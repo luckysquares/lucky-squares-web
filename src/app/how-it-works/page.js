@@ -47,7 +47,7 @@ export default function HowItWorksPage() {
             <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img
-                  src="/images/how-it-works-sell.jpg"
+                  src="/lucky-squares-fundraiser.PNG"
                   alt="Person selling squares on an iPad at a sporting event"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
                 />
