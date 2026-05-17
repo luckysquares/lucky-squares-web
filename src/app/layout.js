@@ -1,6 +1,8 @@
 import { Fraunces, Nunito } from 'next/font/google';
+import { Suspense } from 'react';
 import './globals.css';
 import Footer from '@/components/marketing/Footer';
+import ReferralCapture from '@/components/app/ReferralCapture';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -42,6 +44,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en-AU" className={`${fraunces.variable} ${nunito.variable}`}>
       <body style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Suspense fallback={null}><ReferralCapture /></Suspense>
         <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>{children}</div>
         <Footer />
       </body>

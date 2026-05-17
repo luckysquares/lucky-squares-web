@@ -291,7 +291,19 @@ function VerifyScreen({ email, onVerify, loading, error }) {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, planLimit }) {
+function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, planLimit, referralInfo }) {
+  const [copied, setCopied] = useState(false);
+  const referralLink = referralInfo?.referral_code
+    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/app?ref=${referralInfo.referral_code}`
+    : null;
+  const copyLink = () => {
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  const hasAnyCampaign = fundraisers.some((f) => ['active', 'drawn'].includes(f.status));
+
   return (
     <div className="dot-bg" style={{ flex: 1 }}>
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
@@ -317,6 +329,27 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, plan
             )
           }
         </div>
+
+        {/* Referral card */}
+        {hasAnyCampaign && referralLink && (
+          <div style={{ background: 'linear-gradient(135deg, #0D2B1F, #1A4A30)', borderRadius: 16, padding: '20px 24px', marginTop: 24, display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 32 }}>🍀</div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4 }}>Refer a friend, get your next campaign free</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', lineHeight: 1.5 }}>
+                Share your link. When a friend signs up and launches their first campaign, you get a free campaign coupon.
+                {referralInfo.rewarded_count > 0 && <span style={{ color: '#6EE7B7', fontWeight: 700 }}> You have earned {referralInfo.rewarded_count} free campaign{referralInfo.rewarded_count !== 1 ? 's' : ''}!</span>}
+                {referralInfo.pending_count > 0 && <span style={{ color: 'rgba(255,255,255,.6)' }}> {referralInfo.pending_count} friend{referralInfo.pending_count !== 1 ? 's' : ''} signed up, waiting on their first launch.</span>}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+              <input readOnly value={referralLink} style={{ fontSize: 12, padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.1)', color: '#fff', width: 240, fontFamily: 'monospace' }} onClick={(e) => e.target.select()} />
+              <button className="btn btn-primary btn-sm" onClick={copyLink} style={{ flexShrink: 0 }}>
+                {copied ? '✓ Copied' : 'Copy link'}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20, marginTop: 24 }}>
           {fundraisers.map((f) => (
@@ -1151,6 +1184,14 @@ export default function FundraiseApp() {
   const [activeFundraiser, setActiveFundraiser] = useState(null);
   const [authLoading,      setAuthLoading]      = useState(false);
   const [authError,        setAuthError]        = useState('');
+  const [referralInfo,     setReferralInfo]     = useState(null);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+
+  const loadReferralInfo = useCallback(async () => {
+    if (!supabaseConfigured) return;
+    const { data } = await getSupabaseClient().rpc('get_my_referral_info');
+    if (data?.[0]) setReferralInfo(data[0]);
+  }, []);
 
   const loadFundraisers = useCallback(async (userId) => {
     if (!supabaseConfigured) { setFundraisers(SAMPLE_FUNDRAISERS); return; }
@@ -1179,6 +1220,7 @@ export default function FundraiseApp() {
         const plan = await fetchPlan(u.id);
         setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
         loadFundraisers(u.id);
+        loadReferralInfo();
         setPhase('dashboard');
       } else {
         setPhase('login');
@@ -1234,9 +1276,24 @@ export default function FundraiseApp() {
     setAuthError('');
     if (!supabaseConfigured) { setPendingEmail(email); setPhase('verify'); return; }
     setAuthLoading(true);
-    const { error } = await getSupabaseClient().auth.signUp({ email, password, options: { data: { full_name: name, organisation: org } } });
+    const { data, error } = await getSupabaseClient().auth.signUp({ email, password, options: { data: { full_name: name, organisation: org } } });
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
+    // If email confirmation is disabled, user is auto-confirmed with a session
+    if (data?.session && data?.user) {
+      const u = data.user;
+      const plan = await fetchPlan(u.id);
+      setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
+      const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
+      if (storedRef) {
+        await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
+        localStorage.removeItem('ls_ref');
+      }
+      await loadReferralInfo();
+      setFundraisers([]);
+      setPhase('dashboard');
+      return;
+    }
     setPendingEmail(email);
     setPhase('verify');
   };
@@ -1256,6 +1313,12 @@ export default function FundraiseApp() {
     const u = data.user;
     const plan = await fetchPlan(u.id);
     setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
+    const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
+    if (storedRef) {
+      await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
+      localStorage.removeItem('ls_ref');
+    }
+    await loadReferralInfo();
     setFundraisers([]);
     setPhase('dashboard');
   };
@@ -1341,6 +1404,12 @@ export default function FundraiseApp() {
     setFundraisers((prev) => [nf, ...prev]);
     setActiveFundraiser(nf);
     setPhase('live');
+    // Check referral reward and show referral prompt on first active campaign
+    if (!isDraft && supabaseConfigured && user?.id) {
+      getSupabaseClient().rpc('check_referral_reward', { p_user_id: user.id });
+      loadReferralInfo();
+      setShowReferralModal(true);
+    }
   };
 
   const showHeader = !['login', 'register', 'verify', 'loading'].includes(phase);
@@ -1369,10 +1438,32 @@ export default function FundraiseApp() {
       {phase === 'login'     && <LoginScreen    onLogin={handleLogin}        onRegister={() => { setAuthError(''); setPhase('register'); }} loading={authLoading} error={authError} />}
       {phase === 'register'  && <RegisterScreen onRegister={handleRegister}  onBack={() => { setAuthError(''); setPhase('login'); }} loading={authLoading} error={authError} />}
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
-      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} />}
+      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
+
+      {/* Referral prompt modal */}
+      {showReferralModal && referralInfo?.referral_code && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: 24 }}>
+          <div className="scratch-card" style={{ padding: 36, maxWidth: 460, width: '100%', textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🍀</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Your fundraiser is live!</h2>
+            <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 24, lineHeight: 1.6 }}>
+              Know someone else who needs to raise money? Refer them to LuckySquares and when they launch their first campaign, you get your next one free.
+            </p>
+            <div style={{ background: 'var(--cream)', borderRadius: 12, padding: '14px 16px', marginBottom: 20, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input readOnly value={`${typeof window !== 'undefined' ? window.location.origin : ''}/app?ref=${referralInfo.referral_code}`}
+                style={{ flex: 1, fontSize: 12, background: 'transparent', border: 'none', outline: 'none', fontFamily: 'monospace', color: 'var(--text)' }}
+                onClick={(e) => e.target.select()} />
+              <button className="btn btn-primary btn-sm" onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/app?ref=${referralInfo.referral_code}`);
+              }}>Copy</button>
+            </div>
+            <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => setShowReferralModal(false)}>Maybe later</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
