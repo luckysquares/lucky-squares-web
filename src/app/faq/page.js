@@ -66,7 +66,7 @@ const FAQS = [
       },
       {
         q: 'How do I share my fundraiser?',
-        a: 'Once your fundraiser is live, use the Share button on your fundraiser page to copy your unique link or share directly to WhatsApp, Facebook, or via email. The more people who see the link, the faster your grid fills.',
+        a: 'Once your fundraiser is live, use the Share button on your fundraiser page to copy your unique link or share directly via social media, WhatsApp, or email. The more people who see the link, the faster your grid fills.',
       },
       {
         q: 'Can I see who has bought squares?',

@@ -56,7 +56,7 @@ export default function HowItWorksPage() {
                 <div className="step-num">2</div>
                 <h3 className="step-title">Share &amp; sell</h3>
                 <p className="step-desc">
-                  Share your fundraiser link via WhatsApp, email, or your school app. Buyers pick their squares and pay however suits them: in person, by bank transfer, or online by card. Their numbers are confirmed instantly.
+                  Share your fundraiser link via social media, WhatsApp, email, or your club app. Buyers pick their squares and pay however suits them: in person, by bank transfer, or online by card. Their numbers are confirmed instantly.
                 </p>
               </div>
             </div>
