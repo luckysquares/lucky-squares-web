@@ -29,7 +29,7 @@ export default function HowItWorksPage() {
             <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img
-                  src="/images/how-it-works-setup.jpg"
+                  src="/sports-club-fundraiser.PNG"
                   alt="Campaign setup wizard screen"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                 />
@@ -64,7 +64,7 @@ export default function HowItWorksPage() {
             <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img
-                  src="/images/how-it-works-draw.jpg"
+                  src="/help-for-sports-clubs-to-raise-money.PNG"
                   alt="Winner announcement screen showing the winning square"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                 />
