@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Audit — Lucky Squares Australia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 0;
+  }
+
+  /* Cover page */
+  .cover {
+    page-break-after: always;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 72px;
+    background: linear-gradient(160deg, #0D2B1F 0%, #1A3C2E 60%, #2A5C42 100%);
+    color: #fff;
+  }
+  .cover-label {
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 32px;
+  }
+  .cover-title {
+    font-size: 36pt;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+  .cover-sub {
+    font-size: 16pt;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+  .cover-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 10pt;
+    color: rgba(255,255,255,0.55);
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 32px;
+  }
+  .cover-meta span { color: rgba(255,255,255,0.85); font-weight: 600; }
+  .badge-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge-crit  { background: #CC0000; color: #fff; }
+  .badge-high  { background: #E07000; color: #fff; }
+  .badge-med   { background: #C08000; color: #fff; }
+  .badge-low   { background: #555;    color: #fff; }
+
+  /* Content pages */
+  .page {
+    padding: 52px 72px;
+    max-width: 100%;
+  }
+
+  h1.section-title {
+    font-size: 20pt;
+    font-weight: 900;
+    color: #0D2B1F;
+    margin-bottom: 6px;
+    padding-bottom: 12px;
+    border-bottom: 2.5px solid #1A3C2E;
+  }
+  h2.severity-heading {
+    font-size: 13pt;
+    font-weight: 900;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    page-break-after: avoid;
+  }
+  .sev-critical { background: #FFF0F0; color: #CC0000; border-left: 4px solid #CC0000; }
+  .sev-high     { background: #FFF5EC; color: #B85000; border-left: 4px solid #E07000; }
+  .sev-medium   { background: #FFFBEC; color: #8A6000; border-left: 4px solid #C08000; }
+  .sev-low      { background: #F5F5F5; color: #444;    border-left: 4px solid #999; }
+  .sev-na       { background: #F0FDF8; color: #1A6B45; border-left: 4px solid #2A9060; }
+
+  .finding {
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    border: 1px solid #E8E2D8;
+    border-radius: 8px;
+    background: #FDFCF9;
+    page-break-inside: avoid;
+  }
+  .finding-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .finding-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9pt;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 1px;
+  }
+  .num-crit { background: #CC0000; }
+  .num-high { background: #E07000; }
+  .num-med  { background: #C08000; }
+  .num-low  { background: #888; }
+  .num-na   { background: #2A9060; }
+
+  .finding-title {
+    font-size: 12pt;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1.3;
+  }
+  .finding-body {
+    font-size: 10.5pt;
+    color: #333;
+    line-height: 1.7;
+    margin-left: 40px;
+  }
+  .finding-body p {
+    margin-bottom: 6px;
+  }
+  .file-ref {
+    display: inline-block;
+    background: #F0EDE5;
+    border: 1px solid #D4C9AE;
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9pt;
+    color: #4A3C28;
+    margin: 2px 2px 2px 0;
+    white-space: nowrap;
+  }
+  .file-row {
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  /* Summary table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin-top: 16px;
+  }
+  th {
+    background: #0D2B1F;
+    color: #fff;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: 0.3px;
+  }
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #E8E2D8;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #FAFAF7; }
+  .sev-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 8pt;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .pill-crit { background: #FFF0F0; color: #CC0000; border: 1px solid #FFAAAA; }
+  .pill-high { background: #FFF5EC; color: #B85000; border: 1px solid #FFCC99; }
+  .pill-med  { background: #FFFBEC; color: #8A6000; border: 1px solid #FFE599; }
+  .pill-low  { background: #F5F5F5; color: #555;    border: 1px solid #CCCCCC; }
+
+  /* Recommendations */
+  .rec-group {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+  .rec-group-title {
+    font-size: 11pt;
+    font-weight: 800;
+    color: #0D2B1F;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #D4C9AE;
+  }
+  .rec-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 10.5pt;
+  }
+  .rec-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #1A3C2E;
+    color: #fff;
+    font-size: 8pt;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+
+  .page-break { page-break-before: always; }
+  .section-gap { margin-top: 32px; }
+
+  .footer-note {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #E8E2D8;
+    font-size: 9pt;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ COVER -->
+<div class="cover">
+  <div class="cover-label">Confidential Security Report</div>
+  <div class="cover-title">Security Audit</div>
+  <div class="cover-sub">Lucky Squares Australia</div>
+  <div class="badge-row">
+    <span class="badge badge-crit">4 Critical</span>
+    <span class="badge badge-high">3 High</span>
+    <span class="badge badge-med">5 Medium</span>
+    <span class="badge badge-low">3 Low</span>
+  </div>
+  <div class="cover-meta">
+    <div>Date <span>16 May 2026</span></div>
+    <div>Application <span>Lucky Squares Australia v0.1.0</span></div>
+    <div>Stack <span>Next.js 15 &middot; Supabase (Postgres + RLS + Realtime) &middot; React 19</span></div>
+    <div>Scope <span>Full codebase review — client, server RPCs, RLS policies, config</span></div>
+    <div style="margin-top:8px; color: rgba(255,255,255,0.4);">
+      This report is confidential. Do not distribute outside the Lucky Squares Australia team.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ EXECUTIVE SUMMARY -->
+<div class="page">
+  <h1 class="section-title">Executive Summary</h1>
+  <p style="margin-top:16px; font-size:11pt; line-height:1.8; color:#333;">
+    A read-only security review was conducted across the full Lucky Squares Australia codebase, including the
+    Next.js front-end, Supabase schema and RLS policies, and all client-side data handling flows. Fifteen findings
+    were identified across four severity tiers.
+  </p>
+  <p style="margin-top:12px; font-size:11pt; line-height:1.8; color:#333;">
+    The four Critical findings pose the most immediate risk and should be addressed before the platform accepts
+    real fundraisers or real money. In particular, organiser bank details are currently readable by any
+    anonymous user via the Supabase API, and the square claiming flow marks purchases as complete before
+    any payment has been received or verified.
+  </p>
+  <p style="margin-top:12px; font-size:11pt; line-height:1.8; color:#333;">
+    The High and Medium findings are hardening improvements — none represent an immediate existential risk,
+    but they should be addressed in the weeks following launch. Low findings are minor issues or best-practice
+    gaps that can be addressed incrementally.
+  </p>
+  <p style="margin-top:12px; font-size:11pt; line-height:1.8; color:#333;">
+    No changes have been made to the codebase as part of this review. All findings are listed below for
+    prioritised remediation.
+  </p>
+
+  <!-- Summary table -->
+  <div class="section-gap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Finding</th>
+          <th>Severity</th>
+          <th>Primary File</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Bank details exposed to anonymous users</td><td><span class="sev-pill pill-crit">Critical</span></td><td><code>schema.sql, f/[id]/page.js</code></td></tr>
+        <tr><td>2</td><td>Missing RPC implementations</td><td><span class="sev-pill pill-crit">Critical</span></td><td><code>schema.sql, LiveGrid.js</code></td></tr>
+        <tr><td>3</td><td>No server-side square count limit</td><td><span class="sev-pill pill-crit">Critical</span></td><td><code>LiveGrid.js</code></td></tr>
+        <tr><td>4</td><td>Squares claimed before payment verified</td><td><span class="sev-pill pill-crit">Critical</span></td><td><code>LiveGrid.js</code></td></tr>
+        <tr><td>5</td><td>No rate limiting on reservations</td><td><span class="sev-pill pill-high">High</span></td><td><code>LiveGrid.js, schema.sql</code></td></tr>
+        <tr><td>6</td><td>Buyer name not validated server-side</td><td><span class="sev-pill pill-high">High</span></td><td><code>LiveGrid.js, schema.sql</code></td></tr>
+        <tr><td>7</td><td>No CSRF protection on RPC calls</td><td><span class="sev-pill pill-high">High</span></td><td><code>LiveGrid.js</code></td></tr>
+        <tr><td>8</td><td>No HTTP security headers</td><td><span class="sev-pill pill-med">Medium</span></td><td><code>next.config.mjs</code></td></tr>
+        <tr><td>9</td><td>RLS does not validate reserved_until</td><td><span class="sev-pill pill-med">Medium</span></td><td><code>schema.sql</code></td></tr>
+        <tr><td>10</td><td>No server-side email validation</td><td><span class="sev-pill pill-med">Medium</span></td><td><code>LiveGrid.js</code></td></tr>
+        <tr><td>11</td><td>No audit trail for sensitive operations</td><td><span class="sev-pill pill-med">Medium</span></td><td><code>schema.sql</code></td></tr>
+        <tr><td>12</td><td>No length limits on campaign fields</td><td><span class="sev-pill pill-med">Medium</span></td><td><code>FundraiseApp.js</code></td></tr>
+        <tr><td>13</td><td>No numeric validation on price field</td><td><span class="sev-pill pill-low">Low</span></td><td><code>FundraiseApp.js</code></td></tr>
+        <tr><td>14</td><td>No 2FA for organiser accounts</td><td><span class="sev-pill pill-low">Low</span></td><td><code>FundraiseApp.js</code></td></tr>
+        <tr><td>15</td><td>No fraud pattern detection</td><td><span class="sev-pill pill-low">Low</span></td><td>Platform-wide</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ CRITICAL -->
+<div class="page page-break">
+  <h1 class="section-title">Findings</h1>
+
+  <h2 class="severity-heading sev-critical">Critical</h2>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-crit">1</div>
+      <div class="finding-title">Bank details exposed to anonymous users</div>
+    </div>
+    <div class="finding-body">
+      <p>The RLS policy on the <code>fundraisers</code> table grants <em>any unauthenticated user</em> read access to every column of active or drawn fundraisers. This includes <code>bank_account_name</code>, <code>bank_bsb</code>, <code>bank_account</code>, and <code>stripe_account_id</code>. Anyone who knows (or guesses) a fundraiser UUID can query the Supabase REST API directly and retrieve the organiser's full banking credentials — no UI, no authentication required.</p>
+      <p>This also means bank details are transmitted to every visitor of the public fundraiser page, even those who never intend to buy a square.</p>
+      <div class="file-row">
+        <span class="file-ref">supabase/schema.sql lines 69–70</span>
+        <span class="file-ref">src/app/f/[id]/page.js line 46</span>
+        <span class="file-ref">src/components/app/LiveGrid.js lines 269–284</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-crit">2</div>
+      <div class="finding-title">Missing RPC implementations</div>
+    </div>
+    <div class="finding-body">
+      <p>The application calls four Postgres RPC functions that are not defined anywhere in <code>schema.sql</code>: <code>reserve_square</code>, <code>release_square</code>, <code>claim_squares</code>, and <code>create_fundraiser_squares</code>. The schema only defines <code>handle_new_user</code>, <code>record_draw</code>, and <code>expire_stale_reservations</code>.</p>
+      <p>If these RPCs have not been created directly in the Supabase dashboard without validation logic, every square interaction in the live app is either silently failing or operating without server-side guards — meaning no atomicity, no limit checks, and no ownership verification at the database level.</p>
+      <div class="file-row">
+        <span class="file-ref">supabase/schema.sql</span>
+        <span class="file-ref">src/components/app/LiveGrid.js lines 134, 183, 188, 199</span>
+        <span class="file-ref">src/components/app/FundraiseApp.js line 940</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-crit">3</div>
+      <div class="finding-title">No server-side square count limit</div>
+    </div>
+    <div class="finding-body">
+      <p>The 10-square-per-buyer cap is enforced only in client-side JavaScript (<code>const MAX_CART = 10</code>). The <code>claim_squares</code> RPC is called with a client-supplied array of square numbers. There is no server-side check on this array's length.</p>
+      <p>A malicious buyer can call the RPC directly — bypassing the browser entirely — and pass an array of 100 square numbers, claiming an entire grid in a single request. The limit must be enforced inside the RPC itself using a server-side guard.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/LiveGrid.js line 9 (MAX_CART)</span>
+        <span class="file-ref">src/components/app/LiveGrid.js line 199 (claim_squares call)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-crit">4</div>
+      <div class="finding-title">Squares marked as claimed before payment is received</div>
+    </div>
+    <div class="finding-body">
+      <p>The <code>handlePay</code> function immediately writes squares as claimed in the database and displays the success screen, then instructs the buyer to go and make the bank transfer or pay in person. There is no mechanism to verify payment was received before the claim is recorded, no way to cancel a non-paying registration, and no payment status field on the squares table.</p>
+      <p>A buyer can claim any number of squares across any fundraiser and simply never pay. The organiser sees a "sold" grid but receives no funds. The squares are blocked from legitimate buyers indefinitely. This is particularly critical given the addition of the in-person payment option, where there is no technical link between clicking "Confirm squares" and actual payment occurring.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/LiveGrid.js lines 196–203</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIGH -->
+  <h2 class="severity-heading sev-high">High</h2>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-high">5</div>
+      <div class="finding-title">No rate limiting on square reservation calls</div>
+    </div>
+    <div class="finding-body">
+      <p>There is no throttle on calls to <code>reserve_square</code> or <code>release_square</code>. A script can cycle reserve and release on every available square at high speed, flooding the Realtime channel with bogus updates, making the grid unusable for legitimate buyers, and potentially exhausting Supabase request quotas — creating unexpected costs for the organiser.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/LiveGrid.js line 178</span>
+        <span class="file-ref">supabase/schema.sql (no rate limit policy)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-high">6</div>
+      <div class="finding-title">Buyer name not validated server-side</div>
+    </div>
+    <div class="finding-body">
+      <p>Buyer names are stored in the database with no length cap or character restriction. React's JSX auto-escaping protects the grid view from XSS when names are rendered in the browser. However, if buyer names are used in any non-React context — emails, CSV exports, PDF generation, admin dashboards, or future integrations — they will be unescaped and a name like <code>&lt;script&gt;...&lt;/script&gt;</code> could execute arbitrary code.</p>
+      <p>Additionally, with no length limit, a buyer could submit an extremely long name, causing UI layout issues or database bloat.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/LiveGrid.js line 202</span>
+        <span class="file-ref">supabase/schema.sql line 104 (no constraint on buyer_name)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-high">7</div>
+      <div class="finding-title">No CSRF protection on RPC calls</div>
+    </div>
+    <div class="finding-body">
+      <p>All state-mutating RPC calls are made directly from client-side JavaScript with no CSRF token. The Supabase anon key is intentionally public (required for the public grid to load), which means any third-party website can trigger reservation and release calls on behalf of a visitor. A malicious page could embed scripts that spam the reservation API using a visiting user's session or anonymously, disrupting active fundraisers.</p>
+      <div class="file-row">
+        <span class="file-ref">src/lib/supabase/client.js</span>
+        <span class="file-ref">src/components/app/LiveGrid.js (all RPC calls)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ MEDIUM + LOW -->
+<div class="page page-break">
+  <h2 class="severity-heading sev-medium">Medium</h2>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-med">8</div>
+      <div class="finding-title">No HTTP security headers configured</div>
+    </div>
+    <div class="finding-body">
+      <p><code>next.config.mjs</code> is essentially empty — no security headers are set. Missing headers include <code>Content-Security-Policy</code> (restricts which scripts can run), <code>X-Frame-Options</code> (prevents clickjacking via iframe embedding), <code>Strict-Transport-Security</code> (enforces HTTPS), and <code>X-Content-Type-Options: nosniff</code> (prevents MIME sniffing). Without these, the app is vulnerable to clickjacking and cannot restrict third-party script injection.</p>
+      <div class="file-row">
+        <span class="file-ref">next.config.mjs</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-med">9</div>
+      <div class="finding-title">RLS policy does not validate the reserved_until timestamp</div>
+    </div>
+    <div class="finding-body">
+      <p>The RLS update policy on the <code>squares</code> table only checks that the status transitions from <code>available</code> to <code>reserved</code>. It does not validate the value of <code>reserved_until</code>. A direct API call could set a reservation expiry date years in the future, effectively locking a square unless the <code>expire_stale_reservations</code> cron job catches it — and only if that cron job is actually running.</p>
+      <div class="file-row">
+        <span class="file-ref">supabase/schema.sql lines 124–127</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-med">10</div>
+      <div class="finding-title">No server-side email validation</div>
+    </div>
+    <div class="finding-body">
+      <p>Buyer email is accepted via an HTML5 <code>type="email"</code> input, which provides basic browser-level validation only. This can be bypassed by calling the API directly. No regex or format check exists in the schema or RPCs. Invalid or malicious strings can be stored and will break any future notification, receipt, or communication flow.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/LiveGrid.js line 376</span>
+        <span class="file-ref">supabase/schema.sql (no email constraint)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-med">11</div>
+      <div class="finding-title">No audit trail for sensitive operations</div>
+    </div>
+    <div class="finding-body">
+      <p>There is no logging of who claimed which squares, when draws were run, who accessed bank details, or payment status changes. Without an audit log, dispute resolution between organisers and buyers is impossible, fraud detection cannot be implemented, and the platform cannot demonstrate compliance with fundraising governance requirements in any Australian state.</p>
+      <div class="file-row">
+        <span class="file-ref">supabase/schema.sql (no audit_log table)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-med">12</div>
+      <div class="finding-title">No length limits on campaign input fields</div>
+    </div>
+    <div class="finding-body">
+      <p>Campaign title, description, organisation name, and thank-you message fields have no <code>maxLength</code> attribute and no server-side size constraint. A very large description (e.g. several megabytes) would be accepted by the database, transmitted to every visitor of the fundraiser page, and could cause the page to become unusable or crash.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/FundraiseApp.js lines 556, 564, 568</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="severity-heading sev-low">Low</h2>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-low">13</div>
+      <div class="finding-title">No server-side validation on price per square</div>
+    </div>
+    <div class="finding-body">
+      <p>The price input uses a client-side <code>min="1"</code> constraint. The database type will prevent the worst cases, but there is no RPC-level validation to reject a zero or negative price if the client-side guard is bypassed. An organiser could publish a fundraiser with a $0 price per square.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/FundraiseApp.js line 483</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-low">14</div>
+      <div class="finding-title">No two-factor authentication for organiser accounts</div>
+    </div>
+    <div class="finding-body">
+      <p>Organiser accounts control live fundraisers, live bank details, and the ability to run draws. Account takeover via a weak or reused password has outsized impact compared to a typical consumer app. Supabase supports TOTP-based 2FA but it is not currently enabled or enforced.</p>
+      <div class="file-row">
+        <span class="file-ref">src/components/app/FundraiseApp.js (auth flows)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-num num-low">15</div>
+      <div class="finding-title">No fraud pattern detection</div>
+    </div>
+    <div class="finding-body">
+      <p>There are no alerts for unusual usage patterns: a single buyer claiming all squares in a fundraiser, one email address appearing across many fundraisers, or fundraisers that have never run a draw long after their scheduled date. Without detection, fraud and abuse can go unnoticed indefinitely.</p>
+      <div class="file-row">
+        <span class="file-ref">Platform-wide</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Not applicable -->
+  <h2 class="severity-heading sev-na">Findings Not Applicable</h2>
+  <div class="finding">
+    <div class="finding-body" style="margin-left:0;">
+      <p><strong>Fundraiser UUID enumeration</strong> — Fundraisers correctly use <code>gen_random_uuid()</code>, making enumeration impractical.</p>
+      <p style="margin-top:8px;"><strong>Draw ownership bypass</strong> — The <code>record_draw</code> RPC correctly validates <code>auth.uid()</code> against the fundraiser's <code>owner_id</code> server-side. The UI restriction (<code>isOwner</code> flag) is defence-in-depth only.</p>
+      <p style="margin-top:8px;"><strong>Auth token expiry</strong> — The Supabase JS SDK handles token refresh automatically. No manual handling is required.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ RECOMMENDATIONS -->
+<div class="page page-break">
+  <h1 class="section-title">Remediation Recommendations</h1>
+  <p style="margin-top:16px; margin-bottom:24px; font-size:10.5pt; color:#555; line-height:1.7;">
+    Grouped by priority. Items marked <strong>Before Live</strong> should be resolved before the platform
+    accepts real money or real fundraisers. Items marked <strong>Soon After</strong> are hardening improvements
+    for the weeks following initial launch. Items marked <strong>Ongoing</strong> are best-practice additions
+    that can be built incrementally.
+  </p>
+
+  <div class="rec-group">
+    <div class="rec-group-title">Before Go-Live (Criticals)</div>
+    <div class="rec-item"><div class="rec-num">1</div><div>Create a restricted database view (or update the RLS <code>select</code> policy) so that <code>bank_bsb</code>, <code>bank_account</code>, <code>bank_account_name</code>, and <code>stripe_account_id</code> are never returned in public queries. Return bank details only at checkout — ideally via a server-side route that verifies the buyer has an active reservation.</div></div>
+    <div class="rec-item"><div class="rec-num">2</div><div>Define all four missing RPCs (<code>reserve_square</code>, <code>release_square</code>, <code>claim_squares</code>, <code>create_fundraiser_squares</code>) as <code>security definer</code> functions in the schema. Each must enforce atomicity, validate inputs, and hard-cap the square count at 10 per transaction server-side.</div></div>
+    <div class="rec-item"><div class="rec-num">3</div><div>Introduce a <code>payment_status</code> field on the <code>squares</code> table (<code>pending | confirmed | cancelled</code>). Squares should move to <code>pending</code> at checkout and only show as fully sold once the organiser marks payment as received (bank/in-person) or a Stripe webhook confirms capture.</div></div>
+  </div>
+
+  <div class="rec-group">
+    <div class="rec-group-title">Soon After Launch (High and Medium)</div>
+    <div class="rec-item"><div class="rec-num">4</div><div>Add Supabase rate limiting on the reservation RPCs, or implement a short server-side cooldown using a <code>last_reserved_at</code> timestamp per IP or session.</div></div>
+    <div class="rec-item"><div class="rec-num">5</div><div>Add a <code>CHECK</code> constraint on <code>buyer_name</code> in the schema: max 120 characters, printable characters only. Add server-side email format validation in the <code>claim_squares</code> RPC.</div></div>
+    <div class="rec-item"><div class="rec-num">6</div><div>Add HTTP security headers in <code>next.config.mjs</code>: <code>Strict-Transport-Security</code>, <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code>, and a <code>Content-Security-Policy</code> scoped to Supabase and Google Fonts.</div></div>
+    <div class="rec-item"><div class="rec-num">7</div><div>Strengthen the squares RLS update policy to validate that <code>reserved_until</code> is between <code>now() + 5 minutes</code> and <code>now() + 15 minutes</code>.</div></div>
+    <div class="rec-item"><div class="rec-num">8</div><div>Create an <code>audit_log</code> table recording claims, releases, draws, and payment status changes with <code>actor</code>, <code>fundraiser_id</code>, <code>action</code>, <code>details</code>, and <code>created_at</code>.</div></div>
+    <div class="rec-item"><div class="rec-num">9</div><div>Add <code>maxLength</code> attributes and corresponding database <code>CHECK</code> constraints to all campaign text fields: title (120), organisation (120), description (2000), thank-you message (300).</div></div>
+  </div>
+
+  <div class="rec-group">
+    <div class="rec-group-title">Ongoing Improvements (Low)</div>
+    <div class="rec-item"><div class="rec-num">10</div><div>Enable Supabase TOTP two-factor authentication and consider making it mandatory for organiser accounts.</div></div>
+    <div class="rec-item"><div class="rec-num">11</div><div>Add server-side validation for <code>price_per_sq</code>: must be a positive number with a sensible upper bound (e.g. $500 max).</div></div>
+    <div class="rec-item"><div class="rec-num">12</div><div>Build a basic fraud monitoring dashboard: alert when one buyer claims more than 30% of a grid, or when a fundraiser has had no draw run more than 30 days after its scheduled date.</div></div>
+    <div class="rec-item"><div class="rec-num">13</div><div>When Stripe integration is built, verify all payments via webhook before marking squares as sold. Never trust the client's success callback alone.</div></div>
+  </div>
+
+  <div class="footer-note">
+    Audit conducted: 16 May 2026. Application version: Lucky Squares Australia v0.1.0.
+    This is a read-only review — no changes were made to the codebase. All findings are based on static
+    analysis of source files and schema. Testing in a live environment may reveal additional issues.
+    This report should be treated as confidential and stored securely.
+  </div>
+</div>
+
+</body>
+</html>
