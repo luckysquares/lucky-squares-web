@@ -802,13 +802,13 @@ textarea { font-family: inherit; }
 .step-num {
   width: 48px; height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--green2), var(--green));
+  background: linear-gradient(135deg, #A78BFA, #7C3AED, #4A28D4);
   color: #fff;
   font-family: var(--font-serif);
   font-size: 20px;
   font-weight: 900;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px rgba(26,122,85,.32);
+  box-shadow: 0 4px 12px rgba(107,70,245,.35);
 }
 .step-title { font-family: var(--font-serif); font-size: 20px; font-weight: 700; }
 .step-desc  { font-size: 14px; color: var(--text2); line-height: 1.6; }
