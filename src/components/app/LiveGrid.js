@@ -804,6 +804,12 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             );
           })()}
 
+          {!isOwner && fundraiser.contactName && (
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, textAlign: 'center', fontSize: 13, color: 'var(--text2)' }}>
+              This fundraising campaign has been organised by <strong style={{ color: 'var(--text)' }}>{fundraiser.contactName}</strong>
+            </div>
+          )}
+
           {isDrawn ? (
             <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20 }}>
               <div style={{ background: 'linear-gradient(135deg,#1A3C2E,#0D2B1F)', color: '#fff', padding: '16px 20px', borderRadius: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -838,6 +844,12 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                   <span style={{ color: 'var(--text2)' }}>{lbl}</span>
                 </div>
               ))}
+            </div>
+          )}
+
+          {!isOwner && !isDrawn && (
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 16, textAlign: 'center' }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', margin: 0 }}>Select up to 10 numbers from the grid below</p>
             </div>
           )}
 
