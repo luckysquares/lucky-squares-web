@@ -641,57 +641,62 @@ textarea { font-family: inherit; }
   text-align: center;
   position: relative;
   overflow: hidden;
-  background: var(--hero-bg);
+  background: #EEEDF8;
 }
 
 /* Blob shapes */
 .hero-blob {
   position: absolute;
-  border-radius: 50%;
   pointer-events: none;
   z-index: 0;
 }
+/* Top-right: defined circular purple blob */
 .hero-blob-1 {
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(ellipse, rgba(124,58,237,.32) 0%, rgba(107,70,245,.18) 60%, transparent 100%);
-  top: -140px;
-  right: -100px;
-  filter: blur(48px);
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(148,118,245,.55) 0%, rgba(124,88,230,.30) 45%, transparent 72%);
+  top: -160px;
+  right: -140px;
+  filter: blur(24px);
 }
+/* Bottom-left: soft amorphous purple cloud */
 .hero-blob-2 {
-  width: 440px;
-  height: 340px;
-  background: radial-gradient(ellipse, rgba(91,53,232,.28) 0%, rgba(107,70,245,.12) 70%, transparent 100%);
-  bottom: -40px;
-  left: -60px;
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-  filter: blur(52px);
+  width: 500px;
+  height: 380px;
+  background: radial-gradient(ellipse, rgba(140,118,240,.38) 0%, rgba(107,70,245,.15) 55%, transparent 80%);
+  bottom: -80px;
+  left: -100px;
+  border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+  filter: blur(36px);
 }
+/* Center-right: large warm peach/apricot glow */
 .hero-blob-3 {
-  width: 360px;
-  height: 360px;
-  background: radial-gradient(ellipse, rgba(251,113,133,.35) 0%, rgba(255,160,100,.22) 60%, transparent 100%);
-  top: 40px;
-  right: 10%;
-  filter: blur(60px);
+  width: 560px;
+  height: 480px;
+  background: radial-gradient(ellipse, rgba(255,195,140,.58) 0%, rgba(255,170,110,.28) 50%, transparent 75%);
+  top: -40px;
+  right: -60px;
+  filter: blur(50px);
 }
+/* Small dot accent — left side, mid-height */
 .hero-blob-4 {
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(ellipse, rgba(167,139,250,.28) 0%, transparent 70%);
-  bottom: 10%;
-  right: 18%;
-  filter: blur(44px);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(160,140,245,.22) 0%, transparent 70%);
+  top: 30%;
+  left: 4%;
+  border-radius: 50%;
+  filter: blur(30px);
 }
 .hero-dots {
   position: absolute;
-  bottom: 18%;
+  top: 22%;
   left: 5%;
-  width: 110px;
-  height: 90px;
-  background-image: radial-gradient(circle, rgba(107,70,245,.35) 1.5px, transparent 1.5px);
-  background-size: 20px 20px;
+  width: 120px;
+  height: 100px;
+  background-image: radial-gradient(circle, rgba(130,100,230,.30) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
   pointer-events: none;
   z-index: 0;
 }
