@@ -291,7 +291,136 @@ function VerifyScreen({ email, onVerify, loading, error }) {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, planLimit, referralInfo, suspension }) {
+function OrgTeamSection({ sendTxEmail }) {
+  const [teamData,     setTeamData]     = useState(null);
+  const [inviteEmail,  setInviteEmail]  = useState('');
+  const [inviting,     setInviting]     = useState(false);
+  const [inviteMsg,    setInviteMsg]    = useState('');
+  const [revoking,     setRevoking]     = useState(null);
+
+  const load = useCallback(async () => {
+    const { data } = await getSupabaseClient().rpc('get_org_members');
+    if (data) setTeamData(data);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const sendInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    setInviting(true);
+    setInviteMsg('');
+    const { data } = await getSupabaseClient().rpc('invite_org_member', { p_email: inviteEmail.trim().toLowerCase() });
+    setInviting(false);
+    if (data?.error) { setInviteMsg(data.error); return; }
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const inviteUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/invite/${data.token}`;
+    if (supabaseUrl) {
+      fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'org_member_invite',
+          to: inviteEmail.trim().toLowerCase(),
+          data: { org_name: data.org_name || 'your organisation', invited_by_name: 'your organisation admin', invite_url: inviteUrl, expires_days: 7 },
+        }),
+      }).catch(() => {});
+    }
+    setInviteEmail('');
+    setInviteMsg('Invite sent!');
+    load();
+  };
+
+  const revokeMember = async (userId) => {
+    setRevoking(userId);
+    await getSupabaseClient().rpc('revoke_org_member', { p_member_user_id: userId });
+    setRevoking(null);
+    load();
+  };
+
+  const revokeInvite = async (inviteId) => {
+    setRevoking(inviteId);
+    await getSupabaseClient().rpc('revoke_org_invite', { p_invite_id: inviteId });
+    setRevoking(null);
+    load();
+  };
+
+  const memberCount  = (teamData?.members ?? []).length;
+  const inviteCount  = (teamData?.invites ?? []).length;
+  const totalUsed    = memberCount + inviteCount;
+  const slotsLeft    = Math.max(0, 3 - totalUsed);
+
+  return (
+    <div style={{ background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 16, padding: '24px 28px', marginTop: 32 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 800, margin: 0 }}>Team contributors</h2>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>
+            {totalUsed} of 3 contributor slots used{slotsLeft > 0 ? ` (${slotsLeft} remaining)` : ''}
+          </p>
+        </div>
+      </div>
+
+      {(teamData?.members ?? []).length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          {teamData.members.map((m) => (
+            <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #F0EDE5', gap: 12 }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{m.name || m.email}</div>
+                <div style={{ fontSize: 12, color: 'var(--text2)' }}>{m.email}</div>
+              </div>
+              <button
+                onClick={() => revokeMember(m.user_id)}
+                disabled={revoking === m.user_id}
+                style={{ background: 'none', border: '1px solid #FCA5A5', borderRadius: 8, padding: '4px 12px', fontSize: 12, color: '#991B1B', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
+              >
+                {revoking === m.user_id ? '...' : 'Revoke access'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {(teamData?.invites ?? []).length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Pending invites</div>
+          {teamData.invites.map((inv) => (
+            <div key={inv.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #F0EDE5', gap: 12 }}>
+              <div style={{ fontSize: 13, color: 'var(--text2)' }}>{inv.email}</div>
+              <button
+                onClick={() => revokeInvite(inv.id)}
+                disabled={revoking === inv.id}
+                style={{ background: 'none', border: 'none', fontSize: 12, color: 'var(--text2)', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', flexShrink: 0 }}
+              >
+                {revoking === inv.id ? '...' : 'Cancel invite'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {slotsLeft > 0 && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <input
+            className="form-input"
+            placeholder="contributor@email.com"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && sendInvite()}
+            style={{ flex: 1, fontSize: 13 }}
+          />
+          <button className="btn btn-primary btn-sm" onClick={sendInvite} disabled={inviting || !inviteEmail.trim()} style={{ flexShrink: 0 }}>
+            {inviting ? 'Sending...' : 'Send invite'}
+          </button>
+        </div>
+      )}
+      {inviteMsg && (
+        <p style={{ fontSize: 13, marginTop: 8, color: inviteMsg === 'Invite sent!' ? 'var(--green)' : '#CC0000', fontWeight: 600 }}>{inviteMsg}</p>
+      )}
+    </div>
+  );
+}
+
+function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail }) {
   const [copied, setCopied] = useState(false);
   const referralLink = referralInfo?.referral_code
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/app?ref=${referralInfo.referral_code}`
@@ -307,6 +436,16 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, plan
   return (
     <div className="dot-bg" style={{ flex: 1 }}>
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
+
+        {/* Contributor banner */}
+        {orgInfo?.role === 'contributor' && (
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)', border: '1.5px solid #BFDBFE', borderRadius: 14, padding: '14px 20px', marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <span style={{ fontSize: 20 }}>👥</span>
+            <div style={{ fontSize: 13, color: '#1E40AF', lineHeight: 1.5 }}>
+              You are contributing to <strong>{orgInfo.org_name}</strong>. You can view and manage their campaigns but cannot create new ones.
+            </div>
+          </div>
+        )}
 
         {/* Suspension banner */}
         {suspension?.suspended && (
@@ -377,6 +516,11 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, plan
           ))}
           {canCreate && <NewFundraiserCard onClick={onNew} />}
         </div>
+
+        {/* Team section: visible to org plan admins only */}
+        {user?.plan === 'org' && orgInfo?.role !== 'contributor' && (
+          <OrgTeamSection sendTxEmail={sendTxEmail} />
+        )}
       </div>
     </div>
   );
@@ -1207,6 +1351,7 @@ export default function FundraiseApp() {
   const [referralInfo,      setReferralInfo]      = useState(null);
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [suspension,        setSuspension]        = useState(null); // null | { suspended: true, reason }
+  const [orgInfo,           setOrgInfo]           = useState(null); // null | { role, org_user_id, org_name }
 
   // Call the transactional-email Edge Function (fire-and-forget)
   const sendTxEmail = useCallback((type, to, data) => {
@@ -1250,12 +1395,17 @@ export default function FundraiseApp() {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const u = session.user;
+        const supabase = getSupabaseClient();
         const plan = await fetchPlan(u.id);
         setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
-        loadFundraisers(u.id);
+        // Load org role (contributor or admin)
+        const { data: oi } = await supabase.rpc('get_my_org_info');
+        setOrgInfo(oi);
+        const fundraiserOwnerId = oi?.role === 'contributor' ? oi.org_user_id : u.id;
+        loadFundraisers(fundraiserOwnerId);
         loadReferralInfo();
         // Check suspension status
-        getSupabaseClient().rpc('get_my_suspension_status').then(({ data: s }) => {
+        supabase.rpc('get_my_suspension_status').then(({ data: s }) => {
           if (s?.[0]?.suspended) setSuspension({ suspended: true, reason: s[0].suspension_reason });
         });
         setPhase('dashboard');
@@ -1469,7 +1619,8 @@ export default function FundraiseApp() {
   const activeCampaignCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
   const planLimit           = PLAN_LIMITS[user?.plan ?? 'trial'];
   const isSuspended         = suspension?.suspended === true;
-  const canCreate           = activeCampaignCount < planLimit && !isSuspended;
+  const isContributor       = orgInfo?.role === 'contributor';
+  const canCreate           = activeCampaignCount < planLimit && !isSuspended && !isContributor;
 
   const handleNewFundraiser = () => {
     if (!canCreate) return;
@@ -1491,7 +1642,7 @@ export default function FundraiseApp() {
       {phase === 'login'     && <LoginScreen    onLogin={handleLogin}        onRegister={() => { setAuthError(''); setPhase('register'); }} loading={authLoading} error={authError} />}
       {phase === 'register'  && <RegisterScreen onRegister={handleRegister}  onBack={() => { setAuthError(''); setPhase('login'); }} loading={authLoading} error={authError} />}
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
-      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} />}
+      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}

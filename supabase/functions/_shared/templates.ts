@@ -594,7 +594,7 @@ export function emailAdminNewOrgApplication(d: {
   applied_date: string;
 }) {
   return {
-    subject: `New org application: ${d.org_name}`,
+    subject: `ADMIN NOTICE: New org application: ${d.org_name}`,
     text: `New organisation application received.
 
 Organisation: ${d.org_name}
@@ -776,6 +776,33 @@ If you'd like to share the result, here's a quick message you can post:
 
 Whenever you're ready for your next campaign, we'll be here:
 https://luckysquares.com.au/fundraise
+
+${SIG}`,
+  };
+}
+
+// ── Org contributor invite ─────────────────────────────────────────────────────
+
+export function emailOrgMemberInvite(d: {
+  org_name: string;
+  invited_by_name: string;
+  invite_url: string;
+  expires_days: number;
+}) {
+  return {
+    subject: `You've been invited to join ${d.org_name} on LuckySquares`,
+    text: `Hi there,
+
+${d.invited_by_name} has invited you to join ${d.org_name} as a contributor on LuckySquares Australia.
+
+As a contributor, you'll be able to view and help manage the organisation's fundraising campaigns.
+
+Accept your invite here (link expires in ${d.expires_days} days):
+${d.invite_url}
+
+If you don't have a LuckySquares account yet, you'll be able to create one when you click the link above.
+
+If you weren't expecting this invite, you can safely ignore this email.
 
 ${SIG}`,
   };

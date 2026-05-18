@@ -60,6 +60,8 @@ function buildTemplate(type: string, d: any): { subject: string; text: string } 
     case 'draw_result_winner':            return T.emailDrawResultWinner(d);
     case 'draw_result_no_win':            return T.emailDrawResultDidNotWin(d);
     case 'refund_notification':           return T.emailRefundNotification(d);
+    // Org member invite
+    case 'org_member_invite':             return T.emailOrgMemberInvite(d);
     // Admin internal
     case 'admin_new_org_application':     return T.emailAdminNewOrgApplication(d);
     // Welcome sequence
