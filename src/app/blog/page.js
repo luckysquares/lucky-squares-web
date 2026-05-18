@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Blog | LuckySquares Australia',
@@ -16,7 +16,7 @@ function fmtDate(iso) {
 
 async function getPosts() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return [];
   const supabase = createClient(url, key);
   const { data, error } = await supabase
