@@ -15,28 +15,17 @@ function fmtDate(iso) {
 }
 
 const EMPTY_FORM = {
-  id: null,
-  slug: '',
-  title: '',
-  excerpt: '',
-  content: '',
-  author: 'LuckySquares Australia',
-  cover_image_url: '',
-  tags: '',
-  status: 'draft',
+  id: null, slug: '', title: '', excerpt: '', content: '',
+  author: 'LuckySquares Australia', cover_image_url: '',
+  image_prompt: '', tags: '', status: 'draft',
 };
 
-const EMPTY_GENERATE = {
-  title: '',
-  audience: '',
-  tone: 'Helpful and informative',
-  keyPoints: '',
-};
+const EMPTY_GENERATE = { title: '', audience: '', tone: 'Helpful and informative', keyPoints: '' };
 
 export default function AdminBlogPage() {
   const [posts,         setPosts]         = useState([]);
   const [loading,       setLoading]       = useState(true);
-  const [editing,       setEditing]       = useState(null);   // null or post form object
+  const [editing,       setEditing]       = useState(null);
   const [saving,        setSaving]        = useState(false);
   const [deletingId,    setDeletingId]    = useState(null);
   const [saveError,     setSaveError]     = useState('');
@@ -44,7 +33,9 @@ export default function AdminBlogPage() {
   const [generateForm,  setGenerateForm]  = useState(EMPTY_GENERATE);
   const [generating,    setGenerating]    = useState(false);
   const [generateError, setGenerateError] = useState('');
-  const [slugManual,    setSlugManual]    = useState(false);   // true once user hand-edits slug
+  const [slugManual,    setSlugManual]    = useState(false);
+  const [seedProgress,  setSeedProgress]  = useState(null); // null | { current, total, log[] }
+  const [copied,        setCopied]        = useState(false);
 
   useEffect(() => { load(); }, []);
 
@@ -54,68 +45,43 @@ export default function AdminBlogPage() {
       const res = await fetch('/api/admin/blog');
       const data = await res.json();
       setPosts(Array.isArray(data) ? data : []);
-    } catch {
-      setPosts([]);
-    }
+    } catch { setPosts([]); }
     setLoading(false);
   };
 
-  // ── Open editor ──────────────────────────────────────────────────────────
   const openNew = () => {
     setEditing({ ...EMPTY_FORM });
-    setSlugManual(false);
-    setSaveError('');
-    setShowGenerate(false);
-    setGenerateForm(EMPTY_GENERATE);
-    setGenerateError('');
+    setSlugManual(false); setSaveError('');
+    setShowGenerate(false); setGenerateForm(EMPTY_GENERATE); setGenerateError('');
   };
 
   const openEdit = (post) => {
     setEditing({
-      id:              post.id,
-      slug:            post.slug,
-      title:           post.title,
-      excerpt:         post.excerpt ?? '',
-      content:         post.content ?? '',
-      author:          post.author ?? 'LuckySquares Australia',
+      id: post.id, slug: post.slug, title: post.title,
+      excerpt: post.excerpt ?? '', content: post.content ?? '',
+      author: post.author ?? 'LuckySquares Australia',
       cover_image_url: post.cover_image_url ?? '',
-      tags:            Array.isArray(post.tags) ? post.tags.join(', ') : '',
-      status:          post.status ?? 'draft',
+      image_prompt: post.image_prompt ?? '',
+      tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
+      status: post.status ?? 'draft',
     });
-    setSlugManual(true); // don't auto-overwrite slug when editing existing post
-    setSaveError('');
-    setShowGenerate(false);
-    setGenerateForm(EMPTY_GENERATE);
-    setGenerateError('');
+    setSlugManual(true); setSaveError('');
+    setShowGenerate(false); setGenerateForm(EMPTY_GENERATE); setGenerateError('');
   };
 
-  // ── Field change ─────────────────────────────────────────────────────────
-  const fld = (k, v) => {
-    setEditing((prev) => {
-      const next = { ...prev, [k]: v };
-      if (k === 'title' && !slugManual) {
-        next.slug = toSlug(v);
-      }
-      return next;
-    });
-  };
+  const fld = (k, v) => setEditing((prev) => {
+    const next = { ...prev, [k]: v };
+    if (k === 'title' && !slugManual) next.slug = toSlug(v);
+    return next;
+  });
 
-  const fldSlug = (v) => {
-    setSlugManual(true);
-    setEditing((prev) => ({ ...prev, slug: v }));
-  };
+  const fldSlug = (v) => { setSlugManual(true); setEditing((p) => ({ ...p, slug: v })); };
 
-  // ── Save ─────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!editing.title.trim()) { setSaveError('Title is required.'); return; }
     if (!editing.slug.trim())  { setSaveError('Slug is required.');  return; }
-
     setSaving(true); setSaveError('');
-    const tags = editing.tags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-
+    const tags = editing.tags.split(',').map((t) => t.trim()).filter(Boolean);
     const res = await fetch('/api/admin/blog', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -127,74 +93,86 @@ export default function AdminBlogPage() {
         content:         editing.content,
         author:          editing.author.trim() || 'LuckySquares Australia',
         cover_image_url: editing.cover_image_url.trim() || null,
-        tags,
-        status:          editing.status,
+        image_prompt:    editing.image_prompt.trim() || '',
+        tags, status: editing.status,
       }),
     });
-
     const json = await res.json();
-    if (!res.ok || json.error) {
-      setSaveError(json.error ?? 'Save failed.');
-      setSaving(false);
-      return;
-    }
-    await load();
-    setEditing(null);
-    setSaving(false);
+    if (!res.ok || json.error) { setSaveError(json.error ?? 'Save failed.'); setSaving(false); return; }
+    await load(); setEditing(null); setSaving(false);
   };
 
-  // ── Delete ───────────────────────────────────────────────────────────────
   const handleDelete = async (id, title) => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeletingId(id);
-    await fetch('/api/admin/blog', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    await load();
-    setDeletingId(null);
+    await fetch('/api/admin/blog', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await load(); setDeletingId(null);
   };
 
-  // ── AI Generate ──────────────────────────────────────────────────────────
   const gfld = (k, v) => setGenerateForm((p) => ({ ...p, [k]: v }));
 
   const handleGenerate = async () => {
     setGenerating(true); setGenerateError('');
     try {
       const res = await fetch('/api/admin/blog/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(generateForm),
       });
       const json = await res.json();
-      if (!res.ok || json.error) {
-        setGenerateError(json.error ?? 'Generation failed.');
-        setGenerating(false);
-        return;
-      }
-      // Extract title from first # heading in content if title field is empty
+      if (!res.ok || json.error) { setGenerateError(json.error ?? 'Generation failed.'); setGenerating(false); return; }
+
       const content = json.content ?? '';
       const titleMatch = content.match(/^#\s+(.+)/m);
+      const generatedTitle = json.title || (titleMatch ? titleMatch[1].trim() : '');
+
       setEditing((prev) => ({
         ...prev,
         content,
-        title: prev.title.trim() ? prev.title : (titleMatch ? titleMatch[1].trim() : prev.title),
-        slug:  prev.title.trim() ? prev.slug  : (titleMatch && !slugManual ? toSlug(titleMatch[1]) : prev.slug),
+        title:        prev.title.trim() ? prev.title : generatedTitle,
+        slug:         prev.title.trim() ? prev.slug  : (!slugManual && generatedTitle ? toSlug(generatedTitle) : prev.slug),
+        excerpt:      json.excerpt  || prev.excerpt,
+        tags:         json.tags?.length ? json.tags.join(', ') : prev.tags,
+        image_prompt: json.image_prompt || prev.image_prompt,
       }));
       setShowGenerate(false);
-    } catch {
-      setGenerateError('Generation failed. Please try again.');
-    }
+    } catch { setGenerateError('Generation failed. Please try again.'); }
     setGenerating(false);
   };
 
-  // ── Tag chips ────────────────────────────────────────────────────────────
-  const tagChips = editing
-    ? editing.tags.split(',').map((t) => t.trim()).filter(Boolean)
-    : [];
+  // ── Seed 20 starter posts ─────────────────────────────────────────────────
+  const handleSeed = async () => {
+    if (!confirm('Generate and publish 20 starter blog posts? This may take a few minutes.')) return;
+    const totalRes = await fetch('/api/admin/blog/seed');
+    const { total } = await totalRes.json();
+    setSeedProgress({ current: 0, total, log: [] });
 
-  // ── Render ───────────────────────────────────────────────────────────────
+    for (let i = 0; i < total; i++) {
+      setSeedProgress((p) => ({ ...p, current: i + 1, log: [...p.log, { i, status: 'generating', title: `Post ${i + 1}/${total}…` }] }));
+      try {
+        const res = await fetch('/api/admin/blog/seed', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ index: i }),
+        });
+        const data = await res.json();
+        const label = data.skipped ? `Skipped (exists): ${data.slug}` : `Published: ${data.title || data.slug}`;
+        setSeedProgress((p) => ({ ...p, log: p.log.map((l, idx) => idx === p.log.length - 1 ? { ...l, status: data.skipped ? 'skipped' : 'done', title: label } : l) }));
+      } catch (err) {
+        setSeedProgress((p) => ({ ...p, log: p.log.map((l, idx) => idx === p.log.length - 1 ? { ...l, status: 'error', title: `Error on post ${i + 1}` } : l) }));
+      }
+    }
+
+    await load();
+    setSeedProgress((p) => ({ ...p, current: total, done: true }));
+  };
+
+  const copyImagePrompt = () => {
+    if (!editing?.image_prompt) return;
+    navigator.clipboard.writeText(editing.image_prompt);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
+  };
+
+  const tagChips = editing ? editing.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+
   return (
     <div>
       {/* Header */}
@@ -205,8 +183,38 @@ export default function AdminBlogPage() {
             {loading ? 'Loading…' : `${posts.length} post${posts.length !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <button className="btn btn-purple btn-sm" onClick={openNew}>+ New post</button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button className="btn btn-outline btn-sm" onClick={handleSeed} disabled={!!seedProgress && !seedProgress.done} style={{ fontSize: 12 }}>
+            ✨ Seed starter posts
+          </button>
+          <button className="btn btn-purple btn-sm" onClick={openNew}>+ New post</button>
+        </div>
       </div>
+
+      {/* Seed progress */}
+      {seedProgress && (
+        <div className="scratch-card" style={{ padding: 24, marginBottom: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ fontWeight: 800, fontSize: 14 }}>
+              {seedProgress.done ? `Done — ${seedProgress.log.filter((l) => l.status === 'done').length} posts published` : `Generating ${seedProgress.current} / ${seedProgress.total}…`}
+            </div>
+            {seedProgress.done && (
+              <button className="btn btn-outline btn-sm" onClick={() => setSeedProgress(null)} style={{ fontSize: 11 }}>Dismiss</button>
+            )}
+          </div>
+          <div style={{ height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden', marginBottom: 16 }}>
+            <div style={{ height: '100%', width: `${(seedProgress.current / seedProgress.total) * 100}%`, background: 'linear-gradient(90deg,#A78BFA,#7C3AED)', borderRadius: 99, transition: 'width .3s' }} />
+          </div>
+          <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {seedProgress.log.map((l, i) => (
+              <div key={i} style={{ fontSize: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span>{l.status === 'done' ? '✅' : l.status === 'skipped' ? '⏭️' : l.status === 'error' ? '❌' : '⏳'}</span>
+                <span style={{ color: l.status === 'error' ? '#CC0000' : 'var(--text2)' }}>{l.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Post list */}
       {loading ? (
@@ -214,7 +222,7 @@ export default function AdminBlogPage() {
       ) : posts.length === 0 ? (
         <div className="scratch-card" style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 36, marginBottom: 12 }}>📝</div>
-          <p style={{ color: 'var(--text2)', fontSize: 14 }}>No posts yet. Create your first one.</p>
+          <p style={{ color: 'var(--text2)', fontSize: 14 }}>No posts yet. Create your first one or use Seed starter posts.</p>
         </div>
       ) : (
         <div className="scratch-card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -229,7 +237,7 @@ export default function AdminBlogPage() {
             <tbody>
               {posts.map((post) => (
                 <tr key={post.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '13px 16px', fontWeight: 700, maxWidth: 320 }}>
+                  <td style={{ padding: '13px 16px', maxWidth: 320 }}>
                     <div style={{ fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 300 }}>{post.title}</div>
                     <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>/blog/{post.slug}</div>
                   </td>
@@ -239,21 +247,15 @@ export default function AdminBlogPage() {
                       borderRadius: 4, padding: '3px 8px',
                       background: post.status === 'published' ? 'rgba(0,169,110,.12)' : 'rgba(0,0,0,.06)',
                       color: post.status === 'published' ? 'var(--green)' : 'var(--text2)',
-                    }}>
-                      {post.status === 'published' ? 'Published' : 'Draft'}
-                    </span>
+                    }}>{post.status === 'published' ? 'Published' : 'Draft'}</span>
                   </td>
                   <td style={{ padding: '13px 16px', color: 'var(--text2)' }}>{fmtDate(post.published_at) || '—'}</td>
                   <td style={{ padding: '13px 16px', color: 'var(--text2)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.author}</td>
                   <td style={{ padding: '13px 16px', whiteSpace: 'nowrap' }}>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="btn btn-outline btn-sm" onClick={() => openEdit(post)}>Edit</button>
-                      <button
-                        className="btn btn-outline btn-sm"
-                        style={{ color: '#CC0000', borderColor: '#FFCCCC' }}
-                        onClick={() => handleDelete(post.id, post.title)}
-                        disabled={deletingId === post.id}
-                      >
+                      <button className="btn btn-outline btn-sm" style={{ color: '#CC0000', borderColor: '#FFCCCC' }}
+                        onClick={() => handleDelete(post.id, post.title)} disabled={deletingId === post.id}>
                         {deletingId === post.id ? 'Deleting…' : 'Delete'}
                       </button>
                     </div>
@@ -267,87 +269,42 @@ export default function AdminBlogPage() {
 
       {/* Edit / Create modal */}
       {editing && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(13,31,23,.6)', backdropFilter: 'blur(3px)',
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-          overflowY: 'auto', padding: '24px 16px',
-        }}>
-          <div className="scratch-card" style={{ width: '100%', maxWidth: 780, padding: 36, position: 'relative' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,11,42,.65)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflowY: 'auto', padding: '24px 16px' }}>
+          <div className="scratch-card" style={{ width: '100%', maxWidth: 820, padding: 36, position: 'relative' }}>
 
-            {/* Modal header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900 }}>
-                {editing.id ? 'Edit post' : 'New post'}
-              </h2>
-              <button
-                onClick={() => setEditing(null)}
-                style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: 'var(--text2)', lineHeight: 1 }}
-                aria-label="Close"
-              >
-                ×
-              </button>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900 }}>{editing.id ? 'Edit post' : 'New post'}</h2>
+              <button onClick={() => setEditing(null)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: 'var(--text2)', lineHeight: 1 }}>×</button>
             </div>
 
             {/* Title */}
             <div className="form-group">
               <label className="form-label">Title</label>
-              <input
-                className="form-input"
-                value={editing.title}
-                onChange={(e) => fld('title', e.target.value)}
-                placeholder="e.g. 5 Tips for Running a Successful P&C Fundraiser"
-              />
+              <input className="form-input" value={editing.title} onChange={(e) => fld('title', e.target.value)} placeholder="e.g. 5 Tips for Running a Successful P&C Fundraiser" />
             </div>
 
             {/* Slug */}
             <div className="form-group" style={{ marginBottom: 8 }}>
               <label className="form-label">Slug</label>
-              <input
-                className="form-input"
-                value={editing.slug}
-                onChange={(e) => fldSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                placeholder="auto-generated-from-title"
-                style={{ fontFamily: 'monospace', fontSize: 13 }}
-              />
+              <input className="form-input" value={editing.slug} onChange={(e) => fldSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="auto-generated-from-title" style={{ fontFamily: 'monospace', fontSize: 13 }} />
             </div>
-            {editing.slug && (
-              <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 20 }}>
-                Preview: <strong>/blog/{editing.slug}</strong>
-              </div>
-            )}
+            {editing.slug && <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 20 }}>Preview: <strong>/blog/{editing.slug}</strong></div>}
 
             {/* Excerpt */}
             <div className="form-group">
               <label className="form-label">Excerpt</label>
-              <textarea
-                className="form-input"
-                rows={3}
-                value={editing.excerpt}
-                onChange={(e) => fld('excerpt', e.target.value)}
-                placeholder="A short summary shown on the blog listing page…"
-                style={{ resize: 'vertical' }}
-              />
+              <textarea className="form-input" rows={3} value={editing.excerpt} onChange={(e) => fld('excerpt', e.target.value)} placeholder="A short summary shown on the blog listing page…" style={{ resize: 'vertical' }} />
             </div>
 
-            {/* Author + Status row */}
+            {/* Author + Status */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Author</label>
-                <input
-                  className="form-input"
-                  value={editing.author}
-                  onChange={(e) => fld('author', e.target.value)}
-                  placeholder="LuckySquares Australia"
-                />
+                <input className="form-input" value={editing.author} onChange={(e) => fld('author', e.target.value)} placeholder="LuckySquares Australia" />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Status</label>
-                <select
-                  className="form-input"
-                  value={editing.status}
-                  onChange={(e) => fld('status', e.target.value)}
-                >
+                <select className="form-input" value={editing.status} onChange={(e) => fld('status', e.target.value)}>
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
                 </select>
@@ -357,20 +314,11 @@ export default function AdminBlogPage() {
             {/* Tags */}
             <div className="form-group">
               <label className="form-label">Tags (comma-separated)</label>
-              <input
-                className="form-input"
-                value={editing.tags}
-                onChange={(e) => fld('tags', e.target.value)}
-                placeholder="e.g. Tips, Schools, Fundraising"
-              />
+              <input className="form-input" value={editing.tags} onChange={(e) => fld('tags', e.target.value)} placeholder="e.g. fundraising, sport, community" />
               {tagChips.length > 0 && (
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
                   {tagChips.map((tag) => (
-                    <span key={tag} style={{
-                      fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .5,
-                      background: 'rgba(0,169,110,.1)', color: 'var(--green)',
-                      borderRadius: 4, padding: '2px 8px',
-                    }}>{tag}</span>
+                    <span key={tag} style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .5, background: 'var(--purple-light)', color: 'var(--purple)', borderRadius: 4, padding: '2px 8px' }}>{tag}</span>
                   ))}
                 </div>
               )}
@@ -379,46 +327,40 @@ export default function AdminBlogPage() {
             {/* Cover image URL */}
             <div className="form-group">
               <label className="form-label">Cover image URL (optional)</label>
-              <input
-                className="form-input"
-                value={editing.cover_image_url}
-                onChange={(e) => fld('cover_image_url', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                type="url"
-              />
+              <input className="form-input" value={editing.cover_image_url} onChange={(e) => fld('cover_image_url', e.target.value)} placeholder="https://example.com/image.jpg" type="url" />
+            </div>
+
+            {/* Image prompt */}
+            <div className="form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>AI image prompt</label>
+                {editing.image_prompt && (
+                  <button className="btn btn-outline btn-sm" style={{ fontSize: 11 }} onClick={copyImagePrompt}>
+                    {copied ? 'Copied!' : 'Copy prompt'}
+                  </button>
+                )}
+              </div>
+              <textarea className="form-input" rows={3} value={editing.image_prompt} onChange={(e) => fld('image_prompt', e.target.value)}
+                placeholder="Paste into Midjourney, DALL-E, or Ideogram to generate a cover image…"
+                style={{ resize: 'vertical', fontSize: 13, background: editing.image_prompt ? '#FAFFF8' : undefined }} />
+              {editing.image_prompt && <p style={{ fontSize: 11, color: 'var(--text3)', marginTop: 5 }}>Copy this prompt into your preferred AI image generator, then paste the resulting URL into Cover image URL above.</p>}
             </div>
 
             {/* AI Generate panel */}
             {showGenerate && (
               <div style={{ background: '#FFFBF0', border: '1.5px solid #F0D070', borderRadius: 'var(--radius)', padding: 24, marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#7A5C00' }}>Generate with AI</div>
-                  <button
-                    onClick={() => { setShowGenerate(false); setGenerateError(''); }}
-                    style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#7A5C00', lineHeight: 1 }}
-                    aria-label="Close generate panel"
-                  >
-                    ×
-                  </button>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#7A5C00' }}>✨ Generate with AI</div>
+                  <button onClick={() => { setShowGenerate(false); setGenerateError(''); }} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#7A5C00', lineHeight: 1 }}>×</button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
                   <div>
                     <label style={{ fontSize: 11, fontWeight: 800, color: '#7A5C00', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .5 }}>Topic / working title</label>
-                    <input
-                      className="form-input"
-                      value={generateForm.title}
-                      onChange={(e) => gfld('title', e.target.value)}
-                      placeholder="e.g. How to run a school raffle online"
-                    />
+                    <input className="form-input" value={generateForm.title} onChange={(e) => gfld('title', e.target.value)} placeholder="e.g. How to run a school raffle online" />
                   </div>
                   <div>
                     <label style={{ fontSize: 11, fontWeight: 800, color: '#7A5C00', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .5 }}>Target audience</label>
-                    <input
-                      className="form-input"
-                      value={generateForm.audience}
-                      onChange={(e) => gfld('audience', e.target.value)}
-                      placeholder="e.g. P&C committees, school fundraising coordinators"
-                    />
+                    <input className="form-input" value={generateForm.audience} onChange={(e) => gfld('audience', e.target.value)} placeholder="e.g. P&C committees, school coordinators" />
                   </div>
                 </div>
                 <div style={{ marginBottom: 14 }}>
@@ -431,23 +373,13 @@ export default function AdminBlogPage() {
                 </div>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 11, fontWeight: 800, color: '#7A5C00', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .5 }}>Key points to cover</label>
-                  <textarea
-                    className="form-input"
-                    rows={3}
-                    value={generateForm.keyPoints}
-                    onChange={(e) => gfld('keyPoints', e.target.value)}
-                    placeholder="e.g. Why online is better than paper, how to share with parents, collecting payment safely"
-                    style={{ resize: 'vertical' }}
-                  />
+                  <textarea className="form-input" rows={3} value={generateForm.keyPoints} onChange={(e) => gfld('keyPoints', e.target.value)} placeholder="e.g. Why online is better than paper, how to share with parents…" style={{ resize: 'vertical' }} />
                 </div>
-                {generateError && (
-                  <p style={{ fontSize: 12, color: '#CC0000', marginBottom: 12 }}>{generateError}</p>
-                )}
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={handleGenerate}
-                  disabled={generating}
-                >
+                {generateError && <p style={{ fontSize: 12, color: '#CC0000', marginBottom: 12 }}>{generateError}</p>}
+                <p style={{ fontSize: 12, color: '#7A5C00', marginBottom: 14, lineHeight: 1.6 }}>
+                  AI will generate the full post, excerpt, tags, and an image prompt you can drop into Midjourney or DALL-E.
+                </p>
+                <button className="btn btn-primary btn-sm" onClick={handleGenerate} disabled={generating}>
                   {generating ? 'Generating…' : 'Generate post →'}
                 </button>
               </div>
@@ -458,28 +390,16 @@ export default function AdminBlogPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                 <label className="form-label" style={{ marginBottom: 0 }}>Content (markdown)</label>
                 {!showGenerate && (
-                  <button
-                    className="btn btn-outline btn-sm"
-                    style={{ color: 'var(--green)', borderColor: 'var(--green)', fontSize: 12 }}
-                    onClick={() => { setShowGenerate(true); setGenerateError(''); }}
-                  >
-                    Generate with AI
+                  <button className="btn btn-outline btn-sm" style={{ color: 'var(--purple)', borderColor: 'var(--purple)', fontSize: 12 }} onClick={() => { setShowGenerate(true); setGenerateError(''); }}>
+                    ✨ Generate with AI
                   </button>
                 )}
               </div>
-              <textarea
-                className="form-input"
-                rows={20}
-                value={editing.content}
-                onChange={(e) => fld('content', e.target.value)}
-                placeholder="Write in markdown…"
-                style={{ fontFamily: 'monospace', fontSize: 13, resize: 'vertical' }}
-              />
+              <textarea className="form-input" rows={22} value={editing.content} onChange={(e) => fld('content', e.target.value)} placeholder="Write in markdown…" style={{ fontFamily: 'monospace', fontSize: 13, resize: 'vertical' }} />
             </div>
 
             {saveError && <p style={{ fontSize: 13, color: '#CC0000', marginBottom: 14 }}>{saveError}</p>}
 
-            {/* Footer actions */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button className="btn btn-outline" onClick={() => setEditing(null)}>Cancel</button>
               <button className="btn btn-primary" onClick={handleSave} disabled={saving}>

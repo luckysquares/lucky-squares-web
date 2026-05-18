@@ -22,7 +22,7 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { id, slug, title, excerpt, content, author, cover_image_url, tags, status } = body;
+    const { id, slug, title, excerpt, content, author, cover_image_url, image_prompt, tags, status } = body;
 
     const supabase = getSupabase();
     const { data, error } = await supabase.rpc('admin_upsert_blog_post', {
@@ -33,6 +33,7 @@ export async function POST(req) {
       p_content:         content ?? '',
       p_author:          author ?? 'LuckySquares Australia',
       p_cover_image_url: cover_image_url ?? null,
+      p_image_prompt:    image_prompt ?? '',
       p_tags:            tags ?? [],
       p_status:          status ?? 'draft',
     });
