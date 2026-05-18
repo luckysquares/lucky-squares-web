@@ -53,6 +53,10 @@ const FAQS = [
         a: 'When you are ready to draw, click the "Run draw" button on your fundraiser page. The platform randomly selects one of the sold squares as the winner. The result is recorded instantly and cannot be changed. All participants viewing the page at the time of the draw will see the winning square highlighted live.',
       },
       {
+        q: 'When do I receive the funds raised?',
+        a: 'This depends on how you set up your payment method. Bank transfer: buyers pay directly into your nominated BSB/account number throughout the campaign. You have the funds as they arrive, with no transfer needed from Lucky Squares. In person: you collect payment directly from participants. Online card (coming soon): Lucky Squares collects the funds via Stripe on your behalf and transfers the net amount (after transaction fees) to your nominated bank account within 2 business days of the draw completing.',
+      },
+      {
         q: 'What happens if not all squares sell before my draw date?',
         a: 'You have full control. You can draw from squares sold to that point, extend the selling period, or cancel the fundraiser and arrange refunds for participants. The platform does not automatically close or draw your fundraiser. You decide when to run the draw.',
       },

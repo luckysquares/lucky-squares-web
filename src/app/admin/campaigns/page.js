@@ -6,24 +6,57 @@ import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 const STATUS_COLOURS = { active: 'tag-green', drawn: 'tag-drawn', draft: 'tag-muted', cancelled: 'tag-muted' };
 const STATUS_LABELS  = { active: '● Live', drawn: '🏆 Drawn', draft: 'Draft', cancelled: 'Cancelled' };
 
+const PAYMENT_LABELS = {
+  stripe:        'Online card (Stripe)',
+  bank:          'Bank transfer',
+  bank_inperson: 'In person + bank transfer',
+  inperson:      'In person',
+};
+
 export default function AdminCampaigns() {
-  const [campaigns, setCampaigns] = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [search,    setSearch]    = useState('');
-  const [filter,    setFilter]    = useState('all');
-  const [editing,   setEditing]   = useState(null); // campaign being edited
-  const [saving,    setSaving]    = useState(false);
-  const [buyModal,  setBuyModal]  = useState(null); // { campaign, squares }
-  const [buyNum,    setBuyNum]    = useState('');
-  const [buyMsg,    setBuyMsg]    = useState('');
+  const [campaigns,    setCampaigns]    = useState([]);
+  const [payouts,      setPayouts]      = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [search,       setSearch]       = useState('');
+  const [filter,       setFilter]       = useState('all');
+  const [editing,      setEditing]      = useState(null);
+  const [saving,       setSaving]       = useState(false);
+  const [buyModal,     setBuyModal]     = useState(null);
+  const [buyNum,       setBuyNum]       = useState('');
+  const [buyMsg,       setBuyMsg]       = useState('');
+  const [payoutNotes,  setPayoutNotes]  = useState('');
+  const [processingId, setProcessingId] = useState(null);
 
   useEffect(() => { load(); }, []);
 
   const load = async () => {
     setLoading(true);
-    if (!supabaseConfigured) { setCampaigns(DEMO_CAMPAIGNS); setLoading(false); return; }
-    const { data } = await getSupabaseClient().rpc('admin_get_fundraisers');
-    setCampaigns(data ?? []); setLoading(false);
+    if (!supabaseConfigured) {
+      setCampaigns(DEMO_CAMPAIGNS);
+      setPayouts(DEMO_PAYOUTS);
+      setLoading(false);
+      return;
+    }
+    const [{ data: camps }, { data: pq }] = await Promise.all([
+      getSupabaseClient().rpc('admin_get_fundraisers'),
+      getSupabaseClient().rpc('admin_get_payout_queue', { p_status: 'pending' }),
+    ]);
+    setCampaigns(camps ?? []);
+    setPayouts(pq ?? []);
+    setLoading(false);
+  };
+
+  const markProcessed = async (id) => {
+    setProcessingId(id);
+    if (supabaseConfigured) {
+      await getSupabaseClient().rpc('admin_mark_payout_processed', {
+        p_id: id,
+        p_notes: payoutNotes || null,
+      });
+    }
+    setPayouts((prev) => prev.filter((p) => p.id !== id));
+    setProcessingId(null);
+    setPayoutNotes('');
   };
 
   const filtered = campaigns.filter((c) => {
@@ -74,6 +107,69 @@ export default function AdminCampaigns() {
     <div>
       <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Campaigns</h1>
       <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 28 }}>All fundraisers across the platform</p>
+
+      {/* Pending Payouts */}
+      {payouts.length > 0 && (
+        <div style={{ marginBottom: 36, background: '#FFF8EC', border: '2px solid #F59E0B', borderRadius: 16, padding: '24px 28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <span style={{ fontSize: 22 }}>💸</span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 900, margin: 0, color: '#92400E' }}>
+              Pending Payouts ({payouts.length})
+            </h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {payouts.map((p) => {
+              const needsTransfer = p.payment_method === 'stripe';
+              return (
+                <div key={p.id} style={{ background: '#fff', borderRadius: 12, padding: '18px 20px', border: '1px solid #FDE68A' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{p.campaign_title}</div>
+                      <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 6 }}>
+                        {p.org_name} · {p.contact_name} · {p.contact_email}
+                      </div>
+                      <div style={{ display: 'flex', gap: 16, fontSize: 13, flexWrap: 'wrap' }}>
+                        <span><strong>{p.sold_count}</strong> squares sold</span>
+                        <span style={{ fontWeight: 800, color: '#065F46' }}>${Number(p.funds_raised ?? 0).toLocaleString('en-AU', { minimumFractionDigits: 2 })} raised</span>
+                        <span>{PAYMENT_LABELS[p.payment_method] ?? p.payment_method}</span>
+                        <span style={{ color: 'var(--text2)' }}>Drawn {new Date(p.drawn_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                      {(p.payout_bsb || p.payout_account) && (
+                        <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text2)', background: 'var(--cream)', borderRadius: 8, padding: '8px 12px', display: 'inline-block' }}>
+                          {p.payout_bank_name && <span style={{ marginRight: 12 }}>Account: {p.payout_bank_name}</span>}
+                          {p.payout_bsb && <span style={{ marginRight: 12 }}>BSB: {p.payout_bsb}</span>}
+                          {p.payout_account && <span>Acct: {p.payout_account}</span>}
+                        </div>
+                      )}
+                      {needsTransfer && (
+                        <div style={{ marginTop: 8, fontSize: 12, fontWeight: 800, color: '#B45309', background: '#FEF3C7', borderRadius: 6, padding: '4px 10px', display: 'inline-block' }}>
+                          Action required: transfer funds to organiser
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 180 }}>
+                      <input
+                        className="form-input"
+                        placeholder="Notes (optional)"
+                        value={processingId === p.id ? payoutNotes : ''}
+                        onChange={(e) => { setProcessingId(p.id); setPayoutNotes(e.target.value); }}
+                        style={{ fontSize: 12 }}
+                      />
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => markProcessed(p.id)}
+                        disabled={processingId === p.id && processingId !== null && payoutNotes === '' && false}
+                      >
+                        {processingId === p.id ? 'Processing…' : '✓ Mark as processed'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
@@ -188,4 +284,8 @@ const DEMO_CAMPAIGNS = [
   { id: '1', emoji: '🐨', title: 'Koala Rescue Raffle', org: 'Wildlife Friends', contact_name: 'Priya S.', contact_email: 'priya@wildlife.org.au', contact_phone: '0412 345 678', status: 'active',  grid_size: 100, price_per_sq: 10, sold_count: 63, payment_method: 'stripe',       launched_at: new Date(Date.now() - 22 * 86400000).toISOString(), description: 'Raising funds for koala habitat restoration.' },
   { id: '2', emoji: '🎪', title: 'School Fete Lucky Dip', org: 'Sunbury Primary P&C', contact_name: 'Mel T.', contact_email: 'mel@sunburyprimary.edu.au', contact_phone: '0423 456 789', status: 'active', grid_size: 50, price_per_sq: 15, sold_count: 31, payment_method: 'bank', launched_at: new Date(Date.now() - 8 * 86400000).toISOString(), description: 'School camp fundraiser.' },
   { id: '3', emoji: '🏉', title: 'Footy Club Finals Fund', org: 'Werribee Eagles AFC', contact_name: 'Dave K.', contact_email: 'dave@werribeeeagles.com.au', contact_phone: '0434 567 890', status: 'drawn',  grid_size: 25, price_per_sq: 20, sold_count: 25, payment_method: 'bank',   launched_at: new Date(Date.now() - 35 * 86400000).toISOString(), description: 'Finals trip fund.' },
+];
+
+const DEMO_PAYOUTS = [
+  { id: 'p1', fundraiser_id: '3', campaign_title: 'Footy Club Finals Fund', org_name: 'Werribee Eagles AFC', contact_name: 'Dave K.', contact_email: 'dave@werribeeeagles.com.au', payment_method: 'bank', sold_count: 25, funds_raised: 500, drawn_at: new Date(Date.now() - 2 * 86400000).toISOString(), payout_bank_name: 'Werribee Eagles AFC', payout_bsb: '033-000', payout_account: '87654321', status: 'pending', notes: null },
 ];

@@ -281,6 +281,18 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     setWinners(newWinners);
     setDrawnResult(pickedSquares.map((sq) => sq.id));
     setPhase('winner');
+
+    // Fire-and-forget admin notification (best effort)
+    if (supabaseConfigured) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (supabaseUrl) {
+        fetch(`${supabaseUrl}/functions/v1/draw-notification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fundraiser_id: fundraiser.id }),
+        }).catch(() => {}); // silent fail — notification is non-critical
+      }
+    }
   };
 
   const timerPct     = (timerSecs / RESERVE_SECS) * 100;
