@@ -692,6 +692,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                     )}
                     <button className="btn btn-gold btn-sm" onClick={handleDraw}>🎲 Run draw</button>
                     <button className="btn btn-outline btn-sm" onClick={handleDownloadCsv}>⬇ CSV</button>
+                    <button className="btn btn-outline btn-sm" onClick={() => window.open(`/f/${fundraiser.id}/poster`, '_blank')}>🖨 Poster</button>
                   </div>
                 );
               })()}
