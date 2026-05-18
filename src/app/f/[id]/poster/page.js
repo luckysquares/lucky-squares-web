@@ -102,46 +102,45 @@ export default function PosterPage({ params }) {
         }}>
 
           {/* ── Header ────────────────────────────────────────────────── */}
-          <div style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 45%, #4A28D4 100%)', padding: '30px 36px 26px', textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 6 }}>🍀</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,.75)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 4 }}>Lucky Squares Fundraiser</div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>{f.org}</div>
+          <div style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 45%, #4A28D4 100%)', padding: '22px 36px', textAlign: 'center' }}>
+            <div style={{ fontSize: 32, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px', marginBottom: 4 }}>Lucky Squares Fundraiser</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.8)' }}>{f.org}</div>
           </div>
 
           {/* ── Campaign title ─────────────────────────────────────────── */}
-          <div style={{ background: '#FFFBEC', borderBottom: '4px solid #F5C842', padding: '28px 36px', textAlign: 'center' }}>
-            <div style={{ fontSize: 36, fontWeight: 900, color: '#1A1209', lineHeight: 1.2 }}>{f.title}</div>
+          <div style={{ background: '#FFFBEC', borderBottom: '4px solid #F5C842', padding: '20px 36px', textAlign: 'center' }}>
+            <div style={{ fontSize: 30, fontWeight: 900, color: '#1A1209', lineHeight: 1.2 }}>{f.title}</div>
             {f.description && (
-              <p style={{ fontSize: 14, color: '#4A3728', lineHeight: 1.7, margin: '14px 0 0', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>{f.description}</p>
+              <p style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.6, margin: '10px 0 0', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>{f.description}</p>
             )}
           </div>
 
           {/* ── You could win ─────────────────────────────────────────── */}
           {f.prizes.length > 0 && (
-            <div style={{ padding: '28px 36px', borderBottom: '2px dashed #E5E0D5' }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#6B46F5', marginBottom: 18, textAlign: 'center' }}>
+            <div style={{ padding: '20px 36px', borderBottom: '2px dashed #E5E0D5' }}>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#6B46F5', marginBottom: 14, textAlign: 'center' }}>
                 You could win...
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {f.prizes.map((p, i) => (
                   <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: 16,
+                    display: 'flex', alignItems: 'center', gap: 12,
                     background: i === 0 ? '#FFFBEC' : '#FAFAF8',
-                    border: `2px solid ${i === 0 ? '#F5C842' : '#E5E0D5'}`,
-                    borderRadius: 14, padding: '14px 20px',
+                    border: `1.5px solid ${i === 0 ? '#F5C842' : '#E5E0D5'}`,
+                    borderRadius: 10, padding: '10px 16px',
                   }}>
-                    <span style={{ fontSize: 32, flexShrink: 0 }}>{PLACE_EMOJIS[i] ?? '🎖️'}</span>
+                    <span style={{ fontSize: 24, flexShrink: 0 }}>{PLACE_EMOJIS[i] ?? '🎖️'}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: i === 0 ? '#9A6800' : '#9C8060', marginBottom: 2 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: i === 0 ? '#9A6800' : '#9C8060', marginBottom: 1 }}>
                         {PLACE_LABELS[i] ?? `${i + 1}th`} Prize
                       </div>
-                      <div style={{ fontSize: 20, fontWeight: 900, color: '#1A1209', lineHeight: 1.2 }}>{p.description}</div>
+                      <div style={{ fontSize: 15, fontWeight: 800, color: '#1A1209', lineHeight: 1.2 }}>{p.description}</div>
                     </div>
-                    {p.value && !p.donated && (
-                      <div style={{ fontSize: 26, fontWeight: 900, color: '#6B46F5', flexShrink: 0 }}>${p.value}</div>
-                    )}
-                    {p.donated && (
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#6B46F5', background: '#F0EEFF', border: '1.5px solid #C4B5F4', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>Kindly donated</div>
+                    {p.value && (
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        {p.donated && <div style={{ fontSize: 10, fontWeight: 600, color: '#9C8060' }}>Valued at</div>}
+                        <div style={{ fontSize: 20, fontWeight: 900, color: '#6B46F5' }}>${p.value}</div>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -150,23 +149,23 @@ export default function PosterPage({ params }) {
           )}
 
           {/* ── QR code + price ───────────────────────────────────────── */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 36px', gap: 20 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 36px', gap: 16 }}>
 
-            <div style={{ fontSize: 18, fontWeight: 800, color: '#1A1209', textAlign: 'center' }}>
-              Grab your square for just <span style={{ color: '#6B46F5', fontSize: 26 }}>${f.pricePerSq}</span>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#1A1209', textAlign: 'center' }}>
+              Grab your square for just <span style={{ color: '#6B46F5', fontSize: 22 }}>${f.pricePerSq}</span>
             </div>
 
-            <div style={{ background: '#F5F3EE', borderRadius: 20, padding: '24px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, border: '2px solid #E5E0D5', width: '100%', maxWidth: 320 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 12, border: '3px solid #6B46F5' }}>
-                <QRCodeSVG value={fundraiserUrl} size={200} fgColor="#1A1209" bgColor="#ffffff" level="M" />
+            <div style={{ background: '#F5F3EE', borderRadius: 18, padding: '20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, border: '2px solid #E5E0D5', width: '100%', maxWidth: 300 }}>
+              <div style={{ background: '#fff', borderRadius: 12, padding: 10, border: '3px solid #6B46F5' }}>
+                <QRCodeSVG value={fundraiserUrl} size={180} fgColor="#1A1209" bgColor="#ffffff" level="M" />
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#1A1209', marginBottom: 4 }}>Scan to choose your square!</div>
-                <div style={{ fontSize: 12, color: '#6B7280', wordBreak: 'break-all' }}>{fundraiserUrl}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: '#1A1209', marginBottom: 4 }}>Scan to choose your square!</div>
+                <div style={{ fontSize: 11, color: '#6B7280', wordBreak: 'break-all' }}>{fundraiserUrl}</div>
               </div>
             </div>
 
-            <div style={{ fontSize: 13, color: '#6B7280', textAlign: 'center' }}>
+            <div style={{ fontSize: 12, color: '#6B7280', textAlign: 'center' }}>
               Up to {Math.min(10, f.grid)} squares per person
             </div>
           </div>
