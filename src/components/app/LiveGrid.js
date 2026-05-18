@@ -669,8 +669,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             <div style={{ fontSize: 13, color: 'var(--text2)' }}>{fundraiser.org}, ${fundraiser.pricePerSq} per square</div>
           </div>
           <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ fontSize: 13, color: 'var(--text2)' }}>
-              <strong style={{ color: 'var(--text)' }}>{squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length}</strong> / {fundraiser.grid} sold
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text2)' }}>
+              <strong style={{ color: 'var(--text)' }}>{squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length}</strong> / {fundraiser.grid} squares sold
             </div>
             {isOwner && !isDrawn && (() => {
               const costPrizes    = (fundraiser.prizes || []).reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0);
@@ -681,8 +681,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
               return (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   {belowBreakEven && (
-                    <span style={{ fontSize: 12, color: 'var(--orange)', fontWeight: 700 }}>
-                      ⚠️ {squaresNeeded} more square{squaresNeeded !== 1 ? 's' : ''} to cover prizes
+                    <span style={{ fontSize: 15, color: 'var(--orange)', fontWeight: 700 }}>
+                      ⚠️ Sell {squaresNeeded} more square{squaresNeeded !== 1 ? 's' : ''} to cover prize value
                     </span>
                   )}
                   <button className="btn btn-gold btn-sm" onClick={handleDraw}>🎲 Run draw</button>
