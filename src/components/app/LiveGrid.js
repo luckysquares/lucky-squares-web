@@ -944,13 +944,6 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           )}
 
           {isOwner && fundraiser.status !== 'draft' && (
-            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '20px auto 0', textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Download your sales data here</div>
-              <button className="btn btn-outline btn-sm" onClick={handleDownloadCsv}>⬇ Download CSV</button>
-            </div>
-          )}
-
-          {isOwner && fundraiser.status !== 'draft' && (
             <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '32px auto 0', display: 'flex', gap: 16, alignItems: 'stretch' }}>
 
               {/* Share card */}
@@ -985,6 +978,13 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                 </button>
               </div>
 
+            </div>
+          )}
+
+          {isOwner && fundraiser.status !== 'draft' && (
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '16px auto 0', textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Download your sales data here</div>
+              <button className="btn btn-outline btn-sm" onClick={handleDownloadCsv}>⬇ Download CSV</button>
             </div>
           )}
 
