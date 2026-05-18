@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
@@ -36,6 +36,58 @@ function dbToFundraiser(row, prizes = []) {
       account:     row.bank_account,
     },
   };
+}
+
+const NAV_LINKS = [
+  { href: '/',              label: 'Home' },
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/pricing',      label: 'Pricing' },
+  { href: '/blog',         label: 'Blog' },
+  { href: '/contact',      label: 'Contact' },
+];
+
+function HamburgerMenu() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{ background: 'none', border: '1.5px solid var(--border)', borderRadius: 8, width: 40, height: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, cursor: 'pointer', padding: 0 }}
+        aria-label="Menu"
+      >
+        {[0, 1, 2].map((i) => (
+          <span key={i} style={{ display: 'block', width: 18, height: 2, background: 'var(--text)', borderRadius: 2, transition: 'opacity .15s', opacity: open && i === 1 ? 0 : 1 }} />
+        ))}
+      </button>
+
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,.12)', minWidth: 200, zIndex: 200, overflow: 'hidden' }}>
+          {NAV_LINKS.map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setOpen(false)}
+              style={{ display: 'block', padding: '12px 20px', fontSize: 14, fontWeight: 600, color: 'var(--text)', textDecoration: 'none', borderBottom: '1px solid var(--border)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--cream)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              {label}
+            </Link>
+          ))}
+          <div style={{ padding: '12px 16px' }}>
+            <Link href="/fundraise?register=1" className="btn btn-primary btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setOpen(false)}>
+              Start for free →
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function PublicFundraiserPage({ params }) {
@@ -87,7 +139,7 @@ export default function PublicFundraiserPage({ params }) {
             <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Australia</div>
           </div>
         </Link>
-        <Link href="/" className="btn btn-outline btn-sm">Run your own Lucky Squares Fundraiser →</Link>
+        <HamburgerMenu />
       </header>
 
       {fundraiser.imageUrl && (

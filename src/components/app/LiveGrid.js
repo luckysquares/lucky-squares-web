@@ -669,7 +669,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                 <span style={{ fontSize: 32 }}>{fundraiser.emoji}</span>
                 <div>
                   <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 700 }}>{fundraiser.title}</h1>
-                  <div style={{ fontSize: 13, color: 'var(--text2)' }}>{fundraiser.org} · ${fundraiser.pricePerSq}/square</div>
+                  <div style={{ fontSize: 13, color: 'var(--text2)' }}>{fundraiser.org} · ${fundraiser.pricePerSq} / square</div>
                 </div>
               </div>
             </div>
@@ -768,8 +768,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                 )}
 
                 {!isOwner && fundraiser.description && (
-                  <div style={{ padding: '14px 18px', background: 'var(--card)', borderRadius: 14, border: '1.5px solid var(--border)', flex: 1, minWidth: 200 }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .8, color: 'var(--text2)', marginBottom: 8 }}>💚 About this fundraiser</div>
+                  <div style={{ padding: '14px 18px', background: 'rgba(107,70,245,.04)', borderRadius: 14, border: '1.5px solid rgba(107,70,245,.25)', flex: 1, minWidth: 200 }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .8, color: 'var(--purple)', marginBottom: 8 }}>💜 About this fundraiser</div>
                     <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, margin: 0 }}>{fundraiser.description}</p>
                   </div>
                 )}
@@ -1061,6 +1061,19 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             <p style={{ marginTop: 12, fontSize: 12, color: 'var(--text2)', textAlign: 'center' }}>
               Select up to {MAX_CART - cart.length} more square{MAX_CART - cart.length !== 1 ? 's' : ''}
             </p>
+          )}
+
+          {!isOwner && (
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '40px auto 0', padding: '24px 28px', background: 'linear-gradient(135deg, #A78BFA22, #7C3AED11)', border: '1.5px solid rgba(107,70,245,.2)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                <span style={{ fontSize: 32, flexShrink: 0 }}>🍀</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 900, color: 'var(--text)', marginBottom: 4 }}>Running your own fundraiser?</div>
+                  <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>Set up a Lucky Squares grid in minutes — free to try.</div>
+                </div>
+              </div>
+              <a href="/fundraise?register=1" className="btn btn-primary btn-sm" style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>Start for free →</a>
+            </div>
           )}
         </div>
 
