@@ -41,7 +41,7 @@ const FAQS = [
       },
       {
         q: 'How do I get paid?',
-        a: 'You have four options. In person: collect payment yourself via cash or EFTPOS when you approach participants. Bank transfer: participants pay directly into your nominated BSB/account with no transaction fees. In person and bank transfer: participants choose whichever suits them. Secure online payment (coming soon): participants pay by card online, with a 1.7% + 30c transaction fee per purchase.',
+        a: 'You have four options. In person: collect payment yourself via cash or EFTPOS when you approach participants. Bank transfer: participants pay directly into your nominated BSB/account with no transaction fees. In person and bank transfer: participants choose whichever suits them. Secure online card payment: participants pay by card online via Stripe, with a 1.75% + 30c transaction fee per purchase added to the square price.',
       },
       {
         q: 'Do I need a permit to run a Lucky Squares fundraiser?',
@@ -54,7 +54,7 @@ const FAQS = [
       },
       {
         q: 'When do I receive the funds raised?',
-        a: 'This depends on how you set up your payment method. Bank transfer: buyers pay directly into your nominated BSB/account number throughout the campaign. You have the funds as they arrive, with no transfer needed from Lucky Squares. In person: you collect payment directly from participants. Online card (coming soon): Lucky Squares collects the funds via Stripe on your behalf and transfers the net amount (after transaction fees) to your nominated bank account within 2 business days of the draw completing.',
+        a: 'This depends on how you set up your payment method. Bank transfer: buyers pay directly into your nominated BSB/account number throughout the campaign. You have the funds as they arrive, with no transfer needed from Lucky Squares. In person: you collect payment directly from participants. Online card via Stripe: Lucky Squares collects the funds on your behalf and transfers the net amount (after transaction fees) to your nominated bank account within 2 business days of the draw completing.',
       },
       {
         q: 'What happens if not all squares sell before my draw date?',

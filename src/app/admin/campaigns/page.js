@@ -14,20 +14,29 @@ const PAYMENT_LABELS = {
 };
 
 export default function AdminCampaigns() {
-  const [campaigns,    setCampaigns]    = useState([]);
-  const [payouts,      setPayouts]      = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [search,       setSearch]       = useState('');
-  const [filter,       setFilter]       = useState('all');
-  const [editing,      setEditing]      = useState(null);
-  const [saving,       setSaving]       = useState(false);
-  const [buyModal,     setBuyModal]     = useState(null);
-  const [buyNum,       setBuyNum]       = useState('');
-  const [buyMsg,       setBuyMsg]       = useState('');
+  const [campaigns,      setCampaigns]      = useState([]);
+  const [payouts,        setPayouts]        = useState([]);
+  const [loading,        setLoading]        = useState(true);
+  const [search,         setSearch]         = useState('');
+  const [filter,         setFilter]         = useState('all');
+  const [editing,        setEditing]        = useState(null);
+  const [saving,         setSaving]         = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [buyModal,       setBuyModal]       = useState(null);
+  const [buyNum,         setBuyNum]         = useState('');
+  const [buyMsg,         setBuyMsg]         = useState('');
+  const [giftRedirecting, setGiftRedirecting] = useState(false);
   const [payoutNotes,  setPayoutNotes]  = useState('');
   const [processingId, setProcessingId] = useState(null);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('gift_success') === '1') {
+      window.history.replaceState({}, '', window.location.pathname);
+      alert('Payment successful — the square has been gifted.');
+    }
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -67,6 +76,19 @@ export default function AdminCampaigns() {
 
   const daysLive = (c) => c.launched_at ? Math.floor((Date.now() - new Date(c.launched_at).getTime()) / 86400000) : null;
 
+  const handleImageUpload = async (file) => {
+    if (!file || !editing) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Please choose an image under 5 MB.'); return; }
+    setImageUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `${editing.id}/cover.${ext}`;
+    const { data, error } = await getSupabaseClient().storage.from('fundraiser-images').upload(path, file, { upsert: true });
+    if (error) { alert('Upload failed: ' + error.message); setImageUploading(false); return; }
+    const { data: { publicUrl } } = getSupabaseClient().storage.from('fundraiser-images').getPublicUrl(data.path);
+    setEditing((p) => ({ ...p, image_url: publicUrl }));
+    setImageUploading(false);
+  };
+
   const saveEdit = async () => {
     setSaving(true);
     if (supabaseConfigured) {
@@ -74,6 +96,7 @@ export default function AdminCampaigns() {
         p_id: editing.id, p_title: editing.title, p_org: editing.org,
         p_contact_name: editing.contact_name, p_contact_email: editing.contact_email,
         p_contact_phone: editing.contact_phone, p_description: editing.description,
+        p_image_url: editing.image_url ?? null,
       });
     }
     setCampaigns((prev) => prev.map((c) => c.id === editing.id ? { ...c, ...editing } : c));
@@ -95,12 +118,24 @@ export default function AdminCampaigns() {
   const giftSquare = async () => {
     const num = parseInt(buyNum);
     if (!num || isNaN(num)) return;
-    if (supabaseConfigured) {
-      await getSupabaseClient().rpc('admin_gift_square', { p_fundraiser_id: buyModal.campaign.id, p_square_number: num });
+    setGiftRedirecting(true);
+    try {
+      const res = await fetch('/api/stripe/create-gift-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fundraiser_id: buyModal.campaign.id, square_number: num }),
+      });
+      const { url, error } = await res.json();
+      if (error || !url) {
+        alert(error || 'Could not start payment. Please try again.');
+        setGiftRedirecting(false);
+        return;
+      }
+      window.location.href = url;
+    } catch {
+      alert('Could not start payment. Please try again.');
+      setGiftRedirecting(false);
     }
-    setBuyMsg(`Square #${num} gifted successfully.`);
-    setBuyNum('');
-    setBuyModal((prev) => ({ ...prev, squares: prev.squares.filter((s) => s.number !== num) }));
   };
 
   return (
@@ -241,6 +276,16 @@ export default function AdminCampaigns() {
                 <input className="form-input" value={editing[field] ?? ''} onChange={(e) => setEditing((p) => ({ ...p, [field]: e.target.value }))} />
               </div>
             ))}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Campaign photo</label>
+              {editing.image_url && (
+                <img src={editing.image_url} alt="Campaign" style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 10, marginBottom: 8, display: 'block' }} />
+              )}
+              <label style={{ display: 'inline-block', cursor: 'pointer' }}>
+                <span className="btn btn-outline btn-sm">{imageUploading ? 'Uploading…' : editing.image_url ? 'Replace image' : 'Upload image'}</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} disabled={imageUploading} onChange={(e) => e.target.files[0] && handleImageUpload(e.target.files[0])} />
+              </label>
+            </div>
             <div style={{ marginBottom: 24 }}>
               <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Description</label>
               <textarea className="form-input" rows={3} value={editing.description ?? ''} onChange={(e) => setEditing((p) => ({ ...p, description: e.target.value }))} style={{ resize: 'vertical' }} />
@@ -265,14 +310,33 @@ export default function AdminCampaigns() {
               <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Square number</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input className="form-input" type="number" min={1} max={buyModal.campaign.grid_size} placeholder={`1 – ${buyModal.campaign.grid_size}`} value={buyNum} onChange={(e) => setBuyNum(e.target.value)} style={{ flex: 1 }} />
-                <button className="btn btn-primary" onClick={giftSquare} disabled={!buyNum}>Gift it</button>
               </div>
               <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>
                 {buyModal.squares.length} available square{buyModal.squares.length !== 1 ? 's' : ''}: {buyModal.squares.slice(0,20).map((s) => s.number).join(', ')}{buyModal.squares.length > 20 ? '…' : ''}
               </div>
             </div>
-            {buyMsg && <p style={{ fontSize: 13, color: 'var(--green)', fontWeight: 700, marginBottom: 16 }}>✓ {buyMsg}</p>}
-            <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => { setBuyModal(null); setBuyMsg(''); }}>Close</button>
+            {buyNum && (() => {
+              const price = parseFloat(buyModal.campaign.price_per_sq) || 0;
+              const fee = price * 0.0175 + 0.30;
+              const total = (price + fee).toFixed(2);
+              return (
+                <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 13 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span>Square #{buyNum}</span><span>${price.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text2)', marginBottom: 8 }}>
+                    <span>Transaction fee (1.75% + $0.30)</span><span>${fee.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, borderTop: '1px solid var(--border)', paddingTop: 8 }}>
+                    <span>Total</span><span>${total}</span>
+                  </div>
+                </div>
+              );
+            })()}
+            <button className="btn btn-primary" style={{ width: '100%', marginBottom: 10 }} onClick={giftSquare} disabled={!buyNum || giftRedirecting}>
+              {giftRedirecting ? 'Redirecting to payment…' : `Pay now${buyNum ? ` — $${((parseFloat(buyModal.campaign.price_per_sq) || 0) * 1.0175 + 0.30).toFixed(2)}` : ''}`}
+            </button>
+            <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => { setBuyModal(null); setBuyMsg(''); setGiftRedirecting(false); }}>Cancel</button>
           </div>
         </div>
       )}

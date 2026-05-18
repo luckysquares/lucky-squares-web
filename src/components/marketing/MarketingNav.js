@@ -41,7 +41,7 @@ export default function MarketingNav() {
           {/* Desktop CTA buttons */}
           <div className="nav-cta">
             <Link href="/fundraise" className="btn btn-outline btn-sm">Sign in</Link>
-            <Link href="/fundraise" className="btn btn-purple btn-sm">Start for free →</Link>
+            <Link href="/fundraise?register=1" className="btn btn-purple btn-sm">Start for free →</Link>
           </div>
 
           {/* Hamburger — mobile only */}
@@ -68,7 +68,7 @@ export default function MarketingNav() {
               <Link href="/fundraise" className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={close}>
                 Sign in
               </Link>
-              <Link href="/fundraise" className="btn btn-purple" style={{ flex: 1, justifyContent: 'center' }} onClick={close}>
+              <Link href="/fundraise?register=1" className="btn btn-purple" style={{ flex: 1, justifyContent: 'center' }} onClick={close}>
                 Start for free →
               </Link>
             </div>

@@ -274,7 +274,7 @@ export default function FeelingLuckyPage() {
               <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
                 Check back soon. New fundraisers go live all the time. Or if your group is ready to raise some funds, start your own.
               </p>
-              <Link href="/fundraise" className="btn btn-gold">Start a fundraiser free →</Link>
+              <Link href="/fundraise?register=1" className="btn btn-gold">Start a fundraiser free →</Link>
             </div>
           </div>
         </section>
@@ -290,7 +290,7 @@ export default function FeelingLuckyPage() {
           <p style={{ fontSize: 16, color: 'var(--text2)', marginBottom: 28, maxWidth: 420, margin: '0 auto 28px' }}>
             Set up your Lucky Squares campaign in minutes. Share a link, sell squares, run a live draw. Free to try.
           </p>
-          <Link href="/fundraise" className="btn btn-gold btn-lg">
+          <Link href="/fundraise?register=1" className="btn btn-gold btn-lg">
             Create your fundraiser free →
           </Link>
         </div>

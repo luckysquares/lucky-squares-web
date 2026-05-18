@@ -26,7 +26,7 @@ export async function POST(req) {
       .single();
 
     if (error || !fundraiser) return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
-    if (!fundraiser.stripe_account_id || !fundraiser.stripe_onboarding_complete) {
+    if (!fundraiser.stripe_account_id) {
       return Response.json({ error: 'Stripe not configured for this fundraiser' }, { status: 400 });
     }
 

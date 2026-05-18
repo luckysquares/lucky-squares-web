@@ -32,6 +32,16 @@ export async function POST(req) {
 
     const db = supabase();
 
+    // ── Admin gift square payment ─────────────────────────────────────────────
+    if (action === 'admin_gift') {
+      const squareNum = parseInt(session.metadata.square_number);
+      await db.rpc('admin_gift_square', {
+        p_fundraiser_id: fundraiser_id,
+        p_square_number: squareNum,
+      });
+      return new Response('ok', { status: 200 });
+    }
+
     // ── Platform launch fee payment ───────────────────────────────────────────
     if (action === 'launch') {
       await db.from('fundraisers').update({

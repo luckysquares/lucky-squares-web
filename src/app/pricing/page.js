@@ -35,7 +35,7 @@ export default function PricingPage() {
                 <li>Up to 3 draft fundraisers</li>
                 <li>All screens &amp; draw features</li>
               </ul>
-              <Link href="/fundraise" className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }}>
+              <Link href="/fundraise?register=1" className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }}>
                 Get started free
               </Link>
             </div>
@@ -56,7 +56,7 @@ export default function PricingPage() {
                 <li>Live draw feature</li>
                 <li>Notify buyers of results</li>
               </ul>
-              <Link href="/fundraise" className="btn btn-purple" style={{ width: '100%', justifyContent: 'center' }}>
+              <Link href="/fundraise?register=1" className="btn btn-purple" style={{ width: '100%', justifyContent: 'center' }}>
                 Start your fundraiser →
               </Link>
             </div>

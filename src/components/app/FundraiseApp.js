@@ -66,6 +66,10 @@ function localizeSquare(row, myNums) {
 
 const parsePrizeValue = (v) => parseFloat(String(v ?? '').replace(/[^0-9.]/g, '')) || 0;
 
+const AU_STATES = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'];
+const STATE_PRIZE_CAPS = { ACT: 5000, NSW: 25000, NT: 5000, QLD: 2000, SA: 5000, TAS: 5000, VIC: 5000, WA: 10000 };
+const STATE_LABELS = { ACT: 'Australian Capital Territory', NSW: 'New South Wales', NT: 'Northern Territory', QLD: 'Queensland', SA: 'South Australia', TAS: 'Tasmania', VIC: 'Victoria', WA: 'Western Australia' };
+
 async function fetchPlan(userId) {
   const { data } = await getSupabaseClient().from('profiles').select('plan').eq('id', userId).single();
   return data?.plan ?? 'trial';
@@ -90,6 +94,7 @@ function dbToFundraiser(row, soldCount = 0, prizes = []) {
     winnerSquareNums: Array.isArray(row.winner_square_nums) ? row.winner_square_nums : (row.winner_square_num != null ? [row.winner_square_num] : []),
     launchedAt:      row.launched_at || null,
     imageUrl:        row.image_url || null,
+    state:           row.state || 'SA',
     totalPrizeValue: prizes.reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0),
     prizes: prizes
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
@@ -156,49 +161,82 @@ function AppHeader({ user, onLogout, onHome }) {
   );
 }
 
+// ─── shared auth layout shell ─────────────────────────────────────────────────
+
+function AuthShell({ children }) {
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
+      <div className="rainbow-strip" />
+      <div style={{ padding: '18px 28px', borderBottom: '1px solid var(--border)', background: 'rgba(253,248,240,.92)', backdropFilter: 'blur(8px)' }}>
+        <div style={{ maxWidth: 1060, margin: '0 auto' }}>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+            <Logo size={34} />
+            <div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.5px', lineHeight: 1.1 }}>LuckySquares</div>
+              <div style={{ fontSize: 9, color: 'var(--text2)', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Australia</div>
+            </div>
+          </Link>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 // ─── LoginScreen ──────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin, onRegister, loading, error }) {
   const [email, setEmail] = useState('');
   const [pass,  setPass]  = useState('');
   return (
-    <div className="dot-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <Logo size={72} />
-          <h1 className="section-title" style={{ marginTop: 16 }}>Welcome back!</h1>
-          <p className="section-sub">Sign in to manage your fundraisers</p>
-        </div>
-        <div className="scratch-card" style={{ padding: 32 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input className="form-input" type="password" placeholder="••••••••" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && onLogin({ email, password: pass })} />
-            </div>
-            {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
-            <button className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading} onClick={() => onLogin({ email, password: pass })}>
-              {loading ? 'Signing in…' : 'Sign in 🍀'}
-            </button>
+    <AuthShell>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '60px 24px 80px' }}>
+        <div style={{ width: '100%', maxWidth: 440 }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <div className="section-label" style={{ justifyContent: 'center', display: 'flex' }}>Organiser sign in</div>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px,4vw,36px)', fontWeight: 900, color: 'var(--text)', margin: '10px 0 8px', lineHeight: 1.2 }}>
+              Welcome back
+            </h1>
+            <p style={{ fontSize: 15, color: 'var(--text2)', margin: 0 }}>Sign in to manage your fundraisers</p>
           </div>
-          <div className="divider" />
-          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--text2)' }}>
-            New here?{' '}
-            <button onClick={onRegister} style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>
-              Create account →
-            </button>
-          </p>
+          <div className="scratch-card" style={{ padding: '32px 36px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input className="form-input" type="password" placeholder="••••••••" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && onLogin({ email, password: pass })} />
+              </div>
+              {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
+              <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={loading} onClick={() => onLogin({ email, password: pass })}>
+                {loading ? 'Signing in…' : 'Sign in'}
+              </button>
+            </div>
+            <div className="divider" />
+            <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text2)', margin: 0 }}>
+              New to Lucky Squares?{' '}
+              <button onClick={onRegister} style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
+                Create a free account →
+              </button>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }
 
 // ─── RegisterScreen ───────────────────────────────────────────────────────────
+
+const REGISTER_FEATURES = [
+  { icon: '🎯', title: 'Live online grid', desc: 'Participants pick squares from any device. Reservations are instant.' },
+  { icon: '💳', title: 'Flexible payments', desc: 'In person, bank transfer, or secure card payments via Stripe.' },
+  { icon: '🏆', title: 'One-click draw', desc: 'Run your draw live. Winners are highlighted instantly on the grid.' },
+  { icon: '🍀', title: 'Pay only to go live', desc: 'Set up and preview everything free. $19 flat fee when you launch.' },
+];
 
 function RegisterScreen({ onRegister, onBack, loading, error }) {
   const [name,  setName]  = useState('');
@@ -206,46 +244,79 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
   const [org,   setOrg]   = useState('');
   const [pass,  setPass]  = useState('');
   return (
-    <div className="dot-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <Logo size={72} />
-          <h1 className="section-title" style={{ marginTop: 16 }}>Create account</h1>
-          <p className="section-sub">Start raising funds in minutes</p>
-        </div>
-        <div className="scratch-card" style={{ padding: 32 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div className="form-group">
-              <label className="form-label">Full name</label>
-              <input className="form-input" placeholder="Jane Smith" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
+    <AuthShell>
+      <div style={{ maxWidth: 1060, margin: '0 auto', padding: '52px 28px 80px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 52, alignItems: 'flex-start' }}>
+
+          {/* Left: pitch */}
+          <div style={{ flex: '1 1 320px', paddingTop: 4 }}>
+            <div className="section-label">Free to start</div>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,3.5vw,42px)', fontWeight: 900, color: 'var(--text)', margin: '12px 0 16px', lineHeight: 1.2 }}>
+              The easiest Lucky Squares fundraiser in Australia
+            </h1>
+            <p style={{ fontSize: 16, color: 'var(--text2)', lineHeight: 1.7, margin: '0 0 36px', maxWidth: 460 }}>
+              Set up your grid in minutes, share a link with your community, and watch the squares fill up. No spreadsheets, no cash handling, no stress.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {REGISTER_FEATURES.map((f) => (
+                <div key={f.title} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--green-light)', border: '1.5px solid var(--green-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{f.icon}</div>
+                  <div>
+                    <div style={{ fontWeight: 800, color: 'var(--text)', fontSize: 14, lineHeight: 1.3 }}>{f.title}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.55, marginTop: 2 }}>{f.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="form-group">
-              <label className="form-label">Organisation</label>
-              <input className="form-input" placeholder="School, club or charity name" maxLength={100} value={org} onChange={(e) => setOrg(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input className="form-input" type="password" placeholder="8+ characters" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)} />
-            </div>
-            {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
-            <button className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading} onClick={() => onRegister({ name, email, org, password: pass })}>
-              {loading ? 'Creating account…' : 'Create account 🎉'}
-            </button>
+            <p style={{ marginTop: 36, fontSize: 13, color: 'var(--text2)' }}>
+              Already have an account?{' '}
+              <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
+                Sign in →
+              </button>
+            </p>
           </div>
-          <div className="divider" />
-          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--text2)' }}>
-            Already have an account?{' '}
-            <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>
-              Sign in →
-            </button>
-          </p>
+
+          {/* Right: form */}
+          <div style={{ flex: '1 1 340px', maxWidth: 460 }}>
+            <div className="scratch-card" style={{ padding: '36px 40px' }}>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', margin: '0 0 4px' }}>Create your account</h2>
+              <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 0 24px' }}>Free to set up. No credit card needed.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div className="form-group">
+                  <label className="form-label">Full name</label>
+                  <input className="form-input" placeholder="Jane Smith" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Organisation</label>
+                  <input className="form-input" placeholder="School, club or charity name" maxLength={100} value={org} onChange={(e) => setOrg(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input className="form-input" type="password" placeholder="8+ characters" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && onRegister({ name, email, org, password: pass })} />
+                </div>
+                {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
+                <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={loading} onClick={() => onRegister({ name, email, org, password: pass })}>
+                  {loading ? 'Creating account…' : 'Create account'}
+                </button>
+              </div>
+              <div className="divider" />
+              <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text3)', margin: 0, lineHeight: 1.6 }}>
+                By creating an account you agree to our{' '}
+                <Link href="/terms" style={{ color: 'var(--green)', fontWeight: 700 }}>Terms of Service</Link>
+                {' '}and{' '}
+                <Link href="/privacy" style={{ color: 'var(--green)', fontWeight: 700 }}>Privacy Policy</Link>.
+              </p>
+            </div>
+          </div>
+
         </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }
 
@@ -790,7 +861,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
   const [gridOpt,   setGridOpt]   = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
   const [price,     setPrice]     = useState(savedDraft?.price ?? '5');
   const [prizes,    setPrizes]    = useState(savedDraft?.prizes ?? [{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
-  const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: '', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
+  const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: '', state: 'SA', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
   const [campaignImageUrl,  setCampaignImageUrl]  = useState(savedDraft?.campaignImageUrl ?? '');
   const [imageUploading,    setImageUploading]    = useState(false);
   const [drawRules,         setDrawRules]         = useState(savedDraft?.drawRules ?? { type: 'manual', date: '' });
@@ -800,8 +871,10 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
   const [couponCode,        setCouponCode]        = useState('');
   const [couponState,       setCouponState]       = useState('idle'); // idle | checking | valid | invalid
   const [couponData,        setCouponData]        = useState(null);   // { type, value }
-  const [bankPhase,         setBankPhase]         = useState(false);  // true = showing bank connect step
+  const [bankPhase,         setBankPhase]         = useState(false);
   const [bankDraftId,       setBankDraftId]       = useState(null);
+  const [bankSaving,        setBankSaving]        = useState(false);
+  const [bankSaveError,     setBankSaveError]     = useState(false);
   const [bankConnectDone,   setBankConnectDone]   = useState(false);
   const [pendingLaunchData, setPendingLaunchData] = useState(null);
 
@@ -865,7 +938,9 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
     if (step === 1) return parseFloat(price) > 0;
     if (step === 2) {
       const filled = prizes.filter((p) => p.desc.trim());
-      return filled.length > 0 && filled.every((p) => p.donated || p.value.trim());
+      const totalPrizes = prizes.reduce((sum, p) => sum + parsePrizeValue(p.value), 0);
+      const stateCap = STATE_PRIZE_CAPS[campaign.state || 'SA'] ?? 5000;
+      return filled.length > 0 && filled.every((p) => p.donated || p.value.trim()) && totalPrizes <= stateCap;
     }
     if (step === 3) return campaign.title.trim() && campaign.contactName.trim() && campaign.contactEmail.trim() && campaign.contactPhone.trim();
     if (step === PAYMENT_STEP) return bankComplete;
@@ -948,6 +1023,15 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
             <input className="form-input" type="number" min="1" step="1" value={price} onChange={(e) => setPrice(e.target.value)} style={{ paddingLeft: 36, fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-serif)' }} />
           </div>
         </div>
+        <div className="form-group" style={{ marginTop: 20 }}>
+          <label className="form-label">State / Territory</label>
+          <select className="form-input" value={campaign.state || 'SA'} onChange={(e) => setCampaign({ ...campaign, state: e.target.value })}>
+            {AU_STATES.map((s) => <option key={s} value={s}>{s} — {STATE_LABELS[s]}</option>)}
+          </select>
+          <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 6 }}>
+            Determines the maximum prize pool for your fundraiser under state lottery laws.
+          </p>
+        </div>
       </div>
     </div>,
 
@@ -965,7 +1049,20 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
         const platformFee = PLATFORM_FEES[gridSize] ?? 0;
         const netRaised   = Math.max(0, totalSales - costPrizes - platformFee);
         const fmt         = (n) => n.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        return (
+        const stateCap    = STATE_PRIZE_CAPS[campaign.state || 'SA'] ?? 5000;
+        const capPct      = totalPrizes / stateCap;
+        return (<>
+          {capPct >= 0.8 && (
+            <div style={{ borderRadius: 12, padding: '14px 18px', marginBottom: 16, fontSize: 13, lineHeight: 1.5,
+              background: capPct > 1 ? '#FEE2E2' : '#FFF8E1',
+              border: `1.5px solid ${capPct > 1 ? '#FCA5A5' : '#FDE68A'}`,
+              color: capPct > 1 ? '#991B1B' : '#92400E' }}>
+              {capPct > 1
+                ? <><strong>Prize pool exceeds the {campaign.state || 'SA'} limit of ${stateCap.toLocaleString()}.</strong> Under {STATE_LABELS[campaign.state || 'SA']} lottery laws, a total prize pool above this value requires a licence. Please reduce your prizes to continue.</>
+                : <><strong>Approaching the {campaign.state || 'SA'} limit of ${stateCap.toLocaleString()}.</strong> Your total prize pool is ${fmt(totalPrizes)}. Fundraisers with prizes over ${stateCap.toLocaleString()} require a lottery licence in {STATE_LABELS[campaign.state || 'SA']}.</>
+              }
+            </div>
+          )}
           <div className="scratch-card" style={{ padding: '20px 24px', marginBottom: 24 }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .8, color: 'var(--text2)', marginBottom: 14 }}>Potential funds raised at full sale</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -991,7 +1088,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
               </div>
             </div>
           </div>
-        );
+        </>);
       })()}
 
       <div style={{ background: 'var(--cream)', border: '1.5px solid var(--border)', borderRadius: 12, padding: '12px 16px', marginBottom: 4, fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>
@@ -1286,13 +1383,27 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
               ))}
             </div>
 
-            {bankDraftId ? (
+            {bankSaving && (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
+            )}
+            {bankSaveError && (
+              <div style={{ padding: '20px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, color: '#CC0000', marginBottom: 12 }}>Something went wrong saving your campaign. Please try again.</div>
+                <button className="btn btn-outline btn-sm" onClick={async () => {
+                  if (!pendingLaunchData) return;
+                  setBankSaveError(false);
+                  setBankSaving(true);
+                  const id = await onSaveDraft({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
+                  setBankSaving(false);
+                  if (id) { setBankDraftId(id); } else { setBankSaveError(true); }
+                }}>Try again</button>
+              </div>
+            )}
+            {bankDraftId && (
               <StripeConnectSetup
                 fundraiserId={bankDraftId}
                 onComplete={() => setBankConnectDone(true)}
               />
-            ) : (
-              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
             )}
           </div>
 
@@ -1418,9 +1529,16 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
           } else if (payment.method === 'stripe') {
             closeLaunchModal();
             setPendingLaunchData(launchData);
-            const id = await onSaveDraft({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
-            setBankDraftId(id);
             setBankPhase(true);
+            setBankSaving(true);
+            setBankSaveError(false);
+            const id = await onSaveDraft({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
+            setBankSaving(false);
+            if (id) {
+              setBankDraftId(id);
+            } else {
+              setBankSaveError(true);
+            }
           } else {
             closeLaunchModal();
             await onLaunchPay(launchData);
@@ -1494,6 +1612,9 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
               </div>
 
 
+              <p style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 16, lineHeight: 1.6 }}>
+                By launching this campaign you confirm that it complies with all applicable fundraising and lottery laws in {STATE_LABELS[campaign.state || 'SA'] || 'your state'}, including that total prizes do not exceed the permitted threshold. <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>Platform terms</a>
+              </p>
               <div style={{ display: 'flex', gap: 12 }}>
                 <button className="btn btn-outline" style={{ flex: 1 }} onClick={closeLaunchModal}>Cancel</button>
                 <button className="btn btn-gold btn-lg" style={{ flex: 2 }} onClick={doLaunch}>
@@ -1559,7 +1680,8 @@ export default function FundraiseApp() {
   }, []);
 
   useEffect(() => {
-    if (!supabaseConfigured) { setPhase('login'); return; }
+    const wantsRegister = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('register') === '1';
+    if (!supabaseConfigured) { setPhase(wantsRegister ? 'register' : 'login'); return; }
     const supabase = getSupabaseClient();
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
@@ -1579,7 +1701,7 @@ export default function FundraiseApp() {
         });
         setPhase('dashboard');
       } else {
-        setPhase('login');
+        setPhase(wantsRegister ? 'register' : 'login');
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -1746,6 +1868,7 @@ export default function FundraiseApp() {
           contact_email: sanitize(data.campaign.contactEmail) || null,
           contact_phone: sanitize(data.campaign.contactPhone) || null,
           emoji: nf.emoji, image_url: data.campaignImageUrl || null, description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
+          state: data.campaign.state || 'SA',
           grid_size: nf.grid, price_per_sq: nf.pricePerSq, status: nf.status,
           launched_at: nf.status === 'active' ? new Date().toISOString() : null,
           draw_type: data.drawRules.type, draw_date: data.drawRules.date || null,
@@ -1816,13 +1939,14 @@ export default function FundraiseApp() {
       contact_phone: sanitize(data.campaign.contactPhone) || null,
       emoji: data.campaign.emoji || '🍀', image_url: data.campaignImageUrl || null,
       description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
+      state: data.campaign.state || 'SA',
       grid_size: grid, price_per_sq: parseFloat(data.price) || 10, status: 'draft',
       draw_type: data.drawRules.type, draw_date: data.drawRules.date || null,
       payment_method: data.payment.method,
       bank_account_name: sanitize(data.payment.accountName) || null,
       bank_bsb: sanitize(data.payment.bsb) || null, bank_account: sanitize(data.payment.account) || null,
     }).select().single();
-    if (error || !saved) return null;
+    if (error || !saved) { console.error('handleSaveDraft error:', error); return null; }
     const prizeRows = data.prizes.filter((p) => p.desc)
       .map((p, i) => ({ fundraiser_id: saved.id, place: p.place, description: sanitize(p.desc), value: sanitize(p.value), donated: p.donated ?? false, sort_order: i }));
     await Promise.all([
@@ -1848,6 +1972,7 @@ export default function FundraiseApp() {
       image_url:         data.campaignImageUrl || null,
       description:       sanitize(data.campaign.description),
       thank_you:         sanitize(data.campaign.thankYou),
+      state:             data.campaign.state || 'SA',
       grid_size:         grid,
       price_per_sq:      parseFloat(data.price) || 10,
       status:            'draft',

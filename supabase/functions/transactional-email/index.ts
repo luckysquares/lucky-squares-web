@@ -7,6 +7,27 @@
 import { sendEmail, ADMIN_EMAIL } from '../_shared/resend.ts';
 import * as T from '../_shared/templates.ts';
 
+// These types go to internal admin addresses — skip opt-out checks and unsubscribe links
+const ADMIN_TYPES = new Set(['admin_new_org_application']);
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
+const SERVICE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+const APP_URL      = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://luckysquares.com.au';
+
+async function rpc(fn: string, args: Record<string, unknown>): Promise<unknown> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SERVICE_KEY,
+      'Authorization': `Bearer ${SERVICE_KEY}`,
+    },
+    body: JSON.stringify(args),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
@@ -29,7 +50,27 @@ Deno.serve(async (req) => {
     return new Response(`Unknown email type: ${type}`, { status: 400 });
   }
 
-  await sendEmail({ to, subject: template.subject, text: template.text });
+  const isAdmin = ADMIN_TYPES.has(type);
+
+  // Check opt-out for non-admin emails
+  if (!isAdmin) {
+    const optedOut = await rpc('is_email_opted_out', { p_email: to });
+    if (optedOut === true) {
+      console.log(`[email] Skipping ${type} to ${to} — opted out`);
+      return new Response(JSON.stringify({ ok: true, skipped: true }), { status: 200 });
+    }
+  }
+
+  // Generate unsubscribe URL for non-admin emails
+  let unsubscribeUrl: string | undefined;
+  if (!isAdmin) {
+    const token = await rpc('get_unsubscribe_token', { p_email: to });
+    if (token) {
+      unsubscribeUrl = `${APP_URL}/unsubscribe?token=${token}`;
+    }
+  }
+
+  await sendEmail({ to, subject: template.subject, text: template.text, unsubscribe_url: unsubscribeUrl });
 
   return new Response(JSON.stringify({ ok: true, type }), { status: 200 });
 });

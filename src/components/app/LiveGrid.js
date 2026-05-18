@@ -45,6 +45,9 @@ function localizeSquare(row, myNums) {
     id:            row.number,
     status:        isMine ? 'mine' : dbStatus === 'sold' ? 'taken' : dbStatus,
     owner:         row.buyer_name || null,
+    email:         row.buyer_email || null,
+    phone:         row.buyer_phone || null,
+    paid:          row.paid ?? false,
     reservedUntil: expiredAt,
     isSponsored:   row.is_sponsored ?? false,
   };
@@ -99,6 +102,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [showUnpaidModal,       setShowUnpaidModal]        = useState(false);
   const [showBreakEvenModal,    setShowBreakEvenModal]     = useState(false);
   const [payRedirecting,        setPayRedirecting]         = useState(false);
+  const [ageConfirmed,          setAgeConfirmed]           = useState(false);
   const drawTriggeredRef = useRef(false);
   const [tick,        setTick]        = useState(0);
   const timerRef  = useRef(null);
@@ -249,10 +253,15 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           }),
         });
         const { url, error } = await res.json();
-        if (error || !url) { setPayRedirecting(false); return; }
+        if (error || !url) {
+          setPayRedirecting(false);
+          alert(error || 'Could not start payment. Please try again.');
+          return;
+        }
         window.location.href = url;
-      } catch {
+      } catch (err) {
         setPayRedirecting(false);
+        alert('Could not start payment. Please try again.');
       }
       return;
     }
@@ -264,6 +273,22 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     cart.forEach((num) => myNumsRef.current.add(num));
     setSquares((prev) => prev.map((sq) => cart.includes(sq.id) ? { ...sq, status: 'mine', owner: ownerName } : sq));
     setCart([]); setTimerPaused(false); setTimerSecs(RESERVE_SECS); setPhase('success');
+  };
+
+  const handleDownloadCsv = () => {
+    const sold = squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine');
+    const rows = [
+      ['Square #', 'Buyer Name', 'Email', 'Phone', 'Paid', 'Status'],
+      ...sold.map((sq) => [sq.id, sq.owner || '', sq.email || '', sq.phone || '', sq.paid ? 'Yes' : 'No', sq.status]),
+    ];
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `${fundraiser.title.replace(/[^a-z0-9]/gi, '_')}_participants.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleDraw = async () => {
@@ -570,7 +595,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             </div>
           </div>
         )}
-        <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handlePay} disabled={payRedirecting}>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', marginBottom: 12 }}>
+          <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} style={{ marginTop: 2, flexShrink: 0, width: 16, height: 16, accentColor: 'var(--purple)' }} />
+          <span style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>I confirm I am 18 years of age or older</span>
+        </label>
+        <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handlePay} disabled={payRedirecting || !ageConfirmed}>
           {payRedirecting
             ? 'Redirecting to payment…'
             : fundraiser.payment?.method === 'stripe'
@@ -579,6 +608,12 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             ? 'Confirm my squares →'
             : 'Confirm squares →'}
         </button>
+        <p style={{ fontSize: 11, color: 'var(--text2)', textAlign: 'center', marginTop: 10, lineHeight: 1.6 }}>
+          By {fundraiser.payment?.method === 'stripe' ? 'completing payment' : 'confirming'} you agree to the{' '}
+          <a href={`/f/${fundraiser.id}/terms`} target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>terms of this campaign</a>
+          {' '}and the{' '}
+          <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>LuckySquares terms of service</a>.
+        </p>
       </div>
     </div>
   );
@@ -621,6 +656,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
       )}
 
       <div className="dot-bg">
+        {fundraiser.imageUrl && (
+          <div style={{ width: '100%', maxHeight: 280, overflow: 'hidden' }}>
+            <img src={fundraiser.imageUrl} alt={fundraiser.title} style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block' }} />
+          </div>
+        )}
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
             <div>
@@ -651,6 +691,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                       </span>
                     )}
                     <button className="btn btn-gold btn-sm" onClick={handleDraw}>🎲 Run draw</button>
+                    <button className="btn btn-outline btn-sm" onClick={handleDownloadCsv}>⬇ CSV</button>
                   </div>
                 );
               })()}
@@ -929,15 +970,22 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                   <span style={{ color: 'var(--text2)' }}>{fundraiser.grid}-square fundraiser</span>
                   <span style={{ fontWeight: 800 }}>${LAUNCH_FEES[fundraiser.grid] ?? 19}</span>
                 </div>
-                <p style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 24 }}>Online card payment coming soon. Contact us at support@luckysquares.com.au to launch now.</p>
                 <div style={{ display: 'flex', gap: 12 }}>
                   <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowLaunchModal(false)}>Cancel</button>
-                  <button className="btn btn-gold btn-lg" style={{ flex: 2 }} onClick={async () => {
-                    setShowLaunchModal(false);
-                    if (supabaseConfigured) await getSupabaseClient().from('fundraisers').update({ status: 'active' }).eq('id', fundraiser.id);
-                    onLaunch?.(fundraiser.id);
+                  <button className="btn btn-gold btn-lg" style={{ flex: 2 }} disabled={payRedirecting} onClick={async () => {
+                    setPayRedirecting(true);
+                    try {
+                      const res = await fetch('/api/stripe/create-launch-checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fundraiser_id: fundraiser.id, final_fee: LAUNCH_FEES[fundraiser.grid] ?? 19 }),
+                      });
+                      const { url, error } = await res.json();
+                      if (error || !url) { alert(error || 'Could not start payment. Please try again.'); setPayRedirecting(false); return; }
+                      window.location.href = url;
+                    } catch { alert('Could not start payment. Please try again.'); setPayRedirecting(false); }
                   }}>
-                    Pay &amp; launch →
+                    {payRedirecting ? 'Redirecting…' : 'Pay & launch →'}
                   </button>
                 </div>
               </div>

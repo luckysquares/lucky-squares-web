@@ -3,13 +3,14 @@ export const SUPPORT_EMAIL = 'support@luckysquares.com.au';
 export const ADMIN_EMAIL   = 'jwstott@me.com';
 
 export interface EmailPayload {
-  to:       string;
-  subject:  string;
-  text:     string;
-  reply_to?: string;
+  to:              string;
+  subject:         string;
+  text:            string;
+  reply_to?:       string;
+  unsubscribe_url?: string;
 }
 
-function toHtml(text: string): string {
+function toHtml(text: string, unsubscribeUrl?: string): string {
   const escaped = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -64,6 +65,7 @@ function toHtml(text: string): string {
           <a href="https://luckysquares.com.au" style="color:#9CA3AF">luckysquares.com.au</a><br>
           Questions? Reply to this email or contact
           <a href="mailto:${SUPPORT_EMAIL}" style="color:#9CA3AF">${SUPPORT_EMAIL}</a>
+          ${unsubscribeUrl ? `<br><br><a href="${unsubscribeUrl}" style="color:#9CA3AF;font-size:11px">Unsubscribe from these emails</a>` : ''}
         </td></tr>
 
       </table>
@@ -92,9 +94,10 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
       from:     FROM_EMAIL,
       to:       payload.to,
       subject:  payload.subject,
-      text:     payload.text,
-      html:     toHtml(payload.text),
+      text:     payload.text + (payload.unsubscribe_url ? `\n\nUnsubscribe: ${payload.unsubscribe_url}` : ''),
+      html:     toHtml(payload.text, payload.unsubscribe_url),
       reply_to: payload.reply_to ?? SUPPORT_EMAIL,
+      headers:  payload.unsubscribe_url ? { 'List-Unsubscribe': `<${payload.unsubscribe_url}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' } : undefined,
     }),
   });
 

@@ -14,7 +14,7 @@ export default function StripeConnectSetup({ fundraiserId, onComplete }) {
       try {
         const { loadConnectAndInitialize } = await import('@stripe/connect-js');
 
-        const instance = await loadConnectAndInitialize({
+        const instance = loadConnectAndInitialize({
           publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
           fetchClientSecret: async () => {
             const res = await fetch('/api/stripe/account-session', {

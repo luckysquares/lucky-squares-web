@@ -292,7 +292,7 @@ export default function HowItWorksPage() {
           <p className="section-body" style={{ margin: '0 auto 32px', textAlign: 'center' }}>
             Set up your first fundraiser free. No credit card needed.
           </p>
-          <Link href="/fundraise" className="btn btn-purple btn-xl">
+          <Link href="/fundraise?register=1" className="btn btn-purple btn-xl">
             Start your fundraiser free →
           </Link>
         </div>

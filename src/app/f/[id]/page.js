@@ -25,6 +25,7 @@ function dbToFundraiser(row, prizes = []) {
     winnerSquareNum:  row.winner_square_num ?? null,
     winnerSquareNums: Array.isArray(row.winner_square_nums) ? row.winner_square_nums : (row.winner_square_num != null ? [row.winner_square_num] : []),
     imageUrl:        row.image_url || null,
+    state:           row.state || 'SA',
     prizes:          prizes
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map((p) => ({ place: p.place, description: p.description, value: p.value, donated: p.donated ?? false })),

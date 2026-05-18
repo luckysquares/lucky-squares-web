@@ -89,9 +89,9 @@ export default function PrivacyPage() {
                   the Platform, including:
                 </p>
                 <ul>
-                  <li><strong>Secure online payment provider</strong>: payment processing</li>
-                  <li><strong>Supabase</strong>: secure data storage (Australian data residency)</li>
-                  <li><strong>Resend / SendGrid</strong>: email communications</li>
+                  <li><strong>Stripe</strong>: secure online payment processing. Card details are handled exclusively by Stripe and are never stored on LuckySquares systems. Stripe operates under PCI-DSS compliance.</li>
+                  <li><strong>Supabase</strong>: secure database and file storage (Australian data residency)</li>
+                  <li><strong>Resend</strong>: transactional email communications (confirmation emails, draw notifications)</li>
                 </ul>
                 <p style={{ marginTop: 10 }}>
                   These providers are contractually required to handle your information securely and only
@@ -147,22 +147,43 @@ export default function PrivacyPage() {
               <p>You may disable cookies in your browser settings, however this may affect the functionality of the Platform.</p>
             </Section>
 
-            <Section n="9" title="Children's Privacy">
+            <Section n="9" title="Marketing Communications and Opt-Out">
               <p>
-                The Platform is not directed at persons under the age of 18. We do not knowingly collect
-                personal information from minors. If you believe a minor has provided personal information
-                through the Platform, please contact us and we will delete it promptly.
+                We may send you transactional emails related to your use of the Platform, including purchase
+                confirmations, draw notifications, and fundraiser updates. These communications are necessary
+                for the operation of the service.
+              </p>
+              <p>
+                We may also send optional communications such as tips, updates, and seasonal promotions.
+                Every non-transactional email we send includes an unsubscribe link. You can opt out at any
+                time by clicking that link or by contacting us at{' '}
+                <a href="mailto:privacy@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>privacy@luckysquares.com.au</a>.
+              </p>
+              <p>
+                Once you opt out, your email address is recorded on our suppression list and we will not
+                send you further marketing communications. Opting out does not affect your ability to
+                participate in fundraisers.
               </p>
             </Section>
 
-            <Section n="10" title="Changes to This Policy">
+            <Section n="10" title="Children's Privacy">
+              <p>
+                Participation in Lucky Squares fundraisers is restricted to persons aged 18 years or over.
+                The Platform is not directed at minors. We do not knowingly collect personal information
+                from persons under 18. Participants are required to confirm their age at the point of
+                purchase. If you believe a minor has provided personal information through the Platform,
+                please contact us and we will delete it promptly.
+              </p>
+            </Section>
+
+            <Section n="11" title="Changes to This Policy">
               <p>
                 We may update this Privacy Policy from time to time. Updated versions will be published on
                 the Platform with a revised date. We encourage you to review this Policy periodically.
               </p>
             </Section>
 
-            <Section n="11" title="Contact" last>
+            <Section n="12" title="Contact" last>
               <p>For any privacy-related queries or requests:</p>
               <div style={{ margin: '8px 0 16px', display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>
                 <a href="mailto:privacy@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>privacy@luckysquares.com.au</a>
