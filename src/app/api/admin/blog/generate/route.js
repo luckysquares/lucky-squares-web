@@ -27,7 +27,7 @@ Return a JSON object with these exact keys:
   "title": "The final post title (may refine the working title)",
   "excerpt": "2-3 sentence summary for the blog listing page, under 200 characters",
   "tags": ["tag1", "tag2", "tag3"],
-  "image_prompt": "A detailed prompt for an AI image generator (Midjourney or DALL-E) describing the ideal cover image for this post. Include style, mood, subjects, colours. Under 100 words.",
+  "image_prompt": "A detailed prompt for an AI image generator (Midjourney or DALL-E) describing the ideal cover image for this post. Include style, mood, subjects, colours. Specify 1200x630 pixels, landscape orientation. Under 100 words.",
   "content": "The full post in markdown format"
 }
 

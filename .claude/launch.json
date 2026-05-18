@@ -5,8 +5,7 @@
       "name": "lucky-squares-web",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "cwd": ".",
-      "port": 3001
+"port": 3001
     }
   ]
 }

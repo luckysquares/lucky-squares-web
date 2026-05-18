@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import sharp from 'sharp';
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,18 +23,24 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Only JPEG, PNG, WebP and GIF images are allowed' }, { status: 400 });
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'Image must be under 5 MB' }, { status: 400 });
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: 'Image must be under 10 MB' }, { status: 400 });
     }
 
-    const ext   = file.type.split('/')[1].replace('jpeg', 'jpg');
-    const name  = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const bytes = await file.arrayBuffer();
+
+    // Resize to 1200×630, convert to WebP — typically reduces 2MB JPEGs to ~150-300KB
+    const optimised = await sharp(Buffer.from(bytes))
+      .resize(1200, 630, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 82 })
+      .toBuffer();
+
+    const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
 
     const supabase = getSupabase();
     const { error } = await supabase.storage
       .from('blog-images')
-      .upload(name, bytes, { contentType: file.type, upsert: false });
+      .upload(name, optimised, { contentType: 'image/webp', upsert: false });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

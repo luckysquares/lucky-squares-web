@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,11 +70,14 @@ function CompactCard({ post }) {
         transition: 'box-shadow .15s',
       }}>
         {post.cover_image_url && (
-          <div style={{ aspectRatio: '16/9', overflow: 'hidden', background: 'var(--border)', flexShrink: 0 }}>
-            <img
+          <div style={{ aspectRatio: '16/9', overflow: 'hidden', background: 'var(--border)', flexShrink: 0, position: 'relative' }}>
+            <Image
               src={post.cover_image_url}
               alt={post.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              fill
+              sizes="(max-width: 768px) 100vw, 400px"
+              style={{ objectFit: 'cover' }}
+              loading="lazy"
             />
           </div>
         )}
@@ -176,11 +180,14 @@ export default async function BlogPage() {
                 overflow: 'hidden',
               }}>
                 {featured.cover_image_url && (
-                  <div style={{ aspectRatio: '16/7', overflow: 'hidden', background: 'var(--border)' }}>
-                    <img
+                  <div style={{ aspectRatio: '16/7', overflow: 'hidden', background: 'var(--border)', position: 'relative' }}>
+                    <Image
                       src={featured.cover_image_url}
                       alt={featured.title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 800px"
+                      style={{ objectFit: 'cover' }}
+                      priority
                     />
                   </div>
                 )}

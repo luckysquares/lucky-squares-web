@@ -46,7 +46,7 @@ Return JSON with these exact keys:
   "title": "Final post title",
   "excerpt": "2-3 sentence summary under 180 characters",
   "tags": ["tag1", "tag2"],
-  "image_prompt": "Detailed AI image generator prompt for the cover image, under 80 words, photorealistic style",
+  "image_prompt": "Detailed AI image generator prompt for the cover image, 1200x630 pixels landscape orientation, under 80 words, photorealistic style",
   "content": "Full post in markdown (# heading, 3-4 ## subheadings, CTA at end, 600-800 words, Australian English)"
 }
 
