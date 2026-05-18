@@ -164,10 +164,8 @@ export default function BetaTestPage() {
           <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 28 }}>These are loaded with dummy data. Use the test card and go for it.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {DEMO_CAMPAIGNS.map((c) => (
-              <Link key={c.id} href={`/f/${c.id}`} style={{ textDecoration: 'none' }}>
-                <div className="scratch-card" style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer', transition: 'box-shadow .15s' }}
-                  onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-md)'}
-                  onMouseLeave={e => e.currentTarget.style.boxShadow = ''}>
+              <Link key={c.id} href={`/f/${c.id}`} style={{ textDecoration: 'none' }} className="beta-campaign-link">
+                <div className="scratch-card beta-campaign-card" style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{ fontSize: 28, flexShrink: 0 }}>{c.emoji}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text)', marginBottom: 2 }}>{c.title}</div>

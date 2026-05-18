@@ -966,3 +966,6 @@ textarea { font-family: inherit; }
   /* Cart bar: stack vertically on small screens */
   .cart-bar { flex-direction: column; gap: 10px; padding: 14px 16px 20px; text-align: center; }
 }
+
+.beta-campaign-card { transition: box-shadow .15s; cursor: pointer; }
+.beta-campaign-link:hover .beta-campaign-card { box-shadow: var(--shadow-md); }
