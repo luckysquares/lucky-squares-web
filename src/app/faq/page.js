@@ -101,7 +101,7 @@ const FAQS = [
       },
       {
         q: 'How many squares can I buy?',
-        a: 'You can purchase a maximum of 10 squares per person per fundraiser. If you try to select an 11th square, you will see a message letting you know you have reached the limit.',
+        a: 'You can purchase a maximum of 10 squares per transaction. If you try to select an 11th square, you will see a message letting you know you have reached the limit.',
       },
       {
         q: 'How will I know if I have won?',

@@ -44,7 +44,7 @@ export default function ParticipantTermsPage() {
               <SubSection n="2.2">The price per square, prize structure, draw method, and closing date are set by the Organiser and displayed on the fundraiser page. Lucky Squares Australia does not set or guarantee these details.</SubSection>
               <SubSection n="2.3">Your purchase does not guarantee that you will win a prize.</SubSection>
               <SubSection n="2.4">Each square is allocated a unique number between 1 and the grid size (25, 50, or 100). Square numbers are assigned sequentially in the order they are selected.</SubSection>
-              <SubSection n="2.5">A maximum of 10 squares may be purchased per person per fundraiser.</SubSection>
+              <SubSection n="2.5">A maximum number of 10 squares may be purchased per person per transaction.</SubSection>
             </Section>
 
             <Section n="3" title="Reservation and Checkout">
