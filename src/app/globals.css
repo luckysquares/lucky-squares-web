@@ -644,16 +644,14 @@ textarea { font-family: inherit; }
 /* ── section with hero-style gradient background (no abs blobs needed) ── */
 .section-hero-bg {
   background:
-    radial-gradient(ellipse at 96% 8%,  rgba(148,118,245,.18) 0%, transparent 40%),
-    radial-gradient(ellipse at 78% 22%, rgba(255,195,140,.20) 0%, transparent 36%),
-    radial-gradient(ellipse at 4%  88%, rgba(140,118,240,.14) 0%, transparent 46%),
-    radial-gradient(ellipse at 22% 55%, rgba(160,140,245,.08) 0%, transparent 32%),
-    #F4F3FB;
+    radial-gradient(ellipse at 92% 10%, rgba(255,195,140,.22) 0%, transparent 42%),
+    radial-gradient(ellipse at 6%  85%, rgba(255,180,120,.14) 0%, transparent 44%),
+    #FFFCF8;
 }
 
 /* ── solid light section background ── */
 .section-solid-bg {
-  background: #F2F1FA;
+  background: #F5F3EE;
 }
 
 /* ── marketing: hero ── */
@@ -662,7 +660,7 @@ textarea { font-family: inherit; }
   text-align: center;
   position: relative;
   overflow: hidden;
-  background: #EEEDF8;
+  background: #FFFCF8;
 }
 
 /* Blob shapes */
@@ -671,40 +669,40 @@ textarea { font-family: inherit; }
   pointer-events: none;
   z-index: 0;
 }
-/* Top-right: defined circular purple blob */
+/* Top-right: soft purple accent, very faint */
 .hero-blob-1 {
   width: 480px;
   height: 480px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(148,118,245,.30) 0%, rgba(124,88,230,.14) 45%, transparent 72%);
+  background: radial-gradient(circle, rgba(148,118,245,.14) 0%, transparent 68%);
   top: -160px;
   right: -140px;
-  filter: blur(32px);
+  filter: blur(40px);
 }
-/* Bottom-left: soft amorphous purple cloud */
+/* Bottom-left: warm peach cloud */
 .hero-blob-2 {
   width: 500px;
   height: 380px;
-  background: radial-gradient(ellipse, rgba(140,118,240,.20) 0%, rgba(107,70,245,.08) 55%, transparent 80%);
+  background: radial-gradient(ellipse, rgba(255,180,120,.20) 0%, transparent 70%);
   bottom: -80px;
   left: -100px;
   border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
-  filter: blur(44px);
+  filter: blur(50px);
 }
-/* Center-right: large warm peach/apricot glow */
+/* Center-right: warm peach/apricot glow — the hero's main warmth */
 .hero-blob-3 {
-  width: 560px;
-  height: 480px;
-  background: radial-gradient(ellipse, rgba(255,195,140,.28) 0%, rgba(255,170,110,.12) 50%, transparent 75%);
-  top: -40px;
-  right: -60px;
-  filter: blur(60px);
+  width: 580px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(255,195,140,.38) 0%, rgba(255,165,100,.18) 45%, transparent 72%);
+  top: -60px;
+  right: -80px;
+  filter: blur(55px);
 }
-/* Small dot accent — left side, mid-height */
+/* Small lavender accent — very subtle */
 .hero-blob-4 {
   width: 200px;
   height: 200px;
-  background: radial-gradient(ellipse, rgba(160,140,245,.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(160,140,245,.08) 0%, transparent 70%);
   top: 30%;
   left: 4%;
   border-radius: 50%;
@@ -716,7 +714,7 @@ textarea { font-family: inherit; }
   left: 5%;
   width: 120px;
   height: 100px;
-  background-image: radial-gradient(circle, rgba(130,100,230,.30) 1.5px, transparent 1.5px);
+  background-image: radial-gradient(circle, rgba(200,180,240,.35) 1.5px, transparent 1.5px);
   background-size: 18px 18px;
   pointer-events: none;
   z-index: 0;
