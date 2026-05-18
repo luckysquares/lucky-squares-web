@@ -780,21 +780,34 @@ function CampaignReport({ fundraiser, onBack }) {
 
 // ─── SetupWizard ──────────────────────────────────────────────────────────────
 
+const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
+
 function SetupWizard({ onComplete, onCancel }) {
-  const [step,      setStep]      = useState(0);
-  const [gridOpt,   setGridOpt]   = useState(GRID_OPTIONS[0]);
-  const [price,     setPrice]     = useState('5');
-  const [prizes,    setPrizes]    = useState([{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
-  const [campaign,       setCampaign]       = useState({ title: '', org: '', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
-  const [campaignImageUrl,  setCampaignImageUrl]  = useState('');
+  const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
+
+  const [step,      setStep]      = useState(savedDraft?.step ?? 0);
+  const [gridOpt,   setGridOpt]   = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
+  const [price,     setPrice]     = useState(savedDraft?.price ?? '5');
+  const [prizes,    setPrizes]    = useState(savedDraft?.prizes ?? [{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
+  const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: '', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
+  const [campaignImageUrl,  setCampaignImageUrl]  = useState(savedDraft?.campaignImageUrl ?? '');
   const [imageUploading,    setImageUploading]    = useState(false);
-  const [drawRules,         setDrawRules]         = useState({ type: 'manual', date: '' });
-  const [payment,           setPayment]           = useState({ method: 'inperson', accountName: '', bsb: '', account: '' });
+  const [drawRules,         setDrawRules]         = useState(savedDraft?.drawRules ?? { type: 'manual', date: '' });
+  const [payment,           setPayment]           = useState(savedDraft?.payment ?? { method: 'inperson', accountName: '', bsb: '', account: '' });
   const [paymentConfirming, setPaymentConfirming] = useState(false);
   const [showLaunchModal,   setShowLaunchModal]   = useState(false);
   const [couponCode,        setCouponCode]        = useState('');
   const [couponState,       setCouponState]       = useState('idle'); // idle | checking | valid | invalid
   const [couponData,        setCouponData]        = useState(null);   // { type, value }
+
+  // Auto-save wizard state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ step, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }));
+    } catch {}
+  }, [step, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment]);
+
+  const clearDraft = () => { try { localStorage.removeItem(WIZARD_STORAGE_KEY); } catch {} };
 
   const PAYMENT_STEP = WIZARD_STEPS.indexOf('Payment');
 
@@ -1237,6 +1250,11 @@ function SetupWizard({ onComplete, onCancel }) {
             <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5 }}>Step {step + 1} of {WIZARD_STEPS.length}</div>
             <div style={{ fontSize: 14, fontWeight: 800 }}>{WIZARD_STEPS[step]}</div>
           </div>
+          {step > 0 && (
+            <button className="btn btn-outline btn-sm" style={{ fontSize: 12 }} onClick={() => onCancel()}>
+              Save &amp; exit
+            </button>
+          )}
         </div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 32, flexWrap: 'wrap' }}>
           {WIZARD_STEPS.map((s, i) => (
@@ -1267,7 +1285,7 @@ function SetupWizard({ onComplete, onCancel }) {
         <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'space-between', flexWrap: 'wrap' }}>
           <button className="btn btn-outline" onClick={() => {
             if (paymentConfirming) { setPaymentConfirming(false); return; }
-            step > 0 ? setStep((s) => s - 1) : onCancel();
+            step > 0 ? setStep((s) => s - 1) : (clearDraft(), onCancel());
           }}>
             {paymentConfirming ? '← Edit details' : step === 0 ? 'Cancel' : '← Back'}
           </button>
@@ -1282,7 +1300,7 @@ function SetupWizard({ onComplete, onCancel }) {
             }}>Next →</button>
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button className="btn btn-outline" onClick={() => onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }, true)}>
+              <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }, true); }}>
                 Save as draft
               </button>
               <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={() => setShowLaunchModal(true)}>
@@ -1315,7 +1333,7 @@ function SetupWizard({ onComplete, onCancel }) {
             await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
           }
           closeLaunchModal();
-          onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
+          clearDraft(); onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
         };
         return (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
