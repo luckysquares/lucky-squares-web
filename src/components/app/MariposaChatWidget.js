@@ -79,10 +79,9 @@ export default function MariposaChatWidget() {
   };
 
   const renderMessage = (text, role) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = text.split(urlRegex);
+    const parts = text.split(/(https?:\/\/[^\s]+)/g);
     return parts.map((part, i) =>
-      urlRegex.test(part) ? (
+      part.startsWith('http') ? (
         <a
           key={i}
           href={part}
