@@ -24,14 +24,34 @@ export async function POST(req) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    const { fundraiser_id, buyer_name, buyer_email, buyer_phone, square_numbers, subtotal_cents } = session.metadata;
+    const { action, fundraiser_id, buyer_name, buyer_email, buyer_phone, square_numbers, subtotal_cents, coupon_code } = session.metadata;
 
-    if (!fundraiser_id || !square_numbers) {
-      return new Response('Missing metadata', { status: 400 });
+    if (!fundraiser_id) {
+      return new Response('Missing fundraiser_id', { status: 400 });
+    }
+
+    const db = supabase();
+
+    // ── Platform launch fee payment ───────────────────────────────────────────
+    if (action === 'launch') {
+      await db.from('fundraisers').update({
+        status: 'active',
+        launched_at: new Date().toISOString(),
+      }).eq('id', fundraiser_id);
+
+      if (coupon_code) {
+        await db.rpc('redeem_coupon', { p_code: coupon_code });
+      }
+
+      return new Response('ok', { status: 200 });
+    }
+
+    // ── Buyer square purchase ─────────────────────────────────────────────────
+    if (!square_numbers) {
+      return new Response('Missing square_numbers', { status: 400 });
     }
 
     const squareNums = square_numbers.split(',').map(Number);
-    const db = supabase();
 
     // Claim the squares
     const { error: claimError } = await db.rpc('claim_squares', {

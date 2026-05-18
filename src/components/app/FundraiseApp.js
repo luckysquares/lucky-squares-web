@@ -782,7 +782,7 @@ function CampaignReport({ fundraiser, onBack }) {
 
 const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
 
-function SetupWizard({ onComplete, onCancel }) {
+function SetupWizard({ onComplete, onCancel, onLaunchPay }) {
   const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
 
   const [step,      setStep]      = useState(savedDraft?.step ?? 0);
@@ -1342,11 +1342,20 @@ function SetupWizard({ onComplete, onCancel }) {
         const isFree    = finalFee === 0;
         const fmt       = (n) => Number.isInteger(n) ? String(n) : n.toFixed(2);
         const doLaunch  = async () => {
-          if (couponState === 'valid' && couponCode.trim() && supabaseConfigured) {
-            await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
+          if (isFree) {
+            if (couponState === 'valid' && couponCode.trim() && supabaseConfigured) {
+              await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
+            }
+            closeLaunchModal();
+            clearDraft(); onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
+          } else {
+            closeLaunchModal();
+            await onLaunchPay({
+              gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment,
+              finalFee,
+              couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null,
+            });
           }
-          closeLaunchModal();
-          clearDraft(); onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
         };
         return (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
@@ -1706,6 +1715,64 @@ export default function FundraiseApp() {
     }
   };
 
+  // Handle redirect back from Stripe after launch fee payment
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('launch_success') === '1') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  const handleLaunchPay = async (data) => {
+    if (!supabaseConfigured || !user?.id) return;
+    const db = getSupabaseClient();
+    const grid = data.gridOpt?.size || 100;
+
+    const { data: saved, error } = await db.from('fundraisers').insert({
+      owner_id:          user.id,
+      title:             sanitize(data.campaign.title || 'New Fundraiser'),
+      org:               sanitize(data.campaign.org) || null,
+      contact_name:      sanitize(data.campaign.contactName) || null,
+      contact_email:     sanitize(data.campaign.contactEmail) || null,
+      contact_phone:     sanitize(data.campaign.contactPhone) || null,
+      emoji:             data.campaign.emoji || '🍀',
+      image_url:         data.campaignImageUrl || null,
+      description:       sanitize(data.campaign.description),
+      thank_you:         sanitize(data.campaign.thankYou),
+      grid_size:         grid,
+      price_per_sq:      parseFloat(data.price) || 10,
+      status:            'draft',
+      draw_type:         data.drawRules.type,
+      draw_date:         data.drawRules.date || null,
+      payment_method:    data.payment.method,
+      bank_account_name: sanitize(data.payment.accountName) || null,
+      bank_bsb:          sanitize(data.payment.bsb) || null,
+      bank_account:      sanitize(data.payment.account) || null,
+    }).select().single();
+
+    if (error || !saved) { console.error('Draft save failed:', error); return; }
+
+    const prizeRows = data.prizes
+      .filter((p) => p.desc)
+      .map((p, i) => ({ fundraiser_id: saved.id, place: p.place, description: sanitize(p.desc), value: sanitize(p.value), donated: p.donated ?? false, sort_order: i }));
+    await Promise.all([
+      db.rpc('create_fundraiser_squares', { p_fundraiser_id: saved.id, p_grid_size: grid }),
+      prizeRows.length ? db.from('prizes').insert(prizeRows) : Promise.resolve(),
+    ]);
+
+    const res = await fetch('/api/stripe/create-launch-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fundraiser_id: saved.id, final_fee: data.finalFee, coupon_code: data.couponCode || '' }),
+    });
+    const { url, error: stripeErr } = await res.json();
+    if (stripeErr || !url) { console.error('Checkout creation failed:', stripeErr); return; }
+
+    try { localStorage.removeItem(WIZARD_STORAGE_KEY); } catch {}
+    window.location.href = url;
+  };
+
   const showHeader = !['login', 'register', 'verify', 'loading'].includes(phase);
 
   const activeCampaignCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
@@ -1736,7 +1803,7 @@ export default function FundraiseApp() {
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Referral prompt modal */}
