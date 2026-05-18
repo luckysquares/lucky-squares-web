@@ -114,12 +114,6 @@ export default function ContactPage() {
             <div style={{ flex: '0 1 240px', display: 'flex', flexDirection: 'column', gap: 20 }}>
               {[
                 {
-                  icon: '📧',
-                  title: 'Email us directly',
-                  body: 'support@luckysquares.com.au',
-                  href: 'mailto:support@luckysquares.com.au',
-                },
-                {
                   icon: '⏱️',
                   title: 'Response time',
                   body: 'We aim to respond within one business day, Monday to Friday.',
@@ -134,18 +128,20 @@ export default function ContactPage() {
                 {
                   icon: '🔒',
                   title: 'Privacy enquiries',
-                  body: 'privacy@luckysquares.com.au',
-                  href: 'mailto:privacy@luckysquares.com.au',
+                  body: 'For privacy-related requests, use the form and select "General enquiry" — mention it is a privacy matter in your message.',
+                },
+                {
+                  icon: '📋',
+                  title: 'Compliance questions',
+                  body: 'For questions about raffle permits and state regulations, see our Raffle Compliance page.',
+                  href: '/raffle-compliance',
+                  linkLabel: 'Raffle compliance →',
                 },
               ].map((item) => (
                 <div key={item.title} style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)', border: '1.5px solid var(--border)', padding: '20px 22px' }}>
                   <div style={{ fontSize: 22, marginBottom: 8 }}>{item.icon}</div>
                   <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', marginBottom: 4 }}>{item.title}</div>
-                  {item.href && !item.linkLabel ? (
-                    <a href={item.href} style={{ fontSize: 13, color: 'var(--green)', fontWeight: 700, wordBreak: 'break-all' }}>{item.body}</a>
-                  ) : (
-                    <p style={{ fontSize: 13, color: 'var(--text2)', margin: 0, lineHeight: 1.6 }}>{item.body}</p>
-                  )}
+                  <p style={{ fontSize: 13, color: 'var(--text2)', margin: 0, lineHeight: 1.6 }}>{item.body}</p>
                   {item.linkLabel && (
                     <a href={item.href} style={{ display: 'inline-block', marginTop: 8, fontSize: 13, color: 'var(--green)', fontWeight: 700 }}>{item.linkLabel}</a>
                   )}
