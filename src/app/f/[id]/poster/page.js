@@ -101,8 +101,8 @@ export default function PosterPage({ params }) {
           overflow: 'hidden',
         }}>
 
-          {/* ── Warm green header ──────────────────────────────────────── */}
-          <div style={{ background: '#1A7A55', padding: '30px 36px 26px', textAlign: 'center' }}>
+          {/* ── Header ────────────────────────────────────────────────── */}
+          <div style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 45%, #4A28D4 100%)', padding: '30px 36px 26px', textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 6 }}>🍀</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,.75)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 4 }}>Lucky Squares Fundraiser</div>
             <div style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>{f.org}</div>
@@ -119,7 +119,7 @@ export default function PosterPage({ params }) {
           {/* ── You could win ─────────────────────────────────────────── */}
           {f.prizes.length > 0 && (
             <div style={{ padding: '28px 36px', borderBottom: '2px dashed #E5E0D5' }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#1A7A55', marginBottom: 18, textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#6B46F5', marginBottom: 18, textAlign: 'center' }}>
                 You could win...
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -138,10 +138,10 @@ export default function PosterPage({ params }) {
                       <div style={{ fontSize: 20, fontWeight: 900, color: '#1A1209', lineHeight: 1.2 }}>{p.description}</div>
                     </div>
                     {p.value && !p.donated && (
-                      <div style={{ fontSize: 26, fontWeight: 900, color: '#1A7A55', flexShrink: 0 }}>${p.value}</div>
+                      <div style={{ fontSize: 26, fontWeight: 900, color: '#6B46F5', flexShrink: 0 }}>${p.value}</div>
                     )}
                     {p.donated && (
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#1A7A55', background: '#F0FBF4', border: '1.5px solid #A8DFBF', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>Kindly donated</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#6B46F5', background: '#F0EEFF', border: '1.5px solid #C4B5F4', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>Kindly donated</div>
                     )}
                   </div>
                 ))}
@@ -153,11 +153,11 @@ export default function PosterPage({ params }) {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 36px', gap: 20 }}>
 
             <div style={{ fontSize: 18, fontWeight: 800, color: '#1A1209', textAlign: 'center' }}>
-              Grab your square for just <span style={{ color: '#1A7A55', fontSize: 26 }}>${f.pricePerSq}</span>
+              Grab your square for just <span style={{ color: '#6B46F5', fontSize: 26 }}>${f.pricePerSq}</span>
             </div>
 
             <div style={{ background: '#F5F3EE', borderRadius: 20, padding: '24px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, border: '2px solid #E5E0D5', width: '100%', maxWidth: 320 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 12, border: '3px solid #1A7A55' }}>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 12, border: '3px solid #6B46F5' }}>
                 <QRCodeSVG value={fundraiserUrl} size={200} fgColor="#1A1209" bgColor="#ffffff" level="M" />
               </div>
               <div style={{ textAlign: 'center' }}>
@@ -174,7 +174,7 @@ export default function PosterPage({ params }) {
           {/* ── Footer ────────────────────────────────────────────────── */}
           <div style={{ background: '#F5F3EE', borderTop: '1.5px solid #E5E0D5', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <QRCodeSVG value={HOME_URL} size={36} fgColor="#1A7A55" bgColor="#F5F3EE" level="M" />
+              <QRCodeSVG value={HOME_URL} size={36} fgColor="#6B46F5" bgColor="#F5F3EE" level="M" />
               <div>
                 <div style={{ fontSize: 11, fontWeight: 800, color: '#1A1209' }}>Powered by LuckySquares Australia</div>
                 <div style={{ fontSize: 10, color: '#9C8060' }}>Run your own fundraiser at luckysquares.com.au</div>
