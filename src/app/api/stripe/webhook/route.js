@@ -77,10 +77,10 @@ export async function POST(req) {
       return new Response('Failed to claim squares', { status: 500 });
     }
 
-    // Mark squares as paid (Stripe payment is confirmed)
+    // Mark squares as paid and record the Stripe payment_intent_id for audit
     await db
       .from('squares')
-      .update({ paid: true })
+      .update({ paid: true, payment_intent_id: session.payment_intent })
       .eq('fundraiser_id', fundraiser_id)
       .in('number', squareNums)
       .eq('buyer_email', buyer_email);
