@@ -7,6 +7,7 @@ const CATEGORIES = [
   'General enquiry',
   'Technical support',
   'Billing',
+  'Privacy enquiry',
   'Compliance and permit questions',
   'Media and partnerships',
   'Other',
