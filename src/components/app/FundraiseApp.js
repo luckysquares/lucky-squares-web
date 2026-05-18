@@ -291,7 +291,7 @@ function VerifyScreen({ email, onVerify, loading, error }) {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, planLimit, referralInfo }) {
+function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, planLimit, referralInfo, suspension }) {
   const [copied, setCopied] = useState(false);
   const referralLink = referralInfo?.referral_code
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/app?ref=${referralInfo.referral_code}`
@@ -307,6 +307,24 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, plan
   return (
     <div className="dot-bg" style={{ flex: 1 }}>
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
+
+        {/* Suspension banner */}
+        {suspension?.suspended && (
+          <div style={{ background: '#FEF2F2', border: '2px solid #FCA5A5', borderRadius: 14, padding: '18px 24px', marginBottom: 24 }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 22 }}>🚫</span>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: '#991B1B', marginBottom: 4 }}>Your account has been suspended</div>
+                {suspension.reason && <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.6 }}>{suspension.reason}</div>}
+                <div style={{ fontSize: 13, color: '#991B1B', marginTop: 8 }}>
+                  You cannot launch new campaigns while your account is suspended. To appeal or get help, contact{' '}
+                  <a href="mailto:support@luckysquares.com.au" style={{ color: '#991B1B', fontWeight: 700 }}>support@luckysquares.com.au</a>.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <h1 className="section-title">G&apos;day, {user?.name?.split(' ')[0] ?? 'there'}! 👋</h1>
@@ -321,10 +339,12 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, plan
             : (
               <div style={{ textAlign: 'right' }}>
                 <button className="btn btn-outline" disabled style={{ opacity: .5, cursor: 'not-allowed' }}>＋ New fundraiser</button>
-                <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 6 }}>
-                  {PLAN_LABELS[user?.plan ?? 'trial']} plan limit of {planLimit} reached.{' '}
-                  <Link href="/pricing" style={{ color: 'var(--green)', fontWeight: 700 }}>Upgrade</Link>
-                </p>
+                {!suspension?.suspended && (
+                  <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 6 }}>
+                    {PLAN_LABELS[user?.plan ?? 'trial']} plan limit of {planLimit} reached.{' '}
+                    <Link href="/pricing" style={{ color: 'var(--green)', fontWeight: 700 }}>Upgrade</Link>
+                  </p>
+                )}
               </div>
             )
           }
@@ -1184,8 +1204,21 @@ export default function FundraiseApp() {
   const [activeFundraiser, setActiveFundraiser] = useState(null);
   const [authLoading,      setAuthLoading]      = useState(false);
   const [authError,        setAuthError]        = useState('');
-  const [referralInfo,     setReferralInfo]     = useState(null);
+  const [referralInfo,      setReferralInfo]      = useState(null);
   const [showReferralModal, setShowReferralModal] = useState(false);
+  const [suspension,        setSuspension]        = useState(null); // null | { suspended: true, reason }
+
+  // Call the transactional-email Edge Function (fire-and-forget)
+  const sendTxEmail = useCallback((type, to, data) => {
+    if (!supabaseConfigured || !to) return;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) return;
+    fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, to, data }),
+    }).catch(() => {});
+  }, []);
 
   const loadReferralInfo = useCallback(async () => {
     if (!supabaseConfigured) return;
@@ -1221,6 +1254,10 @@ export default function FundraiseApp() {
         setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
         loadFundraisers(u.id);
         loadReferralInfo();
+        // Check suspension status
+        getSupabaseClient().rpc('get_my_suspension_status').then(({ data: s }) => {
+          if (s?.[0]?.suspended) setSuspension({ suspended: true, reason: s[0].suspension_reason });
+        });
         setPhase('dashboard');
       } else {
         setPhase('login');
@@ -1283,6 +1320,7 @@ export default function FundraiseApp() {
     if (data?.session && data?.user) {
       const u = data.user;
       const plan = await fetchPlan(u.id);
+      const firstName = name?.split(' ')[0] || u.email;
       setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
       const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
       if (storedRef) {
@@ -1291,6 +1329,8 @@ export default function FundraiseApp() {
       }
       await loadReferralInfo();
       setFundraisers([]);
+      sendTxEmail('organizer_welcome', email, { first_name: firstName });
+      sendTxEmail('welcome_day1', email, { first_name: firstName });
       setPhase('dashboard');
       return;
     }
@@ -1312,6 +1352,7 @@ export default function FundraiseApp() {
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
     const plan = await fetchPlan(u.id);
+    const firstName = u.user_metadata?.full_name?.split(' ')[0] || u.email;
     setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
     const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
     if (storedRef) {
@@ -1320,6 +1361,8 @@ export default function FundraiseApp() {
     }
     await loadReferralInfo();
     setFundraisers([]);
+    sendTxEmail('organizer_welcome', pendingEmail, { first_name: firstName });
+    sendTxEmail('welcome_day1', pendingEmail, { first_name: firstName });
     setPhase('dashboard');
   };
 
@@ -1404,11 +1447,20 @@ export default function FundraiseApp() {
     setFundraisers((prev) => [nf, ...prev]);
     setActiveFundraiser(nf);
     setPhase('live');
-    // Check referral reward and show referral prompt on first active campaign
-    if (!isDraft && supabaseConfigured && user?.id) {
-      getSupabaseClient().rpc('check_referral_reward', { p_user_id: user.id });
-      loadReferralInfo();
-      setShowReferralModal(true);
+    // Send campaign launched email and check referral reward
+    if (!isDraft && user?.email) {
+      const campaignUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/f/${nf.id}`;
+      const firstName = user.name?.split(' ')[0] || 'there';
+      sendTxEmail('campaign_launched', user.email, {
+        first_name: firstName,
+        campaign_title: nf.title,
+        campaign_url: campaignUrl,
+      });
+      if (supabaseConfigured && user?.id) {
+        getSupabaseClient().rpc('check_referral_reward', { p_user_id: user.id });
+        loadReferralInfo();
+        setShowReferralModal(true);
+      }
     }
   };
 
@@ -1416,7 +1468,8 @@ export default function FundraiseApp() {
 
   const activeCampaignCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
   const planLimit           = PLAN_LIMITS[user?.plan ?? 'trial'];
-  const canCreate           = activeCampaignCount < planLimit;
+  const isSuspended         = suspension?.suspended === true;
+  const canCreate           = activeCampaignCount < planLimit && !isSuspended;
 
   const handleNewFundraiser = () => {
     if (!canCreate) return;
@@ -1438,7 +1491,7 @@ export default function FundraiseApp() {
       {phase === 'login'     && <LoginScreen    onLogin={handleLogin}        onRegister={() => { setAuthError(''); setPhase('register'); }} loading={authLoading} error={authError} />}
       {phase === 'register'  && <RegisterScreen onRegister={handleRegister}  onBack={() => { setAuthError(''); setPhase('login'); }} loading={authLoading} error={authError} />}
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
-      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} />}
+      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}

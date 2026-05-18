@@ -1,16 +1,18 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { sendEmail, ADMIN_EMAIL } from '../_shared/resend.ts';
+import {
+  emailDrawCompleteOrganiser,
+  emailDrawResultWinner,
+  emailDrawResultDidNotWin,
+  emailDrawMilestone,
+} from '../_shared/templates.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
 
-const ADMIN_EMAIL   = 'jwstott@me.com';
-const FROM_EMAIL    = 'no-reply@luckysquares.com.au';
-const SUPPORT_EMAIL = 'support@luckysquares.com.au';
-
 Deno.serve(async (req) => {
-  // Only accept POST from the app
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
@@ -43,72 +45,147 @@ Deno.serve(async (req) => {
     return new Response('Campaign not found', { status: 404 });
   }
 
-  // Count sold squares
-  const { count: soldCount } = await supabase
+  // Fetch sold squares
+  const { data: squares } = await supabase
     .from('squares')
-    .select('id', { count: 'exact', head: true })
+    .select('number, buyer_name, buyer_email')
     .eq('fundraiser_id', fundraiserId)
     .eq('status', 'sold');
 
-  const fundsRaised = (soldCount ?? 0) * parseFloat(f.price_per_sq);
-  const winners = Array.isArray(f.winner_square_nums)
-    ? f.winner_square_nums.join(', ')
-    : f.winner_square_num ?? 'Unknown';
+  const soldSquares = squares ?? [];
+  const soldCount   = soldSquares.length;
+  const fundsRaised = (soldCount * parseFloat(f.price_per_sq)).toFixed(2);
 
-  const paymentMethodLabel: Record<string, string> = {
-    stripe:       'Online card (Stripe)',
-    bank:         'Bank transfer',
-    bank_inperson:'In person + bank transfer',
-    inperson:     'In person',
-  };
+  // Fetch prizes
+  const { data: prizes } = await supabase
+    .from('prizes')
+    .select('place, description, value, sort_order')
+    .eq('fundraiser_id', fundraiserId)
+    .order('sort_order');
 
-  const requiresTransfer = f.payment_method === 'stripe';
+  const prizeList = (prizes ?? []).filter((p) => p.description);
 
-  const subject = requiresTransfer
-    ? `ACTION REQUIRED: Draw complete, payout needed — ${f.title}`
-    : `Draw complete: ${f.title}`;
+  // Map winner square numbers to buyer details
+  const winnerNums: number[] = Array.isArray(f.winner_square_nums)
+    ? f.winner_square_nums
+    : f.winner_square_num != null ? [f.winner_square_num] : [];
 
-  const payoutSection = requiresTransfer
-    ? `PAYOUT REQUIRED\nFunds raised: $${fundsRaised.toFixed(2)}\nLucky Squares needs to transfer net funds to the organiser.\nLog in to the admin portal to mark this as processed once done.\n\n`
-    : `Payment method: ${paymentMethodLabel[f.payment_method] ?? f.payment_method}\nOrganiser collects funds directly — no transfer required.\n\n`;
-
-  const bankSection = (f.bank_account_name || f.bank_bsb)
-    ? `Organiser bank account:\n  Name: ${f.bank_account_name ?? 'Not provided'}\n  BSB:  ${f.bank_bsb ?? 'Not provided'}\n  Acct: ${f.bank_account ?? 'Not provided'}\n\n`
-    : '';
-
-  const body = `Lucky Squares Draw Notification\n${'─'.repeat(40)}\n\nCampaign: ${f.title}\nOrganisation: ${f.org}\nContact: ${f.contact_name} (${f.contact_email}${f.contact_phone ? `, ${f.contact_phone}` : ''})\n\nGrid: ${f.grid_size} squares at $${f.price_per_sq} each\nSquares sold: ${soldCount ?? 0} of ${f.grid_size}\nFunds raised: $${fundsRaised.toFixed(2)}\n\nWinning square(s): #${winners}\n\n${payoutSection}${bankSection}Admin portal: https://luckysquares.com.au/admin/campaigns\n\n${SUPPORT_EMAIL}`;
-
-  await sendEmail({ to: ADMIN_EMAIL, subject, body });
-
-  return new Response(JSON.stringify({ ok: true }), { status: 200 });
-});
-
-async function sendEmail({ to, subject, body }: { to: string; subject: string; body: string }) {
-  const resendKey = Deno.env.get('RESEND_API_KEY');
-  if (!resendKey) {
-    console.log(`[email] RESEND_API_KEY not set — logging only`);
-    console.log(`[email] To: ${to} | Subject: ${subject}`);
-    console.log(body);
-    return;
-  }
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${resendKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: FROM_EMAIL,
-      to,
-      subject,
-      text: body,
-      reply_to: ADMIN_EMAIL,
-    }),
+  const winners = winnerNums.map((num, i) => {
+    const sq = soldSquares.find((s) => s.number === num);
+    return {
+      square_number: num,
+      buyer_name:    sq?.buyer_name ?? 'Unknown',
+      buyer_email:   sq?.buyer_email ?? null,
+      place:         prizeList[i]?.place ?? `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'} Prize`,
+      prize:         prizeList[i]?.description ?? '',
+      value:         prizeList[i]?.value ?? '',
+    };
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    console.error(`[email] Resend error: ${err}`);
+  const firstName  = (f.contact_name ?? 'there').split(' ')[0];
+  const isStripe   = f.payment_method === 'stripe';
+
+  // 1. Email admin (internal notification)
+  const winnerSummary = winners.map((w) => `#${w.square_number} (${w.buyer_name})`).join(', ');
+  const paymentLabel  = { stripe: 'Online card (Stripe)', bank: 'Bank transfer', bank_inperson: 'In person + bank transfer', inperson: 'In person' }[f.payment_method as string] ?? f.payment_method;
+  const adminBody = [
+    `Lucky Squares Draw Notification`,
+    `${'─'.repeat(40)}`,
+    ``,
+    `Campaign: ${f.title}`,
+    `Organisation: ${f.org}`,
+    `Contact: ${f.contact_name} (${f.contact_email}${f.contact_phone ? `, ${f.contact_phone}` : ''})`,
+    ``,
+    `Grid: ${f.grid_size} squares at $${f.price_per_sq} each`,
+    `Squares sold: ${soldCount} of ${f.grid_size}`,
+    `Funds raised: $${fundsRaised}`,
+    `Payment method: ${paymentLabel}`,
+    ``,
+    `Winning square(s): #${winnerNums.join(', ')}`,
+    isStripe ? `\nACTION REQUIRED: transfer net funds to organiser after verifying draw.` : `\nNo payout action needed (organiser collects directly).`,
+    (f.bank_bsb || f.bank_account) ? `\nOrganiser bank: ${f.bank_account_name ?? ''} | BSB: ${f.bank_bsb ?? ''} | Acct: ${f.bank_account ?? ''}` : '',
+    ``,
+    `Admin portal: https://luckysquares.com.au/admin/campaigns`,
+  ].filter((l) => l !== undefined).join('\n');
+
+  await sendEmail({
+    to:      ADMIN_EMAIL,
+    subject: isStripe ? `ACTION REQUIRED: Draw complete, payout needed — ${f.title}` : `Draw complete: ${f.title}`,
+    text:    adminBody,
+  });
+
+  // 2. Email organiser (draw complete)
+  if (f.contact_email) {
+    const tpl = emailDrawCompleteOrganiser({
+      first_name:     firstName,
+      campaign_title: f.title,
+      org_name:       f.org,
+      amount_raised:  fundsRaised,
+      winners:        winners.map((w) => ({ place: w.place, prize: w.prize, square_number: w.square_number, buyer_name: w.buyer_name })),
+      is_stripe:      isStripe,
+    });
+    await sendEmail({ to: f.contact_email, subject: tpl.subject, text: tpl.text });
   }
-}
+
+  // 3. Email each buyer (winner or no-win)
+  const winnerNums_set = new Set(winnerNums);
+  const uniqueBuyers   = [...new Map(soldSquares.filter((s) => s.buyer_email).map((s) => [s.buyer_email, s])).values()];
+
+  const winnerSummaryList = winners.map((w) => ({
+    prize_place: w.place, prize_description: w.prize, square_number: w.square_number,
+  }));
+
+  for (const buyer of uniqueBuyers) {
+    const buyerSquareNums = soldSquares
+      .filter((s) => s.buyer_email === buyer.buyer_email)
+      .map((s) => s.number);
+
+    const buyerWins = buyerSquareNums.filter((n) => winnerNums_set.has(n));
+
+    if (buyerWins.length > 0) {
+      // Winner email (one per winning square)
+      for (const winningNum of buyerWins) {
+        const w = winners.find((x) => x.square_number === winningNum);
+        if (!w) continue;
+        const tpl = emailDrawResultWinner({
+          buyer_name:      buyer.buyer_name ?? 'there',
+          campaign_title:  f.title,
+          org_name:        f.org,
+          winning_square:  winningNum,
+          prize_place:     w.place,
+          prize_description: w.prize,
+          contact_email:   f.contact_email ?? '',
+        });
+        await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
+      }
+    } else {
+      // Did not win
+      const tpl = emailDrawResultDidNotWin({
+        buyer_name:    buyer.buyer_name ?? 'there',
+        campaign_title: f.title,
+        org_name:      f.org,
+        amount_raised: fundsRaised,
+        winners:       winnerSummaryList,
+      });
+      await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
+    }
+  }
+
+  // 4. Draw milestone email to organiser (celebratory wrap-up)
+  if (f.contact_email) {
+    const tpl = emailDrawMilestone({
+      first_name:     firstName,
+      campaign_title: f.title,
+      sold_count:     soldCount,
+      grid_size:      f.grid_size,
+      amount_raised:  fundsRaised,
+      org_name:       f.org,
+      winner_summary: winnerSummary,
+    });
+    // Send after a short delay so organiser gets draw_complete first
+    await new Promise((r) => setTimeout(r, 2000));
+    await sendEmail({ to: f.contact_email, subject: tpl.subject, text: tpl.text });
+  }
+
+  return new Response(JSON.stringify({ ok: true, admin: true, organiser: !!f.contact_email, buyers: uniqueBuyers.length }), { status: 200 });
+});
