@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-const SUPPORT_EMAIL = 'support@luckysquares.com.au';
-const FROM_EMAIL    = 'onboarding@resend.dev';
+const RECIPIENT_EMAIL = 'jamie@luckysquares.com.au';
+const FROM_EMAIL      = 'noreply@luckysquares.com.au';
 
 function toHtml(name, email, category, message) {
   const safe = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -25,7 +25,7 @@ function toHtml(name, email, category, message) {
             <tr><td style="padding:8px 0;border-bottom:1px solid #F0EAE0;font-weight:700">Category</td><td style="padding:8px 0;border-bottom:1px solid #F0EAE0">${safe(category)}</td></tr>
             <tr><td style="padding:16px 0 8px;font-weight:700;vertical-align:top">Message</td><td style="padding:16px 0 8px;white-space:pre-wrap">${safe(message)}</td></tr>
           </table>
-          <p style="margin:20px 0 0;font-size:13px;color:#9C8060">Reply directly to this email to respond to ${safe(name)}.</p>
+          <p style="margin:20px 0 0;font-size:13px;color:#9C8060">Reply directly to this email to respond to ${safe(name)} at ${safe(email)}.</p>
         </td></tr>
       </table>
     </td></tr>
@@ -64,7 +64,7 @@ export async function POST(req) {
     },
     body: JSON.stringify({
       from:     FROM_EMAIL,
-      to:       SUPPORT_EMAIL,
+      to:       RECIPIENT_EMAIL,
       reply_to: email,
       subject,
       html:     toHtml(name, email, category || 'General enquiry', message),
