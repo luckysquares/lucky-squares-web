@@ -26,6 +26,14 @@
   --orange2:      #F07030;
   --orange-light: #FFF3EC;
 
+  /* Purple / hero accent */
+  --purple:       #6B46F5;
+  --purple2:      #7B5CF6;
+  --purple3:      #9B7FFA;
+  --purple-dark:  #4A28D4;
+  --purple-light: #F0EEFF;
+  --hero-bg:      #EDECF8;
+
   /* Text */
   --text:         #2A1F0F;
   --text2:        #6B5340;
@@ -580,9 +588,9 @@ textarea { font-family: inherit; }
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(253,248,240,.92);
+  background: rgba(237,236,248,.92);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(107,70,245,.12);
   padding: 0 24px;
 }
 .marketing-nav-inner {
@@ -614,13 +622,68 @@ textarea { font-family: inherit; }
 }
 .nav-link:hover { color: var(--text); background: rgba(42,31,15,.05); }
 
+/* ── btn-purple ── */
+.btn-purple {
+  background: linear-gradient(135deg, var(--purple2) 0%, var(--purple-dark) 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 20px rgba(107,70,245,.35);
+}
+.btn-purple:hover { box-shadow: 0 6px 28px rgba(107,70,245,.45); }
+
 /* ── marketing: hero ── */
 .hero {
   padding: 80px 24px 100px;
   text-align: center;
   position: relative;
   overflow: hidden;
+  background: var(--hero-bg);
 }
+
+/* Blob shapes */
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-blob-1 {
+  width: 560px;
+  height: 560px;
+  background: rgba(107,70,245,.18);
+  top: -160px;
+  right: -120px;
+  filter: blur(80px);
+}
+.hero-blob-2 {
+  width: 420px;
+  height: 320px;
+  background: rgba(107,70,245,.14);
+  bottom: -60px;
+  left: -80px;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  filter: blur(70px);
+}
+.hero-blob-3 {
+  width: 380px;
+  height: 380px;
+  background: rgba(255,160,100,.28);
+  top: 60px;
+  right: 12%;
+  filter: blur(100px);
+}
+.hero-dots {
+  position: absolute;
+  bottom: 18%;
+  left: 5%;
+  width: 110px;
+  height: 90px;
+  background-image: radial-gradient(circle, rgba(107,70,245,.35) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero > * { position: relative; z-index: 1; }
 .hero-title {
   font-family: var(--font-serif);
   font-size: clamp(36px, 6vw, 68px);

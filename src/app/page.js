@@ -7,22 +7,27 @@ export default function HomePage() {
       <MarketingNav />
 
       {/* ── Hero ── */}
-      <section className="hero dot-bg">
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#D4F5E9', borderRadius: 20, padding: '6px 14px', marginBottom: 24, fontSize: 13, fontWeight: 700, color: '#007A5C' }}>
+      <section className="hero">
+        <div className="hero-blob hero-blob-1" />
+        <div className="hero-blob hero-blob-2" />
+        <div className="hero-blob hero-blob-3" />
+        <div className="hero-dots" />
+
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(107,70,245,.12)', borderRadius: 20, padding: '6px 14px', marginBottom: 24, fontSize: 13, fontWeight: 700, color: 'var(--purple)' }}>
           🍀 Now in open beta, free to try
         </div>
         <h1 className="hero-title">
-          The easiest Lucky Squares fundraiser in Australia
+          The easiest Lucky Squares fundraiser in <span style={{ color: 'var(--purple)' }}>Australia</span>
         </h1>
         <p className="hero-sub">
           Set up your fundraising campaign in minutes, share a link, and watch the squares sell. Run a live draw when you&apos;re ready. No spreadsheets, no unintelligible handwriting and no cash handling headaches.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/fundraise" className="btn btn-gold btn-xl">
+          <Link href="/fundraise" className="btn btn-purple btn-xl">
             Start your fundraiser free →
           </Link>
           <Link href="/how-it-works" className="btn btn-outline btn-lg">
-            See how it works
+            ▷ See how it works
           </Link>
         </div>
 
