@@ -103,10 +103,11 @@ export default function BetaTestPage() {
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <div style={{ background: 'linear-gradient(135deg, #A78BFA22, #7C3AED11)', border: '1.5px solid var(--purple-light)', borderRadius: 'var(--radius-lg)', padding: '32px 36px', textAlign: 'center' }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>🎁</div>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>A thank-you from us</h2>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>A thank-you from me</h2>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 480, margin: '0 auto' }}>
-              As our way of saying thanks, every Founding Member who helps test the platform will receive <strong style={{ color: 'var(--purple)' }}>three free campaigns</strong> when we go live — no campaign fee, on us. Just let us know once you've put it through its paces.
+              As my way of saying thanks, every Founding Member who helps test the platform will receive <strong style={{ color: 'var(--purple)' }}>three free campaigns</strong> when we go live — no campaign fee, on me. Just let me know once you've put it through its paces.
             </p>
+            <p style={{ fontSize: 15, color: 'var(--text2)', marginTop: 16, fontWeight: 700 }}>— Jamie</p>
           </div>
         </div>
       </section>
