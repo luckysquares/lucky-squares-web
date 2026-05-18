@@ -215,7 +215,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="section section-hero-bg" style={{ textAlign: 'center' }}>
+      <section className="section" style={{ textAlign: 'center', background: '#fff' }}>
         <div className="section-inner">
           <div style={{ fontSize: 56, marginBottom: 16 }}>🍀</div>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,4vw,44px)', fontWeight: 900, color: 'var(--text)', marginBottom: 16 }}>
