@@ -692,7 +692,6 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                     )}
                     <button className="btn btn-gold btn-sm" onClick={handleDraw}>🎲 Run draw</button>
                     <button className="btn btn-outline btn-sm" onClick={handleDownloadCsv}>⬇ CSV</button>
-                    <button className="btn btn-outline btn-sm" onClick={() => window.open(`/f/${fundraiser.id}/poster`, '_blank')}>🖨 Poster</button>
                   </div>
                 );
               })()}
@@ -952,21 +951,40 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           )}
 
           {isOwner && fundraiser.status !== 'draft' && (
-            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '32px auto 0' }}>
-            <div style={{ padding: '24px 28px', background: 'linear-gradient(135deg,#F0FDF8,#E6FAF2)', borderRadius: 18, border: '1.5px solid #B6EDD8', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
-              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                <div style={{ fontSize: 36, flexShrink: 0 }}>📣</div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, color: 'var(--text)', marginBottom: 6 }}>Now share it far and wide!</div>
-                  <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6, maxWidth: 460 }}>
-                    Send your link via WhatsApp, SMS, email, or post it to your school app and socials. The more people who see it, the faster your grid fills up!
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '32px auto 0', display: 'flex', gap: 16, alignItems: 'stretch' }}>
+
+              {/* Share card */}
+              <div style={{ flex: 1, padding: '22px 24px', background: 'linear-gradient(135deg,#F0FDF8,#E6FAF2)', borderRadius: 18, border: '1.5px solid #B6EDD8', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: 30, flexShrink: 0 }}>📣</div>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 900, color: 'var(--text)', marginBottom: 5 }}>Share it far and wide!</div>
+                    <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.6 }}>
+                      Send your link via WhatsApp, SMS, email, or post it to your school app and socials.
+                    </div>
                   </div>
                 </div>
+                <button className="btn btn-primary btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setShowShare(true)}>
+                  🔗 Share your fundraiser
+                </button>
               </div>
-              <button className="btn btn-primary" style={{ flexShrink: 0 }} onClick={() => setShowShare(true)}>
-                🔗 Share your fundraiser
-              </button>
-            </div>
+
+              {/* Poster card */}
+              <div style={{ flex: 1, padding: '22px 24px', background: 'linear-gradient(135deg,#FAF8FF,#F3EFFF)', borderRadius: 18, border: '1.5px solid #D4C8F8', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: 30, flexShrink: 0 }}>🖨</div>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 900, color: 'var(--text)', marginBottom: 5 }}>Print a poster</div>
+                    <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.6 }}>
+                      Put up a QR code poster around your club or venue so people can scan and buy a square on the spot.
+                    </div>
+                  </div>
+                </div>
+                <button className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', borderColor: '#C4B5F4', color: '#7C3AED' }} onClick={() => window.open(`/f/${fundraiser.id}/poster`, '_blank')}>
+                  🖨 Create poster
+                </button>
+              </div>
+
             </div>
           )}
 
