@@ -36,6 +36,9 @@ export default function AdminBlogPage() {
   const [slugManual,    setSlugManual]    = useState(false);
   const [seedProgress,  setSeedProgress]  = useState(null); // null | { current, total, log[] }
   const [copied,        setCopied]        = useState(false);
+  const [imageTab,      setImageTab]      = useState('upload'); // 'upload' | 'url'
+  const [uploading,     setUploading]     = useState(false);
+  const [uploadError,   setUploadError]   = useState('');
 
   useEffect(() => { load(); }, []);
 
@@ -163,6 +166,21 @@ export default function AdminBlogPage() {
 
     await load();
     setSeedProgress((p) => ({ ...p, current: total, done: true }));
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true); setUploadError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/admin/blog/upload', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!res.ok || json.error) { setUploadError(json.error ?? 'Upload failed.'); setUploading(false); return; }
+      fld('cover_image_url', json.url);
+    } catch { setUploadError('Upload failed. Please try again.'); }
+    setUploading(false);
   };
 
   const copyImagePrompt = () => {
@@ -324,10 +342,45 @@ export default function AdminBlogPage() {
               )}
             </div>
 
-            {/* Cover image URL */}
+            {/* Cover image */}
             <div className="form-group">
-              <label className="form-label">Cover image URL (optional)</label>
-              <input className="form-input" value={editing.cover_image_url} onChange={(e) => fld('cover_image_url', e.target.value)} placeholder="https://example.com/image.jpg" type="url" />
+              <label className="form-label">Cover image (optional)</label>
+
+              {/* Tab toggle */}
+              <div style={{ display: 'flex', gap: 0, marginBottom: 10, border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', width: 'fit-content' }}>
+                {['upload', 'url'].map((tab) => (
+                  <button key={tab} type="button" onClick={() => { setImageTab(tab); setUploadError(''); }}
+                    style={{ padding: '6px 16px', fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', background: imageTab === tab ? 'var(--purple)' : 'transparent', color: imageTab === tab ? '#fff' : 'var(--text2)', transition: 'background .15s' }}>
+                    {tab === 'upload' ? '⬆ Upload file' : '🔗 Enter URL'}
+                  </button>
+                ))}
+              </div>
+
+              {imageTab === 'upload' ? (
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: uploading ? 'not-allowed' : 'pointer', background: 'var(--cream)', border: '1.5px dashed var(--border)', borderRadius: 'var(--radius)', padding: '14px 18px' }}>
+                    <span style={{ fontSize: 22 }}>{uploading ? '⏳' : '🖼️'}</span>
+                    <span style={{ fontSize: 13, color: 'var(--text2)' }}>
+                      {uploading ? 'Uploading…' : 'Click to choose an image (JPEG, PNG, WebP — max 5 MB)'}
+                    </span>
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageUpload} disabled={uploading} style={{ display: 'none' }} />
+                  </label>
+                  {uploadError && <p style={{ fontSize: 12, color: '#CC0000', marginTop: 6 }}>{uploadError}</p>}
+                </div>
+              ) : (
+                <input className="form-input" value={editing.cover_image_url} onChange={(e) => fld('cover_image_url', e.target.value)} placeholder="https://example.com/image.jpg" type="url" />
+              )}
+
+              {/* Preview thumbnail */}
+              {editing.cover_image_url && (
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <img src={editing.cover_image_url} alt="Cover preview" style={{ width: 120, height: 63, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 11, color: 'var(--text2)', wordBreak: 'break-all' }}>{editing.cover_image_url}</div>
+                    <button type="button" className="btn btn-outline btn-sm" style={{ marginTop: 6, fontSize: 11, color: '#CC0000', borderColor: '#FFCCCC' }} onClick={() => { fld('cover_image_url', ''); setUploadError(''); }}>Remove</button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Image prompt */}
