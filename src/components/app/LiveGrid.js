@@ -1087,8 +1087,9 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
         const bc   = hoveredSq.status === 'mine' ? 'var(--green)' : '#DDD5C0';
         const col  = hoveredSq.status === 'mine' ? '#007A5C' : 'var(--muted)';
         return (
-          <div style={{ position: 'fixed', left, top, width: size, height: size, zIndex: 9999, pointerEvents: 'none', background: bg, border: `2px solid ${bc}`, borderRadius: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, boxShadow: '0 6px 24px rgba(0,0,0,.18)' }}>
+          <div style={{ position: 'fixed', left, top, width: size, height: size, zIndex: 9999, pointerEvents: 'none', background: bg, border: `2px solid ${bc}`, borderRadius: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, boxShadow: '0 6px 24px rgba(0,0,0,.18)' }}>
             <span style={{ fontSize: 20, fontWeight: 900, color: col, fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{hoveredSq.id}</span>
+            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.2, textTransform: 'uppercase', color: col, opacity: .6, lineHeight: 1 }}>SOLD</span>
             <span style={{ fontSize: 13, fontWeight: 700, color: col, lineHeight: 1 }}>{abbrevName(hoveredSq.owner)}</span>
           </div>
         );

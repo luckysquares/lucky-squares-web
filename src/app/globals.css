@@ -969,3 +969,10 @@ textarea { font-family: inherit; }
 
 .beta-campaign-card { transition: box-shadow .15s; cursor: pointer; }
 .beta-campaign-link:hover .beta-campaign-card { box-shadow: var(--shadow-md); }
+
+.fundraiser-desktop-nav { display: flex; }
+.fundraiser-mobile-nav  { display: none; }
+@media (max-width: 768px) {
+  .fundraiser-desktop-nav { display: none; }
+  .fundraiser-mobile-nav  { display: block; }
+}

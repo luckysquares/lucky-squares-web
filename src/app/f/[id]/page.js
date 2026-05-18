@@ -139,7 +139,20 @@ export default function PublicFundraiserPage({ params }) {
             <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Australia</div>
           </div>
         </Link>
-        <HamburgerMenu />
+        {/* Desktop nav */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="fundraiser-desktop-nav">
+          {NAV_LINKS.map(({ href, label }) => (
+            <Link key={href} href={href} style={{ padding: '6px 12px', fontSize: 14, fontWeight: 600, color: 'var(--text2)', textDecoration: 'none', borderRadius: 8 }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--text2)'}
+            >{label}</Link>
+          ))}
+          <Link href="/fundraise?register=1" className="btn btn-primary btn-sm" style={{ marginLeft: 8 }}>Start for free →</Link>
+        </nav>
+        {/* Mobile hamburger */}
+        <div className="fundraiser-mobile-nav">
+          <HamburgerMenu />
+        </div>
       </header>
 
       {fundraiser.imageUrl && (
