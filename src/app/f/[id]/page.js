@@ -140,7 +140,7 @@ export default function PublicFundraiserPage({ params }) {
           </div>
         </Link>
         {/* Desktop nav */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="fundraiser-desktop-nav">
+        <nav style={{ alignItems: 'center', gap: 4 }} className="fundraiser-desktop-nav">
           {NAV_LINKS.map(({ href, label }) => (
             <Link key={href} href={href} style={{ padding: '6px 12px', fontSize: 14, fontWeight: 600, color: 'var(--text2)', textDecoration: 'none', borderRadius: 8 }}
               onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
