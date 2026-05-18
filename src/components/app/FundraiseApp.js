@@ -1789,9 +1789,20 @@ export default function FundraiseApp() {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('launch_success') === '1') {
+      const fid = params.get('fid');
       window.history.replaceState({}, '', window.location.pathname);
+      if (fid && user?.id) {
+        // Reload fundraisers then open the campaign
+        loadFundraisers(user.id).then(() => {
+          setFundraisers((prev) => {
+            const f = prev.find((x) => x.id === fid);
+            if (f) { setActiveFundraiser(f); setPhase('live'); }
+            return prev;
+          });
+        });
+      }
     }
-  }, []);
+  }, [user]);
 
   const handleSaveDraft = async (data) => {
     if (!supabaseConfigured || !user?.id) return null;

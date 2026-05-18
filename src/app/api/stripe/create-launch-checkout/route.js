@@ -34,7 +34,7 @@ export async function POST(req) {
         fundraiser_id,
         coupon_code: coupon_code || '',
       },
-      success_url: `${appUrl}/fundraise?launch_success=1`,
+      success_url: `${appUrl}/fundraise?launch_success=1&fid=${fundraiser_id}`,
       cancel_url: `${appUrl}/fundraise`,
     });
 
