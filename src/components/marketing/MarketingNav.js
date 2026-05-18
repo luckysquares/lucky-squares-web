@@ -5,7 +5,7 @@ import Logo from '@/components/ui/Logo';
 
 export default function MarketingNav() {
   return (
-    <>
+    <div className="marketing-header">
       <div className="rainbow-strip" />
       <nav className="marketing-nav">
         <div className="marketing-nav-inner">
@@ -33,6 +33,6 @@ export default function MarketingNav() {
           </div>
         </div>
       </nav>
-    </>
+    </div>
   );
 }

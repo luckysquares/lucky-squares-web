@@ -39,7 +39,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Logos / social proof ── */}
-      <section style={{ background: 'var(--card)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '28px 24px' }}>
+      <section style={{ background: '#fff', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '28px 24px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 20 }}>
             Trusted by schools, sports clubs &amp; charities across Australia
@@ -53,7 +53,7 @@ export default function HomePage() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="section" style={{ background: 'var(--cream)' }}>
+      <section className="section section-hero-bg">
         <div className="section-inner">
           <div style={{ textAlign: 'center', marginBottom: 0 }}>
             <div className="section-label">Simple as 1, 2, 3</div>
@@ -62,7 +62,7 @@ export default function HomePage() {
             </h2>
           </div>
           <div className="steps-grid">
-            <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img src="/images/how-it-works-setup.jpg" alt="Campaign setup wizard screen" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
               </div>
@@ -74,7 +74,7 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img src="/images/how-it-works-sell.jpg" alt="Person selling squares on an iPad at a sporting event" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
               </div>
@@ -86,7 +86,7 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img src="/images/how-it-works-draw.jpg" alt="Winner announcement screen showing the winning square" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
               </div>
@@ -103,7 +103,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Features ── */}
-      <section className="section" style={{ background: 'var(--cream2)' }}>
+      <section className="section section-solid-bg">
         <div className="section-inner">
           <div className="section-label">Everything you need</div>
           <h2 className="section-heading">Built for Australian fundraisers</h2>
@@ -116,7 +116,7 @@ export default function HomePage() {
               { icon: '⏱️', title: '7-minute reservations', desc: "Squares are held for 7 minutes while someone pays. If they don't complete, the squares release automatically for someone else." },
               { icon: '🇦🇺', title: 'Built for Australia', desc: 'BSB/account bank transfers, AUD pricing, and compliance notes for each state\'s raffle regulations. We\'ve done the homework.' },
             ].map((f) => (
-              <div key={f.title} className="feature-card scratch-card">
+              <div key={f.title} style={{ background: '#fff', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', padding: 28, boxShadow: 'var(--shadow)' }}>
                 <div className="feature-icon">{f.icon}</div>
                 <h3 className="feature-title">{f.title}</h3>
                 <p className="feature-desc">{f.desc}</p>
@@ -127,7 +127,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="section" style={{ background: 'var(--cream)' }}>
+      <section className="section section-hero-bg">
         <div className="section-inner">
           <div style={{ textAlign: 'center', marginBottom: 0 }}>
             <div className="section-label">What people say</div>
@@ -150,7 +150,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section className="section" style={{ background: 'var(--cream2)' }}>
+      <section className="section section-solid-bg">
         <div className="section-inner">
           <div style={{ textAlign: 'center' }}>
             <div className="section-label">Pricing</div>
@@ -178,7 +178,7 @@ export default function HomePage() {
             <div className="pricing-card featured">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div className="pricing-name">Casual</div>
-                <span className="tag tag-green">Most popular</span>
+                <span className="tag" style={{ background: 'var(--purple-light)', color: 'var(--purple)', border: '1px solid rgba(107,70,245,.2)' }}>Most popular</span>
               </div>
               <div className="pricing-price">$19 <span>per fundraiser</span></div>
               <p className="pricing-desc">One flat fee per live fundraising campaign. No percentage cuts, no hidden fees.</p>
@@ -190,7 +190,7 @@ export default function HomePage() {
                 <li>Real-time reservations</li>
                 <li>Live draw feature</li>
               </ul>
-              <Link href="/fundraise" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+              <Link href="/fundraise" className="btn btn-purple" style={{ width: '100%', justifyContent: 'center' }}>
                 Start your fundraiser →
               </Link>
             </div>
@@ -215,7 +215,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="section dot-bg" style={{ textAlign: 'center' }}>
+      <section className="section section-hero-bg" style={{ textAlign: 'center' }}>
         <div className="section-inner">
           <div style={{ fontSize: 56, marginBottom: 16 }}>🍀</div>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,4vw,44px)', fontWeight: 900, color: 'var(--text)', marginBottom: 16 }}>

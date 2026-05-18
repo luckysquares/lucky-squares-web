@@ -87,7 +87,7 @@ export default function MariposaChatWidget() {
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: role === 'user' ? 'rgba(255,255,255,0.9)' : '#007A5C', textDecoration: 'underline', wordBreak: 'break-all' }}
+          style={{ color: role === 'user' ? 'rgba(255,255,255,0.9)' : '#5B21B6', textDecoration: 'underline', wordBreak: 'break-all' }}
         >
           {part}
         </a>
@@ -106,13 +106,13 @@ export default function MariposaChatWidget() {
         style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 9000,
           width: 60, height: 60, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00A86B, #007A5C)',
-          border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,120,80,.35)',
+          background: 'linear-gradient(135deg, #A78BFA, #7C3AED, #4A28D4)',
+          border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(107,70,245,.4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 28, transition: 'transform .2s, box-shadow .2s',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,120,80,.45)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,120,80,.35)'; }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(107,70,245,.55)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(107,70,245,.4)'; }}
       >
         {open ? '✕' : '💬'}
       </button>
@@ -130,7 +130,7 @@ export default function MariposaChatWidget() {
 
           {/* Header */}
           <div style={{
-            background: 'linear-gradient(135deg, #0D2B1F, #1A4A30)',
+            background: 'linear-gradient(135deg, #2D1B69, #4A28D4, #7C3AED)',
             padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0,
           }}>
             <div style={{
@@ -154,7 +154,7 @@ export default function MariposaChatWidget() {
               <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{
                   maxWidth: '85%', padding: '10px 14px', borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  background: m.role === 'user' ? 'linear-gradient(135deg, #00A86B, #007A5C)' : '#F5F3EE',
+                  background: m.role === 'user' ? 'linear-gradient(135deg, #7C3AED, #4A28D4)' : '#F5F3EE',
                   color: m.role === 'user' ? '#fff' : '#1A1209',
                   fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                 }}>
@@ -167,7 +167,7 @@ export default function MariposaChatWidget() {
                 <div style={{ background: '#F5F3EE', borderRadius: '16px 16px 16px 4px', padding: '10px 16px' }}>
                   <span style={{ display: 'inline-flex', gap: 4 }}>
                     {[0,1,2].map((i) => (
-                      <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: '#00A86B', display: 'inline-block', animation: `bounce 1s ${i * 0.2}s infinite` }} />
+                      <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: '#7C3AED', display: 'inline-block', animation: `bounce 1s ${i * 0.2}s infinite` }} />
                     ))}
                   </span>
                 </div>
@@ -204,7 +204,7 @@ export default function MariposaChatWidget() {
                   onChange={(e) => setQuestion(e.target.value)}
                   style={{ marginBottom: 8, fontSize: 12, resize: 'none' }}
                 />
-                <button className="btn btn-primary" style={{ width: '100%', fontSize: 12 }} onClick={handleEscalate} disabled={!email.trim()}>
+                <button className="btn btn-purple" style={{ width: '100%', fontSize: 12 }} onClick={handleEscalate} disabled={!email.trim()}>
                   Send to support
                 </button>
               </div>
@@ -239,7 +239,7 @@ export default function MariposaChatWidget() {
               disabled={loading || !input.trim()}
               style={{
                 width: 38, height: 38, borderRadius: '50%', border: 'none',
-                background: input.trim() ? 'linear-gradient(135deg, #00A86B, #007A5C)' : '#E5E0D5',
+                background: input.trim() ? 'linear-gradient(135deg, #7C3AED, #4A28D4)' : '#E5E0D5',
                 color: '#fff', cursor: input.trim() ? 'pointer' : 'not-allowed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 16, flexShrink: 0, transition: 'background .2s',

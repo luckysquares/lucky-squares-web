@@ -583,10 +583,16 @@ textarea { font-family: inherit; }
   margin-bottom: 12px;
 }
 
-/* ── marketing: nav ── */
-.marketing-nav {
+/* ── marketing: sticky header wrapper (rainbow + nav together) ── */
+.marketing-header {
   position: sticky;
   top: 0;
+  z-index: 100;
+}
+
+/* ── marketing: nav ── */
+.marketing-nav {
+  position: relative;
   z-index: 100;
   background: rgba(255,255,255,.97);
   backdrop-filter: blur(12px);
@@ -633,6 +639,21 @@ textarea { font-family: inherit; }
   background: linear-gradient(135deg, #C4B5FD 0%, #8B5CF6 45%, #5B35E8 100%);
   box-shadow: 0 8px 32px rgba(107,70,245,.55), inset 0 1px 0 rgba(255,255,255,.22);
   animation: wiggle .4s ease;
+}
+
+/* ── section with hero-style gradient background (no abs blobs needed) ── */
+.section-hero-bg {
+  background:
+    radial-gradient(ellipse at 96% 8%,  rgba(148,118,245,.38) 0%, transparent 40%),
+    radial-gradient(ellipse at 78% 22%, rgba(255,195,140,.44) 0%, transparent 36%),
+    radial-gradient(ellipse at 4%  88%, rgba(140,118,240,.28) 0%, transparent 46%),
+    radial-gradient(ellipse at 22% 55%, rgba(160,140,245,.16) 0%, transparent 32%),
+    #EEEDF8;
+}
+
+/* ── solid light section background ── */
+.section-solid-bg {
+  background: #F2F1FA;
 }
 
 /* ── marketing: hero ── */
@@ -800,7 +821,7 @@ textarea { font-family: inherit; }
   margin-top: 48px;
 }
 .pricing-card {
-  background: var(--card);
+  background: #fff;
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   padding: 32px;
@@ -809,9 +830,9 @@ textarea { font-family: inherit; }
   flex-direction: column;
 }
 .pricing-card.featured {
-  border-color: var(--green);
+  border-color: var(--purple);
   border-width: 2px;
-  box-shadow: var(--shadow), 0 0 0 4px rgba(26,122,85,.08);
+  box-shadow: var(--shadow), 0 0 0 4px rgba(107,70,245,.10);
 }
 .pricing-name  { font-family: var(--font-serif); font-size: 22px; font-weight: 700; margin-bottom: 4px; }
 .pricing-price { font-family: var(--font-serif); font-size: 40px; font-weight: 900; color: var(--text); margin: 12px 0; }
@@ -829,7 +850,7 @@ textarea { font-family: inherit; }
   margin-top: 48px;
 }
 .testimonial-card {
-  background: var(--card);
+  background: #fff;
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   padding: 28px;
