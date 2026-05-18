@@ -95,7 +95,7 @@ export default function MariposaChatWidget() {
         onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,120,80,.45)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,120,80,.35)'; }}
       >
-        {open ? '✕' : '⚾'}
+        {open ? '✕' : '💬'}
       </button>
 
       {/* Chat panel */}
