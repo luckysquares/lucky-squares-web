@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import LiveGrid from '@/components/app/LiveGrid';
+import StripeConnectSetup from '@/components/app/StripeConnectSetup';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -782,7 +783,7 @@ function CampaignReport({ fundraiser, onBack }) {
 
 const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
 
-function SetupWizard({ onComplete, onCancel, onLaunchPay }) {
+function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
   const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
 
   const [step,      setStep]      = useState(savedDraft?.step ?? 0);
@@ -799,6 +800,10 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay }) {
   const [couponCode,        setCouponCode]        = useState('');
   const [couponState,       setCouponState]       = useState('idle'); // idle | checking | valid | invalid
   const [couponData,        setCouponData]        = useState(null);   // { type, value }
+  const [bankPhase,         setBankPhase]         = useState(false);  // true = showing bank connect step
+  const [bankDraftId,       setBankDraftId]       = useState(null);
+  const [bankConnectDone,   setBankConnectDone]   = useState(false);
+  const [pendingLaunchData, setPendingLaunchData] = useState(null);
 
   // Auto-save wizard state to localStorage
   useEffect(() => {
@@ -1254,6 +1259,63 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay }) {
     </div>,
   ];
 
+  // ── Bank connect interstitial step ──────────────────────────────────────────
+  if (bankPhase) {
+    return (
+      <div className="dot-bg" style={{ minHeight: '100vh' }}>
+        <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5, marginBottom: 4 }}>Almost there</div>
+            <h2 className="section-title" style={{ marginBottom: 8 }}>Connect your bank account</h2>
+            <p className="section-sub">
+              Because your buyers will pay by card, Lucky Squares needs to know where to send the money. Your funds are transferred directly to your bank account once the draw is complete — we never hold them.
+            </p>
+          </div>
+
+          <div className="scratch-card" style={{ padding: 28, marginBottom: 24 }}>
+            <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
+              {[
+                { icon: '🔒', text: 'Your details are secured by Stripe, the same payment infrastructure used by millions of businesses worldwide.' },
+                { icon: '🏦', text: 'Funds land directly in your nominated account within 2 business days of your draw completing.' },
+                { icon: '✅', text: 'You only need to do this once per campaign. Future campaigns can reuse the same account.' },
+              ].map((item) => (
+                <div key={item.icon} style={{ flex: 1, fontSize: 12, color: 'var(--text2)', lineHeight: 1.6, textAlign: 'center' }}>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}>{item.icon}</div>
+                  {item.text}
+                </div>
+              ))}
+            </div>
+
+            {bankDraftId ? (
+              <StripeConnectSetup
+                fundraiserId={bankDraftId}
+                onComplete={() => setBankConnectDone(true)}
+              />
+            ) : (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
+            )}
+          </div>
+
+          <button
+            className="btn btn-purple btn-lg"
+            style={{ width: '100%' }}
+            disabled={!bankConnectDone}
+            onClick={async () => {
+              if (pendingLaunchData) await onLaunchPay(pendingLaunchData);
+            }}
+          >
+            {bankConnectDone ? 'Continue to payment →' : 'Complete bank account setup above to continue'}
+          </button>
+          {!bankConnectDone && (
+            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text2)', marginTop: 12 }}>
+              You must complete the bank account setup before your campaign can go live.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dot-bg" style={{ minHeight: '100vh' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
@@ -1341,6 +1403,11 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay }) {
           : baseFee;
         const isFree    = finalFee === 0;
         const fmt       = (n) => Number.isInteger(n) ? String(n) : n.toFixed(2);
+        const launchData = {
+          gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment,
+          finalFee,
+          couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null,
+        };
         const doLaunch  = async () => {
           if (isFree) {
             if (couponState === 'valid' && couponCode.trim() && supabaseConfigured) {
@@ -1348,13 +1415,15 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay }) {
             }
             closeLaunchModal();
             clearDraft(); onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
+          } else if (payment.method === 'stripe') {
+            closeLaunchModal();
+            setPendingLaunchData(launchData);
+            const id = await onSaveDraft({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
+            setBankDraftId(id);
+            setBankPhase(true);
           } else {
             closeLaunchModal();
-            await onLaunchPay({
-              gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment,
-              finalFee,
-              couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null,
-            });
+            await onLaunchPay(launchData);
           }
         };
         return (
@@ -1724,6 +1793,34 @@ export default function FundraiseApp() {
     }
   }, []);
 
+  const handleSaveDraft = async (data) => {
+    if (!supabaseConfigured || !user?.id) return null;
+    const db = getSupabaseClient();
+    const grid = data.gridOpt?.size || 100;
+    const { data: saved, error } = await db.from('fundraisers').insert({
+      owner_id: user.id, title: sanitize(data.campaign.title || 'New Fundraiser'),
+      org: sanitize(data.campaign.org) || null,
+      contact_name: sanitize(data.campaign.contactName) || null,
+      contact_email: sanitize(data.campaign.contactEmail) || null,
+      contact_phone: sanitize(data.campaign.contactPhone) || null,
+      emoji: data.campaign.emoji || '🍀', image_url: data.campaignImageUrl || null,
+      description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
+      grid_size: grid, price_per_sq: parseFloat(data.price) || 10, status: 'draft',
+      draw_type: data.drawRules.type, draw_date: data.drawRules.date || null,
+      payment_method: data.payment.method,
+      bank_account_name: sanitize(data.payment.accountName) || null,
+      bank_bsb: sanitize(data.payment.bsb) || null, bank_account: sanitize(data.payment.account) || null,
+    }).select().single();
+    if (error || !saved) return null;
+    const prizeRows = data.prizes.filter((p) => p.desc)
+      .map((p, i) => ({ fundraiser_id: saved.id, place: p.place, description: sanitize(p.desc), value: sanitize(p.value), donated: p.donated ?? false, sort_order: i }));
+    await Promise.all([
+      db.rpc('create_fundraiser_squares', { p_fundraiser_id: saved.id, p_grid_size: grid }),
+      prizeRows.length ? db.from('prizes').insert(prizeRows) : Promise.resolve(),
+    ]);
+    return saved.id;
+  };
+
   const handleLaunchPay = async (data) => {
     if (!supabaseConfigured || !user?.id) return;
     const db = getSupabaseClient();
@@ -1803,7 +1900,7 @@ export default function FundraiseApp() {
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Referral prompt modal */}

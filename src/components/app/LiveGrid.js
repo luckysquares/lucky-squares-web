@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SharePanel from './SharePanel';
-import StripeConnectSetup from './StripeConnectSetup';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
 const RESERVE_SECS   = 420;
@@ -100,8 +99,6 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [showUnpaidModal,       setShowUnpaidModal]        = useState(false);
   const [showBreakEvenModal,    setShowBreakEvenModal]     = useState(false);
   const [payRedirecting,        setPayRedirecting]         = useState(false);
-  const [showStripeSetup,       setShowStripeSetup]        = useState(false);
-  const [stripeConnectComplete, setStripeConnectComplete]  = useState(fundraiser.payment?.stripeOnboardingComplete ?? false);
   const drawTriggeredRef = useRef(false);
   const [tick,        setTick]        = useState(0);
   const timerRef  = useRef(null);
@@ -611,28 +608,6 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
         </div>
       )}
 
-      {/* Stripe Connect setup banner */}
-      {isOwner && fundraiser.payment?.method === 'stripe' && !stripeConnectComplete && (
-        <div style={{ background: '#F5F3FF', borderBottom: '2px solid #C4B5FD', padding: '12px 24px' }}>
-          {!showStripeSetup ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#4C1D95' }}>💳 Connect your bank account to accept card payments</span>
-              <button className="btn btn-purple btn-sm" onClick={() => setShowStripeSetup(true)}>Connect bank account</button>
-            </div>
-          ) : (
-            <div style={{ maxWidth: 680, margin: '0 auto', paddingTop: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <span style={{ fontSize: 15, fontWeight: 800, color: '#4C1D95' }}>Bank account setup</span>
-                <button onClick={() => setShowStripeSetup(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--text2)' }}>×</button>
-              </div>
-              <StripeConnectSetup
-                fundraiserId={fundraiser.id}
-                onComplete={() => { setStripeConnectComplete(true); setShowStripeSetup(false); }}
-              />
-            </div>
-          )}
-        </div>
-      )}
 
       {cartToast && (
         <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#3D2E1A', color: '#fff', padding: '14px 24px', borderRadius: 50, fontSize: 14, fontWeight: 700, zIndex: 9999, boxShadow: '0 4px 24px rgba(0,0,0,.25)', whiteSpace: 'nowrap' }}>
