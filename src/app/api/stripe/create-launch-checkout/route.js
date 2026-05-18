@@ -20,7 +20,7 @@ export async function POST(req) {
           price_data: {
             currency: 'aud',
             product_data: {
-              name: 'Lucky Squares — Platform Fee',
+              name: 'Lucky Squares — Campaign Fee',
               description: 'One-off fee to launch your fundraiser campaign.',
             },
             unit_amount: amountCents,

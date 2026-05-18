@@ -161,6 +161,17 @@ textarea { font-family: inherit; }
   border-color: var(--border2);
 }
 
+/* ── prose list styles (legal pages, blog content) ── */
+.scratch-card ul, .scratch-card ol,
+.blog-content ul, .blog-content ol {
+  padding-left: 22px;
+  margin: 6px 0 10px;
+}
+.scratch-card li, .blog-content li {
+  margin-bottom: 5px;
+  line-height: 1.7;
+}
+
 /* ── buttons ── */
 @keyframes wiggle {
   0%,100% { transform: rotate(0deg) translateY(-2px); }
@@ -204,13 +215,14 @@ textarea { font-family: inherit; }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; animation: none !important; }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--green2) 0%, var(--green) 100%);
+  background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 45%, #4A28D4 100%);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(26,122,85,.32), inset 0 1px 0 rgba(255,255,255,.15);
+  border: none;
+  box-shadow: 0 4px 20px rgba(107,70,245,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--green3) 0%, var(--green2) 100%);
-  box-shadow: 0 6px 22px rgba(26,122,85,.42), inset 0 1px 0 rgba(255,255,255,.18);
+  background: linear-gradient(135deg, #C4B5FD 0%, #8B5CF6 45%, #5B35E8 100%);
+  box-shadow: 0 8px 32px rgba(107,70,245,.55), inset 0 1px 0 rgba(255,255,255,.22);
   animation: wiggle .4s ease;
 }
 

@@ -9,7 +9,7 @@ export default function PrivacyPage() {
     <>
       <MarketingNav />
 
-      <section className="section dot-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
         <div className="section-inner" style={{ textAlign: 'center' }}>
           <div className="section-label">Legal</div>
           <h1 className="section-heading" style={{ margin: '0 auto 16px' }}>Privacy Policy</h1>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               <p>We use personal information to:</p>
               <ul>
                 <li>Create and manage Organiser accounts</li>
-                <li>Process Platform Fee payments</li>
+                <li>Process Campaign Fee payments</li>
                 <li>Operate fundraiser grids and manage square reservations</li>
                 <li>Notify Participants of draw results</li>
                 <li>Facilitate prize notification between Organisers and Participants</li>

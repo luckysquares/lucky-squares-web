@@ -44,7 +44,7 @@ export default function AdminLayout({ children }) {
 
   if (status === 'loading') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0D1F17' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0F0B2A' }}>
         <div style={{ color: '#fff', fontSize: 14, opacity: .6 }}>Checking credentials…</div>
       </div>
     );
@@ -58,7 +58,7 @@ export default function AdminLayout({ children }) {
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--cream)' }}>
 
       {/* Sidebar */}
-      <aside style={{ width: 220, background: '#0D1F17', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
+      <aside style={{ width: 220, background: '#0F0B2A', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
         <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <Logo size={30} />
@@ -78,7 +78,7 @@ export default function AdminLayout({ children }) {
                 fontSize: 13, fontWeight: 700, textDecoration: 'none',
                 color: active ? '#fff' : 'rgba(255,255,255,.5)',
                 background: active ? 'rgba(255,255,255,.08)' : 'none',
-                borderLeft: active ? '3px solid #00C875' : '3px solid transparent',
+                borderLeft: active ? '3px solid #7C3AED' : '3px solid transparent',
                 transition: 'all .15s',
               }}>
                 <span style={{ fontSize: 16 }}>{icon}</span>
@@ -119,8 +119,8 @@ function AdminLogin({ reason, onAuth }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D1F17', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: '#1A3C2E', borderRadius: 20, padding: 40, maxWidth: 380, width: '100%', textAlign: 'center' }}>
+    <div style={{ minHeight: '100vh', background: '#0F0B2A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: '#1A1650', borderRadius: 20, padding: 40, maxWidth: 380, width: '100%', textAlign: 'center' }}>
         <Logo size={48} style={{ margin: '0 auto 20px' }} />
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Admin portal</h1>
         {reason === 'nonadmin' && (

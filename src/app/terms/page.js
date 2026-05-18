@@ -9,7 +9,7 @@ export default function TermsPage() {
     <>
       <MarketingNav />
 
-      <section className="section dot-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
         <div className="section-inner" style={{ textAlign: 'center' }}>
           <div className="section-label">Legal</div>
           <h1 className="section-heading" style={{ margin: '0 auto 16px' }}>Terms of Service</h1>
@@ -45,7 +45,7 @@ export default function TermsPage() {
                 <Term term='"Organiser"'>any individual, incorporated association, registered charity, or community organisation that creates an account and launches a fundraiser on the Platform.</Term>
                 <Term term='"Participant"'>any person who purchases one or more squares in a fundraiser conducted through the Platform.</Term>
                 <Term term='"Fundraiser"'>a grid-based lucky squares fundraising activity created and operated by an Organiser using the Platform.</Term>
-                <Term term='"Platform Fee"'>the fee charged by Lucky Squares Australia to the Organiser for access to the Platform tools required to create and manage a Fundraiser.</Term>
+                <Term term='"Campaign Fee"'>the fee charged by Lucky Squares Australia to the Organiser for access to the Platform tools required to create and manage a Fundraiser.</Term>
                 <Term term='"Square"'>a numbered grid position within a Fundraiser that a Participant may purchase for the opportunity to win a prize.</Term>
               </dl>
             </Section>
@@ -62,15 +62,15 @@ export default function TermsPage() {
               <p>Lucky Squares Australia reserves the right to refuse access to the Platform to any person or organisation at its sole discretion.</p>
             </Section>
 
-            <Section n="4" title="Platform Fee and Payment">
+            <Section n="4" title="Campaign Fee and Payment">
               <SubSection n="4.1">
-                The Platform Fee is charged to the Organiser at the time of launching a Fundraiser. Current fees are:
+                The Campaign Fee is charged to the Organiser at the time of launching a Fundraiser. Current fees are:
                 <FeeTable />
               </SubSection>
-              <SubSection n="4.2">The Platform Fee is processed securely via our online payment provider and is charged in Australian dollars inclusive of GST where applicable.</SubSection>
-              <SubSection n="4.3">The Platform Fee is non-refundable once a Fundraiser has been launched, except where required by Australian Consumer Law.</SubSection>
-              <SubSection n="4.4">Lucky Squares Australia reserves the right to amend Platform Fees at any time. Amended fees will not apply to Fundraisers already launched prior to the fee change.</SubSection>
-              <SubSection n="4.5">The Platform Fee covers access to the Platform software tools only. It does not guarantee any particular outcome, number of participants, or funds raised.</SubSection>
+              <SubSection n="4.2">The Campaign Fee is processed securely via our online payment provider and is charged in Australian dollars inclusive of GST where applicable.</SubSection>
+              <SubSection n="4.3">The Campaign Fee is non-refundable once a Fundraiser has been launched, except where required by Australian Consumer Law.</SubSection>
+              <SubSection n="4.4">Lucky Squares Australia reserves the right to amend Campaign Fees at any time. Amended fees will not apply to Fundraisers already launched prior to the fee change.</SubSection>
+              <SubSection n="4.5">The Campaign Fee covers access to the Platform software tools only. It does not guarantee any particular outcome, number of participants, or funds raised.</SubSection>
             </Section>
 
             <Section n="5" title="Organiser Obligations">
@@ -127,7 +127,7 @@ export default function TermsPage() {
             </Section>
 
             <Section n="8" title="Limitation of Liability">
-              <SubSection n="8.1">To the maximum extent permitted by law, Lucky Squares Australia&apos;s total liability to any Organiser arising out of or in connection with these Terms or the Platform is limited to the Platform Fee paid by that Organiser for the relevant Fundraiser.</SubSection>
+              <SubSection n="8.1">To the maximum extent permitted by law, Lucky Squares Australia&apos;s total liability to any Organiser arising out of or in connection with these Terms or the Platform is limited to the Campaign Fee paid by that Organiser for the relevant Fundraiser.</SubSection>
               <SubSection n="8.2">
                 Lucky Squares Australia is not liable for:
                 <ul style={{ marginTop: 10 }}>
@@ -154,7 +154,7 @@ export default function TermsPage() {
             <Section n="10" title="Termination">
               <SubSection n="10.1">Lucky Squares Australia may suspend or terminate an Organiser&apos;s access to the Platform at any time if the Organiser breaches these Terms, engages in unlawful conduct, or for any other reason at Lucky Squares Australia&apos;s sole discretion.</SubSection>
               <SubSection n="10.2">Upon termination, the Organiser remains responsible for all obligations to Participants arising from any Fundraiser conducted prior to termination, including prize payment.</SubSection>
-              <SubSection n="10.3">Platform Fees are non-refundable upon termination except where required by law.</SubSection>
+              <SubSection n="10.3">Campaign Fees are non-refundable upon termination except where required by law.</SubSection>
             </Section>
 
             <Section n="11" title="Amendments">
@@ -220,9 +220,13 @@ function Section({ n, title, children, last, id }) {
 
 function SubSection({ n, label, children }) {
   return (
-    <div>
-      <span style={{ fontWeight: 800, marginRight: 6 }}>{n}{label ? `: ${label}` : ''}</span>
-      {children}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {(n || label) && (
+        <div style={{ fontWeight: 800 }}>
+          {n}{label ? `: ${label}` : ''}
+        </div>
+      )}
+      <div>{children}</div>
     </div>
   );
 }

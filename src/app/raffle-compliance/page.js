@@ -9,7 +9,7 @@ export default function CompliancePage() {
     <>
       <MarketingNav />
 
-      <section className="section dot-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
         <div className="section-inner" style={{ textAlign: 'center' }}>
           <div className="section-label">Legal</div>
           <h1 className="section-heading" style={{ margin: '0 auto 16px' }}>Compliance Statement</h1>

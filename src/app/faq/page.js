@@ -19,7 +19,7 @@ const FAQS = [
       },
       {
         q: 'Is it free to set up?',
-        a: 'Yes. You can create an account, set up your fundraiser, and preview everything for free. A one-off Platform Fee is charged only when you launch your fundraiser and make it live. There are no monthly fees or hidden costs.',
+        a: 'Yes. You can create an account, set up your fundraiser, and preview everything for free. A one-off Campaign Fee is charged only when you launch your fundraiser and make it live. There are no monthly fees or hidden costs.',
       },
       {
         q: 'What devices does it work on?',
@@ -130,16 +130,16 @@ const FAQS = [
         a: 'A processing fee of 1.7% + $0.30 is added to the participant total only when payment is made by secure online card payment. No processing fee applies to bank transfer or in person payments. The fee is displayed clearly before participants confirm their purchase.',
       },
       {
-        q: 'Is the Platform Fee refundable?',
-        a: 'The Platform Fee is non-refundable once a fundraiser has been launched, except where required by Australian Consumer Law. It is charged for access to the platform tools, not for any particular outcome or number of squares sold.',
+        q: 'Is the Campaign Fee refundable?',
+        a: 'The Campaign Fee is non-refundable once a fundraiser has been launched, except where required by Australian Consumer Law. It is charged for access to the platform tools, not for any particular outcome or number of squares sold.',
       },
       {
         q: 'Do you charge a percentage of funds raised?',
-        a: 'No. Lucky Squares Australia charges only a flat Platform Fee at launch. We do not take a percentage of your fundraising proceeds. The only transaction-related costs are secure online payment processing fees, which apply only when participants choose to pay by card.',
+        a: 'No. Lucky Squares Australia charges only a flat Campaign Fee at launch. We do not take a percentage of your fundraising proceeds. The only transaction-related costs are secure online payment processing fees, which apply only when participants choose to pay by card.',
       },
       {
         q: 'Are prices inclusive of GST?',
-        a: 'Platform Fees are inclusive of GST where applicable. Online payment processing fees follow the payment provider\'s own GST treatment. Lucky Squares Australia will issue a tax invoice for all Platform Fee charges upon request.',
+        a: 'Campaign Fees are inclusive of GST where applicable. Online payment processing fees follow the payment provider\'s own GST treatment. Lucky Squares Australia will issue a tax invoice for all Campaign Fee charges upon request.',
       },
     ],
   },
