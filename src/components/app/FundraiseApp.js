@@ -94,10 +94,12 @@ function dbToFundraiser(row, soldCount = 0, prizes = []) {
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map((p) => ({ place: p.place, description: p.description, value: p.value, donated: p.donated ?? false })),
     payment: {
-      method:      row.payment_method,
-      accountName: row.bank_account_name,
-      bsb:         row.bank_bsb,
-      account:     row.bank_account,
+      method:                  row.payment_method,
+      accountName:             row.bank_account_name,
+      bsb:                     row.bank_bsb,
+      account:                 row.bank_account,
+      stripeAccountId:         row.stripe_account_id || null,
+      stripeOnboardingComplete: row.stripe_onboarding_complete ?? false,
     },
   };
 }
@@ -1117,15 +1119,16 @@ function SetupWizard({ onComplete, onCancel }) {
           { method: 'inperson',      icon: '🤝', title: 'In person',                     desc: 'Collect payment face-to-face via cash, card tap, or EFTPOS terminal. No online payment required.' },
           { method: 'bank',          icon: '🏦', title: 'Bank transfer',                 desc: 'Buyers pay via BSB/account number, free with no platform transaction fees.' },
           { method: 'bank_inperson', icon: '🤝', title: 'In person + bank transfer',     desc: 'Accept payment in person or by bank transfer. Your buyers choose whichever suits them.' },
+          { method: 'stripe',        icon: '💳', title: 'Online card payment',            desc: 'Buyers pay securely by card. A 1.75% + 30c processing fee is added to the buyer total. Funds transferred to your bank after the draw.' },
         ].map((opt) => (
-          <div key={opt.method} className="scratch-card" style={{ padding: '20px 24px', cursor: 'pointer', borderColor: payment.method === opt.method ? 'var(--green)' : undefined, borderWidth: payment.method === opt.method ? 2 : 1.5 }} onClick={() => setPayment({ ...payment, method: opt.method })}>
+          <div key={opt.method} className="scratch-card" style={{ padding: '20px 24px', cursor: 'pointer', borderColor: payment.method === opt.method ? 'var(--purple)' : undefined, borderWidth: payment.method === opt.method ? 2 : 1.5 }} onClick={() => setPayment({ ...payment, method: opt.method })}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <span style={{ fontSize: 28 }}>{opt.icon}</span>
               <div>
                 <div style={{ fontWeight: 800 }}>{opt.title}</div>
                 <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{opt.desc}</div>
               </div>
-              {payment.method === opt.method && <div style={{ marginLeft: 'auto', fontSize: 20, color: 'var(--green)' }}>✓</div>}
+              {payment.method === opt.method && <div style={{ marginLeft: 'auto', fontSize: 20, color: 'var(--purple)' }}>✓</div>}
             </div>
           </div>
         ))}
@@ -1135,6 +1138,15 @@ function SetupWizard({ onComplete, onCancel }) {
           <div style={{ fontSize: 40, marginBottom: 12 }}>🤝</div>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>In person payments</div>
           <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>Buyers register their squares online or in person and you collect payment directly, via cash or an EFTPOS terminal. No bank details needed.</div>
+        </div>
+      )}
+      {payment.method === 'stripe' && (
+        <div className="scratch-card" style={{ padding: 24, background: '#F5F3FF', border: '1.5px solid #C4B5FD' }}>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>💳</div>
+          <div style={{ fontWeight: 800, marginBottom: 6 }}>Online card payments</div>
+          <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
+            After saving your fundraiser, you&apos;ll connect your bank account from your dashboard. This takes about 2 minutes and only needs to be done once. Funds are transferred directly to your bank after the draw.
+          </div>
         </div>
       )}
       {['bank', 'bank_inperson'].includes(payment.method) && (
@@ -1372,7 +1384,6 @@ function SetupWizard({ onComplete, onCancel }) {
                 )}
               </div>
 
-              {!isFree && <p style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 20 }}>Online card payment coming soon. Contact us at support@luckysquares.com.au to launch now.</p>}
 
               <div style={{ display: 'flex', gap: 12 }}>
                 <button className="btn btn-outline" style={{ flex: 1 }} onClick={closeLaunchModal}>Cancel</button>

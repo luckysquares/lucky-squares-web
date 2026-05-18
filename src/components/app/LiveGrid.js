@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SharePanel from './SharePanel';
+import StripeConnectSetup from './StripeConnectSetup';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
 const RESERVE_SECS   = 420;
@@ -95,9 +96,12 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [showExtendDate,     setShowExtendDate]     = useState(false);
   const [newDrawDate,        setNewDrawDate]        = useState(fundraiser.drawDate || '');
   const [savingDate,         setSavingDate]         = useState(false);
-  const [showLaunchModal,    setShowLaunchModal]    = useState(false);
-  const [showUnpaidModal,    setShowUnpaidModal]    = useState(false);
-  const [showBreakEvenModal, setShowBreakEvenModal] = useState(false);
+  const [showLaunchModal,       setShowLaunchModal]       = useState(false);
+  const [showUnpaidModal,       setShowUnpaidModal]        = useState(false);
+  const [showBreakEvenModal,    setShowBreakEvenModal]     = useState(false);
+  const [payRedirecting,        setPayRedirecting]         = useState(false);
+  const [showStripeSetup,       setShowStripeSetup]        = useState(false);
+  const [stripeConnectComplete, setStripeConnectComplete]  = useState(fundraiser.payment?.stripeOnboardingComplete ?? false);
   const drawTriggeredRef = useRef(false);
   const [tick,        setTick]        = useState(0);
   const timerRef  = useRef(null);
@@ -144,6 +148,18 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
         ? { ...sq, status: 'available', reservedUntil: null, owner: null } : sq
     ));
   }, [tick]);
+
+  // Handle redirect back from Stripe Checkout
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === '1') {
+      setPhase('success');
+      // Clean up URL without reload
+      const clean = window.location.pathname;
+      window.history.replaceState({}, '', clean);
+    }
+  }, []);
 
   useEffect(() => {
     clearInterval(timerRef.current);
@@ -219,6 +235,32 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     const ownerName = sanitize(buyerName || user?.name || 'Buyer');
     const safeEmail = sanitize(buyerEmail).toLowerCase();
     const safePhone = sanitize(buyerPhone);
+
+    if (fundraiser.payment?.method === 'stripe') {
+      if (!safeEmail || !ownerName) return;
+      setPayRedirecting(true);
+      try {
+        const res = await fetch('/api/stripe/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fundraiser_id: fundraiser.id,
+            square_numbers: cart,
+            buyer_name: ownerName,
+            buyer_email: safeEmail,
+            buyer_phone: safePhone,
+          }),
+        });
+        const { url, error } = await res.json();
+        if (error || !url) { setPayRedirecting(false); return; }
+        window.location.href = url;
+      } catch {
+        setPayRedirecting(false);
+      }
+      return;
+    }
+
+    // Bank / in-person: claim immediately
     if (supabaseConfigured) {
       await getSupabaseClient().rpc('claim_squares', { p_fundraiser_id: fundraiser.id, p_square_numbers: cart, p_buyer_name: ownerName, p_buyer_email: safeEmail, p_buyer_phone: safePhone });
     }
@@ -523,20 +565,19 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>The organiser will collect your payment of <strong>${subtotal.toFixed(2)}</strong> directly via cash or card tap. Just confirm your squares below and they will be in touch.</div>
           </div>
         ) : (
-          <div className="scratch-card" style={{ padding: 24, marginBottom: 20 }}>
-            <div style={{ fontWeight: 800, marginBottom: 16 }}>💳 Card payment</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <input className="form-input" placeholder="Card number" maxLength={19} />
-              <div style={{ display: 'flex', gap: 12 }}>
-                <input className="form-input" placeholder="MM / YY" maxLength={5} style={{ flex: 1 }} />
-                <input className="form-input" placeholder="CVV" maxLength={4} style={{ width: 90 }} />
-              </div>
+          <div className="scratch-card" style={{ padding: 24, marginBottom: 20, textAlign: 'center' }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
+            <div style={{ fontWeight: 800, marginBottom: 8 }}>Secure card payment</div>
+            <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
+              You&apos;ll be taken to a secure payment page to enter your card details. Your squares are held while you pay.
             </div>
           </div>
         )}
-        <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handlePay}>
-          {fundraiser.payment?.method === 'stripe'
-            ? `Pay $${totalCost.toFixed(2)} →`
+        <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handlePay} disabled={payRedirecting}>
+          {payRedirecting
+            ? 'Redirecting to payment…'
+            : fundraiser.payment?.method === 'stripe'
+            ? `Pay $${totalCost.toFixed(2)} securely →`
             : fundraiser.payment?.method === 'inperson'
             ? 'Confirm my squares →'
             : 'Confirm squares →'}
@@ -567,6 +608,29 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
         <div style={{ background: '#FFF8E1', borderBottom: '2px solid #F0D878', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontSize: 14 }}>
           <span style={{ fontWeight: 800, color: '#9A6800' }}>Draft mode</span>
           <span style={{ color: '#7A5200' }}>Your fundraiser is saved but not yet live. Buyers cannot purchase squares until you launch.</span>
+        </div>
+      )}
+
+      {/* Stripe Connect setup banner */}
+      {isOwner && fundraiser.payment?.method === 'stripe' && !stripeConnectComplete && (
+        <div style={{ background: '#F5F3FF', borderBottom: '2px solid #C4B5FD', padding: '12px 24px' }}>
+          {!showStripeSetup ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#4C1D95' }}>💳 Connect your bank account to accept card payments</span>
+              <button className="btn btn-purple btn-sm" onClick={() => setShowStripeSetup(true)}>Connect bank account</button>
+            </div>
+          ) : (
+            <div style={{ maxWidth: 680, margin: '0 auto', paddingTop: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: '#4C1D95' }}>Bank account setup</span>
+                <button onClick={() => setShowStripeSetup(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--text2)' }}>×</button>
+              </div>
+              <StripeConnectSetup
+                fundraiserId={fundraiser.id}
+                onComplete={() => { setStripeConnectComplete(true); setShowStripeSetup(false); }}
+              />
+            </div>
+          )}
         </div>
       )}
 

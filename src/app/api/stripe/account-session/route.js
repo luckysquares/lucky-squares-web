@@ -1,0 +1,60 @@
+import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+function supabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+  );
+}
+
+export async function POST(req) {
+  try {
+    const { fundraiser_id } = await req.json();
+    if (!fundraiser_id) return Response.json({ error: 'fundraiser_id required' }, { status: 400 });
+
+    const db = supabase();
+    const { data: fundraiser, error } = await db
+      .from('fundraisers')
+      .select('stripe_account_id')
+      .eq('id', fundraiser_id)
+      .single();
+
+    if (error) return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
+
+    let accountId = fundraiser.stripe_account_id;
+
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        controller: {
+          stripe_dashboard: { type: 'none' },
+          fees: { payer: 'application' },
+          losses: { payments: 'stripe' },
+          requirement_collection: 'stripe',
+        },
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+        country: 'AU',
+      });
+      accountId = account.id;
+      await db.from('fundraisers').update({ stripe_account_id: accountId }).eq('id', fundraiser_id);
+    }
+
+    const accountSession = await stripe.accountSessions.create({
+      account: accountId,
+      components: {
+        account_onboarding: { enabled: true },
+        account_management: { enabled: true },
+      },
+    });
+
+    return Response.json({ client_secret: accountSession.client_secret, account_id: accountId });
+  } catch (err) {
+    console.error('account-session error:', err);
+    return Response.json({ error: err.message }, { status: 500 });
+  }
+}
