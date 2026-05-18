@@ -173,10 +173,9 @@ textarea { font-family: inherit; }
 }
 
 /* ── buttons ── */
-@keyframes wiggle {
-  0%,100% { transform: rotate(0deg) translateY(-2px); }
-  25%      { transform: rotate(-3deg) translateY(-2px); }
-  75%      { transform: rotate(3deg) translateY(-2px); }
+@keyframes btn-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.03); }
 }
 .btn {
   display: inline-flex;
@@ -210,7 +209,6 @@ textarea { font-family: inherit; }
 .btn:hover::after  { background: rgba(255,255,255,.1); }
 .btn:active::after { background: rgba(0,0,0,.06); }
 
-.btn:hover  { transform: translateY(-2px); }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; animation: none !important; }
 
@@ -223,7 +221,7 @@ textarea { font-family: inherit; }
 .btn-primary:hover {
   background: linear-gradient(135deg, #C4B5FD 0%, #8B5CF6 45%, #5B35E8 100%);
   box-shadow: 0 8px 32px rgba(107,70,245,.55), inset 0 1px 0 rgba(255,255,255,.22);
-  animation: wiggle .4s ease;
+  animation: btn-pulse .5s ease;
 }
 
 .btn-gold {
@@ -234,7 +232,7 @@ textarea { font-family: inherit; }
 .btn-gold:hover {
   background: linear-gradient(135deg, var(--gold3) 0%, var(--gold2) 100%);
   box-shadow: 0 6px 22px rgba(224,155,26,.42), inset 0 1px 0 rgba(255,255,255,.18);
-  animation: wiggle .4s ease;
+  animation: btn-pulse .5s ease;
 }
 
 .btn-outline {
