@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-const GREETING = `G'day! I'm Mariposa — a baseball-loving jackrabbit and your LuckySquares guide. 🍀⚾
+const GREETING = `G'day! I'm Mariposa, a baseball-loving jackrabbit and your LuckySquares guide. 🍀⚾
 
-Whether you're setting up your first fundraiser, trying to figure out how squares work, or just curious about me and my story — I'm here for all of it.
+Whether you're setting up your first fundraiser, figuring out how squares work, or just curious about me and my story, I'm here for all of it.
 
 What can I help you with today?`;
 
