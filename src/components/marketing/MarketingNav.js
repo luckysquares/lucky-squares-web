@@ -29,7 +29,7 @@ export default function MarketingNav() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/fundraise" className="btn btn-outline btn-sm">Sign in</Link>
-            <Link href="/fundraise" className="btn btn-gold btn-sm">Start for free →</Link>
+            <Link href="/fundraise" className="btn btn-purple btn-sm">Start for free →</Link>
           </div>
         </div>
       </nav>

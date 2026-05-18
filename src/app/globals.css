@@ -173,7 +173,7 @@ textarea { font-family: inherit; }
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  border-radius: 50px;
+  border-radius: 12px;
   font-family: var(--font-sans);
   font-weight: 800;
   font-size: 15px;
@@ -588,9 +588,9 @@ textarea { font-family: inherit; }
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(237,236,248,.92);
+  background: rgba(255,255,255,.97);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(107,70,245,.12);
+  border-bottom: 1px solid rgba(0,0,0,.08);
   padding: 0 24px;
 }
 .marketing-nav-inner {
@@ -624,12 +624,16 @@ textarea { font-family: inherit; }
 
 /* ── btn-purple ── */
 .btn-purple {
-  background: linear-gradient(135deg, var(--purple2) 0%, var(--purple-dark) 100%);
+  background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 45%, #4A28D4 100%);
   color: #fff;
   border: none;
-  box-shadow: 0 4px 20px rgba(107,70,245,.35);
+  box-shadow: 0 4px 20px rgba(107,70,245,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
-.btn-purple:hover { box-shadow: 0 6px 28px rgba(107,70,245,.45); }
+.btn-purple:hover {
+  background: linear-gradient(135deg, #C4B5FD 0%, #8B5CF6 45%, #5B35E8 100%);
+  box-shadow: 0 8px 32px rgba(107,70,245,.55), inset 0 1px 0 rgba(255,255,255,.22);
+  animation: wiggle .4s ease;
+}
 
 /* ── marketing: hero ── */
 .hero {
@@ -648,29 +652,37 @@ textarea { font-family: inherit; }
   z-index: 0;
 }
 .hero-blob-1 {
-  width: 560px;
-  height: 560px;
-  background: rgba(107,70,245,.18);
-  top: -160px;
-  right: -120px;
-  filter: blur(80px);
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(ellipse, rgba(124,58,237,.32) 0%, rgba(107,70,245,.18) 60%, transparent 100%);
+  top: -140px;
+  right: -100px;
+  filter: blur(48px);
 }
 .hero-blob-2 {
-  width: 420px;
-  height: 320px;
-  background: rgba(107,70,245,.14);
-  bottom: -60px;
-  left: -80px;
+  width: 440px;
+  height: 340px;
+  background: radial-gradient(ellipse, rgba(91,53,232,.28) 0%, rgba(107,70,245,.12) 70%, transparent 100%);
+  bottom: -40px;
+  left: -60px;
   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-  filter: blur(70px);
+  filter: blur(52px);
 }
 .hero-blob-3 {
-  width: 380px;
-  height: 380px;
-  background: rgba(255,160,100,.28);
-  top: 60px;
-  right: 12%;
-  filter: blur(100px);
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(ellipse, rgba(251,113,133,.35) 0%, rgba(255,160,100,.22) 60%, transparent 100%);
+  top: 40px;
+  right: 10%;
+  filter: blur(60px);
+}
+.hero-blob-4 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(ellipse, rgba(167,139,250,.28) 0%, transparent 70%);
+  bottom: 10%;
+  right: 18%;
+  filter: blur(44px);
 }
 .hero-dots {
   position: absolute;

@@ -43,7 +43,7 @@ LuckySquares Australia is a platform for running grid-based fundraisers online. 
 - 25 squares: great for smaller groups, sells out faster
 - 50 squares: suits medium clubs and P&Cs
 - 100 squares: suits larger organisations with wide networks
-Price per square is set by the organiser (most use $10 to $20)
+Price per square is set by the organiser. The most successful campaigns price squares between $2 and $10, with the sweet spot around $5. A $20/square campaign only works well if the community is very well-supported and cashed up, or the prize is substantial enough that spending $20 for a 1-in-100 chance feels genuinely enticing. If someone asks what to charge, steer them toward $5 as a starting point.
 
 ### Pricing
 - Trial: Free (build and preview a fundraiser, up to 3 drafts, no real payments)

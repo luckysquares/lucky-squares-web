@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
 
   await sendEmail({
     to:      ADMIN_EMAIL,
-    subject: isStripe ? `ACTION REQUIRED: Draw complete, payout needed — ${f.title}` : `Draw complete: ${f.title}`,
+    subject: isStripe ? `ADMIN NOTICE: Draw complete, payout needed — ${f.title}` : `ADMIN NOTICE: Draw complete — ${f.title}`,
     text:    adminBody,
   });
 
