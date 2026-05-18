@@ -66,7 +66,7 @@ const FAQS = [
       },
       {
         q: 'Can I delete my fundraiser?',
-        a: 'Yes, but only if no squares have been sold. Once participants have purchased squares, the fundraiser cannot be deleted. If you need to cancel a live fundraiser with sales, you will need to manually refund participants and contact us at support@luckysquares.com.au.',
+        a: 'Yes, but only if no squares have been sold. Once participants have purchased squares, the fundraiser cannot be deleted. If you need to cancel a live fundraiser with sales, you will need to manually refund participants and contact us via our contact page.',
       },
       {
         q: 'How do I share my fundraiser?',
@@ -117,7 +117,7 @@ const FAQS = [
       },
       {
         q: 'What if I have a problem with a fundraiser?',
-        a: 'In the first instance, contact the Organiser directly. If you believe the Platform has been used improperly or unlawfully, you can contact Lucky Squares Australia at support@luckysquares.com.au and we will investigate.',
+        a: 'In the first instance, contact the Organiser directly. If you believe the Platform has been used improperly or unlawfully, you can contact Lucky Squares Australia via our contact page and we will investigate.',
       },
     ],
   },
@@ -162,7 +162,7 @@ const FAQS = [
       },
       {
         q: 'What if the platform goes down during a draw?',
-        a: 'Draw results are recorded to our database as soon as the draw is run. If there is any interruption during the draw process, the result is preserved and can be displayed once the connection is restored. Contact support@luckysquares.com.au if you experience any issues.',
+        a: 'Draw results are recorded to our database as soon as the draw is run. If there is any interruption during the draw process, the result is preserved and can be displayed once the connection is restored. Contact us via our contact page if you experience any issues.',
       },
     ],
   },

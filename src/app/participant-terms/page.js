@@ -106,8 +106,7 @@ export default function ParticipantTermsPage() {
             <Section n="10" title="Complaints">
               <p>
                 If you have a complaint about a fundraiser, please contact the Organiser in the first instance.
-                If you believe the Platform has been used unlawfully, you may contact Lucky Squares Australia at{' '}
-                <a href="mailto:support@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>support@luckysquares.com.au</a>.
+                If you believe the Platform has been used unlawfully, you may <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>contact Lucky Squares Australia</a>.
                 Lucky Squares Australia will cooperate with any relevant regulatory authority investigation.
               </p>
             </Section>

@@ -38,6 +38,7 @@ export default function Footer() {
             <Link href="/terms">Terms of service</Link>
             <Link href="/participant-terms">Participant terms</Link>
             <Link href="/privacy">Privacy policy</Link>
+            <Link href="/fair-play">Fair Play policy</Link>
             <Link href="/raffle-compliance">Raffle compliance</Link>
           </div>
         </div>

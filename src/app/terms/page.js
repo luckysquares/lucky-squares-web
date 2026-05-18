@@ -195,7 +195,7 @@ export default function TermsPage() {
 
             <Section n="14" title="Contact" last>
               <p>For any questions regarding these Terms, please contact Play With Heart Pty Ltd (trading as Lucky Squares Australia) at:</p>
-              <p><a href="mailto:legal@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>legal@luckysquares.com.au</a></p>
+              <p><a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>Contact us</a></p>
             </Section>
 
           </div>

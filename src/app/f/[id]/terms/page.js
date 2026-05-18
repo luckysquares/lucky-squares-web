@@ -169,7 +169,7 @@ export default async function CampaignTermsPage({ params }) {
 
             <Section n="10" title="Disputes">
               <p>Any disputes regarding this Fundraiser should be directed in the first instance to the Organiser at <strong>{f.contact_email || f.contact_name}</strong>.</p>
-              <p>Unresolved disputes may be escalated to LuckySquares Australia at <a href="mailto:support@luckysquares.com.au" style={{ color: 'var(--purple)' }}>support@luckysquares.com.au</a>.</p>
+              <p>Unresolved disputes may be escalated to LuckySquares Australia via our <a href="/contact" style={{ color: 'var(--purple)' }}>contact page</a>.</p>
               <p>These terms are governed by the laws of {stateName}, Australia.</p>
             </Section>
 

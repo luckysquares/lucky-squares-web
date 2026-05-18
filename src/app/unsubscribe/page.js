@@ -45,8 +45,7 @@ function UnsubscribeContent() {
             <div style={{ fontSize: 40, marginBottom: 16 }}>🤔</div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 12 }}>Link not recognised</h1>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.6 }}>
-              This unsubscribe link may have already been used or is invalid. If you're still receiving emails, please contact{' '}
-              <a href="mailto:support@luckysquares.com.au" style={{ color: 'var(--purple)' }}>support@luckysquares.com.au</a>.
+              This unsubscribe link may have already been used or is invalid. If you're still receiving emails, please <a href="/contact" style={{ color: 'var(--purple)' }}>contact us</a>.
             </p>
           </>
         )}

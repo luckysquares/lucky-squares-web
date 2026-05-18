@@ -134,7 +134,7 @@ export default function PrivacyPage() {
                 <li>Withdraw consent for non-essential processing</li>
                 <li>Lodge a complaint with the Office of the Australian Information Commissioner (OAIC) at <a href="https://www.oaic.gov.au" style={{ color: 'var(--green)', fontWeight: 700 }}>oaic.gov.au</a></li>
               </ul>
-              <p>To exercise any of these rights, contact us at <a href="mailto:privacy@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>privacy@luckysquares.com.au</a>.</p>
+              <p>To exercise any of these rights, <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>contact us</a>.</p>
             </Section>
 
             <Section n="8" title="Cookies">
@@ -156,8 +156,7 @@ export default function PrivacyPage() {
               <p>
                 We may also send optional communications such as tips, updates, and seasonal promotions.
                 Every non-transactional email we send includes an unsubscribe link. You can opt out at any
-                time by clicking that link or by contacting us at{' '}
-                <a href="mailto:privacy@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>privacy@luckysquares.com.au</a>.
+                time by clicking that link or by <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>contacting us</a>.
               </p>
               <p>
                 Once you opt out, your email address is recorded on our suppression list and we will not
@@ -186,7 +185,7 @@ export default function PrivacyPage() {
             <Section n="12" title="Contact" last>
               <p>For any privacy-related queries or requests:</p>
               <div style={{ margin: '8px 0 16px', display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>
-                <a href="mailto:privacy@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>privacy@luckysquares.com.au</a>
+                <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>Contact us</a>
                 <span style={{ color: 'var(--text2)' }}>Play With Heart Pty Ltd, Adelaide, South Australia</span>
               </div>
               <p>For complaints that are not resolved to your satisfaction, you may contact the Office of the Australian Information Commissioner:</p>

@@ -531,8 +531,7 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, plan
                 <div style={{ fontWeight: 800, fontSize: 15, color: '#991B1B', marginBottom: 4 }}>Your account has been suspended</div>
                 {suspension.reason && <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.6 }}>{suspension.reason}</div>}
                 <div style={{ fontSize: 13, color: '#991B1B', marginTop: 8 }}>
-                  You cannot launch new campaigns while your account is suspended. To appeal or get help, contact{' '}
-                  <a href="mailto:support@luckysquares.com.au" style={{ color: '#991B1B', fontWeight: 700 }}>support@luckysquares.com.au</a>.
+                  You cannot launch new campaigns while your account is suspended. To appeal or get help, <a href="/contact" style={{ color: '#991B1B', fontWeight: 700 }}>contact us</a>.
                 </div>
               </div>
             </div>

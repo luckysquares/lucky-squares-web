@@ -146,7 +146,7 @@ export default function OrgSignupPage() {
         });
 
         if (appError) {
-          setError('Account created but we could not save your application details. Please email support@luckysquares.com.au.');
+          setError('Account created but we could not save your application details. Please contact us via luckysquares.com.au/contact.');
           setLoading(false);
           return;
         }
@@ -154,7 +154,7 @@ export default function OrgSignupPage() {
 
       setStep('submitted');
     } catch (e) {
-      setError('Something went wrong. Please try again or contact support@luckysquares.com.au.');
+      setError('Something went wrong. Please try again or contact us via luckysquares.com.au/contact.');
     } finally {
       setLoading(false);
     }
@@ -182,10 +182,7 @@ export default function OrgSignupPage() {
                   exploring the platform on the Trial plan straight away.
                 </Row>
                 <Row label="Questions">
-                  Email us at{' '}
-                  <a href="mailto:support@luckysquares.com.au" style={{ color: 'var(--green)', fontWeight: 700 }}>
-                    support@luckysquares.com.au
-                  </a>
+                  <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>Contact us</a>
                 </Row>
               </div>
             </div>
@@ -282,7 +279,7 @@ export default function OrgSignupPage() {
                       <span style={{ fontSize: 12, color: 'var(--text2)' }}>Checking…</span>
                     )}
                     {abnValid && !abnChecking && abnExists && (
-                      <span style={{ fontSize: 12, color: '#CC0000' }}>This ABN is already registered. If this is your organisation, please <a href="/fundraise" style={{ color: '#CC0000', fontWeight: 700 }}>sign in</a> or contact support@luckysquares.com.au.</span>
+                      <span style={{ fontSize: 12, color: '#CC0000' }}>This ABN is already registered. If this is your organisation, please <a href="/fundraise" style={{ color: '#CC0000', fontWeight: 700 }}>sign in</a> or <a href="/contact" style={{ color: '#CC0000', fontWeight: 700 }}>contact us</a>.</span>
                     )}
                     {abnValid && !abnChecking && !abnExists && (
                       <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>ABN format valid ✓</span>
