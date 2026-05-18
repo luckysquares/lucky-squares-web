@@ -18,7 +18,7 @@ export default function HomePage() {
           🍀 Now in open beta, free to try
         </div>
         <h1 className="hero-title">
-          The easiest Lucky Squares fundraiser in <span style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #4A28D4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Australia</span>
+          The <span style={{ color: 'var(--purple)' }}>easiest</span> Lucky Squares <span style={{ color: 'var(--purple)' }}>fundraiser</span> in Australia
         </h1>
         <p className="hero-sub">
           Set up your fundraising campaign in minutes, share a link, and watch the squares sell. Run a live draw when you&apos;re ready. No spreadsheets, no unintelligible handwriting and no cash handling headaches.
