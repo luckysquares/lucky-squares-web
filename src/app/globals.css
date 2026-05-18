@@ -425,7 +425,14 @@ textarea { font-family: inherit; }
 }
 .sq.sponsored:hover .sq-tooltip { display: block; }
 
-.sq-num   { font-size: 13px; line-height: 1; font-weight: 800; }
+.sq-num   { font-size: 16px; line-height: 1; font-weight: 800; }
+.sq-sold-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 900; color: #fff; letter-spacing: 1.5px;
+  opacity: 0; transition: opacity .15s; pointer-events: none;
+}
+.sq.taken:hover .sq-sold-overlay { opacity: 1; }
 .sq-label { font-size: 8px; line-height: 1; margin-top: 2px; text-align: center; overflow: hidden; max-width: 100%; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; }
 .sq-timer { font-size: 10px; color: var(--orange); font-weight: 800; }
 
@@ -954,7 +961,7 @@ textarea { font-family: inherit; }
   .grid-container { gap: 3px; }
   .sq { border-radius: 4px; }
   .sq:hover { transform: none; } /* disable hover scale on touch */
-  .sq-num   { font-size: 8px; }
+  .sq-num   { font-size: 10px; }
   .sq-label { font-size: 6px; }
   .sq-timer { font-size: 5px; }
 

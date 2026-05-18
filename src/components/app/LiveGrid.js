@@ -662,41 +662,34 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           </div>
         )}
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
-            <div>
-              {isOwner && <button className="btn btn-outline btn-sm" style={{ marginBottom: 12 }} onClick={onBack}>← Dashboard</button>}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 32 }}>{fundraiser.emoji}</span>
-                <div>
-                  <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 700 }}>{fundraiser.title}</h1>
-                  <div style={{ fontSize: 13, color: 'var(--text2)' }}>{fundraiser.org} · ${fundraiser.pricePerSq} / square</div>
+          {isOwner && <button className="btn btn-outline btn-sm" style={{ marginBottom: 16 }} onClick={onBack}>← Dashboard</button>}
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>{fundraiser.emoji}</div>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 700, marginBottom: 4 }}>{fundraiser.title}</h1>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>{fundraiser.org}, ${fundraiser.pricePerSq} per square</div>
+          </div>
+          <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>
+              <strong style={{ color: 'var(--text)' }}>{squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length}</strong> / {fundraiser.grid} sold
+            </div>
+            {isOwner && !isDrawn && (() => {
+              const costPrizes    = (fundraiser.prizes || []).reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0);
+              const soldCount     = squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length;
+              const soldRevenue   = soldCount * fundraiser.pricePerSq;
+              const belowBreakEven = costPrizes > 0 && soldRevenue < costPrizes;
+              const squaresNeeded = costPrizes > 0 ? Math.ceil((costPrizes - soldRevenue) / fundraiser.pricePerSq) : 0;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  {belowBreakEven && (
+                    <span style={{ fontSize: 12, color: 'var(--orange)', fontWeight: 700 }}>
+                      ⚠️ {squaresNeeded} more square{squaresNeeded !== 1 ? 's' : ''} to cover prizes
+                    </span>
+                  )}
+                  <button className="btn btn-gold btn-sm" onClick={handleDraw}>🎲 Run draw</button>
                 </div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-              <div style={{ fontSize: 13, color: 'var(--text2)' }}>
-                <strong style={{ color: 'var(--text)' }}>{squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length}</strong> / {fundraiser.grid} sold
-              </div>
-              {isOwner && !isDrawn && (() => {
-                const costPrizes    = (fundraiser.prizes || []).reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0);
-                const soldCount     = squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length;
-                const soldRevenue   = soldCount * fundraiser.pricePerSq;
-                const belowBreakEven = costPrizes > 0 && soldRevenue < costPrizes;
-                const squaresNeeded = costPrizes > 0 ? Math.ceil((costPrizes - soldRevenue) / fundraiser.pricePerSq) : 0;
-                return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    {belowBreakEven && (
-                      <span style={{ fontSize: 12, color: 'var(--orange)', fontWeight: 700 }}>
-                        ⚠️ {squaresNeeded} more square{squaresNeeded !== 1 ? 's' : ''} to cover prizes
-                      </span>
-                    )}
-                    <button className="btn btn-gold btn-sm" onClick={handleDraw}>🎲 Run draw</button>
-                    <button className="btn btn-outline btn-sm" onClick={handleDownloadCsv}>⬇ CSV</button>
-                  </div>
-                );
-              })()}
-              {isDrawn && <span className="tag tag-drawn" style={{ fontSize: 13, padding: '5px 12px' }}>🏆 Drawn</span>}
-            </div>
+              );
+            })()}
+            {isDrawn && <span className="tag tag-drawn" style={{ fontSize: 13, padding: '5px 12px' }}>🏆 Drawn</span>}
           </div>
 
           {isOwner && fundraiser.drawType === 'auto' && !isDrawn && localDrawDate && (() => {
@@ -891,7 +884,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                     </>
                   ) : (
                     <>
-                      {!isDrawn && sq.status === 'taken' && !isSponsored && <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', textTransform: 'uppercase', lineHeight: 1 }}>SOLD</span>}
+                      {!isDrawn && sq.status === 'taken' && !isSponsored && <span className="sq-sold-overlay">SOLD</span>}
                       <span className="sq-num">{sq.id}</span>
                       {!isDrawn && sq.status === 'taken'    && sq.owner    && <span className="sq-label">{abbrevName(sq.owner)}</span>}
                       {!isDrawn && sq.status === 'mine'                    && <span className="sq-label" style={{ color: '#007A5C' }}>✓</span>}
@@ -947,6 +940,13 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                   🚀 Launch now
                 </button>
               </div>
+            </div>
+          )}
+
+          {isOwner && fundraiser.status !== 'draft' && (
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '20px auto 0', textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Download your sales data here</div>
+              <button className="btn btn-outline btn-sm" onClick={handleDownloadCsv}>⬇ Download CSV</button>
             </div>
           )}
 
