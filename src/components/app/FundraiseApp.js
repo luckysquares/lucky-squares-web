@@ -858,7 +858,10 @@ function SetupWizard({ onComplete, onCancel }) {
   const canNext = () => {
     if (step === 0) return !!gridOpt;
     if (step === 1) return parseFloat(price) > 0;
-    if (step === 2) return prizes.some((p) => p.desc.trim());
+    if (step === 2) {
+      const filled = prizes.filter((p) => p.desc.trim());
+      return filled.length > 0 && filled.every((p) => p.donated || p.value.trim());
+    }
     if (step === 3) return campaign.title.trim() && campaign.contactName.trim() && campaign.contactEmail.trim() && campaign.contactPhone.trim();
     if (step === PAYMENT_STEP) return bankComplete;
     return true;
@@ -1001,7 +1004,17 @@ function SetupWizard({ onComplete, onCancel }) {
               </div>
               <div className="form-group" style={{ width: 120 }}>
                 <label className="form-label">Value</label>
-                <input className="form-input" placeholder={i === 0 ? '$150' : i === 1 ? '$50' : i === 2 ? '$25' : '$0'} maxLength={20} value={p.value} onChange={(e) => { const n = [...prizes]; n[i] = { ...n[i], value: e.target.value }; setPrizes(n); }} />
+                <input
+                  className="form-input"
+                  placeholder={i === 0 ? '$150' : i === 1 ? '$50' : i === 2 ? '$25' : '$0'}
+                  maxLength={20}
+                  value={p.value}
+                  onChange={(e) => { const n = [...prizes]; n[i] = { ...n[i], value: e.target.value }; setPrizes(n); }}
+                  style={p.desc.trim() && !p.donated && !p.value.trim() ? { borderColor: 'var(--orange)' } : undefined}
+                />
+                {p.desc.trim() && !p.donated && !p.value.trim() && (
+                  <div style={{ fontSize: 11, color: 'var(--orange)', fontWeight: 700, marginTop: 4 }}>Required</div>
+                )}
               </div>
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer', width: 'fit-content' }}>
