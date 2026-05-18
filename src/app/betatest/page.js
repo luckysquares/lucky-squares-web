@@ -137,7 +137,8 @@ export default function BetaTestPage() {
       <section style={{ padding: '48px 24px' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Your testing checklist</h2>
-          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 32 }}>Work through as many of these as you can. Note anything that feels broken, confusing, or just a bit off.</p>
+          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 8 }}>Please work through as many of these as you can. Note anything that feels broken, confusing, or just a bit off.</p>
+          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 32 }}>Talking of a bit off, you'll notice that all of the example campaigns and testimonials are fictional organisations. I've used AI to help populate content until I've got enough testimonials from awesome people like you to share.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {TASKS.map((task) => (
               <div key={task.title} className="scratch-card" style={{ padding: '24px 28px' }}>
