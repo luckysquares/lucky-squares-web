@@ -2,6 +2,10 @@ import { SUPPORT_EMAIL } from './resend.ts';
 
 const SIG = `Cheers,\nThe LuckySquares team\n${SUPPORT_EMAIL}`;
 
+function firstName(name: string): string {
+  return (name || 'there').split(' ')[0];
+}
+
 // ── Organiser emails ──────────────────────────────────────────────────────────
 
 export function emailOrganizerWelcome(d: { first_name: string }) {
@@ -479,7 +483,7 @@ export function emailSquarePurchaseConfirmation(d: {
 }) {
   return {
     subject: `You're in! Square${d.square_numbers.includes(',') ? 's' : ''} #${d.square_numbers} ${d.square_numbers.includes(',') ? 'are' : 'is'} yours`,
-    text: `Hi ${d.buyer_name},
+    text: `Hi ${firstName(d.buyer_name)},
 
 Your square${d.square_numbers.includes(',') ? 's are' : ' is'} confirmed for ${d.campaign_title}, run by ${d.org_name}.
 
@@ -509,7 +513,7 @@ export function emailDrawResultWinner(d: {
 }) {
   return {
     subject: `You won in ${d.campaign_title}!`,
-    text: `Hi ${d.buyer_name},
+    text: `Hi ${firstName(d.buyer_name)},
 
 Congratulations, you're a winner!
 
@@ -538,7 +542,7 @@ export function emailDrawResultDidNotWin(d: {
 
   return {
     subject: `The results are in for ${d.campaign_title}`,
-    text: `Hi ${d.buyer_name},
+    text: `Hi ${firstName(d.buyer_name)},
 
 The draw for ${d.campaign_title} has been completed.
 
@@ -567,7 +571,7 @@ export function emailRefundNotification(d: {
 
   return {
     subject: `Refund for your squares in ${d.campaign_title}`,
-    text: `Hi ${d.buyer_name},
+    text: `Hi ${firstName(d.buyer_name)},
 
 ${d.campaign_title} has been cancelled before the draw took place.
 

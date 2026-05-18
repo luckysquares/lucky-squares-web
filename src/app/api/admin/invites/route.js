@@ -81,7 +81,7 @@ function inviteHtml(name, couponCode, couponLabel) {
           <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">Australia</div>
         </td></tr>
         <tr><td style="background:#FFFFFF;border-radius:16px;padding:40px;border:1.5px solid #E5E0D5;box-shadow:0 2px 12px rgba(61,46,26,0.07)">
-          <p style="margin:0 0 20px;font-size:16px;line-height:1.7;color:#1A1209">Hi ${safe(name)},</p>
+          <p style="margin:0 0 20px;font-size:16px;line-height:1.7;color:#1A1209">Hi ${safe(name.split(' ')[0])},</p>
           <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#4A3728">
             I wanted to personally reach out and invite you to try LuckySquares Australia. I built it to make Lucky Squares fundraisers genuinely easy to run, and I think you will love it.
           </p>
@@ -151,7 +151,7 @@ export async function POST(req) {
 
       const subject = `An invitation from Jamie at LuckySquares Australia`;
       const html    = inviteHtml(name.trim(), couponCode, couponLabel);
-      const text    = `Hi ${name},\n\nI wanted to personally invite you to try LuckySquares Australia. Head to https://luckysquares.com.au to get started.\n\n${couponCode ? `Your coupon code: ${couponCode}\n\n` : ''}Best,\nJamie\nFounder, LuckySquares Australia`;
+      const text    = `Hi ${name.trim().split(' ')[0]},\n\nI wanted to personally invite you to try LuckySquares Australia. Head to https://luckysquares.com.au to get started.\n\n${couponCode ? `Your coupon code: ${couponCode}\n\n` : ''}Best,\nJamie\nFounder, LuckySquares Australia`;
 
       if (resendKey) {
         const res = await fetch('https://api.resend.com/emails', {
