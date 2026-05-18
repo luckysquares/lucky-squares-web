@@ -10,7 +10,7 @@ export default function HowItWorksPage() {
     <>
       <MarketingNav />
 
-      <section className="section dot-bg" style={{ paddingTop: 80 }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 80 }}>
         <div className="section-inner" style={{ textAlign: 'center' }}>
           <div className="section-label">How it works</div>
           <h1 className="section-heading" style={{ margin: '0 auto 24px' }}>
@@ -22,11 +22,11 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      <section className="section" style={{ background: 'var(--cream)' }}>
+      <section className="section" style={{ background: '#FFFCF8' }}>
         <div className="section-inner">
           <div className="steps-grid">
 
-            <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img
                   src="/sports-club-fundraiser.PNG"
@@ -44,7 +44,7 @@ export default function HowItWorksPage() {
               </div>
             </div>
 
-            <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img
                   src="/lucky-squares-fundraiser.PNG"
@@ -61,7 +61,7 @@ export default function HowItWorksPage() {
               </div>
             </div>
 
-            <div className="scratch-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
                 <img
                   src="/help-for-sports-clubs-to-raise-money.PNG"
@@ -84,7 +84,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* ── Deep-dive panels ── */}
-      <section className="section" style={{ background: 'var(--cream2)' }}>
+      <section className="section section-solid-bg">
         <div className="section-inner">
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div className="section-label">A closer look</div>
@@ -94,7 +94,7 @@ export default function HowItWorksPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
 
             {/* Panel 1: Campaign setup wizard */}
-            <div className="scratch-card" style={{ padding: '36px 40px' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '36px 40px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                 <span style={{ fontSize: 32 }}>🧙</span>
                 <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
@@ -113,7 +113,7 @@ export default function HowItWorksPage() {
                   { num: '5', icon: '👁️', title: 'Preview and launch', desc: 'Review everything before it goes live. When you are happy, click Launch. Your unique share link is ready to send to your community.' },
                 ].map((s) => (
                   <div key={s.num} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: 'var(--cream)', borderRadius: 12, padding: '16px 20px', border: '1px solid var(--border)' }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--green)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #A78BFA, #7C3AED)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
                       {s.num}
                     </div>
                     <div>
@@ -129,7 +129,7 @@ export default function HowItWorksPage() {
             </div>
 
             {/* Panel 2: Grid colour guide */}
-            <div className="scratch-card" style={{ padding: '36px 40px' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '36px 40px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                 <span style={{ fontSize: 32 }}>🎨</span>
                 <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
@@ -219,7 +219,7 @@ export default function HowItWorksPage() {
             </div>
 
             {/* Panel 3: Checking sales */}
-            <div className="scratch-card" style={{ padding: '36px 40px' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '36px 40px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                 <span style={{ fontSize: 32 }}>📊</span>
                 <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
@@ -248,7 +248,7 @@ export default function HowItWorksPage() {
             </div>
 
             {/* Panel 4: Running the draw */}
-            <div className="scratch-card" style={{ padding: '36px 40px' }}>
+            <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '36px 40px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                 <span style={{ fontSize: 32 }}>🏆</span>
                 <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
@@ -266,7 +266,7 @@ export default function HowItWorksPage() {
                   { step: '4', icon: '📬', title: 'Notifying your winners', desc: 'The platform automatically notifies buyers of the draw results by email. You can also follow up directly using the contact details each winner provided at checkout to arrange prize delivery.' },
                 ].map((s) => (
                   <div key={s.step} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '16px 18px', background: 'var(--cream)', borderRadius: 12, border: '1px solid var(--border)' }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--green)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #A78BFA, #7C3AED)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
                       {s.step}
                     </div>
                     <div>
@@ -286,13 +286,13 @@ export default function HowItWorksPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="section" style={{ background: 'var(--cream2)', textAlign: 'center' }}>
+      <section className="section section-hero-bg" style={{ textAlign: 'center' }}>
         <div className="section-inner">
           <h2 className="section-heading" style={{ margin: '0 auto 16px' }}>Ready to try it?</h2>
           <p className="section-body" style={{ margin: '0 auto 32px', textAlign: 'center' }}>
             Set up your first fundraiser free. No credit card needed.
           </p>
-          <Link href="/fundraise" className="btn btn-gold btn-xl">
+          <Link href="/fundraise" className="btn btn-purple btn-xl">
             Start your fundraiser free →
           </Link>
         </div>

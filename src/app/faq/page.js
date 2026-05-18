@@ -198,7 +198,7 @@ export default function FaqPage() {
     <>
       <MarketingNav />
 
-      <section className="section dot-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 80, paddingBottom: 40 }}>
         <div className="section-inner" style={{ textAlign: 'center' }}>
           <div className="section-label">Help</div>
           <h1 className="section-heading" style={{ margin: '0 auto 16px' }}>Frequently Asked Questions</h1>
@@ -208,11 +208,11 @@ export default function FaqPage() {
         </div>
       </section>
 
-      <section className="section" style={{ background: 'var(--cream)', paddingTop: 0 }}>
+      <section className="section section-solid-bg" style={{ paddingTop: 0 }}>
         <div className="section-inner" style={{ maxWidth: 780 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
             {FAQS.map((section) => (
-              <div key={section.category} className="scratch-card" style={{ padding: '28px 36px' }}>
+              <div key={section.category} style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '28px 36px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                   <span style={{ fontSize: 24 }}>{section.emoji}</span>
                   <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 900, color: 'var(--text)', margin: 0 }}>
@@ -228,7 +228,7 @@ export default function FaqPage() {
             ))}
           </div>
 
-          <div className="scratch-card" style={{ padding: '32px 36px', marginTop: 32, textAlign: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '32px 36px', marginTop: 32, textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>💬</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 8 }}>Still have questions?</h2>
             <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.7 }}>

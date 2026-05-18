@@ -172,7 +172,7 @@ export default function OrgSignupPage() {
               Thanks, {name.split(' ')[0]}. We have received your Organisation plan application for{' '}
               <strong>{orgName}</strong>.
             </p>
-            <div className="scratch-card" style={{ padding: 28, textAlign: 'left', marginBottom: 32 }}>
+            <div className="scratch-card" style={{ background: '#fff', padding: 28, textAlign: 'left', marginBottom: 32 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: 14 }}>
                 <Row label="What happens next">
                   We will verify your ABN and review your application. You will hear from us within 1 business day.
@@ -200,7 +200,7 @@ export default function OrgSignupPage() {
     <>
       <MarketingNav />
 
-      <section className="section dot-bg" style={{ paddingTop: 72, paddingBottom: 24 }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 72, paddingBottom: 24 }}>
         <div className="section-inner" style={{ textAlign: 'center' }}>
           <div className="section-label">Organisation plan</div>
           <h1 className="section-heading" style={{ margin: '0 auto 12px' }}>Register your organisation</h1>
@@ -210,13 +210,13 @@ export default function OrgSignupPage() {
         </div>
       </section>
 
-      <section className="section" style={{ background: 'var(--cream)', paddingTop: 0 }}>
+      <section className="section section-solid-bg" style={{ paddingTop: 0 }}>
         <div className="section-inner">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 48, maxWidth: 1000, margin: '0 auto', alignItems: 'start' }}>
 
             {/* Left: benefits */}
             <div style={{ position: 'sticky', top: 100 }}>
-              <div className="scratch-card" style={{ padding: 32 }}>
+              <div className="scratch-card" style={{ background: '#fff', padding: 32 }}>
                 <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 4 }}>
                   Organisation plan
                 </div>
@@ -241,7 +241,7 @@ export default function OrgSignupPage() {
 
             {/* Right: form */}
             <div>
-              <div className="scratch-card" style={{ padding: '32px 36px' }}>
+              <div className="scratch-card" style={{ background: '#fff', padding: '32px 36px' }}>
 
                 {/* Section: Organisation */}
                 <SectionHeading>Your organisation</SectionHeading>
@@ -469,7 +469,7 @@ export default function OrgSignupPage() {
                 )}
 
                 <button
-                  className="btn btn-gold btn-lg"
+                  className="btn btn-purple btn-lg"
                   style={{ width: '100%', justifyContent: 'center', opacity: canSubmit ? 1 : .5, cursor: canSubmit ? 'pointer' : 'not-allowed' }}
                   onClick={handleSubmit}
                   disabled={loading || !canSubmit}

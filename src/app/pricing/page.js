@@ -10,7 +10,7 @@ export default function PricingPage() {
     <>
       <MarketingNav />
 
-      <section className="section dot-bg" style={{ paddingTop: 80 }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 80 }}>
         <div className="section-inner" style={{ textAlign: 'center' }}>
           <div className="section-label">Pricing</div>
           <h1 className="section-heading" style={{ margin: '0 auto 16px' }}>
@@ -22,7 +22,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section className="section" style={{ background: 'var(--cream)' }}>
+      <section className="section section-solid-bg">
         <div className="section-inner">
           <div className="pricing-grid" style={{ maxWidth: 900, margin: '0 auto' }}>
             <div className="pricing-card">
@@ -43,7 +43,7 @@ export default function PricingPage() {
             <div className="pricing-card featured">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div className="pricing-name">Casual</div>
-                <span className="tag tag-green">Most popular</span>
+                <span className="tag" style={{ background: 'var(--purple-light)', color: 'var(--purple)', border: '1px solid rgba(107,70,245,.2)' }}>Most popular</span>
               </div>
               <div className="pricing-price">$19 <span>per fundraiser</span></div>
               <p className="pricing-desc">One flat fee per live fundraising campaign. No percentage cuts, no hidden fees.</p>
@@ -56,7 +56,7 @@ export default function PricingPage() {
                 <li>Live draw feature</li>
                 <li>Notify buyers of results</li>
               </ul>
-              <Link href="/fundraise" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+              <Link href="/fundraise" className="btn btn-purple" style={{ width: '100%', justifyContent: 'center' }}>
                 Start your fundraiser →
               </Link>
             </div>
@@ -78,7 +78,7 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: 64, background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: 16, padding: '32px 40px', maxWidth: 700, margin: '64px auto 0' }}>
+          <div style={{ marginTop: 64, background: '#fff', border: '1.5px solid var(--border)', borderRadius: 16, padding: '32px 40px', maxWidth: 700, margin: '64px auto 0' }}>
             <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>
               Frequently asked questions
             </h3>

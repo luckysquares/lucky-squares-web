@@ -116,7 +116,7 @@ export default function FeelingLuckyPage() {
       <MarketingNav />
 
       {/* Hero */}
-      <section className="section dot-bg" style={{ paddingTop: 80, paddingBottom: 48, textAlign: 'center' }}>
+      <section className="section section-hero-bg" style={{ paddingTop: 80, paddingBottom: 48, textAlign: 'center' }}>
         <div className="section-inner" style={{ maxWidth: 680 }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🎲</div>
           <div className="section-label">Feeling Lucky</div>
@@ -151,7 +151,7 @@ export default function FeelingLuckyPage() {
 
       {/* Selected campaign card */}
       {(selected || spinning) && (
-        <section className="section" style={{ background: 'var(--cream)', paddingTop: 0, paddingBottom: 64 }}>
+        <section className="section section-solid-bg" style={{ paddingTop: 0, paddingBottom: 64 }}>
           <div className="section-inner" style={{ maxWidth: 680 }}>
 
             {spinning ? (
@@ -266,7 +266,7 @@ export default function FeelingLuckyPage() {
 
       {/* No campaigns state */}
       {!spinning && !selected && hasSpun && campaigns.length === 0 && (
-        <section className="section" style={{ background: 'var(--cream)', paddingTop: 0, paddingBottom: 64 }}>
+        <section className="section section-solid-bg" style={{ paddingTop: 0, paddingBottom: 64 }}>
           <div className="section-inner" style={{ maxWidth: 560, textAlign: 'center' }}>
             <div className="scratch-card" style={{ padding: '48px 36px' }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🍀</div>
@@ -281,7 +281,7 @@ export default function FeelingLuckyPage() {
       )}
 
       {/* Bottom CTA */}
-      <section className="section dot-bg" style={{ textAlign: 'center' }}>
+      <section className="section section-hero-bg" style={{ textAlign: 'center' }}>
         <div className="section-inner" style={{ maxWidth: 560 }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>🏫</div>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(22px,3vw,32px)', fontWeight: 900, color: 'var(--text)', marginBottom: 12 }}>
