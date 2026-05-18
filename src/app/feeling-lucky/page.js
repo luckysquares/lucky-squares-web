@@ -285,7 +285,7 @@ export default function FeelingLuckyPage() {
         <div className="section-inner" style={{ maxWidth: 560 }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>🏫</div>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(22px,3vw,32px)', fontWeight: 900, color: 'var(--text)', marginBottom: 12 }}>
-            Running a fundraiser?
+            Running your own fundraiser?
           </h2>
           <p style={{ fontSize: 16, color: 'var(--text2)', marginBottom: 28, maxWidth: 420, margin: '0 auto 28px' }}>
             Set up your Lucky Squares campaign in minutes. Share a link, sell squares, run a live draw. Free to try.
