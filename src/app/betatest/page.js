@@ -8,11 +8,11 @@ export const metadata = {
 };
 
 const DEMO_CAMPAIGNS = [
-  { id: 'd746fddb-f8bb-4a25-bfcb-a7d4a1df4e9e', emoji: '🏆', title: 'Werribee Junior FC — State Championships', org: 'Werribee Junior Football Club', sold: 50, total: 50 },
+  { id: 'd746fddb-f8bb-4a25-bfcb-a7d4a1df4e9e', emoji: '🏆', title: 'Werribee Junior FC: State Championships', org: 'Werribee Junior Football Club', sold: 50, total: 50 },
   { id: '8cd6f1ef-1eb6-4dec-8ba6-f4e24a6dc4af', emoji: '🌱', title: 'New playground for Sunbury Primary', org: 'Sunbury Primary School P&C', sold: 27, total: 100 },
-  { id: '41466307-b68b-4b4c-bfc7-8c13547549c4', emoji: '⭐', title: 'New patrol boards — Bayside SLSC', org: 'Bayside Surf Lifesaving Club', sold: 16, total: 50 },
-  { id: '35e4dc13-13a0-43b2-81d0-20205e326e75', emoji: '⚾', title: 'PANPACS Gold Coast — Chuggernauts', org: 'Glenelg Baseball Club', sold: 50, total: 50 },
-  { id: '415ff60b-ed99-4050-9c07-c68f9e890713', emoji: '🐾', title: 'New rescue vehicle — Wildlife Friends SA', org: 'Wildlife Friends SA', sold: 12, total: 50 },
+  { id: '41466307-b68b-4b4c-bfc7-8c13547549c4', emoji: '⭐', title: 'New patrol boards: Bayside SLSC', org: 'Bayside Surf Lifesaving Club', sold: 16, total: 50 },
+  { id: '35e4dc13-13a0-43b2-81d0-20205e326e75', emoji: '⚾', title: 'PANPACS Gold Coast: Chuggernauts', org: 'Glenelg Baseball Club', sold: 50, total: 50 },
+  { id: '415ff60b-ed99-4050-9c07-c68f9e890713', emoji: '🐾', title: 'New rescue vehicle: Wildlife Friends SA', org: 'Wildlife Friends SA', sold: 12, total: 50 },
 ];
 
 const TASKS = [
@@ -21,7 +21,7 @@ const TASKS = [
     title: 'Sign up and create a campaign',
     steps: [
       'Hit "Start for free" and create a new account with your own email',
-      'Set up a campaign — give it a fun name, pick a grid size, set a price per square',
+      'Set up a campaign, give it a fun name, pick a grid size, set a price per square',
       'Launch it and grab the share link',
       'Use the Stripe test card below to pay the campaign fee',
     ],
@@ -32,7 +32,7 @@ const TASKS = [
     steps: [
       'Visit one of the demo campaigns below',
       'Pick a few squares and go through the checkout',
-      'Use the Stripe test card — does the confirmation feel right?',
+      'Use the Stripe test card. Does the confirmation feel right?',
       'Check the grid updates in real time',
     ],
   },
@@ -41,7 +41,7 @@ const TASKS = [
     title: 'Try the contact form',
     steps: [
       'Head to the Contact page',
-      'Send a message — try a few different categories',
+      'Send a message, try a few different categories',
       'Does it confirm nicely? Does anything feel off?',
     ],
   },
@@ -49,7 +49,7 @@ const TASKS = [
     emoji: '📰',
     title: 'Browse the blog',
     steps: [
-      'Check out the blog — does the layout work well?',
+      'Check out the blog. Does the layout work well?',
       'Click into a few posts',
       'Would you share any of them?',
     ],
@@ -59,7 +59,7 @@ const TASKS = [
     title: 'Test on mobile',
     steps: [
       'Open the site on your phone',
-      'Try the grid on a small screen — can you tap squares easily?',
+      'Try the grid on a small screen. Can you tap squares easily?',
       'Go through the whole checkout on mobile',
     ],
   },
@@ -68,7 +68,7 @@ const TASKS = [
     title: 'Try to break it',
     steps: [
       'Submit empty forms',
-      'Try weird inputs — long names, emoji, special characters',
+      'Try weird inputs: long names, emoji, special characters',
       'Go back and forward during checkout',
       'Anything that feels wrong, note it down',
     ],
@@ -90,7 +90,7 @@ export default function BetaTestPage() {
             You're one of the first people to see this. 👀
           </h1>
           <p style={{ fontSize: 18, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 540, margin: '0 auto 32px' }}>
-            LuckySquares Australia is almost ready to go live — and before we do, we want people we trust to kick the tyres, find the rough edges, and tell us what's not working.
+            LuckySquares Australia is almost ready to go live. Before we do, we want people we trust to kick the tyres, find the rough edges, and tell us what's not working.
           </p>
           <p style={{ fontSize: 16, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 540, margin: '0 auto' }}>
             That's you. Welcome, Founding Member.
@@ -105,9 +105,9 @@ export default function BetaTestPage() {
             <div style={{ fontSize: 36, marginBottom: 12 }}>🎁</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>A thank-you from me</h2>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 480, margin: '0 auto' }}>
-              As my way of saying thanks, every Founding Member who helps test the platform will receive <strong style={{ color: 'var(--purple)' }}>three free campaigns</strong> when we go live — no campaign fee, on me. Just let me know once you've put it through its paces.
+              As my way of saying thanks, every Founding Member who helps test the platform will receive <strong style={{ color: 'var(--purple)' }}>three free campaigns</strong> when we go live (no campaign fee, on me). Just let me know once you've put it through its paces.
             </p>
-            <p style={{ fontSize: 15, color: 'var(--text2)', marginTop: 16, fontWeight: 700 }}>— Jamie</p>
+            <p style={{ fontSize: 15, color: 'var(--text2)', marginTop: 16, fontWeight: 700 }}>Jamie</p>
           </div>
         </div>
       </section>
@@ -119,9 +119,9 @@ export default function BetaTestPage() {
           <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 24 }}>Use these details anywhere a payment is required. No real money changes hands.</p>
           <div className="scratch-card" style={{ padding: 28, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
             {[
-              { label: 'Card number',  value: '4242 4242 4242 4242' },
-              { label: 'Expiry',       value: 'Any future date — e.g. 12/29' },
-              { label: 'CVC',          value: 'Any 3 digits — e.g. 123' },
+              { label: 'Card number',     value: '4242 4242 4242 4242' },
+              { label: 'Expiry',          value: 'Any future date, e.g. 12/29' },
+              { label: 'CVC',             value: 'Any 3 digits, e.g. 123' },
               { label: 'Name / postcode', value: 'Anything' },
             ].map(({ label, value }) => (
               <div key={label}>
@@ -174,7 +174,7 @@ export default function BetaTestPage() {
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 800, color: c.sold === c.total ? 'var(--green)' : 'var(--purple)' }}>
-                      {c.sold === c.total ? 'Full — draw ready' : `${c.sold}/${c.total} sold`}
+                      {c.sold === c.total ? 'Full (draw ready)' : `${c.sold}/${c.total} sold`}
                     </div>
                   </div>
                 </div>
