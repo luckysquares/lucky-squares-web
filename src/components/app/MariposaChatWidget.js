@@ -78,6 +78,26 @@ export default function MariposaChatWidget() {
     setSent(true);
   };
 
+  const renderMessage = (text, role) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) =>
+      urlRegex.test(part) ? (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: role === 'user' ? 'rgba(255,255,255,0.9)' : '#007A5C', textDecoration: 'underline', wordBreak: 'break-all' }}
+        >
+          {part}
+        </a>
+      ) : (
+        part
+      )
+    );
+  };
+
   return (
     <>
       {/* Floating button */}
@@ -139,7 +159,7 @@ export default function MariposaChatWidget() {
                   color: m.role === 'user' ? '#fff' : '#1A1209',
                   fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                 }}>
-                  {m.content}
+                  {renderMessage(m.content, m.role)}
                 </div>
               </div>
             ))}
