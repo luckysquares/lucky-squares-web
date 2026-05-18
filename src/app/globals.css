@@ -683,7 +683,7 @@ textarea { font-family: inherit; }
   pointer-events: none;
   z-index: 0;
 }
-.hero > * { position: relative; z-index: 1; }
+.hero > :not(.hero-blob):not(.hero-dots) { position: relative; z-index: 1; }
 .hero-title {
   font-family: var(--font-serif);
   font-size: clamp(36px, 6vw, 68px);
