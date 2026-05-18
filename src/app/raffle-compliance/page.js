@@ -144,7 +144,7 @@ export default function CompliancePage() {
                 by [Law Firm Name], [City], South Australia. A written legal opinion dated [Date] is held on file.
               </p>
               <div style={{ marginTop: 16, padding: '14px 18px', background: '#FFFBEC', border: '1.5px solid #F0D878', borderRadius: 10, fontSize: 13, color: '#9A6800' }}>
-                <strong>Note:</strong> This field to be completed following your legal appointment.
+                <strong>Note:</strong> This field to be completed following appointment for legal opinion.
               </div>
             </Section>
 
