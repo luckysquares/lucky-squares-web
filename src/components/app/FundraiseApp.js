@@ -88,6 +88,7 @@ function dbToFundraiser(row, soldCount = 0, prizes = []) {
     winnerSquareNum:  row.winner_square_num ?? null,
     winnerSquareNums: Array.isArray(row.winner_square_nums) ? row.winner_square_nums : (row.winner_square_num != null ? [row.winner_square_num] : []),
     launchedAt:      row.launched_at || null,
+    imageUrl:        row.image_url || null,
     totalPrizeValue: prizes.reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0),
     prizes: prizes
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
@@ -782,7 +783,9 @@ function SetupWizard({ onComplete, onCancel }) {
   const [gridOpt,   setGridOpt]   = useState(GRID_OPTIONS[0]);
   const [price,     setPrice]     = useState('5');
   const [prizes,    setPrizes]    = useState([{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
-  const [campaign,  setCampaign]  = useState({ title: '', org: '', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
+  const [campaign,       setCampaign]       = useState({ title: '', org: '', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
+  const [campaignImageUrl,  setCampaignImageUrl]  = useState('');
+  const [imageUploading,    setImageUploading]    = useState(false);
   const [drawRules,         setDrawRules]         = useState({ type: 'manual', date: '' });
   const [payment,           setPayment]           = useState({ method: 'inperson', accountName: '', bsb: '', account: '' });
   const [paymentConfirming, setPaymentConfirming] = useState(false);
@@ -792,6 +795,26 @@ function SetupWizard({ onComplete, onCancel }) {
   const [couponData,        setCouponData]        = useState(null);   // { type, value }
 
   const PAYMENT_STEP = WIZARD_STEPS.indexOf('Payment');
+
+  const handleImageSelect = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Please choose an image under 5 MB.'); return; }
+    const preview = URL.createObjectURL(file);
+    setCampaignImageUrl(preview);
+    if (!supabaseConfigured) return;
+    setImageUploading(true);
+    const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const path = `uploads/${Date.now()}.${ext}`;
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.storage
+      .from('fundraiser-images')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (!error && data) {
+      const { data: { publicUrl } } = supabase.storage.from('fundraiser-images').getPublicUrl(data.path);
+      setCampaignImageUrl(publicUrl);
+    }
+    setImageUploading(false);
+  };
 
   const checkCoupon = async () => {
     const code = couponCode.trim().toUpperCase();
@@ -1014,6 +1037,32 @@ function SetupWizard({ onComplete, onCancel }) {
             <textarea className="form-input" rows={3} placeholder="Tell your story: why you're fundraising and what the money supports" maxLength={500} value={campaign.description} onChange={(e) => setCampaign({ ...campaign, description: e.target.value })} style={{ resize: 'vertical' }} />
           </div>
           <div className="form-group">
+            <label className="form-label">Campaign photo <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 400 }}>(optional)</span></label>
+            <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Show supporters what they are fundraising for</div>
+            {campaignImageUrl ? (
+              <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--border)' }}>
+                <img src={campaignImageUrl} alt="Campaign" style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+                {imageUploading && (
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 700 }}>
+                    Uploading...
+                  </div>
+                )}
+                {!imageUploading && (
+                  <button onClick={() => setCampaignImageUrl('')} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,.55)', color: '#fff', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
+                    Remove
+                  </button>
+                )}
+              </div>
+            ) : (
+              <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '28px 20px', border: '2px dashed var(--border2)', borderRadius: 12, cursor: 'pointer', background: 'var(--cream)', transition: 'border-color .15s' }}>
+                <span style={{ fontSize: 32 }}>📷</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text2)' }}>Tap to upload a photo</span>
+                <span style={{ fontSize: 12, color: 'var(--muted)' }}>JPG, PNG or WEBP · max 5 MB</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={(e) => e.target.files[0] && handleImageSelect(e.target.files[0])} />
+              </label>
+            )}
+          </div>
+          <div className="form-group">
             <label className="form-label">Thank-you message</label>
             <input className="form-input" placeholder="e.g. Thank you so much for your support!" maxLength={160} value={campaign.thankYou} onChange={(e) => setCampaign({ ...campaign, thankYou: e.target.value })} />
           </div>
@@ -1221,7 +1270,7 @@ function SetupWizard({ onComplete, onCancel }) {
             }}>Next →</button>
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button className="btn btn-outline" onClick={() => onComplete({ gridOpt, price, prizes, campaign, drawRules, payment }, true)}>
+              <button className="btn btn-outline" onClick={() => onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }, true)}>
                 Save as draft
               </button>
               <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={() => setShowLaunchModal(true)}>
@@ -1254,7 +1303,7 @@ function SetupWizard({ onComplete, onCancel }) {
             await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
           }
           closeLaunchModal();
-          onComplete({ gridOpt, price, prizes, campaign, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
+          onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
         };
         return (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
@@ -1559,6 +1608,7 @@ export default function FundraiseApp() {
       sold:            0,
       status:          isDraft ? 'draft' : 'active',
       emoji:           data.campaign.emoji || '🍀',
+      imageUrl:        data.campaignImageUrl || null,
       drawType:        data.drawRules.type,
       drawDate:        data.drawRules.date || null,
       totalPrizeValue,
@@ -1575,7 +1625,7 @@ export default function FundraiseApp() {
           contact_name: sanitize(data.campaign.contactName) || null,
           contact_email: sanitize(data.campaign.contactEmail) || null,
           contact_phone: sanitize(data.campaign.contactPhone) || null,
-          emoji: nf.emoji, description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
+          emoji: nf.emoji, image_url: data.campaignImageUrl || null, description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
           grid_size: nf.grid, price_per_sq: nf.pricePerSq, status: nf.status,
           launched_at: nf.status === 'active' ? new Date().toISOString() : null,
           draw_type: data.drawRules.type, draw_date: data.drawRules.date || null,

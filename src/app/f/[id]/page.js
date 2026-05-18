@@ -24,6 +24,7 @@ function dbToFundraiser(row, prizes = []) {
     drawDate:        row.draw_date || null,
     winnerSquareNum:  row.winner_square_num ?? null,
     winnerSquareNums: Array.isArray(row.winner_square_nums) ? row.winner_square_nums : (row.winner_square_num != null ? [row.winner_square_num] : []),
+    imageUrl:        row.image_url || null,
     prizes:          prizes
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map((p) => ({ place: p.place, description: p.description, value: p.value, donated: p.donated ?? false })),
@@ -88,6 +89,15 @@ export default function PublicFundraiserPage({ params }) {
         <Link href="/" className="btn btn-outline btn-sm">Run your own Lucky Squares Fundraiser →</Link>
       </header>
 
+      {fundraiser.imageUrl && (
+        <div style={{ width: '100%', maxHeight: 320, overflow: 'hidden', lineHeight: 0 }}>
+          <img
+            src={fundraiser.imageUrl}
+            alt={fundraiser.title}
+            style={{ width: '100%', maxHeight: 320, objectFit: 'cover', objectPosition: 'center' }}
+          />
+        </div>
+      )}
       <LiveGrid fundraiser={fundraiser} user={null} onBack={null} />
     </>
   );
