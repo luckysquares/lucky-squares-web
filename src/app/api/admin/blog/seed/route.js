@@ -46,7 +46,7 @@ Return JSON with these exact keys:
   "title": "Final post title",
   "excerpt": "2-3 sentence summary under 180 characters",
   "tags": ["tag1", "tag2"],
-  "image_prompt": "Detailed AI image generator prompt for the cover image, 1200x630 pixels landscape orientation, under 80 words, photorealistic style",
+  "image_prompt": "Detailed AI image generator prompt for the cover image. Must feel warm and community-focused: local sporting clubs, school fetes, volunteers, families at fundraising events, grassroots Australian community life. Only use professional or corporate imagery if the post is specifically about seeking business sponsorship. 1200x630 pixels, landscape orientation, photorealistic style, under 80 words.",
   "content": "Full post in markdown (# heading, 3-4 ## subheadings, CTA at end, 600-800 words, Australian English)"
 }
 
