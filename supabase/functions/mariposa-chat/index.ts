@@ -36,7 +36,7 @@ LuckySquares Australia is a platform for running grid-based fundraisers online. 
 ### How it works
 1. An organiser creates a numbered grid (25, 50, or 100 squares), sets a price per square, adds prizes, and writes a short description
 2. They launch the fundraiser (one-off $19 platform fee) and share the link via WhatsApp, social media, or email
-3. Buyers pick their squares and pay: in person, by bank transfer, or online by card (coming soon)
+3. Buyers pick their squares and pay: in person, by bank transfer, or online by card
 4. When ready, the organiser hits the draw button and a winner is randomly selected
 5. The winning square is revealed live: all participants watching see it highlighted instantly
 
@@ -55,7 +55,7 @@ Price per square is set by the organiser. The most successful campaigns price sq
 - In person: collect cash or EFTPOS directly from buyers
 - Bank transfer: buyers pay to the organiser's BSB/account number (no transaction fees)
 - In person + bank transfer: buyers choose whichever suits them
-- Secure online card (coming soon): 1.7% + 30c per transaction
+- Secure online card: 1.7% + 30c per transaction (added to buyer total so the full amount raised goes to the cause)
 
 ### For buyers
 - Click any available square to select it (up to 10 per person per fundraiser)
@@ -106,7 +106,7 @@ Price per square is set by the organiser. The most successful campaigns price sq
 ### Receiving funds
 - Bank transfer campaigns: buyers pay directly into the organiser's nominated account throughout the campaign (no transfer from LuckySquares needed)
 - In person campaigns: organiser collects directly
-- Stripe/online card campaigns (coming soon): LuckySquares transfers net funds to the organiser's registered bank account within 2 business days of the draw completing
+- Stripe/online card campaigns: LuckySquares transfers net funds to the organiser's registered bank account within 2 business days of the draw completing
 
 ### Refunds
 - Refund requests go to the organiser, not LuckySquares (unless the platform was used improperly)

@@ -1,4 +1,4 @@
-export const FROM_EMAIL    = 'onboarding@resend.dev';
+export const FROM_EMAIL    = 'noreply@luckysquares.com.au';
 export const SUPPORT_EMAIL = 'support@luckysquares.com.au';
 export const ADMIN_EMAIL   = 'jwstott@me.com';
 
