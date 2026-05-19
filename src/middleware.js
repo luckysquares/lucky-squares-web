@@ -1,24 +1,20 @@
-import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 export async function middleware(request) {
-  const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnon   = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // Skip if Supabase not configured (local dev without env vars)
-  if (!supabaseUrl || !supabaseAnon) return NextResponse.next();
+  if (!supabaseUrl || !serviceKey) return NextResponse.next();
 
-  const response = NextResponse.next({ request: { headers: request.headers } });
+  const authHeader = request.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnon, {
-    cookies: {
-      getAll()           { return request.cookies.getAll(); },
-      setAll(cookies)    { cookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options)); },
-    },
-  });
+  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const supabase = createClient(supabaseUrl, serviceKey);
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -28,7 +24,7 @@ export async function middleware(request) {
 
   if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

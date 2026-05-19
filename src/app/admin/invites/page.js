@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { adminFetch } from '@/lib/adminFetch';
 
 const COUPON_OPTIONS = [
   { value: '',          label: 'No coupon'                  },
@@ -22,7 +23,7 @@ export default function InvitesPage() {
   const fetchLog = useCallback(async () => {
     setLogLoad(true);
     try {
-      const res = await fetch('/api/admin/invites');
+      const res = await adminFetch('/api/admin/invites');
       if (res.ok) setLog(await res.json());
     } finally {
       setLogLoad(false);
@@ -50,7 +51,7 @@ export default function InvitesPage() {
     }));
 
     try {
-      const res  = await fetch('/api/admin/invites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ invites }) });
+      const res  = await adminFetch('/api/admin/invites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ invites }) });
       const data = await res.json();
       if (!res.ok) { setResult({ error: data.error ?? 'Unknown error' }); return; }
       setResult({ sent: data.results.filter((r) => r.ok).length, failed: data.failed_count });

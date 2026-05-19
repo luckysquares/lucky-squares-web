@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/adminFetch';
 
 const toSlug = (s) =>
   s.toLowerCase().trim()
@@ -45,7 +46,7 @@ export default function AdminBlogPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/blog');
+      const res = await adminFetch('/api/admin/blog');
       const data = await res.json();
       setPosts(Array.isArray(data) ? data : []);
     } catch { setPosts([]); }
@@ -85,7 +86,7 @@ export default function AdminBlogPage() {
     if (!editing.slug.trim())  { setSaveError('Slug is required.');  return; }
     setSaving(true); setSaveError('');
     const tags = editing.tags.split(',').map((t) => t.trim()).filter(Boolean);
-    const res = await fetch('/api/admin/blog', {
+    const res = await adminFetch('/api/admin/blog', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -108,7 +109,7 @@ export default function AdminBlogPage() {
   const handleDelete = async (id, title) => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeletingId(id);
-    await fetch('/api/admin/blog', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await adminFetch('/api/admin/blog', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     await load(); setDeletingId(null);
   };
 
@@ -117,7 +118,7 @@ export default function AdminBlogPage() {
   const handleGenerate = async () => {
     setGenerating(true); setGenerateError('');
     try {
-      const res = await fetch('/api/admin/blog/generate', {
+      const res = await adminFetch('/api/admin/blog/generate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(generateForm),
       });
@@ -145,14 +146,14 @@ export default function AdminBlogPage() {
   // ── Seed 20 starter posts ─────────────────────────────────────────────────
   const handleSeed = async () => {
     if (!confirm('Generate and publish 20 starter blog posts? This may take a few minutes.')) return;
-    const totalRes = await fetch('/api/admin/blog/seed');
+    const totalRes = await adminFetch('/api/admin/blog/seed');
     const { total } = await totalRes.json();
     setSeedProgress({ current: 0, total, log: [] });
 
     for (let i = 0; i < total; i++) {
       setSeedProgress((p) => ({ ...p, current: i + 1, log: [...p.log, { i, status: 'generating', title: `Post ${i + 1}/${total}…` }] }));
       try {
-        const res = await fetch('/api/admin/blog/seed', {
+        const res = await adminFetch('/api/admin/blog/seed', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ index: i }),
         });
@@ -175,7 +176,7 @@ export default function AdminBlogPage() {
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch('/api/admin/blog/upload', { method: 'POST', body: fd });
+      const res = await adminFetch('/api/admin/blog/upload', { method: 'POST', body: fd });
       const json = await res.json();
       if (!res.ok || json.error) { setUploadError(json.error ?? 'Upload failed.'); setUploading(false); return; }
       fld('cover_image_url', json.url);

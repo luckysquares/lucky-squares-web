@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
+import { adminFetch } from '@/lib/adminFetch';
 
 const STATUS_COLOURS = { active: 'tag-green', drawn: 'tag-drawn', draft: 'tag-muted', cancelled: 'tag-muted' };
 const STATUS_LABELS  = { active: '● Live', drawn: '🏆 Drawn', draft: 'Draft', cancelled: 'Cancelled' };
@@ -83,7 +84,7 @@ export default function AdminCampaigns() {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('fundraiser_id', editing.id);
-    const res = await fetch('/api/admin/campaigns/upload', { method: 'POST', body: fd });
+    const res = await adminFetch('/api/admin/campaigns/upload', { method: 'POST', body: fd });
     const json = await res.json();
     if (!res.ok || json.error) { alert('Upload failed: ' + (json.error || 'Unknown error')); setImageUploading(false); return; }
     setEditing((p) => ({ ...p, image_url: json.url }));
