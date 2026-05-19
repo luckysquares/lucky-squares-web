@@ -230,7 +230,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     setCart((prev) => [...prev, sq.id]);
   }, [cart, fundraiser.id]);
 
-  const handleCheckout = () => { setTimerPaused(true); setPhase('checkout'); };
+  const handleCheckout = () => { setTimerPaused(true); setPhase('checkout'); window.scrollTo(0, 0); };
 
   const handlePay = async () => {
     const ownerName = sanitize(buyerName || user?.name || 'Buyer');
@@ -521,7 +521,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   if (phase === 'checkout') return (
     <div className="dot-bg" style={{ minHeight: '100vh' }}>
       <div style={{ maxWidth: 540, margin: '0 auto', padding: 32 }}>
-        <button className="btn btn-outline btn-sm" style={{ marginBottom: 24 }} onClick={() => { setTimerPaused(false); setPhase('browse'); }}>← Back to grid</button>
+        <button className="btn btn-outline btn-sm" style={{ marginBottom: 24 }} onClick={() => { setTimerPaused(false); setPhase('browse'); window.scrollTo(0, 0); }}>← Back to grid</button>
         <h2 className="section-title" style={{ marginBottom: 24 }}>Checkout</h2>
         <div className="scratch-card" style={{ padding: 24, marginBottom: 20 }}>
           <div style={{ fontWeight: 800, marginBottom: 16 }}>Your squares</div>
@@ -540,7 +540,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                 <span>${txFee.toFixed(2)}</span>
               </div>
               <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 14, lineHeight: 1.5 }}>
-                Includes ${txFee.toFixed(2)} to cover secure payment processing fees (1.7% + 30c)
+                Processing fee (1.7% + 30c) is passed on to your total so the full amount raised goes to the cause.
               </div>
             </>
           )}

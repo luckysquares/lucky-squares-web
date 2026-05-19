@@ -487,7 +487,7 @@ function OrgTeamSection({ sendTxEmail }) {
   );
 }
 
-function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail }) {
+function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail }) {
   const [copied, setCopied] = useState(false);
   const referralLink = referralInfo?.referral_code
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/app?ref=${referralInfo.referral_code}`
@@ -578,7 +578,7 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, canCreate, plan
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20, marginTop: 24 }}>
           {fundraisers.map((f) => (
-            <FundraiserCard key={f.id} f={f} onView={() => onView(f)} onReport={() => onReport(f)} />
+            <FundraiserCard key={f.id} f={f} onView={() => onView(f)} onReport={() => onReport(f)} onConnectBank={() => onConnectBank(f)} />
           ))}
           {canCreate && <NewFundraiserCard onClick={onNew} />}
         </div>
@@ -597,7 +597,7 @@ const PLATFORM_FEES = { 25: 19, 50: 19, 100: 19 };
 const PLAN_LIMITS  = { trial: 3, casual: 5, org: 10 };
 const PLAN_LABELS  = { trial: 'Trial', casual: 'Casual', org: 'Organisation' };
 
-function FundraiserCard({ f, onView, onReport }) {
+function FundraiserCard({ f, onView, onReport, onConnectBank }) {
   const [hovered, setHovered] = useState(false);
   const pct            = Math.round((f.sold / f.grid) * 100);
   const platformFee    = PLATFORM_FEES[f.grid] ?? 0;
@@ -680,6 +680,13 @@ function FundraiserCard({ f, onView, onReport }) {
         )}
       </div>
 
+      {f.status === 'active' && f.payment?.method === 'stripe' && !f.payment?.stripeAccountId && (
+        <div style={{ marginTop: 10, padding: '10px 12px', background: '#FFF6EE', border: '1.5px solid #FFD8B0', borderRadius: 10, fontSize: 13 }}>
+          <div style={{ fontWeight: 800, color: 'var(--orange)', marginBottom: 4 }}>⚠️ Bank account not connected</div>
+          <div style={{ color: 'var(--text2)', marginBottom: 8, lineHeight: 1.5 }}>Participants can't pay by card until you connect your bank account.</div>
+          <button className="btn btn-sm" style={{ background: 'var(--orange)', color: '#fff', width: '100%' }} onClick={onConnectBank}>Connect bank account →</button>
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
         <button className="btn btn-primary btn-sm" style={{ width: '100%' }} onClick={onView}>View my campaign →</button>
         <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={onReport}>View campaign report</button>
@@ -863,6 +870,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
   const [couponState,       setCouponState]       = useState('idle'); // idle | checking | valid | invalid
   const [couponData,        setCouponData]        = useState(null);   // { type, value }
   const [bankPhase,         setBankPhase]         = useState(false);
+  const [bankPhaseRetro,    setBankPhaseRetro]    = useState(false);
   const [bankDraftId,       setBankDraftId]       = useState(null);
   const [bankSaving,        setBankSaving]        = useState(false);
   const [bankSaveError,     setBankSaveError]     = useState(false);
@@ -1403,14 +1411,20 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
             style={{ width: '100%' }}
             disabled={!bankConnectDone}
             onClick={async () => {
-              if (pendingLaunchData) await onLaunchPay(pendingLaunchData);
+              if (bankPhaseRetro) {
+                setBankPhase(false); setBankPhaseRetro(false); setBankDraftId(null); setBankConnectDone(false);
+                if (user?.id) loadFundraisers(user.id);
+                setPhase('dashboard');
+              } else if (pendingLaunchData) {
+                await onLaunchPay(pendingLaunchData);
+              }
             }}
           >
-            {bankConnectDone ? 'Continue to payment →' : 'Complete bank account setup above to continue'}
+            {bankConnectDone ? (bankPhaseRetro ? 'Done →' : 'Continue to payment →') : 'Complete bank account setup above to continue'}
           </button>
           {!bankConnectDone && (
             <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text2)', marginTop: 12 }}>
-              You must complete the bank account setup before your campaign can go live.
+              {bankPhaseRetro ? 'Complete the bank account setup above to receive card payments.' : 'You must complete the bank account setup before your campaign can go live.'}
             </p>
           )}
         </div>
@@ -1824,6 +1838,7 @@ export default function FundraiseApp() {
 
   const handleViewGrid   = (f) => { setActiveFundraiser(f); setPhase('live'); };
   const handleViewReport = (f) => { setActiveFundraiser(f); setPhase('report'); };
+  const handleConnectBank = (f) => { setBankPhaseRetro(true); setBankPhase(true); setBankDraftId(f.id); setBankConnectDone(false); setBankSaving(false); setBankSaveError(false); };
 
   const handleWizardComplete = async (data, isDraft = false) => {
     const currentCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
@@ -2025,7 +2040,7 @@ export default function FundraiseApp() {
       {phase === 'login'     && <LoginScreen    onLogin={handleLogin}        onRegister={() => { setAuthError(''); setPhase('register'); }} loading={authLoading} error={authError} />}
       {phase === 'register'  && <RegisterScreen onRegister={handleRegister}  onBack={() => { setAuthError(''); setPhase('login'); }} loading={authLoading} error={authError} />}
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
-      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
+      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
