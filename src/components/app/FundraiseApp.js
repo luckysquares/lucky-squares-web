@@ -1633,6 +1633,41 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
     </div>
   );
 }
+// ─── BankConnectScreen ────────────────────────────────────────────────────────
+
+function BankConnectScreen({ fundraiserId, onDone }) {
+  const [done, setDone] = useState(false);
+  return (
+    <div className="dot-bg" style={{ minHeight: '100vh' }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5, marginBottom: 4 }}>Payment setup</div>
+          <h2 className="section-title" style={{ marginBottom: 8 }}>Connect your bank account</h2>
+          <p className="section-sub">Your buyers pay by card and funds are transferred directly to your nominated bank account once the draw is complete.</p>
+        </div>
+        <div className="scratch-card" style={{ padding: 28, marginBottom: 24 }}>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
+            {[
+              { icon: '🔒', text: 'Your details are secured by Stripe, the same payment infrastructure used by millions of businesses worldwide.' },
+              { icon: '🏦', text: 'Funds land directly in your nominated account within 2 business days of your draw completing.' },
+              { icon: '✅', text: 'You only need to do this once. Future campaigns can reuse the same account.' },
+            ].map((item) => (
+              <div key={item.icon} style={{ flex: 1, fontSize: 12, color: 'var(--text2)', lineHeight: 1.6, textAlign: 'center' }}>
+                <div style={{ fontSize: 24, marginBottom: 6 }}>{item.icon}</div>
+                {item.text}
+              </div>
+            ))}
+          </div>
+          <StripeConnectSetup fundraiserId={fundraiserId} onComplete={() => setDone(true)} />
+        </div>
+        <button className="btn btn-purple btn-lg" style={{ width: '100%' }} disabled={!done} onClick={onDone}>
+          {done ? 'Done — back to dashboard →' : 'Complete bank account setup above to continue'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── FundraiseApp (root) ──────────────────────────────────────────────────────
 
 export default function FundraiseApp() {
@@ -1647,6 +1682,7 @@ export default function FundraiseApp() {
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [suspension,        setSuspension]        = useState(null); // null | { suspended: true, reason }
   const [orgInfo,           setOrgInfo]           = useState(null); // null | { role, org_user_id, org_name }
+  const [bankConnectId,     setBankConnectId]     = useState(null);
 
   // Call the transactional-email Edge Function (fire-and-forget)
   const sendTxEmail = useCallback((type, to, data) => {
@@ -1838,7 +1874,7 @@ export default function FundraiseApp() {
 
   const handleViewGrid   = (f) => { setActiveFundraiser(f); setPhase('live'); };
   const handleViewReport = (f) => { setActiveFundraiser(f); setPhase('report'); };
-  const handleConnectBank = (f) => { setBankPhaseRetro(true); setBankPhase(true); setBankDraftId(f.id); setBankConnectDone(false); setBankSaving(false); setBankSaveError(false); };
+  const handleConnectBank = (f) => { setBankConnectId(f.id); setPhase('bankconnect'); };
 
   const handleWizardComplete = async (data, isDraft = false) => {
     const currentCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
@@ -2042,6 +2078,7 @@ export default function FundraiseApp() {
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
+      {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
       {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 

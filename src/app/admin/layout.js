@@ -62,7 +62,7 @@ export default function AdminLayout({ children }) {
       <aside style={{ width: 220, background: '#0F0B2A', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
         <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <Logo size={30} />
+            <Logo size={60} dark />
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: 2 }}>Admin</div>
           </Link>
         </div>
