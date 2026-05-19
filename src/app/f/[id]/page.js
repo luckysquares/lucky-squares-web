@@ -132,12 +132,8 @@ export default function PublicFundraiserPage({ params }) {
     <>
       <div className="rainbow-strip" />
       <header style={{ background: 'var(--card)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(61,46,26,.07)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <Logo size={40} />
-          <div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.5px' }}>LuckySquares</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Australia</div>
-          </div>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <Logo size={44} />
         </Link>
         {/* Desktop nav */}
         <nav style={{ alignItems: 'center', gap: 4 }} className="fundraiser-desktop-nav">

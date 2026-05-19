@@ -7,9 +7,8 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-top">
           <div className="footer-brand">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <Logo size={32} />
-              <span className="footer-logo-title">LuckySquares</span>
+            <div style={{ marginBottom: 12 }}>
+              <Logo size={36} />
             </div>
             <p className="footer-tagline">
               The easiest way to run a Lucky Squares fundraiser in Australia.

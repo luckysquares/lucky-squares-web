@@ -140,12 +140,8 @@ function AppHeader({ user, onLogout, onHome }) {
     <>
       <div className="rainbow-strip" />
       <header style={{ background: 'var(--card)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(61,46,26,.07)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <Logo size={40} />
-          <div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.5px' }}>LuckySquares</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Australia</div>
-          </div>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <Logo size={44} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {user && (
@@ -169,12 +165,8 @@ function AuthShell({ children }) {
       <div className="rainbow-strip" />
       <div style={{ padding: '18px 28px', borderBottom: '1px solid var(--border)', background: 'rgba(253,248,240,.92)', backdropFilter: 'blur(8px)' }}>
         <div style={{ maxWidth: 1060, margin: '0 auto' }}>
-          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <Logo size={34} />
-            <div>
-              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.5px', lineHeight: 1.1 }}>LuckySquares</div>
-              <div style={{ fontSize: 9, color: 'var(--text2)', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Australia</div>
-            </div>
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <Logo size={40} />
           </Link>
         </div>
       </div>

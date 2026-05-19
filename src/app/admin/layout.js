@@ -63,10 +63,7 @@ export default function AdminLayout({ children }) {
         <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <Logo size={30} />
-            <div>
-              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 900, color: '#fff', letterSpacing: '-.3px' }}>LuckySquares</div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,.4)', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Admin</div>
-            </div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: 2 }}>Admin</div>
           </Link>
         </div>
 
