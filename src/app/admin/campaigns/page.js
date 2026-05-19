@@ -80,12 +80,13 @@ export default function AdminCampaigns() {
     if (!file || !editing) return;
     if (file.size > 5 * 1024 * 1024) { alert('Please choose an image under 5 MB.'); return; }
     setImageUploading(true);
-    const ext = file.name.split('.').pop();
-    const path = `${editing.id}/cover.${ext}`;
-    const { data, error } = await getSupabaseClient().storage.from('fundraiser-images').upload(path, file, { upsert: true });
-    if (error) { alert('Upload failed: ' + error.message); setImageUploading(false); return; }
-    const { data: { publicUrl } } = getSupabaseClient().storage.from('fundraiser-images').getPublicUrl(data.path);
-    setEditing((p) => ({ ...p, image_url: publicUrl }));
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('fundraiser_id', editing.id);
+    const res = await fetch('/api/admin/campaigns/upload', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!res.ok || json.error) { alert('Upload failed: ' + (json.error || 'Unknown error')); setImageUploading(false); return; }
+    setEditing((p) => ({ ...p, image_url: json.url }));
     setImageUploading(false);
   };
 

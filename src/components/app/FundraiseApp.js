@@ -893,18 +893,12 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
     if (file.size > 5 * 1024 * 1024) { alert('Please choose an image under 5 MB.'); return; }
     const preview = URL.createObjectURL(file);
     setCampaignImageUrl(preview);
-    if (!supabaseConfigured) return;
     setImageUploading(true);
-    const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
-    const path = `uploads/${Date.now()}.${ext}`;
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase.storage
-      .from('fundraiser-images')
-      .upload(path, file, { upsert: true, contentType: file.type });
-    if (!error && data) {
-      const { data: { publicUrl } } = supabase.storage.from('fundraiser-images').getPublicUrl(data.path);
-      setCampaignImageUrl(publicUrl);
-    }
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/fundraiser/upload', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (res.ok && json.url) setCampaignImageUrl(json.url);
     setImageUploading(false);
   };
 
