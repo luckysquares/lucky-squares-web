@@ -28,7 +28,7 @@ export default function TermsPage() {
 
             <Section n="1" title="About Lucky Squares Australia">
               <p>
-                Play With Heart Pty Ltd (trading as Lucky Squares Australia) (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is a
+                Play With Heart Pty Ltd ACN 698 202 069 ABN 19 698 202 069 (trading as Lucky Squares Australia) (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is a
                 software-as-a-service platform that provides digital tools enabling community organisations
                 to conduct grid-based fundraising activities. We are based in South Australia, Australia.
               </p>
@@ -194,7 +194,7 @@ export default function TermsPage() {
             </Section>
 
             <Section n="14" title="Contact" last>
-              <p>For any questions regarding these Terms, please contact Play With Heart Pty Ltd (trading as Lucky Squares Australia) at:</p>
+              <p>For any questions regarding these Terms, please contact Play With Heart Pty Ltd ACN 698 202 069 (trading as Lucky Squares Australia) at:</p>
               <p><a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>Contact us</a></p>
             </Section>
 

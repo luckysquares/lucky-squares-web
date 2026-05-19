@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="footer-top">
           <div className="footer-brand">
             <div style={{ marginBottom: 12 }}>
-              <Logo size={36} />
+              <Logo size={64} />
             </div>
             <p className="footer-tagline">
               The easiest way to run a Lucky Squares fundraiser in Australia.
@@ -43,7 +43,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Play With Heart Pty Ltd</span>
+          <span>© {new Date().getFullYear()} Play With Heart Pty Ltd ACN 698 202 069 (trading as Lucky Squares Australia)</span>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,.35)' }}>
             Fundraising regulations vary by state. Always check your local requirements.
           </span>

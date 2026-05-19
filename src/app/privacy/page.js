@@ -29,7 +29,7 @@ export default function PrivacyPage() {
 
             <Section n="1" title="Who We Are">
               <p>
-                Play With Heart Pty Ltd (trading as Lucky Squares Australia) (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;)
+                Play With Heart Pty Ltd ACN 698 202 069 ABN 19 698 202 069 (trading as Lucky Squares Australia) (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;)
                 operates the Lucky Squares Australia platform at luckysquares.com.au. We are based in
                 South Australia, Australia.
               </p>
@@ -186,7 +186,7 @@ export default function PrivacyPage() {
               <p>For any privacy-related queries or requests:</p>
               <div style={{ margin: '8px 0 16px', display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>
                 <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>Contact us</a>
-                <span style={{ color: 'var(--text2)' }}>Play With Heart Pty Ltd, Adelaide, South Australia</span>
+                <span style={{ color: 'var(--text2)' }}>Play With Heart Pty Ltd ACN 698 202 069, Adelaide, South Australia</span>
               </div>
               <p>For complaints that are not resolved to your satisfaction, you may contact the Office of the Australian Information Commissioner:</p>
               <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>

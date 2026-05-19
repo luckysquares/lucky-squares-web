@@ -83,7 +83,7 @@ export default async function CampaignTermsPage({ params }) {
           <div className="scratch-card" style={{ padding: '40px 48px', display: 'flex', flexDirection: 'column', gap: 32 }}>
 
             <Section n="1" title="About This Fundraiser">
-              <p>This Lucky Squares fundraiser (&ldquo;the Fundraiser&rdquo;) is conducted by <strong>{f.org}</strong> (&ldquo;the Organiser&rdquo;) using the LuckySquares Australia platform operated by Play With Heart Pty Ltd (&ldquo;LuckySquares&rdquo;).</p>
+              <p>This Lucky Squares fundraiser (&ldquo;the Fundraiser&rdquo;) is conducted by <strong>{f.org}</strong> (&ldquo;the Organiser&rdquo;) using the LuckySquares Australia platform operated by Play With Heart Pty Ltd ACN 698 202 069 (&ldquo;LuckySquares&rdquo;).</p>
               <p>This is a game of chance. There is no guaranteed prize and no skill involved in the outcome of the draw.</p>
               <p>All proceeds from this Fundraiser, after deducting prize costs and platform fees, go to <strong>{f.org}</strong> for their nominated fundraising purpose.</p>
             </Section>
@@ -174,7 +174,7 @@ export default async function CampaignTermsPage({ params }) {
             </Section>
 
             <Section n="11" title="Platform" last>
-              <p>This Fundraiser is facilitated by LuckySquares Australia (Play With Heart Pty Ltd), Adelaide, South Australia. LuckySquares Australia operates the platform and processes payments but is not the promoter of this Fundraiser. The Organiser is solely responsible for the conduct of the Fundraiser and compliance with applicable state lottery and fundraising laws.</p>
+              <p>This Fundraiser is facilitated by LuckySquares Australia (Play With Heart Pty Ltd ACN 698 202 069 ABN 19 698 202 069), Adelaide, South Australia. LuckySquares Australia operates the platform and processes payments but is not the promoter of this Fundraiser. The Organiser is solely responsible for the conduct of the Fundraiser and compliance with applicable state lottery and fundraising laws.</p>
               <p>By using the LuckySquares platform you also agree to the <a href="/terms" style={{ color: 'var(--purple)' }}>LuckySquares Platform Terms of Service</a>.</p>
             </Section>
 

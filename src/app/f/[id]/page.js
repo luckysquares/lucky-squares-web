@@ -133,7 +133,7 @@ export default function PublicFundraiserPage({ params }) {
       <div className="rainbow-strip" />
       <header style={{ background: 'var(--card)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(61,46,26,.07)', position: 'sticky', top: 0, zIndex: 100 }}>
         <Link href="/" style={{ textDecoration: 'none' }}>
-          <Logo size={44} />
+          <Logo size={88} />
         </Link>
         {/* Desktop nav */}
         <nav style={{ alignItems: 'center', gap: 4 }} className="fundraiser-desktop-nav">

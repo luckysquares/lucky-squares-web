@@ -34,7 +34,7 @@ export default function ParticipantTermsPage() {
                 that created the fundraiser). You are not entering into a transaction with Lucky Squares Australia.
               </p>
               <p>
-                Play With Heart Pty Ltd (trading as Lucky Squares Australia) provides the software platform only.
+                Play With Heart Pty Ltd ACN 698 202 069 ABN 19 698 202 069 (trading as Lucky Squares Australia) provides the software platform only.
                 It is not the organiser, operator, or promoter of any fundraiser conducted through the Platform.
               </p>
             </Section>
