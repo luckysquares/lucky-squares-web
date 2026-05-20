@@ -40,6 +40,7 @@ export default function AdminBlogPage() {
   const [imageTab,      setImageTab]      = useState('upload'); // 'upload' | 'url'
   const [uploading,     setUploading]     = useState(false);
   const [uploadError,   setUploadError]   = useState('');
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   useEffect(() => { load(); }, []);
 
@@ -172,7 +173,7 @@ export default function AdminBlogPage() {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true); setUploadError('');
+    setUploading(true); setUploadError(''); setUploadSuccess(false);
     try {
       const fd = new FormData();
       fd.append('file', file);
@@ -180,7 +181,8 @@ export default function AdminBlogPage() {
       const json = await res.json();
       if (!res.ok || json.error) { setUploadError(json.error ?? 'Upload failed.'); setUploading(false); return; }
       fld('cover_image_url', json.url);
-    } catch { setUploadError('Upload failed. Please try again.'); }
+      setUploadSuccess(true);
+    } catch { setUploadError('Upload failed. Please try again.'); setUploadSuccess(false); }
     setUploading(false);
   };
 
@@ -366,6 +368,7 @@ export default function AdminBlogPage() {
                     </span>
                     <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageUpload} disabled={uploading} style={{ display: 'none' }} />
                   </label>
+                  {uploadSuccess && <p style={{ fontSize: 12, color: '#16A34A', marginTop: 6 }}>Image uploaded — remember to save the post.</p>}
                   {uploadError && <p style={{ fontSize: 12, color: '#CC0000', marginTop: 6 }}>{uploadError}</p>}
                 </div>
               ) : (
