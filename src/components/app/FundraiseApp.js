@@ -882,6 +882,13 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [bankConnectDone,   setBankConnectDone]   = useState(false);
   const [pendingLaunchData, setPendingLaunchData] = useState(null);
 
+  // Auto-populate campaign.org from org details when type is 'org'
+  useEffect(() => {
+    if (fundraiserType === 'org' && orgDetails.name.trim() && !campaign.org.trim()) {
+      setCampaign((c) => ({ ...c, org: orgDetails.name.trim() }));
+    }
+  }, [fundraiserType, orgDetails.name]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Auto-save wizard state to localStorage
   useEffect(() => {
     try {
