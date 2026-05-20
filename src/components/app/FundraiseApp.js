@@ -892,6 +892,9 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     }
   }, [fundraiserType, orgDetails.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Scroll to top on every step change
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [step]);
+
   // Auto-save wizard state to localStorage
   useEffect(() => {
     try {
@@ -1862,6 +1865,9 @@ export default function FundraiseApp() {
     }, {});
     setFundraisers(rows.map((r) => dbToFundraiser(r, Number(statsMap[r.id]?.sold_count ?? 0), prizesMap[r.id] || [])));
   }, []);
+
+  // Scroll to top on every phase change
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [phase]);
 
   useEffect(() => {
     const wantsRegister = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('register') === '1';
