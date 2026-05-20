@@ -110,6 +110,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [ageConfirmed,          setAgeConfirmed]           = useState(false);
   const drawTriggeredRef = useRef(false);
   const [tick,        setTick]        = useState(0);
+  const [optOutStatus, setOptOutStatus] = useState('idle'); // idle | checking | needs_reconfirm | confirmed | dismissed
   const timerRef  = useRef(null);
   const prevLen   = useRef(0);
   const myNumsRef = useRef(new Set());
@@ -166,6 +167,17 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
       window.history.replaceState({}, '', clean);
     }
   }, []);
+
+  useEffect(() => {
+    if (phase !== 'success') return;
+    const email = (buyerEmail || savedBuyer?.email || '').trim().toLowerCase();
+    if (!email) return;
+    setOptOutStatus('checking');
+    fetch(`/api/unsubscribe/status?email=${encodeURIComponent(email)}`)
+      .then((r) => r.json())
+      .then(({ needs_reconfirm }) => setOptOutStatus(needs_reconfirm ? 'needs_reconfirm' : 'idle'))
+      .catch(() => setOptOutStatus('idle'));
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     clearInterval(timerRef.current);
@@ -494,6 +506,51 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           <div style={{ background: '#F0FDF8', border: '1.5px solid #B6EDD8', borderRadius: 12, padding: '16px 20px', marginBottom: 20, textAlign: 'center' }}>
             <div style={{ fontWeight: 800, color: 'var(--green)', marginBottom: 4 }}>✓ You're on the list</div>
             <div style={{ fontSize: 13, color: 'var(--text2)' }}>We'll send you a link when {fundraiser.org || 'this organiser'} launches their next campaign.</div>
+          </div>
+        )}
+        {optOutStatus === 'needs_reconfirm' && (
+          <div style={{ background: '#FFF7ED', border: '1.5px solid #FCD34D', borderRadius: 12, padding: '20px 24px', marginBottom: 20, textAlign: 'left' }}>
+            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 8 }}>📧 Heads up about your email preferences</div>
+            <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, marginBottom: 16 }}>
+              We noticed that you have previously opted out of all emails from Lucky Squares. Would you like to receive transactional emails only so you can be notified if you&apos;re a winner?
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                className="btn btn-sm"
+                style={{ background: 'var(--green)', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', flex: 1 }}
+                onClick={async () => {
+                  const email = (buyerEmail || savedBuyer?.email || '').trim().toLowerCase();
+                  const squareNums = mySquares.map((sq) => sq.id).join(', ');
+                  const amountPaid = (mySquares.length * fundraiser.pricePerSq).toFixed(2);
+                  setOptOutStatus('checking');
+                  try {
+                    await fetch('/api/unsubscribe/transactional-optin', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email, fundraiser_id: fundraiser.id, square_numbers: squareNums, amount_paid: amountPaid }),
+                    });
+                    setOptOutStatus('confirmed');
+                  } catch {
+                    setOptOutStatus('needs_reconfirm');
+                  }
+                }}
+              >
+                Yes, notify me if I win
+              </button>
+              <button
+                className="btn btn-sm"
+                style={{ background: 'none', border: '1.5px solid #D1D5DB', color: 'var(--text2)', borderRadius: 10, padding: '10px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                onClick={() => setOptOutStatus('dismissed')}
+              >
+                No thanks
+              </button>
+            </div>
+          </div>
+        )}
+        {optOutStatus === 'confirmed' && (
+          <div style={{ background: '#F0FDF8', border: '1.5px solid #B6EDD8', borderRadius: 12, padding: '16px 20px', marginBottom: 20, textAlign: 'center' }}>
+            <div style={{ fontWeight: 800, color: 'var(--green)', marginBottom: 4 }}>✓ Done! You&apos;ll hear from us if you win</div>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>We&apos;ve updated your preferences to allow winner notifications and purchase confirmations.</div>
           </div>
         )}
         <div style={{ display: 'flex', gap: 12 }}>

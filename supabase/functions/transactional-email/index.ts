@@ -10,6 +10,33 @@ import * as T from '../_shared/templates.ts';
 // These types go to internal admin addresses — skip opt-out checks and unsubscribe links
 const ADMIN_TYPES = new Set(['admin_new_org_application']);
 
+// Direct consequences of user actions — respected even if user previously opted out but re-enabled transactional
+const TRANSACTIONAL_TYPES = new Set([
+  'square_purchase_confirmation',
+  'draw_result_winner',
+  'draw_result_no_win',
+  'refund_notification',
+  'campaign_launched',
+  'campaign_cancelled_organiser',
+  'draw_complete_organiser',
+  'square_sold',
+  'square_daily_digest',
+  'square_no_sales_nudge',
+  'expiry_reminder_7',
+  'expiry_reminder_14',
+  'expiry_reminder_21',
+  'referral_reward',
+  'organizer_welcome',
+  'org_welcome',
+  'org_campaign_launched',
+  'org_square_sold',
+  'org_application_received',
+  'org_application_approved',
+  'org_member_invite',
+  'campaign_launched_notification',
+  'account_suspended',
+]);
+
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const APP_URL      = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://luckysquares.com.au';
@@ -50,11 +77,12 @@ Deno.serve(async (req) => {
     return new Response(`Unknown email type: ${type}`, { status: 400 });
   }
 
-  const isAdmin = ADMIN_TYPES.has(type);
+  const isAdmin        = ADMIN_TYPES.has(type);
+  const isTransactional = TRANSACTIONAL_TYPES.has(type);
 
   // Check opt-out for non-admin emails
   if (!isAdmin) {
-    const optedOut = await rpc('is_email_opted_out', { p_email: to });
+    const optedOut = await rpc('is_email_opted_out', { p_email: to, p_is_transactional: isTransactional });
     if (optedOut === true) {
       console.log(`[email] Skipping ${type} to ${to} — opted out`);
       return new Response(JSON.stringify({ ok: true, skipped: true }), { status: 200 });
