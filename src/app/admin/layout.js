@@ -40,6 +40,11 @@ export default function AdminLayout({ children }) {
     });
   }, []);
 
+  useEffect(() => {
+    document.body.classList.add('admin-layout');
+    return () => document.body.classList.remove('admin-layout');
+  }, []);
+
   const handleSignOut = async () => {
     if (supabaseConfigured) await getSupabaseClient().auth.signOut();
     router.push('/admin');

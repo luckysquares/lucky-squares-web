@@ -988,3 +988,6 @@ textarea { font-family: inherit; }
   .fundraiser-desktop-nav { display: none; }
   .fundraiser-mobile-nav  { display: block; }
 }
+
+/* Admin layout: hide marketing footer and chat widget */
+body.admin-layout footer, body.admin-layout [data-mariposa-widget] { display: none !important; }

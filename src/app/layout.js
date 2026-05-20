@@ -49,7 +49,7 @@ export default function RootLayout({ children }) {
         <Suspense fallback={null}><ReferralCapture /></Suspense>
         <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>{children}</div>
         <Footer />
-        <MariposaChatWidget />
+        <div data-mariposa-widget><MariposaChatWidget /></div>
         <Analytics />
       </body>
     </html>
