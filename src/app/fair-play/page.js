@@ -2,8 +2,8 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Fair Play Policy | LuckySquares Australia',
-  description: 'Our commitment to fair, honest use of the LuckySquares platform by community organisations across Australia.',
+  title: 'Fair Play Policy | Lucky Squares Australia',
+  description: 'Our commitment to fair, honest use of the Lucky Squares platform by community organisations across Australia.',
 };
 
 export default function FairPlayPage() {
@@ -17,7 +17,7 @@ export default function FairPlayPage() {
             Fair Play Policy
           </h1>
           <p style={{ fontSize: 16, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 520, margin: '0 auto' }}>
-            LuckySquares Australia exists to help genuine community organisations raise funds. This policy explains what fair use looks like and why it matters.
+            Lucky Squares Australia exists to help genuine community organisations raise funds. This policy explains what fair use looks like and why it matters.
           </p>
         </div>
       </section>

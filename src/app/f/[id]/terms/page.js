@@ -44,7 +44,7 @@ export default async function CampaignTermsPage({ params }) {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)', padding: 24 }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--text2)' }}>Campaign not found.</p>
-          <Link href="/" className="btn btn-outline" style={{ marginTop: 16 }}>Back to LuckySquares</Link>
+          <Link href="/" className="btn btn-outline" style={{ marginTop: 16 }}>Back to Lucky Squares</Link>
         </div>
       </div>
     );
@@ -67,7 +67,7 @@ export default async function CampaignTermsPage({ params }) {
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <Logo size={40} />
           <div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.5px' }}>LuckySquares</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.5px' }}>Lucky Squares</div>
             <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Australia</div>
           </div>
         </Link>
@@ -83,7 +83,7 @@ export default async function CampaignTermsPage({ params }) {
           <div className="scratch-card" style={{ padding: '40px 48px', display: 'flex', flexDirection: 'column', gap: 32 }}>
 
             <Section n="1" title="About This Fundraiser">
-              <p>This Lucky Squares fundraiser (&ldquo;the Fundraiser&rdquo;) is conducted by <strong>{f.org}</strong> (&ldquo;the Organiser&rdquo;) using the LuckySquares Australia platform provided by Play With Heart Pty Ltd ACN 698 202 069 (&ldquo;LuckySquares&rdquo;).</p>
+              <p>This Lucky Squares fundraiser (&ldquo;the Fundraiser&rdquo;) is conducted by <strong>{f.org}</strong> (&ldquo;the Organiser&rdquo;) using the Lucky Squares Australia platform provided by Play With Heart Pty Ltd ACN 698 202 069 (&ldquo;Lucky Squares&rdquo;).</p>
               <p>This is a game of chance. There is no guaranteed prize and no skill involved in the outcome of the draw.</p>
               <p>All proceeds from this Fundraiser, after deducting prize costs and platform fees, go to <strong>{f.org}</strong> for their nominated fundraising purpose.</p>
             </Section>
@@ -92,7 +92,7 @@ export default async function CampaignTermsPage({ params }) {
               <ul>
                 <li>Participation is open to individuals aged 18 years or over.</li>
                 <li>Participants must be located in Australia.</li>
-                <li>The Organiser, their immediate family members, and employees of LuckySquares Australia are not eligible to participate.</li>
+                <li>The Organiser, their immediate family members, and employees of Lucky Squares Australia are not eligible to participate.</li>
                 <li>By purchasing a square, you confirm that you meet these eligibility requirements.</li>
               </ul>
             </Section>
@@ -139,7 +139,7 @@ export default async function CampaignTermsPage({ params }) {
             <Section n="6" title="The Draw">
               <ul>
                 <li>{drawDesc}</li>
-                <li>Winners are determined by a random draw conducted through the LuckySquares platform.</li>
+                <li>Winners are determined by a random draw conducted through the Lucky Squares platform.</li>
                 <li>The draw is automated and uses a cryptographically random selection process.</li>
                 <li>The draw result is final.</li>
                 <li>If a winner cannot be contacted within 14 days of the draw, a redraw will take place.</li>
@@ -164,18 +164,18 @@ export default async function CampaignTermsPage({ params }) {
 
             <Section n="9" title="Privacy">
               <p>Your personal information (name, email, phone) is collected for the purpose of managing your participation in this Fundraiser, contacting you regarding the draw, and delivering prizes if applicable.</p>
-              <p>Your information is shared with the Organiser and handled in accordance with the <a href="/privacy" style={{ color: 'var(--purple)' }}>LuckySquares Privacy Policy</a>.</p>
+              <p>Your information is shared with the Organiser and handled in accordance with the <a href="/privacy" style={{ color: 'var(--purple)' }}>Lucky Squares Privacy Policy</a>.</p>
             </Section>
 
             <Section n="10" title="Disputes">
               <p>Any disputes regarding this Fundraiser should be directed in the first instance to the Organiser at <strong>{f.contact_email || f.contact_name}</strong>.</p>
-              <p>Unresolved disputes may be escalated to LuckySquares Australia via our <a href="/contact" style={{ color: 'var(--purple)' }}>contact page</a>.</p>
+              <p>Unresolved disputes may be escalated to Lucky Squares Australia via our <a href="/contact" style={{ color: 'var(--purple)' }}>contact page</a>.</p>
               <p>These terms are governed by the laws of {stateName}, Australia.</p>
             </Section>
 
             <Section n="11" title="Platform" last>
-              <p>This Fundraiser is facilitated by LuckySquares Australia (Play With Heart Pty Ltd ACN 698 202 069 ABN 19 698 202 069), Adelaide, South Australia. LuckySquares Australia provides the platform software and processes payments but is not the organiser, operator, or promoter of this Fundraiser. The Organiser is solely responsible for the conduct of the Fundraiser and compliance with applicable state lottery and fundraising laws.</p>
-              <p>By using the LuckySquares platform you also agree to the <a href="/terms" style={{ color: 'var(--purple)' }}>LuckySquares Platform Terms of Service</a>.</p>
+              <p>This Fundraiser is facilitated by Lucky Squares Australia (Play With Heart Pty Ltd ACN 698 202 069 ABN 19 698 202 069), Adelaide, South Australia. Lucky Squares Australia provides the platform software and processes payments but is not the organiser, operator, or promoter of this Fundraiser. The Organiser is solely responsible for the conduct of the Fundraiser and compliance with applicable state lottery and fundraising laws.</p>
+              <p>By using the Lucky Squares platform you also agree to the <a href="/terms" style={{ color: 'var(--purple)' }}>Lucky Squares Platform Terms of Service</a>.</p>
             </Section>
 
           </div>

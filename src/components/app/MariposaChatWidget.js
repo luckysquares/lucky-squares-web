@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-const GREETING = `G'day! I'm Mariposa, a baseball-loving jackrabbit and your LuckySquares guide. 🍀⚾
+const GREETING = `G'day! I'm Mariposa, a baseball-loving jackrabbit and your Lucky Squares guide. 🍀⚾
 
 Whether you're setting up your first fundraiser, figuring out how squares work, or just curious about me and my story, I'm here for all of it.
 
@@ -140,7 +140,7 @@ export default function MariposaChatWidget() {
             }}>🐰</div>
             <div>
               <div style={{ color: '#fff', fontWeight: 800, fontSize: 15, fontFamily: 'var(--font-serif)' }}>Mariposa</div>
-              <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 11, fontWeight: 600 }}>LuckySquares guide</div>
+              <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 11, fontWeight: 600 }}>Lucky Squares guide</div>
             </div>
             <div style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#4ADE80' }} title="Online" />
           </div>

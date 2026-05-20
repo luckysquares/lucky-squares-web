@@ -49,7 +49,7 @@ function toHtml(text: string, unsubscribeUrl?: string): string {
         <tr><td style="text-align:center;padding-bottom:28px">
           <a href="https://luckysquares.com.au" style="text-decoration:none">
             <span style="font-size:28px">🍀</span>
-            <div style="font-size:18px;font-weight:900;color:#1A1209;letter-spacing:-0.5px;margin-top:4px">LuckySquares</div>
+            <div style="font-size:18px;font-weight:900;color:#1A1209;letter-spacing:-0.5px;margin-top:4px">Lucky Squares</div>
             <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">Australia</div>
           </a>
         </td></tr>
@@ -61,7 +61,7 @@ function toHtml(text: string, unsubscribeUrl?: string): string {
 
         <!-- Footer -->
         <tr><td style="text-align:center;padding-top:24px;font-size:12px;color:#9CA3AF;line-height:1.7">
-          LuckySquares Australia &nbsp;|&nbsp;
+          Lucky Squares Australia &nbsp;|&nbsp;
           <a href="https://luckysquares.com.au" style="color:#9CA3AF">luckysquares.com.au</a><br>
           Questions? Reply to this email or contact
           <a href="mailto:${SUPPORT_EMAIL}" style="color:#9CA3AF">${SUPPORT_EMAIL}</a>

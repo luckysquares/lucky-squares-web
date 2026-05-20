@@ -546,7 +546,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                       </div>
                       {isOwner && (w.square.buyer_email || w.square.owner_email) && (
                         <a
-                          href={`mailto:${w.square.buyer_email || w.square.owner_email}?subject=Congratulations! You won ${w.place} prize in ${fundraiser.title}&body=Hi ${w.square.owner},%0D%0A%0D%0ACongratulations! You have won the ${w.place} prize${w.prize ? ` (${w.prize})` : ''} in the ${fundraiser.title} LuckySquares fundraiser.%0D%0A%0D%0APlease contact us to arrange collection of your prize.%0D%0A%0D%0ARegards,%0D%0A${fundraiser.org}`}
+                          href={`mailto:${w.square.buyer_email || w.square.owner_email}?subject=Congratulations! You won ${w.place} prize in ${fundraiser.title}&body=Hi ${w.square.owner},%0D%0A%0D%0ACongratulations! You have won the ${w.place} prize${w.prize ? ` (${w.prize})` : ''} in the ${fundraiser.title} Lucky Squares fundraiser.%0D%0A%0D%0APlease contact us to arrange collection of your prize.%0D%0A%0D%0ARegards,%0D%0A${fundraiser.org}`}
                           onClick={() => setNotifiedSet((prev) => { const n = new Set(prev); n.add(i); return n; })}
                           style={{ flexShrink: 0, fontSize: 13, textDecoration: 'none', borderRadius: 8, padding: '7px 14px', whiteSpace: 'nowrap', ...(notifiedSet.has(i) ? { background: 'rgba(0,200,117,.25)', border: '1px solid rgba(0,200,117,.5)', color: '#00C875' } : { background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', color: 'rgba(255,255,255,.85)' }) }}
                         >
@@ -680,7 +680,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           By {fundraiser.payment?.method === 'stripe' ? 'completing payment' : 'confirming'} you agree to the{' '}
           <a href={`/f/${fundraiser.id}/terms`} target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>terms of this campaign</a>
           {' '}and the{' '}
-          <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>LuckySquares terms of service</a>.
+          <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>Lucky Squares terms of service</a>.
         </p>
       </div>
     </div>
@@ -697,7 +697,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 12 }}>Not open yet</h2>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.6 }}>
-              Please contact <strong>{fundraiser.org}</strong> to launch this LuckySquares fundraiser.
+              Please contact <strong>{fundraiser.org}</strong> to launch this Lucky Squares fundraiser.
             </p>
           </div>
         </div>

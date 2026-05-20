@@ -6,7 +6,7 @@ import Image from 'next/image';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Blog | LuckySquares Australia',
+  title: 'Blog | Lucky Squares Australia',
   description: 'Tips, stories and inspiration for community fundraisers across Australia.',
 };
 
@@ -221,7 +221,7 @@ export default async function BlogPage() {
                       {featured.author?.[0]?.toUpperCase() ?? 'L'}
                     </div>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{featured.author || 'LuckySquares'}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{featured.author || 'Lucky Squares'}</div>
                       <div style={{ fontSize: 12, color: 'var(--text3)' }}>{fmtDate(featured.published_at)}</div>
                     </div>
                     <span style={{ marginLeft: 'auto', fontSize: 14, fontWeight: 800, color: 'var(--purple)' }}>Read article →</span>

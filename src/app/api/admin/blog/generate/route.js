@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const SYSTEM_PROMPT = `You are a skilled content writer for LuckySquares Australia, a platform that helps community organisations (schools, sporting clubs, charities) run Lucky Squares grid fundraisers online. Write in a warm, helpful, Australian English voice. Never use em-dashes or middle dots.
+const SYSTEM_PROMPT = `You are a skilled content writer for Lucky Squares Australia, a platform that helps community organisations (schools, sporting clubs, charities) run Lucky Squares grid fundraisers online. Write in a warm, helpful, Australian English voice. Never use em-dashes or middle dots.
 
 You MUST respond with a single valid JSON object and nothing else. No markdown fences, no explanation — just the raw JSON.`;
 
@@ -15,7 +15,7 @@ export async function POST(req) {
 
   const { title, audience, tone, keyPoints } = await req.json();
 
-  const userPrompt = `Write a blog post for LuckySquares Australia.
+  const userPrompt = `Write a blog post for Lucky Squares Australia.
 
 Topic / working title: ${title || 'Community fundraising tips'}
 Target audience: ${audience || 'Community organisation fundraising coordinators'}
@@ -35,7 +35,7 @@ Content requirements:
 - Start content with # heading (the post title)
 - Engaging introduction paragraph
 - 3 to 5 ## subheadings with body paragraphs
-- End with a ## call-to-action section mentioning LuckySquares Australia
+- End with a ## call-to-action section mentioning Lucky Squares Australia
 - Australian English, 600 to 900 words
 - Do not use em-dashes or middle dots
 - Use bullet points or numbered lists where helpful

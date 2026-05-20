@@ -28,14 +28,14 @@ export const viewport = {
 
 export const metadata = {
   title: {
-    default: 'LuckySquares Australia: Fundraise with a Lucky Squares grid',
-    template: '%s | LuckySquares Australia',
+    default: 'Lucky Squares Australia: Fundraise with a Lucky Squares grid',
+    template: '%s | Lucky Squares Australia',
   },
   description:
     'The easiest way to run a Lucky Squares fundraiser in Australia. Set up your grid in minutes, sell squares online, and run a live draw. Perfect for schools, sports clubs, and charities.',
   keywords: ['lucky squares', 'fundraiser', 'australia', 'school fundraiser', 'raffle', 'sports club'],
   openGraph: {
-    title: 'LuckySquares Australia',
+    title: 'Lucky Squares Australia',
     description: 'Set up a Lucky Squares fundraiser in minutes. Sell squares, run your draw, raise funds.',
     locale: 'en_AU',
     type: 'website',

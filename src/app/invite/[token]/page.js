@@ -102,7 +102,7 @@ export default function AcceptInvitePage() {
               You&apos;re invited to join {invite.org_name}
             </h2>
             <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              You&apos;ve been invited as a contributor to help manage {invite.org_name}&apos;s fundraising campaigns on LuckySquares.
+              You&apos;ve been invited as a contributor to help manage {invite.org_name}&apos;s fundraising campaigns on Lucky Squares.
               The invite was sent to <strong>{invite.email}</strong>.
             </p>
             <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={sendOtp} disabled={loading}>

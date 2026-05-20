@@ -171,7 +171,7 @@ export default function PosterPage({ params }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <QRCodeSVG value={HOME_URL} size={32} fgColor="#6B46F5" bgColor="#F5F3EE" level="M" />
               <div>
-                <div style={{ fontSize: 11, fontWeight: 800, color: '#1A1209' }}>Powered by LuckySquares Australia</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: '#1A1209' }}>Powered by Lucky Squares Australia</div>
                 <div style={{ fontSize: 10, color: '#9C8060' }}>Run your own fundraiser at luckysquares.com.au</div>
               </div>
             </div>

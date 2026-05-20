@@ -31,7 +31,7 @@ export async function POST(req) {
       p_title:           title,
       p_excerpt:         excerpt ?? '',
       p_content:         content ?? '',
-      p_author:          author ?? 'LuckySquares Australia',
+      p_author:          author ?? 'Lucky Squares Australia',
       p_cover_image_url: cover_image_url ?? null,
       p_image_prompt:    image_prompt ?? '',
       p_tags:            tags ?? [],

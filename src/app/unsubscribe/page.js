@@ -36,7 +36,7 @@ function UnsubscribeContent() {
             <div style={{ fontSize: 40, marginBottom: 16 }}>✅</div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 12 }}>You've been unsubscribed</h1>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.6 }}>
-              <strong>{email}</strong> has been removed from our mailing list. You won't receive any further emails from LuckySquares.
+              <strong>{email}</strong> has been removed from our mailing list. You won't receive any further emails from Lucky Squares.
             </p>
           </>
         )}
@@ -49,7 +49,7 @@ function UnsubscribeContent() {
             </p>
           </>
         )}
-        <a href="/" style={{ display: 'inline-block', marginTop: 28, fontSize: 13, color: 'var(--text2)' }}>← Back to LuckySquares</a>
+        <a href="/" style={{ display: 'inline-block', marginTop: 28, fontSize: 13, color: 'var(--text2)' }}>← Back to Lucky Squares</a>
       </div>
     </div>
   );

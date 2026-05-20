@@ -202,7 +202,7 @@ export default function OrgSignupPage() {
           <div className="section-label">Organisation plan</div>
           <h1 className="section-heading" style={{ margin: '0 auto 12px' }}>Register your organisation</h1>
           <p className="section-body" style={{ margin: '0 auto' }}>
-            $149 / year for UNLIMITED LuckySquares fundraising campaigns
+            $149 / year for UNLIMITED Lucky Squares fundraising campaigns
           </p>
         </div>
       </section>

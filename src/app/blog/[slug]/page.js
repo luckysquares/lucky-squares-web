@@ -114,9 +114,9 @@ async function getPost(slug) {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const post = await getPost(slug);
-  if (!post) return { title: 'Post not found | LuckySquares Australia' };
+  if (!post) return { title: 'Post not found | Lucky Squares Australia' };
   return {
-    title: `${post.title} | LuckySquares Australia`,
+    title: `${post.title} | Lucky Squares Australia`,
     description: post.excerpt || undefined,
     openGraph: post.cover_image_url ? { images: [post.cover_image_url] } : undefined,
   };

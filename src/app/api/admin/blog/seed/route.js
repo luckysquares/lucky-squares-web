@@ -32,9 +32,9 @@ const toSlug = (s) =>
     .slice(0, 80);
 
 async function generatePost(apiKey, topic) {
-  const systemPrompt = `You are a skilled content writer for LuckySquares Australia, a platform that helps community organisations run Lucky Squares grid fundraisers online. Write in a warm, helpful, Australian English voice. Never use em-dashes or middle dots. You MUST respond with a single valid JSON object and nothing else.`;
+  const systemPrompt = `You are a skilled content writer for Lucky Squares Australia, a platform that helps community organisations run Lucky Squares grid fundraisers online. Write in a warm, helpful, Australian English voice. Never use em-dashes or middle dots. You MUST respond with a single valid JSON object and nothing else.`;
 
-  const userPrompt = `Write a blog post for LuckySquares Australia.
+  const userPrompt = `Write a blog post for Lucky Squares Australia.
 
 Topic: ${topic.title}
 Target audience: ${topic.audience}
@@ -111,7 +111,7 @@ export async function POST(req) {
     p_title:           generated.title || topic.title,
     p_excerpt:         generated.excerpt || '',
     p_content:         generated.content || '',
-    p_author:          'LuckySquares Australia',
+    p_author:          'Lucky Squares Australia',
     p_cover_image_url: null,
     p_image_prompt:    generated.image_prompt || '',
     p_tags:            Array.isArray(generated.tags) ? generated.tags : [],

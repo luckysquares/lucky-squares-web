@@ -17,7 +17,7 @@ function fmtDate(iso) {
 
 const EMPTY_FORM = {
   id: null, slug: '', title: '', excerpt: '', content: '',
-  author: 'LuckySquares Australia', cover_image_url: '',
+  author: 'Lucky Squares Australia', cover_image_url: '',
   image_prompt: '', tags: '', status: 'draft',
 };
 
@@ -63,7 +63,7 @@ export default function AdminBlogPage() {
     setEditing({
       id: post.id, slug: post.slug, title: post.title,
       excerpt: post.excerpt ?? '', content: post.content ?? '',
-      author: post.author ?? 'LuckySquares Australia',
+      author: post.author ?? 'Lucky Squares Australia',
       cover_image_url: post.cover_image_url ?? '',
       image_prompt: post.image_prompt ?? '',
       tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
@@ -95,7 +95,7 @@ export default function AdminBlogPage() {
         title:           editing.title.trim(),
         excerpt:         editing.excerpt.trim(),
         content:         editing.content,
-        author:          editing.author.trim() || 'LuckySquares Australia',
+        author:          editing.author.trim() || 'Lucky Squares Australia',
         cover_image_url: editing.cover_image_url.trim() || null,
         image_prompt:    editing.image_prompt.trim() || '',
         tags, status: editing.status,
@@ -319,7 +319,7 @@ export default function AdminBlogPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Author</label>
-                <input className="form-input" value={editing.author} onChange={(e) => fld('author', e.target.value)} placeholder="LuckySquares Australia" />
+                <input className="form-input" value={editing.author} onChange={(e) => fld('author', e.target.value)} placeholder="Lucky Squares Australia" />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Status</label>

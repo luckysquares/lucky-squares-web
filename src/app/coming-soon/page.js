@@ -54,7 +54,7 @@ export default function ComingSoonPage() {
         </h1>
 
         <p className="hero-sub" style={{ maxWidth: 520 }}>
-          LuckySquares Australia is in early access. We&apos;re inviting a small group of founding members to be the first to run fundraising campaigns on the platform.
+          Lucky Squares Australia is in early access. We&apos;re inviting a small group of founding members to be the first to run fundraising campaigns on the platform.
         </p>
         <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 40 }}>
           Join the waitlist and we&apos;ll be in touch when we open up to everyone.

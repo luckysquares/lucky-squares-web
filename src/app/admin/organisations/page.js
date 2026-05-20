@@ -63,7 +63,7 @@ export default function AdminOrganisations() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                    <a href={`mailto:${o.email}?subject=Your LuckySquares Organisation Application`} className="btn btn-outline btn-sm">
+                    <a href={`mailto:${o.email}?subject=Your Lucky Squares Organisation Application`} className="btn btn-outline btn-sm">
                       ✉ Reach out
                     </a>
                   </div>

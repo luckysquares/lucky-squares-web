@@ -125,7 +125,7 @@ export default function PublicFundraiserPage({ params }) {
         <div style={{ fontSize: 64, marginBottom: 16 }}>🍀</div>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 12 }}>Fundraiser not found</h1>
         <p style={{ color: 'var(--text2)', marginBottom: 32 }}>This fundraiser may have closed or the link may be incorrect.</p>
-        <Link href="/" className="btn btn-primary">Back to LuckySquares</Link>
+        <Link href="/" className="btn btn-primary">Back to Lucky Squares</Link>
       </div>
     </div>
   );

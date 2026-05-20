@@ -77,13 +77,13 @@ function inviteHtml(name, couponCode, couponLabel) {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
         <tr><td style="text-align:center;padding-bottom:28px">
           <span style="font-size:36px">🍀</span>
-          <div style="font-size:20px;font-weight:900;color:#1A1209;letter-spacing:-0.5px;margin-top:6px">LuckySquares</div>
+          <div style="font-size:20px;font-weight:900;color:#1A1209;letter-spacing:-0.5px;margin-top:6px">Lucky Squares</div>
           <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">Australia</div>
         </td></tr>
         <tr><td style="background:#FFFFFF;border-radius:16px;padding:40px;border:1.5px solid #E5E0D5;box-shadow:0 2px 12px rgba(61,46,26,0.07)">
           <p style="margin:0 0 20px;font-size:16px;line-height:1.7;color:#1A1209">Hi ${safe(name.split(' ')[0])},</p>
           <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#4A3728">
-            I wanted to personally reach out and invite you to try LuckySquares Australia. I built it to make Lucky Squares fundraisers genuinely easy to run, and I think you will love it.
+            I wanted to personally reach out and invite you to try Lucky Squares Australia. I built it to make Lucky Squares fundraisers genuinely easy to run, and I think you will love it.
           </p>
           <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#4A3728">
             You can set up a fundraiser in minutes, share a link with your community, and watch the squares fill up in real time. The platform handles payments, the draw, and winner notifications automatically.
@@ -99,7 +99,7 @@ function inviteHtml(name, couponCode, couponLabel) {
           </table>
           <p style="margin:0 0 4px;font-size:15px;line-height:1.8;color:#4A3728">Best,</p>
           <p style="margin:0;font-size:15px;font-weight:700;color:#1A1209">Jamie</p>
-          <p style="margin:4px 0 0;font-size:13px;color:#9C8060">Founder, LuckySquares Australia</p>
+          <p style="margin:4px 0 0;font-size:13px;color:#9C8060">Founder, Lucky Squares Australia</p>
         </td></tr>
         <tr><td style="padding:24px 0;text-align:center">
           <p style="font-size:11px;color:#9C8060;margin:0">You are receiving this because someone thought you might find it useful.</p>
@@ -141,9 +141,9 @@ export async function POST(req) {
         couponLabel = coupon?.description ?? null;
       }
 
-      const subject = `An invitation from Jamie at LuckySquares Australia`;
+      const subject = `An invitation from Jamie at Lucky Squares Australia`;
       const html    = inviteHtml(name.trim(), coupon_code ?? null, couponLabel);
-      const text    = `Hi ${name.trim().split(' ')[0]},\n\nI wanted to personally invite you to try LuckySquares Australia. Head to https://luckysquares.com.au to get started.\n\n${coupon_code ? `Your coupon code: ${coupon_code}\n\n` : ''}Best,\nJamie\nFounder, LuckySquares Australia`;
+      const text    = `Hi ${name.trim().split(' ')[0]},\n\nI wanted to personally invite you to try Lucky Squares Australia. Head to https://luckysquares.com.au to get started.\n\n${coupon_code ? `Your coupon code: ${coupon_code}\n\n` : ''}Best,\nJamie\nFounder, Lucky Squares Australia`;
 
       if (resendKey) {
         const res = await fetch('https://api.resend.com/emails', {
@@ -187,9 +187,9 @@ export async function POST(req) {
         couponLabel = coupon?.label ?? null;
       }
 
-      const subject = `An invitation from Jamie at LuckySquares Australia`;
+      const subject = `An invitation from Jamie at Lucky Squares Australia`;
       const html    = inviteHtml(name.trim(), couponCode, couponLabel);
-      const text    = `Hi ${name.trim().split(' ')[0]},\n\nI wanted to personally invite you to try LuckySquares Australia. Head to https://luckysquares.com.au to get started.\n\n${couponCode ? `Your coupon code: ${couponCode}\n\n` : ''}Best,\nJamie\nFounder, LuckySquares Australia`;
+      const text    = `Hi ${name.trim().split(' ')[0]},\n\nI wanted to personally invite you to try Lucky Squares Australia. Head to https://luckysquares.com.au to get started.\n\n${couponCode ? `Your coupon code: ${couponCode}\n\n` : ''}Best,\nJamie\nFounder, Lucky Squares Australia`;
 
       if (resendKey) {
         const res = await fetch('https://api.resend.com/emails', {

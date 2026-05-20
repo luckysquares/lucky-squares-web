@@ -101,7 +101,7 @@ export default function TermsPage() {
                 confirmation of participation, draw results, and prize notifications.
               </SubSection>
               <SubSection n="5.6" label="Fund Management">
-                Where the Organiser collects participant payments directly (Standard Plan), the Organiser is solely
+                Where the Organiser collects participant payments directly (in-person or direct deposit payment campaigns), the Organiser is solely
                 responsible for the collection, holding, and disbursement of all funds in accordance with applicable law.
               </SubSection>
               <SubSection n="5.7" label="Age Restrictions">

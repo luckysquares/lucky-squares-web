@@ -89,7 +89,7 @@ export default function PrivacyPage() {
                   the Platform, including:
                 </p>
                 <ul>
-                  <li><strong>Stripe</strong>: secure online payment processing. Card details are handled exclusively by Stripe and are never stored on LuckySquares systems. Stripe operates under PCI-DSS compliance.</li>
+                  <li><strong>Stripe</strong>: secure online payment processing. Card details are handled exclusively by Stripe and are never stored on Lucky Squares systems. Stripe operates under PCI-DSS compliance.</li>
                   <li><strong>Supabase</strong>: secure database and file storage (Australian data residency)</li>
                   <li><strong>Resend</strong>: transactional email communications (confirmation emails, draw notifications)</li>
                 </ul>
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
 
             <Section n="6" title="Data Retention">
               <SubSection n="6.1">Organiser account information is retained for the duration of the account and for seven years following account closure for legal and tax compliance purposes.</SubSection>
-              <SubSection n="6.2">Participant information relating to a specific fundraiser is retained for two years following the close of that fundraiser, after which it is deleted or anonymised.</SubSection>
+              <SubSection n="6.2">Participant information relating to a specific fundraiser is retained for one year (12 months) following the close of that fundraiser, or after one year of inactivity on our platform, after which it is de-identified or anonymised.</SubSection>
               <SubSection n="6.3">You may request deletion of your personal information at any time, subject to any legal retention obligations.</SubSection>
             </Section>
 

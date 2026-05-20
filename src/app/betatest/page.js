@@ -2,8 +2,8 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Founding Members Beta | LuckySquares Australia',
-  description: 'You\'ve been invited to help shape LuckySquares Australia before we go live. Welcome, Founding Member.',
+  title: 'Founding Members Beta | Lucky Squares Australia',
+  description: 'You\'ve been invited to help shape Lucky Squares Australia before we go live. Welcome, Founding Member.',
   robots: 'noindex, nofollow',
 };
 
@@ -90,7 +90,7 @@ export default function BetaTestPage() {
             You're one of the first people to see this. 👀
           </h1>
           <p style={{ fontSize: 18, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 540, margin: '0 auto 32px' }}>
-            LuckySquares Australia is almost ready to go live. Before we do, we want people we trust to kick the tyres, find the rough edges, and tell us what's not working.
+            Lucky Squares Australia is almost ready to go live. Before we do, we want people we trust to kick the tyres, find the rough edges, and tell us what's not working.
           </p>
           <p style={{ fontSize: 16, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 540, margin: '0 auto' }}>
             That's you. Welcome, Founding Member.
@@ -160,7 +160,7 @@ export default function BetaTestPage() {
       </section>
 
       {/* Demo campaigns */}
-      <section style={{ padding: '0 24px 64px' }}>
+      <section style={{ padding: '0 24px 0' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Demo campaigns to buy squares on</h2>
           <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 28 }}>These are loaded with dummy data. Use the test card and go for it.</p>
@@ -181,6 +181,56 @@ export default function BetaTestPage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* QR codes for mobile testing */}
+      <section style={{ padding: '48px 24px 0' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Test on your phone</h2>
+          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 8 }}>
+            Point your phone camera at any QR code below to open that campaign directly on your device — no typing required.
+          </p>
+          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 28 }}>
+            This is the most important test. Most real buyers will be on mobile. Check that you can pick a square, enter your details, and pay without any friction.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+            {DEMO_CAMPAIGNS.map((c) => {
+              const url = `https://luckysquares.com.au/f/${c.id}`;
+              const qr = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}&bgcolor=FAFAF7&color=2D2A26&margin=8`;
+              return (
+                <div key={c.id} className="scratch-card" style={{ padding: '20px 16px', textAlign: 'center' }}>
+                  <img src={qr} alt={`QR code for ${c.title}`} width={160} height={160} style={{ borderRadius: 8, marginBottom: 12 }} />
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', lineHeight: 1.4 }}>{c.title}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing feedback */}
+      <section style={{ padding: '48px 24px 0' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <div className="scratch-card" style={{ padding: '36px 40px' }}>
+            <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>💸</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 16, textAlign: 'center' }}>What do you think of the pricing?</h2>
+            <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 12 }}>
+              The platform charges <strong style={{ color: 'var(--text)' }}>$19 per live fundraising campaign</strong> — one flat fee, no percentage cuts, no hidden charges. For organisations running multiple campaigns there&apos;s an annual plan at $149/year for unlimited campaigns.
+            </p>
+            <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 8 }}>We&apos;d love to know:</p>
+            <ul style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, paddingLeft: 20, marginBottom: 20 }}>
+              <li>Does $19 feel fair for what you get?</li>
+              <li>Is there a price point that would feel like a no-brainer for a school or club?</li>
+              <li>Would the pricing put you off, or would you happily recommend it to a committee treasurer?</li>
+            </ul>
+            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24 }}>
+              No right or wrong answers — even &quot;that feels expensive&quot; is genuinely useful. You can also check out the <Link href="/pricing" style={{ color: 'var(--green)', fontWeight: 700 }}>full pricing page</Link> if you want context before you answer.
+            </p>
+            <div style={{ textAlign: 'center' }}>
+              <a href="sms:0423795501?body=Pricing%20feedback:%20" className="btn btn-purple">SMS your thoughts →</a>
+            </div>
           </div>
         </div>
       </section>

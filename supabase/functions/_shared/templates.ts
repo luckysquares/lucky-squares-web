@@ -1,6 +1,6 @@
 import { SUPPORT_EMAIL } from './resend.ts';
 
-const SIG = `Cheers,\nThe LuckySquares team\n${SUPPORT_EMAIL}`;
+const SIG = `Cheers,\nThe Lucky Squares team\n${SUPPORT_EMAIL}`;
 
 function firstName(name: string): string {
   return (name || 'there').split(' ')[0];
@@ -14,10 +14,10 @@ function amt(v: string | number): string {
 
 export function emailOrganizerWelcome(d: { first_name: string }) {
   return {
-    subject: `Welcome to LuckySquares, ${d.first_name}!`,
+    subject: `Welcome to Lucky Squares, ${d.first_name}!`,
     text: `Hi ${d.first_name},
 
-Welcome aboard! You've just joined a community of Australian schools, clubs, and charities using LuckySquares to run simple, fun fundraisers.
+Welcome aboard! You've just joined a community of Australian schools, clubs, and charities using Lucky Squares to run simple, fun fundraisers.
 
 Here's how it works in three steps:
 
@@ -276,7 +276,7 @@ export function emailReferralReward(d: {
     subject: `You've earned a free campaign, ${d.first_name}!`,
     text: `Hi ${d.first_name},
 
-Great news: ${d.referred_name} just launched their first LuckySquares fundraiser after you referred them. As promised, your next campaign is on us.
+Great news: ${d.referred_name} just launched their first Lucky Squares fundraiser after you referred them. As promised, your next campaign is on us.
 
 Your free campaign coupon code is:
 
@@ -295,10 +295,10 @@ export function emailAccountSuspended(d: {
   reason: string;
 }) {
   return {
-    subject: `Important notice about your LuckySquares account`,
+    subject: `Important notice about your Lucky Squares account`,
     text: `Hi ${d.first_name},
 
-We're writing to let you know that your LuckySquares account has been temporarily suspended.
+We're writing to let you know that your Lucky Squares account has been temporarily suspended.
 
 Reason: ${d.reason}
 
@@ -318,10 +318,10 @@ export function emailOrgWelcome(d: {
   campaign_limit: number;
 }) {
   return {
-    subject: `Welcome to LuckySquares, ${d.org_name}!`,
+    subject: `Welcome to Lucky Squares, ${d.org_name}!`,
     text: `Hi ${d.first_name},
 
-Welcome to the LuckySquares Organisation Plan. You're all set to run fundraising campaigns for ${d.org_name}.
+Welcome to the Lucky Squares Organisation Plan. You're all set to run fundraising campaigns for ${d.org_name}.
 
 Here's what's available to you:
 
@@ -352,7 +352,7 @@ export function emailOrgCampaignLaunched(d: {
     subject: `New campaign live: ${d.campaign_title}`,
     text: `Hi ${d.first_name},
 
-A new LuckySquares campaign has just gone live under ${d.org_name}.
+A new Lucky Squares campaign has just gone live under ${d.org_name}.
 
 Campaign: ${d.campaign_title}
 Grid size: ${d.grid_size} squares
@@ -419,10 +419,10 @@ export function emailOrgMonthlySummary(d: {
     : '';
 
   return {
-    subject: `Your LuckySquares summary for ${d.month_name}`,
+    subject: `Your Lucky Squares summary for ${d.month_name}`,
     text: `Hi ${d.first_name},
 
-Here's a quick look at how ${d.org_name} performed on LuckySquares in ${d.month_name}.
+Here's a quick look at how ${d.org_name} performed on Lucky Squares in ${d.month_name}.
 
 Campaigns run: ${d.campaign_count}
 Squares sold: ${d.total_squares_sold}
@@ -446,7 +446,7 @@ export function emailOrgApplicationReceived(d: {
     subject: `We've received your application, ${d.org_name}`,
     text: `Hi ${d.first_name},
 
-Thanks for applying for the LuckySquares Organisation Plan. We've received your application and will be in touch shortly.
+Thanks for applying for the Lucky Squares Organisation Plan. We've received your application and will be in touch shortly.
 
 Here's what we received:
 
@@ -470,7 +470,7 @@ export function emailOrgApplicationApproved(d: {
     subject: `Great news: ${d.org_name} is approved!`,
     text: `Hi ${d.first_name},
 
-We've reviewed your application and ${d.org_name} has been approved for the LuckySquares Organisation Plan.
+We've reviewed your application and ${d.org_name} has been approved for the Lucky Squares Organisation Plan.
 
 Your account has been upgraded and you now have access to all organisation features. Head to your dashboard to get your next campaign started:
 https://luckysquares.com.au/fundraise
@@ -726,7 +726,7 @@ export function emailReEngagement(d: {
     subject: `Ready for your next fundraiser, ${d.first_name}?`,
     text: `Hi ${d.first_name},
 
-It's been a little while since your last LuckySquares campaign. We hope ${d.org_name} is going well.
+It's been a little while since your last Lucky Squares campaign. We hope ${d.org_name} is going well.
 
 When you're ready to run another fundraiser, everything is still set up and waiting for you. Your previous campaign details are saved in your dashboard so you can use them as a starting point.
 
@@ -771,17 +771,17 @@ export function emailOrgMemberInvite(d: {
   expires_days: number;
 }) {
   return {
-    subject: `You've been invited to join ${d.org_name} on LuckySquares`,
+    subject: `You've been invited to join ${d.org_name} on Lucky Squares`,
     text: `Hi there,
 
-${d.invited_by_name} has invited you to join ${d.org_name} as a contributor on LuckySquares Australia.
+${d.invited_by_name} has invited you to join ${d.org_name} as a contributor on Lucky Squares Australia.
 
 As a contributor, you'll be able to view and help manage the organisation's fundraising campaigns.
 
 Accept your invite here (link expires in ${d.expires_days} days):
 ${d.invite_url}
 
-If you don't have a LuckySquares account yet, you'll be able to create one when you click the link above.
+If you don't have a Lucky Squares account yet, you'll be able to create one when you click the link above.
 
 If you weren't expecting this invite, you can safely ignore this email.
 
@@ -865,6 +865,6 @@ Good luck!
 ${SIG}
 
 ---
-You're receiving this because you opted in after purchasing squares in a previous ${d.organiser_name} fundraiser. To stop receiving these notifications, click the unsubscribe link in any LuckySquares email.`,
+You're receiving this because you opted in after purchasing squares in a previous ${d.organiser_name} fundraiser. To stop receiving these notifications, click the unsubscribe link in any Lucky Squares email.`,
   };
 }

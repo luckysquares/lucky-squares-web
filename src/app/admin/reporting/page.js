@@ -76,7 +76,7 @@ export default function AdminReporting() {
                         <div style={{ textAlign: 'right', flexShrink: 0 }}>
                           <div style={{ fontSize: 22, fontWeight: 900, color: urgent ? '#CC0000' : 'var(--orange)', fontFamily: 'var(--font-serif)' }}>{remaining}d</div>
                           <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700 }}>remaining</div>
-                          <a href={`mailto:${c.contact_email}?subject=Your LuckySquares campaign "${c.title}"&body=Hi ${c.contact_name},%0A%0AJust checking in on your Lucky Squares fundraiser "${c.title}". You have ${remaining} days remaining before the campaign expires. How can we help?%0A%0ACheers,%0ALuckySquares Australia`}
+                          <a href={`mailto:${c.contact_email}?subject=Your Lucky Squares campaign "${c.title}"&body=Hi ${c.contact_name},%0A%0AJust checking in on your Lucky Squares fundraiser "${c.title}". You have ${remaining} days remaining before the campaign expires. How can we help?%0A%0ACheers,%0ALucky Squares Australia`}
                             className="btn btn-outline btn-sm" style={{ marginTop: 8, display: 'inline-block' }}>
                             ✉ Reach out
                           </a>
@@ -109,7 +109,7 @@ export default function AdminReporting() {
                         <div style={{ fontSize: 13, color: 'var(--text2)' }}>{o.contact_name} · <a href={`mailto:${o.email}`} style={{ color: 'var(--green)', fontWeight: 700 }}>{o.email}</a> · {o.org_type}</div>
                         <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>ABN {o.abn} · {[o.suburb, o.state].filter(Boolean).join(', ')} · Applied {fmtDate(o.created_at)}</div>
                       </div>
-                      <a href={`mailto:${o.email}?subject=Welcome to LuckySquares Australia!&body=Hi ${o.contact_name},%0A%0AWelcome to LuckySquares Australia! We noticed your organisation ${o.org_name} has applied for an organisation plan. We'd love to help you get started.%0A%0ACheers,%0ALuckySquares Australia`}
+                      <a href={`mailto:${o.email}?subject=Welcome to Lucky Squares Australia!&body=Hi ${o.contact_name},%0A%0AWelcome to Lucky Squares Australia! We noticed your organisation ${o.org_name} has applied for an organisation plan. We'd love to help you get started.%0A%0ACheers,%0ALucky Squares Australia`}
                         className="btn btn-outline btn-sm" style={{ flexShrink: 0 }}>
                         ✉ Say hello
                       </a>
