@@ -41,7 +41,7 @@ export async function GET(req) {
     .select(`
       id, ticket_ref, contact_name, contact_email, subject,
       category, priority, status, sla_breached, created_at, updated_at, closed_at,
-      assignee:profiles!assignee_id(id, full_name, email)
+      assignee_id
     `, { count: 'exact' })
     .is('merged_into', null);
 
