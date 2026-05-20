@@ -878,6 +878,72 @@ export default function AdminForecasting() {
         </Card>
       </div>
 
+      {/* ── 6. Model methodology ──────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}>
+        <SectionTitle>Model Methodology and Assumptions</SectionTitle>
+      </div>
+      <Card style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 13, color: '#6B5E4E', lineHeight: 1.8 }}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
+
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#1A1209', marginBottom: 12 }}>Pipeline and Conversion</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>50 individual organiser leads</strong> identified through existing network. 15% conversion rate per month, tapering as the list is exhausted. Pipeline is fully depleted by month 8-10.</li>
+                <li><strong>20 organisation leads</strong> (clubs, schools, sporting bodies). 10% monthly conversion rate, reflecting a longer sales cycle requiring committee sign-off.</li>
+                <li><strong>Individual-to-org upgrade:</strong> 5% of individual organisers per year recognise the value of the org plan and upgrade, adding to the recurring revenue base.</li>
+              </ul>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#1A1209', marginBottom: 12 }}>Organic Growth and Referrals</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>Organic acquisition:</strong> 2 new individual organisers per month from month 1, independent of pipeline (word of mouth, social, search). This grows as the installed base grows.</li>
+                <li><strong>Referral coefficient of 8%:</strong> For every 100 active organisers, 8 additional organisers join through direct referral each month. Compounds significantly in years 2-5.</li>
+                <li><strong>First-mover advantage:</strong> Lucky Squares is the first purpose-built Lucky Squares platform in Australia. No direct competitors currently exist in this niche, supporting stronger early conversion rates.</li>
+              </ul>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#1A1209', marginBottom: 12 }}>Usage and Revenue</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>Individual organisers run 2.5 campaigns per year</strong> on average (approximately one per school term, with some running seasonal campaigns only).</li>
+                <li><strong>Org plan clients run 6 campaigns per year</strong> — higher frequency reflects that clubs and schools run multiple fundraisers across the year.</li>
+                <li><strong>Blitz events from month 3:</strong> 50% of org plan clients run one Blitz event per year at $99. This is a conservative estimate given the strong incentive (whole-of-club participation, leaderboard, prizes). Introduced conservatively from month 3.</li>
+              </ul>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#1A1209', marginBottom: 12 }}>Seasonality</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>Australian school term pattern applied:</strong> Term 1 (Feb-Mar) and Term 4 (Oct-Nov) are peak fundraising periods. July is the lowest month (school holidays). Weights range from 0.75x (Jul) to 1.2x (Apr, Oct).</li>
+                <li>Seasonal weighting is applied to campaign volume, not to organiser sign-ups, which are assumed to be more evenly distributed.</li>
+              </ul>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#1A1209', marginBottom: 12 }}>Scenarios</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>Conservative (70%):</strong> Slower pipeline conversion, lower referral uptake, fewer campaigns per organiser. Reflects a difficult early market or slower word-of-mouth.</li>
+                <li><strong>Base (100%):</strong> Default assumptions as described above.</li>
+                <li><strong>Optimistic (140%):</strong> Faster conversion, stronger referral loop, higher campaign frequency. Reflects strong early press, a successful beta cohort, or an influencer-driven spike.</li>
+              </ul>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#1A1209', marginBottom: 12 }}>Costs and TAM</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>Fixed costs of $600/month</strong> cover platform infrastructure (Supabase, Vercel, Resend, Stripe). This excludes wages and marketing spend.</li>
+                <li><strong>Total Addressable Market (TAM):</strong> 15,000 eligible Australian organisations including schools, sporting clubs, community groups, and charities. Market penetration milestones are shown in the 5-year view.</li>
+                <li>All projections are estimates only and will self-correct as actual platform data accumulates. Actual figures are pulled directly from the platform database where available.</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </Card>
+
       {/* Footer note */}
       <div style={{ fontSize: 12, color: '#9B8F80', textAlign: 'center', paddingBottom: 40 }}>
         Model assumptions stored in browser localStorage. TAM: {TAM.toLocaleString('en-AU')} eligible Australian organisations.
