@@ -163,6 +163,82 @@ export default function PublicFundraiserPage({ params }) {
         </div>
       )}
       <LiveGrid fundraiser={fundraiser} user={null} onBack={null} />
+      <ReportCampaign fundraiserId={fundraiser.id} />
     </>
+  );
+}
+
+function ReportCampaign({ fundraiserId }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState('');
+  const [details, setDetails] = useState('');
+  const [status, setStatus] = useState('idle');
+
+  const REASONS = [
+    { value: 'inappropriate_content',  label: 'Inappropriate content' },
+    { value: 'suspicious_activity',    label: 'Suspicious or fraudulent activity' },
+    { value: 'misleading_information', label: 'Misleading prize or campaign information' },
+    { value: 'spam',                   label: 'Spam' },
+    { value: 'other',                  label: 'Other' },
+  ];
+
+  const handleSubmit = async () => {
+    if (!reason) return;
+    setStatus('submitting');
+    const res = await fetch('/api/campaigns/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fundraiser_id: fundraiserId, reason, details: details.trim() }),
+    });
+    setStatus(res.ok ? 'done' : 'error');
+  };
+
+  if (!open) {
+    return (
+      <div style={{ textAlign: 'center', padding: '24px 24px 40px' }}>
+        <button
+          onClick={() => setOpen(true)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'var(--text3)', textDecoration: 'underline' }}
+        >
+          Something not right? Report this campaign
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 24px 48px' }}>
+      <div style={{ background: '#fff', border: '1.5px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>
+        {status === 'done' ? (
+          <div style={{ textAlign: 'center', padding: '16px 0' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>✅</div>
+            <p style={{ fontSize: 14, color: 'var(--text2)', margin: 0 }}>Thanks for letting us know. Our team will review this campaign.</p>
+          </div>
+        ) : (
+          <>
+            <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 4 }}>Report this campaign</h3>
+            <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>Help us keep the platform safe. All reports are reviewed by our team.</p>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--text2)', display: 'block', marginBottom: 6 }}>Reason</label>
+              <select className="form-input" value={reason} onChange={(e) => setReason(e.target.value)}>
+                <option value="">Select a reason…</option>
+                {REASONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--text2)', display: 'block', marginBottom: 6 }}>Additional details <span style={{ fontWeight: 400 }}>(optional)</span></label>
+              <textarea className="form-input" rows={3} placeholder="Tell us more about what you saw…" value={details} onChange={(e) => setDetails(e.target.value)} maxLength={500} style={{ resize: 'none' }} />
+            </div>
+            {status === 'error' && <p style={{ fontSize: 13, color: '#DC2626', marginBottom: 12 }}>Something went wrong. Please try again.</p>}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setOpen(false)}>Cancel</button>
+              <button className="btn btn-purple" style={{ flex: 1, justifyContent: 'center', opacity: (!reason || status === 'submitting') ? 0.6 : 1 }} disabled={!reason || status === 'submitting'} onClick={handleSubmit}>
+                {status === 'submitting' ? 'Sending…' : 'Submit report'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }

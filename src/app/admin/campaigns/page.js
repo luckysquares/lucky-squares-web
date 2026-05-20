@@ -17,6 +17,7 @@ const PAYMENT_LABELS = {
 export default function AdminCampaigns() {
   const [campaigns,      setCampaigns]      = useState([]);
   const [payouts,        setPayouts]        = useState([]);
+  const [reports,        setReports]        = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [search,         setSearch]         = useState('');
   const [filter,         setFilter]         = useState('all');
@@ -47,12 +48,14 @@ export default function AdminCampaigns() {
       setLoading(false);
       return;
     }
-    const [{ data: camps }, { data: pq }] = await Promise.all([
+    const [{ data: camps }, { data: pq }, rpts] = await Promise.all([
       getSupabaseClient().rpc('admin_get_fundraisers'),
       getSupabaseClient().rpc('admin_get_payout_queue', { p_status: 'pending' }),
+      adminFetch('/api/admin/campaigns/reports'),
     ]);
     setCampaigns(camps ?? []);
     setPayouts(pq ?? []);
+    setReports(Array.isArray(rpts) ? rpts : []);
     setLoading(false);
   };
 
@@ -144,6 +147,37 @@ export default function AdminCampaigns() {
     <div>
       <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Campaigns</h1>
       <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 28 }}>All fundraisers across the platform</p>
+
+      {/* Campaign Reports */}
+      {reports.length > 0 && (
+        <div style={{ marginBottom: 36, background: '#FFF2F2', border: '2px solid #FCA5A5', borderRadius: 16, padding: '24px 28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <span style={{ fontSize: 22 }}>🚩</span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 900, margin: 0, color: '#991B1B' }}>
+              Campaign Reports ({reports.length})
+            </h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {reports.map((r) => (
+              <div key={r.id} style={{ background: '#fff', borderRadius: 12, padding: '14px 18px', border: '1px solid #FECACA' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>{r.fundraisers?.title ?? r.fundraiser_id}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 4 }}>{r.fundraisers?.org} · {r.fundraisers?.status}</div>
+                    <div style={{ fontSize: 12 }}>
+                      <span style={{ fontWeight: 700 }}>{r.reason.replace(/_/g, ' ')}</span>
+                      {r.details && <span style={{ color: 'var(--text2)' }}> — {r.details}</span>}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text3)', whiteSpace: 'nowrap' }}>
+                    {new Date(r.created_at).toLocaleDateString('en-AU')}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Pending Payouts */}
       {payouts.length > 0 && (
