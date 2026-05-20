@@ -811,3 +811,30 @@ If you weren't expecting this invite, you can safely ignore this email.
 ${SIG}`,
   };
 }
+
+// ── Buyer campaign notification ───────────────────────────────────────────────
+
+export function emailCampaignLaunchedNotification(d: {
+  organiser_name: string;
+  campaign_title: string;
+  campaign_url: string;
+}) {
+  return {
+    subject: `New fundraiser from ${d.organiser_name}: ${d.campaign_title}`,
+    text: `Hi there,
+
+You asked to be notified when ${d.organiser_name} launched their next fundraiser — and it's now live!
+
+${d.campaign_title}
+
+Get your squares here:
+${d.campaign_url}
+
+Good luck!
+
+${SIG}
+
+---
+You're receiving this because you opted in after purchasing squares in a previous ${d.organiser_name} fundraiser. To stop receiving these notifications, click the unsubscribe link in any LuckySquares email.`,
+  };
+}

@@ -87,6 +87,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [buyerEmail,  setBuyerEmail]  = useState(savedBuyer?.email || '');
   const [buyerPhone,  setBuyerPhone]  = useState(savedBuyer?.phone || '');
   const [rememberMe,  setRememberMe]  = useState(!!savedBuyer);
+  const [notifyEmail,  setNotifyEmail]  = useState('');
+  const [notifyState,  setNotifyState]  = useState('idle'); // idle | saving | done | error
   const [winner,      setWinner]      = useState(null);
   const [winners,     setWinners]     = useState([]);
   const [drawnResult,        setDrawnResult]        = useState(null); // null | int[]
@@ -445,6 +447,53 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           <div style={{ background: '#F0FDF8', border: '1.5px solid #B6EDD8', borderRadius: 12, padding: '16px 20px', marginBottom: 24 }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--green)', marginBottom: 4 }}>🤝 Payment collected in person</div>
             <div style={{ fontSize: 13, color: 'var(--text2)' }}>The organiser will be in touch to collect your payment directly.</div>
+          </div>
+        )}
+        {!isOwner && notifyState !== 'done' && (
+          <div style={{ background: '#F8F5FF', border: '1.5px solid #DDD6FE', borderRadius: 12, padding: '20px 24px', marginBottom: 20, textAlign: 'left' }}>
+            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>🔔 Get notified next time</div>
+            <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 12, lineHeight: 1.5 }}>
+              Want to know when {fundraiser.org || 'this organiser'} launches their next campaign?
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="form-input"
+                type="email"
+                placeholder="your@email.com"
+                value={notifyEmail || (savedBuyer?.email ?? buyerEmail)}
+                onChange={(e) => setNotifyEmail(e.target.value)}
+                style={{ flex: 1, fontSize: 13 }}
+              />
+              <button
+                className="btn btn-sm"
+                style={{ background: '#7C3AED', color: '#fff', border: 'none', borderRadius: 10, padding: '0 16px', fontWeight: 700, flexShrink: 0, cursor: notifyState === 'saving' ? 'not-allowed' : 'pointer', opacity: notifyState === 'saving' ? 0.6 : 1 }}
+                disabled={notifyState === 'saving'}
+                onClick={async () => {
+                  const email = (notifyEmail || savedBuyer?.email || buyerEmail).trim();
+                  if (!email) return;
+                  setNotifyState('saving');
+                  try {
+                    const res = await fetch('/api/notifications/opt-in', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email, fundraiser_id: fundraiser.id }),
+                    });
+                    setNotifyState(res.ok ? 'done' : 'error');
+                  } catch {
+                    setNotifyState('error');
+                  }
+                }}
+              >
+                {notifyState === 'saving' ? '…' : 'Notify me'}
+              </button>
+            </div>
+            {notifyState === 'error' && <div style={{ fontSize: 12, color: '#DC2626', marginTop: 8 }}>Something went wrong. Please try again.</div>}
+          </div>
+        )}
+        {notifyState === 'done' && (
+          <div style={{ background: '#F0FDF8', border: '1.5px solid #B6EDD8', borderRadius: 12, padding: '16px 20px', marginBottom: 20, textAlign: 'center' }}>
+            <div style={{ fontWeight: 800, color: 'var(--green)', marginBottom: 4 }}>✓ You're on the list</div>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>We'll send you a link when {fundraiser.org || 'this organiser'} launches their next campaign.</div>
           </div>
         )}
         <div style={{ display: 'flex', gap: 12 }}>

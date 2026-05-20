@@ -2079,6 +2079,17 @@ export default function FundraiseApp() {
         getSupabaseClient().rpc('check_referral_reward', { p_user_id: user.id });
         loadReferralInfo();
         setShowReferralModal(true);
+        // Notify opted-in buyers from previous campaigns (fire-and-forget)
+        if (nf.id && typeof nf.id === 'string') {
+          getSupabaseClient().rpc('get_campaign_notification_followers', { p_fundraiser_id: nf.id }).then(({ data: followers }) => {
+            if (!followers?.length) return;
+            followers.forEach((f) => sendTxEmail('campaign_launched_notification', f.email, {
+              organiser_name: nf.org || user.org || 'the organiser',
+              campaign_title: nf.title,
+              campaign_url: campaignUrl,
+            }));
+          });
+        }
       }
     }
   };

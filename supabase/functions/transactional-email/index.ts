@@ -97,6 +97,7 @@ function buildTemplate(type: string, d: any): { subject: string; text: string } 
     case 'org_application_received':      return T.emailOrgApplicationReceived(d);
     case 'org_application_approved':      return T.emailOrgApplicationApproved(d);
     // Buyer
+    case 'campaign_launched_notification': return T.emailCampaignLaunchedNotification(d);
     case 'square_purchase_confirmation':  return T.emailSquarePurchaseConfirmation(d);
     case 'draw_result_winner':            return T.emailDrawResultWinner(d);
     case 'draw_result_no_win':            return T.emailDrawResultDidNotWin(d);
