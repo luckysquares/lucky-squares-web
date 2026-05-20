@@ -337,6 +337,8 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
   const [mergeInput,    setMergeInput]    = useState('');
   const [showMerge,     setShowMerge]     = useState(false);
   const bottomRef = useRef(null);
+  const topRef    = useRef(null);
+  const prevMsgCount = useRef(0);
 
   const fetchDetail = useCallback(async () => {
     setLoading(true);
@@ -350,7 +352,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
     setLoading(false);
   }, [ticketId]);
 
-  useEffect(() => { fetchDetail(); }, [fetchDetail]);
+  useEffect(() => { prevMsgCount.current = 0; fetchDetail(); }, [fetchDetail]);
 
   useEffect(() => {
     adminFetch('/api/admin/support/canned')
@@ -360,7 +362,15 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const msgs = data?.messages ?? [];
+    if (prevMsgCount.current === 0 && msgs.length >= 0) {
+      // Initial load — scroll to top so user sees ticket header first
+      topRef.current?.scrollIntoView({ behavior: 'instant' });
+    } else if (msgs.length > prevMsgCount.current) {
+      // New reply added — scroll to bottom
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    prevMsgCount.current = msgs.length;
   }, [data?.messages]);
 
   const patchTicket = async (updates) => {
@@ -421,6 +431,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div ref={topRef} />
       {/* Header */}
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
