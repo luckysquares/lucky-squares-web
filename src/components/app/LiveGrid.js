@@ -579,7 +579,10 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', paddingTop: 4 }}>
               <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ width: 16, height: 16, flexShrink: 0, accentColor: 'var(--green)' }} />
-              <span style={{ fontSize: 13, color: 'var(--text2)' }}>Remember my details for next time</span>
+              <span style={{ fontSize: 13, color: 'var(--text2)' }}>
+                Remember my details for next time
+                {savedBuyer && <span style={{ fontSize: 12, color: 'var(--muted)', marginLeft: 4 }}>(uncheck to forget your details)</span>}
+              </span>
             </label>
           </div>
         </div>
