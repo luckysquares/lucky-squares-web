@@ -16,9 +16,6 @@ export default function MariposaChatWidget() {
   const [input,    setInput]    = useState('');
   const [loading,  setLoading]  = useState(false);
   const [escalate, setEscalate] = useState(false);
-  const [email,    setEmail]    = useState('');
-  const [question, setQuestion] = useState('');
-  const [sent,     setSent]     = useState(false);
   const bottomRef  = useRef(null);
   const inputRef   = useRef(null);
 
@@ -52,31 +49,6 @@ export default function MariposaChatWidget() {
     setLoading(false);
   };
 
-  const handleEscalate = async () => {
-    if (!email.trim()) return;
-    const lastQ = question.trim() || messages.filter((m) => m.role === 'user').slice(-1)[0]?.content || 'General enquiry';
-    // Send via transactional-email Edge Function
-    try {
-      await fetch(`${SUPABASE_URL}/functions/v1/transactional-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'admin_new_org_application',
-          to: 'support@luckysquares.com.au',
-          data: {
-            org_name:     'Chat escalation',
-            abn:          'N/A',
-            org_type:     'Support request via Mariposa chat',
-            contact_name: email,
-            contact_email: email,
-            applied_date:  new Date().toLocaleDateString('en-AU'),
-            suburb:        lastQ,
-          },
-        }),
-      });
-    } catch { /* silent */ }
-    setSent(true);
-  };
 
   const renderMessage = (text, role) => {
     const parts = text.split(/(https?:\/\/[^\s]+)/g);
@@ -175,44 +147,29 @@ export default function MariposaChatWidget() {
             )}
 
             {/* Escalate to support */}
-            {!escalate && !sent && messages.length > 2 && (
+            {!escalate && messages.length > 2 && (
               <div style={{ textAlign: 'center', margin: '4px 0 8px' }}>
                 <button
                   onClick={() => setEscalate(true)}
                   style={{ background: 'none', border: 'none', fontSize: 11, color: '#9CA3AF', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
                 >
-                  Still need help? Email our support team
+                  Still need help? Contact our support team
                 </button>
               </div>
             )}
 
-            {escalate && !sent && (
+            {escalate && (
               <div style={{ background: '#F5F3EE', borderRadius: 12, padding: 14, margin: '4px 0 8px', fontSize: 13 }}>
-                <div style={{ fontWeight: 700, marginBottom: 8, color: '#1A1209' }}>Send us a message</div>
-                <input
-                  className="form-input"
-                  placeholder="Your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ marginBottom: 8, fontSize: 12 }}
-                />
-                <textarea
-                  className="form-input"
-                  placeholder="Your question (optional)"
-                  rows={2}
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  style={{ marginBottom: 8, fontSize: 12, resize: 'none' }}
-                />
-                <button className="btn btn-purple" style={{ width: '100%', fontSize: 12 }} onClick={handleEscalate} disabled={!email.trim()}>
-                  Send to support
+                <div style={{ fontWeight: 700, marginBottom: 8, color: '#1A1209' }}>Need more help?</div>
+                <p style={{ margin: '0 0 12px', fontSize: 12, lineHeight: 1.6, color: '#4A3728' }}>
+                  For detailed support, please visit our <a href="/contact" style={{ color: '#7C3AED', fontWeight: 700 }}>contact page</a> and submit a support request. Our team typically responds within one business day.
+                </p>
+                <button
+                  onClick={() => setEscalate(false)}
+                  style={{ background: 'none', border: 'none', fontSize: 11, color: '#9CA3AF', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 }}
+                >
+                  Dismiss
                 </button>
-              </div>
-            )}
-
-            {sent && (
-              <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 12, padding: 12, margin: '4px 0 8px', fontSize: 13, color: '#065F46', textAlign: 'center' }}>
-                Got it! The support team will be in touch within one business day.
               </div>
             )}
 
