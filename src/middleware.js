@@ -1,23 +1,20 @@
 import { NextResponse } from 'next/server';
 
-// Routes that remain accessible even in preview/lockdown mode
-const PREVIEW_ALLOWED = [
-  '/coming-soon',
-  '/admin',
-  '/api/',
-  '/unsubscribe',
-  '/_next',
-  '/favicon',
-  '/icon',
+// Routes locked during beta — redirect to /coming-soon (waitlist)
+const BETA_LOCKED = [
+  '/fundraise',
+  '/feeling-lucky',
+  '/org-signup',
 ];
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // ── Site-wide preview gate ───────────────────────────────────────────────
-  if (process.env.NEXT_PUBLIC_SITE_PHASE === 'preview') {
-    const allowed = PREVIEW_ALLOWED.some((p) => pathname.startsWith(p));
-    if (!allowed && pathname !== '/coming-soon') {
+  // ── Beta gate: lock campaign/registration routes on production ───────────
+  if (process.env.NEXT_PUBLIC_SITE_PHASE === 'beta') {
+    const locked = BETA_LOCKED.some((p) => pathname.startsWith(p))
+      || /^\/f\/[^/]+/.test(pathname); // campaign pages /f/[id]
+    if (locked) {
       return NextResponse.redirect(new URL('/coming-soon', request.url));
     }
   }
