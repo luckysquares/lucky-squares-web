@@ -44,13 +44,21 @@ export async function POST(req) {
 
     // ── Platform launch fee payment ───────────────────────────────────────────
     if (action === 'launch') {
-      await db.from('fundraisers').update({
-        status: 'active',
-        launched_at: new Date().toISOString(),
-      }).eq('id', fundraiser_id);
+      const { data: existing } = await db
+        .from('fundraisers')
+        .select('status')
+        .eq('id', fundraiser_id)
+        .single();
 
-      if (coupon_code) {
-        await db.rpc('redeem_coupon', { p_code: coupon_code });
+      if (existing?.status !== 'active') {
+        await db.from('fundraisers').update({
+          status: 'active',
+          launched_at: new Date().toISOString(),
+        }).eq('id', fundraiser_id);
+
+        if (coupon_code) {
+          await db.rpc('redeem_coupon', { p_code: coupon_code });
+        }
       }
 
       return new Response('ok', { status: 200 });

@@ -12,17 +12,28 @@ function supabase() {
 
 export async function POST(req) {
   try {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const userRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: process.env.SUPABASE_SERVICE_ROLE_KEY },
+    });
+    if (!userRes.ok) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const { id: userId } = await userRes.json();
+
     const { fundraiser_id } = await req.json();
     if (!fundraiser_id) return Response.json({ error: 'fundraiser_id required' }, { status: 400 });
 
     const db = supabase();
     const { data: fundraiser, error } = await db
       .from('fundraisers')
-      .select('stripe_account_id')
+      .select('stripe_account_id, owner_id')
       .eq('id', fundraiser_id)
       .single();
 
-    if (error) return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
+    if (error || !fundraiser) return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
+    if (fundraiser.owner_id !== userId) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     let accountId = fundraiser.stripe_account_id;
 

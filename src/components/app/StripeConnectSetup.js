@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { getSupabaseClient } from '@/lib/supabase/client';
 
 export default function StripeConnectSetup({ fundraiserId, onComplete }) {
   const containerRef = useRef(null);
@@ -17,9 +18,14 @@ export default function StripeConnectSetup({ fundraiserId, onComplete }) {
         const instance = loadConnectAndInitialize({
           publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
           fetchClientSecret: async () => {
+            const { data: { session } } = await getSupabaseClient().auth.getSession();
+            const token = session?.access_token;
             const res = await fetch('/api/stripe/account-session', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
               body: JSON.stringify({ fundraiser_id: fundraiserId }),
             });
             const data = await res.json();

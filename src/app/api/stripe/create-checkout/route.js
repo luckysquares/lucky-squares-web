@@ -18,7 +18,23 @@ export async function POST(req) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    if (square_numbers.length > 10) {
+      return Response.json({ error: 'Maximum 10 squares per purchase' }, { status: 400 });
+    }
+
     const db = supabase();
+
+    const { data: takenSquares } = await db
+      .from('squares')
+      .select('number')
+      .eq('fundraiser_id', fundraiser_id)
+      .in('number', square_numbers)
+      .eq('paid', true);
+
+    if (takenSquares?.length > 0) {
+      return Response.json({ error: 'One or more squares are no longer available', taken: takenSquares.map((s) => s.number) }, { status: 409 });
+    }
+
     const { data: fundraiser, error } = await db
       .from('fundraisers')
       .select('title, org, price_per_sq, stripe_account_id, stripe_onboarding_complete')

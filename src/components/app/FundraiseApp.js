@@ -894,12 +894,21 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
     const preview = URL.createObjectURL(file);
     setCampaignImageUrl(preview);
     setImageUploading(true);
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await fetch('/api/fundraiser/upload', { method: 'POST', body: fd });
-    const json = await res.json();
-    if (res.ok && json.url) setCampaignImageUrl(json.url);
-    setImageUploading(false);
+    try {
+      const { data: { session } } = await getSupabaseClient().auth.getSession();
+      const token = session?.access_token;
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/fundraiser/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      const json = await res.json();
+      if (res.ok && json.url) setCampaignImageUrl(json.url);
+    } finally {
+      setImageUploading(false);
+    }
   };
 
   const checkCoupon = async () => {
