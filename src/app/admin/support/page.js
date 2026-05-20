@@ -148,6 +148,8 @@ function TicketsTab() {
   const [tickets,      setTickets]      = useState([]);
   const [total,        setTotal]        = useState(0);
   const [loading,      setLoading]      = useState(true);
+  const [refreshing,   setRefreshing]   = useState(false);
+  const [lastRefresh,  setLastRefresh]  = useState(null);
   const [selectedId,   setSelectedId]   = useState(null);
   const [search,       setSearch]       = useState('');
   const [filterStatus,   setFilterStatus]   = useState('');
@@ -155,8 +157,8 @@ function TicketsTab() {
   const [filterCategory, setFilterCategory] = useState('');
   const [adminProfiles, setAdminProfiles] = useState([]);
 
-  const fetchTickets = useCallback(async () => {
-    setLoading(true);
+  const fetchTickets = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true); else setRefreshing(true);
     const params = new URLSearchParams({ page: '1', limit: '50' });
     if (filterStatus)   params.set('status',   filterStatus);
     if (filterPriority) params.set('priority', filterPriority);
@@ -168,13 +170,21 @@ function TicketsTab() {
       const data = await res.json();
       setTickets(data.tickets || []);
       setTotal(data.total || 0);
+      setLastRefresh(new Date());
     } catch (err) {
       console.error('Failed to fetch tickets:', err);
     }
     setLoading(false);
+    setRefreshing(false);
   }, [filterStatus, filterPriority, filterCategory, search]);
 
   useEffect(() => { fetchTickets(); }, [fetchTickets]);
+
+  // Poll every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => fetchTickets(true), 30000);
+    return () => clearInterval(interval);
+  }, [fetchTickets]);
 
   // Fetch admin profiles for assignee selector
   useEffect(() => {
@@ -191,6 +201,21 @@ function TicketsTab() {
     <div style={{ display: 'flex', gap: 0, height: 'calc(100vh - 180px)', minHeight: 500 }}>
       {/* Left Panel */}
       <div style={{ width: 320, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1.5px solid #E5E0D5', paddingRight: 20, overflowY: 'auto' }}>
+
+        {/* Refresh bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <span style={{ fontSize: 11, color: '#9C8060' }}>
+            {lastRefresh ? `Updated ${timeAgo(lastRefresh.toISOString())}` : 'Loading...'}
+          </span>
+          <button
+            onClick={() => fetchTickets(true)}
+            disabled={refreshing}
+            style={{ ...btn('#F5F3EE', '#7C3AED'), padding: '4px 10px', border: '1.5px solid #E5E0D5', opacity: refreshing ? 0.6 : 1 }}
+          >
+            {refreshing ? '↻ Refreshing…' : '↻ Refresh'}
+          </button>
+        </div>
+
         {/* Search */}
         <input
           placeholder="Search tickets..."

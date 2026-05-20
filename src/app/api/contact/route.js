@@ -117,8 +117,19 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Message is too short.' }, { status: 400 });
   }
 
-  const cat     = category?.trim() || 'general';
-  const subject = `${cat.charAt(0).toUpperCase() + cat.slice(1).replace('_', ' ')} enquiry from ${name.trim()}`;
+  const CAT_MAP = {
+    'general enquiry':                  'general',
+    'technical support':                'technical',
+    'billing':                          'billing',
+    'privacy enquiry':                  'general',
+    'compliance and permit questions':  'general',
+    'media and partnerships':           'general',
+    'other':                            'general',
+    'campaign_help':                    'campaign_help',
+    'abuse':                            'abuse',
+  };
+  const cat     = CAT_MAP[category?.trim().toLowerCase()] ?? 'general';
+  const subject = `${category?.trim() || 'General enquiry'} from ${name.trim()}`;
 
   // Create ticket in Supabase
   let ticketRef = 'TKT-XXXX';
