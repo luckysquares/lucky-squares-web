@@ -32,8 +32,7 @@ export async function GET(req, { params }) {
     .select(`
       id, ticket_ref, contact_name, contact_email, subject,
       category, priority, status, sla_breached, satisfaction,
-      created_at, updated_at, closed_at, merged_into,
-      assignee:profiles!assignee_id(id, full_name, email)
+      created_at, updated_at, closed_at, merged_into, assignee_id
     `)
     .eq('id', id)
     .single();
