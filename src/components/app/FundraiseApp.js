@@ -1001,6 +1001,12 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
         ))}
       </div>
 
+      <div style={{ textAlign: 'center', marginBottom: 8 }}>
+        <a href="/pricing" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: 'var(--green)', fontWeight: 600, textDecoration: 'none' }}>
+          Read about the unlimited campaign plan for Organisations →
+        </a>
+      </div>
+
       {fundraiserType === 'individual' && (
         <div style={{ background: '#FFFBEB', border: '1.5px solid #F59E0B', borderRadius: 12, padding: '16px 20px' }}>
           <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 6, color: '#92400E' }}>A note on personal fundraising</div>
