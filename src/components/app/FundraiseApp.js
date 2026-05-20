@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
+import { validateAbn, formatAbn } from '@/lib/abn';
 import LiveGrid from '@/components/app/LiveGrid';
 import StripeConnectSetup from '@/components/app/StripeConnectSetup';
 
@@ -1048,8 +1049,19 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                 placeholder="e.g. 12 345 678 901"
                 value={orgDetails.abn}
                 onChange={(e) => setOrgDetails((o) => ({ ...o, abn: e.target.value }))}
+                onBlur={() => {
+                  const { valid, digits } = validateAbn(orgDetails.abn);
+                  if (valid) setOrgDetails((o) => ({ ...o, abn: formatAbn(digits) }));
+                }}
                 maxLength={14}
+                style={{ borderColor: orgDetails.abn.replace(/\s/g, '').length === 11 && !validateAbn(orgDetails.abn).valid ? '#E53E3E' : undefined }}
               />
+              {orgDetails.abn.replace(/\s/g, '').length === 11 && !validateAbn(orgDetails.abn).valid && (
+                <div style={{ marginTop: 5, fontSize: 12, color: '#E53E3E' }}>That doesn&apos;t look like a valid ABN. Please check the number and try again.</div>
+              )}
+              {orgDetails.abn.replace(/\s/g, '').length === 11 && validateAbn(orgDetails.abn).valid && (
+                <div style={{ marginTop: 5, fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>✓ Valid ABN</div>
+              )}
             </div>
           </div>
         </div>
