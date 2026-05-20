@@ -110,7 +110,7 @@ export async function POST(req) {
     // Fetch fundraiser details for email
     const { data: fundraiser } = await db
       .from('fundraisers')
-      .select('title, org, draw_type, draw_date, contact_name')
+      .select('title, org, draw_type, draw_date, contact_name, contact_email')
       .eq('id', fundraiser_id)
       .single();
 
@@ -136,13 +136,54 @@ export async function POST(req) {
             buyer_name,
             campaign_title: fundraiser.title,
             org_name: fundraiser.org,
-            square_numbers: squareNums.map((n) => `#${n}`).join(', '),
-            amount_paid: `$${subtotal.toFixed(2)}`,
+            square_numbers: squareNums.join(', '),
+            amount_paid: subtotal.toFixed(2),
             draw_type_description: drawDesc,
             campaign_url: `${appUrl}/f/${fundraiser_id}`,
           },
         }),
       });
+
+      // First-sale notification to organiser
+      const { data: stats } = await db
+        .from('fundraiser_stats')
+        .select('sold_count')
+        .eq('fundraiser_id', fundraiser_id)
+        .single();
+
+      const totalSold = Number(stats?.sold_count ?? 0);
+      const isFirstSale = totalSold === squareNums.length;
+
+      if (isFirstSale && fundraiser?.contact_email) {
+        const { data: fullFundraiser } = await db
+          .from('fundraisers')
+          .select('contact_email, contact_name, grid_size, price_per_sq')
+          .eq('id', fundraiser_id)
+          .single();
+
+        if (fullFundraiser?.contact_email) {
+          const amountRaised = (totalSold * parseFloat(fullFundraiser.price_per_sq || 0)).toFixed(2);
+          await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+            body: JSON.stringify({
+              type: 'square_sold',
+              to: fullFundraiser.contact_email,
+              data: {
+                first_name: (fullFundraiser.contact_name ?? 'there').split(' ')[0],
+                campaign_title: fundraiser.title,
+                org_name: fundraiser.org,
+                buyer_name: buyer_name,
+                square_number: squareNums[0],
+                sold_count: totalSold,
+                grid_size: fullFundraiser.grid_size,
+                amount_raised: amountRaised,
+                is_first: true,
+              },
+            }),
+          }).catch(() => {});
+        }
+      }
     }
   }
 

@@ -101,6 +101,8 @@ function buildTemplate(type: string, d: any): { subject: string; text: string } 
     case 'square_purchase_confirmation':  return T.emailSquarePurchaseConfirmation(d);
     case 'draw_result_winner':            return T.emailDrawResultWinner(d);
     case 'draw_result_no_win':            return T.emailDrawResultDidNotWin(d);
+    case 'square_daily_digest':           return T.emailSquareDailyDigest(d);
+    case 'square_no_sales_nudge':         return T.emailSquareNoSalesNudge(d);
     case 'refund_notification':           return T.emailRefundNotification(d);
     // Org member invite
     case 'org_member_invite':             return T.emailOrgMemberInvite(d);
@@ -113,7 +115,6 @@ function buildTemplate(type: string, d: any): { subject: string; text: string } 
     case 'first_campaign_tips':           return T.emailFirstCampaignTips(d);
     case 're_engagement':                 return T.emailReEngagement(d);
     case 'seasonal':                      return T.emailSeasonal(d);
-    case 'draw_milestone':                return T.emailDrawMilestone(d);
 
     default: return null;
   }

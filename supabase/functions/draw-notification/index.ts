@@ -4,7 +4,6 @@ import {
   emailDrawCompleteOrganiser,
   emailDrawResultWinner,
   emailDrawResultDidNotWin,
-  emailDrawMilestone,
 } from '../_shared/templates.ts';
 
 const supabase = createClient(
@@ -121,6 +120,8 @@ Deno.serve(async (req) => {
       campaign_title: f.title,
       org_name:       f.org,
       amount_raised:  fundsRaised,
+      sold_count:     soldCount,
+      grid_size:      f.grid_size,
       winners:        winners.map((w) => ({ place: w.place, prize: w.prize, square_number: w.square_number, buyer_name: w.buyer_name })),
       is_stripe:      isStripe,
     });
@@ -169,22 +170,6 @@ Deno.serve(async (req) => {
       });
       await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
     }
-  }
-
-  // 4. Draw milestone email to organiser (celebratory wrap-up)
-  if (f.contact_email) {
-    const tpl = emailDrawMilestone({
-      first_name:     firstName,
-      campaign_title: f.title,
-      sold_count:     soldCount,
-      grid_size:      f.grid_size,
-      amount_raised:  fundsRaised,
-      org_name:       f.org,
-      winner_summary: winnerSummary,
-    });
-    // Send after a short delay so organiser gets draw_complete first
-    await new Promise((r) => setTimeout(r, 2000));
-    await sendEmail({ to: f.contact_email, subject: tpl.subject, text: tpl.text });
   }
 
   return new Response(JSON.stringify({ ok: true, admin: true, organiser: !!f.contact_email, buyers: uniqueBuyers.length }), { status: 200 });

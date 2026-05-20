@@ -6,6 +6,10 @@ function firstName(name: string): string {
   return (name || 'there').split(' ')[0];
 }
 
+function amt(v: string | number): string {
+  return `$${String(v).replace(/^\$/, '')}`;
+}
+
 // ── Organiser emails ──────────────────────────────────────────────────────────
 
 export function emailOrganizerWelcome(d: { first_name: string }) {
@@ -58,6 +62,7 @@ ${SIG}`,
 export function emailSquareSold(d: {
   first_name: string;
   campaign_title: string;
+  org_name: string;
   buyer_name: string;
   square_number: number;
   sold_count: number;
@@ -218,6 +223,8 @@ export function emailDrawCompleteOrganiser(d: {
   campaign_title: string;
   org_name: string;
   amount_raised: string;
+  sold_count: number;
+  grid_size: number;
   winners: Array<{ place: string; prize: string; square_number: number; buyer_name: string }>;
   is_stripe: boolean;
 }) {
@@ -241,15 +248,19 @@ export function emailDrawCompleteOrganiser(d: {
     subject: `The draw is done! Here are your winners`,
     text: `Hi ${d.first_name},
 
-Your draw for ${d.campaign_title} is complete. Here are your winners:
+Your draw for ${d.campaign_title} is complete. Here are your results:
 
 ${winnerLines}
 
 ${nextSteps}
 
-Congratulations on a successful fundraiser. You raised $${d.amount_raised} for ${d.org_name}!
+You raised ${amt(d.amount_raised)} for ${d.org_name} from ${d.sold_count} of ${d.grid_size} squares sold.
 
-Log in to view your campaign report:
+Want to share the result? Here's a quick message you can post:
+
+"${d.campaign_title} draw is done! Big thanks to everyone who took part. We raised ${amt(d.amount_raised)} for ${d.org_name}. Congratulations to all our winners!"
+
+Whenever you're ready to run your next campaign, we'll be here:
 https://luckysquares.com.au/fundraise
 
 ${SIG}`,
@@ -445,7 +456,7 @@ Type: ${d.org_type}
 
 We review all applications personally and aim to get back to you within 2 business days.
 
-In the meantime, you're welcome to get started on the trial plan. Your progress will carry over when your organisation plan is approved.
+In the meantime, you can get started on your first campaign straight away. Just log in and create one when you're ready.
 
 ${SIG}`,
   };
@@ -482,18 +493,16 @@ export function emailSquarePurchaseConfirmation(d: {
   campaign_url: string;
 }) {
   return {
-    subject: `You're in! Square${d.square_numbers.includes(',') ? 's' : ''} #${d.square_numbers} ${d.square_numbers.includes(',') ? 'are' : 'is'} yours`,
+    subject: `You're in! Square${d.square_numbers.includes(',') ? 's' : ''} confirmed`,
     text: `Hi ${firstName(d.buyer_name)},
 
-Your square${d.square_numbers.includes(',') ? 's are' : ' is'} confirmed for ${d.campaign_title}, run by ${d.org_name}.
+You've secured your square${d.square_numbers.includes(',') ? 's' : ''} in ${d.campaign_title} — good luck in the draw!
 
-Your square(s): #${d.square_numbers}
-Amount paid: $${d.amount_paid}
+Square${d.square_numbers.includes(',') ? 's' : ''}: #${d.square_numbers.split(', ').join(', #')}
+Amount paid: ${amt(d.amount_paid)}
 Draw: ${d.draw_type_description}
 
-You'll receive an email with the result as soon as the draw is complete.
-
-Good luck!
+Thanks for supporting ${d.org_name}'s fundraiser. We'll send you the result as soon as the draw is complete.
 
 View the live grid:
 ${d.campaign_url}
@@ -624,7 +633,7 @@ export function emailWelcomeDay1(d: {
 
 Now that you're set up, here's the quickest way to get your first fundraiser live.
 
-Step 1: Create your grid. Choose 25, 50, or 100 squares. Set your price per square (most campaigns use $10 to $20). Add a prize or two and a short description of what you're raising money for.
+Step 1: Create your grid. Choose 25, 50, or 100 squares. Set your price per square (most campaigns price squares between $5 and $10). Add a prize or two and a short description of what you're raising money for.
 
 Step 2: Launch it. Pay the one-off platform fee and your live link is ready to share immediately.
 
@@ -643,12 +652,12 @@ export function emailWelcomeDay3NoCampaign(d: {
   first_name: string;
 }) {
   return {
-    subject: `A primary school in Melbourne raised $1,800 in four days`,
+    subject: `A primary school in Melbourne raised $1,000 in four days`,
     text: `Hi ${d.first_name},
 
 We wanted to share a quick story from one of our organisers.
 
-A P&C treasurer at a primary school in Melbourne set up a 100-square grid at $18 per square. She shared it in the school WhatsApp group on a Tuesday morning. By Friday afternoon, every square was sold and the school had raised $1,800 before prizes.
+A P&C treasurer at a primary school in Melbourne set up a 100-square grid at $10 per square. She shared it in the school WhatsApp group on a Tuesday morning. By Friday afternoon, every square was sold and the school had raised $1,000 before prizes.
 
 She told us the hardest part was deciding what prizes to offer. Everything else just happened.
 
@@ -753,38 +762,6 @@ ${SIG}`,
   };
 }
 
-export function emailDrawMilestone(d: {
-  first_name: string;
-  campaign_title: string;
-  sold_count: number;
-  grid_size: number;
-  amount_raised: string;
-  org_name: string;
-  winner_summary: string;
-}) {
-  return {
-    subject: `What a result, ${d.first_name}!`,
-    text: `Hi ${d.first_name},
-
-${d.campaign_title} is officially wrapped up and what a run it was.
-
-Squares sold: ${d.sold_count} of ${d.grid_size}
-Total raised: $${d.amount_raised}
-Winners: ${d.winner_summary}
-
-You just showed your community what's possible when people come together for a good cause. That's genuinely something to be proud of.
-
-If you'd like to share the result, here's a quick message you can post:
-
-"Our Lucky Squares draw is done! Huge thanks to everyone who bought a square. We raised $${d.amount_raised} for ${d.org_name}. Congrats to our winners!"
-
-Whenever you're ready for your next campaign, we'll be here:
-https://luckysquares.com.au/fundraise
-
-${SIG}`,
-  };
-}
-
 // ── Org contributor invite ─────────────────────────────────────────────────────
 
 export function emailOrgMemberInvite(d: {
@@ -807,6 +784,59 @@ ${d.invite_url}
 If you don't have a LuckySquares account yet, you'll be able to create one when you click the link above.
 
 If you weren't expecting this invite, you can safely ignore this email.
+
+${SIG}`,
+  };
+}
+
+export function emailSquareDailyDigest(d: {
+  first_name: string;
+  campaign_title: string;
+  sales_today: number;
+  buyer_names: string;  // e.g. "Sarah, Tom and 3 others" or "Jamie"
+  sold_count: number;
+  grid_size: number;
+  amount_raised: string;
+  campaign_url: string;
+}) {
+  return {
+    subject: `${d.sales_today} square${d.sales_today !== 1 ? 's' : ''} sold today in ${d.campaign_title}`,
+    text: `Hi ${d.first_name},
+
+Here's your daily update for ${d.campaign_title}.
+
+Squares sold today: ${d.sales_today} (${d.buyer_names})
+Running total: ${d.sold_count} of ${d.grid_size} squares sold, ${amt(d.amount_raised)} raised
+
+Keep sharing your link to keep the momentum going!
+
+${d.campaign_url}
+
+${SIG}
+
+---
+Prefer fewer emails? Log in to your dashboard to manage notification settings.`,
+  };
+}
+
+export function emailSquareNoSalesNudge(d: {
+  first_name: string;
+  campaign_title: string;
+  sold_count: number;
+  grid_size: number;
+  campaign_url: string;
+}) {
+  return {
+    subject: `A fresh share could get ${d.campaign_title} moving again`,
+    text: `Hi ${d.first_name},
+
+It's been a few days since the last square was sold in ${d.campaign_title}. A fresh share to your network is often all it takes to get things moving again.
+
+${d.sold_count} of ${d.grid_size} squares sold so far. Here's your link to share:
+
+${d.campaign_url}
+
+A personal message to 3 or 4 people who haven't bought yet often works better than a group post at this stage.
 
 ${SIG}`,
   };
