@@ -60,7 +60,7 @@ export default function ComingSoonPage() {
           Join the waitlist and we&apos;ll be in touch when we open up to everyone.
         </p>
 
-        <div style={{ maxWidth: 460, width: '100%' }}>
+        <div style={{ maxWidth: 460, width: '100%', margin: '0 auto' }}>
           {status === 'done' ? (
             <div className="scratch-card" style={{ padding: '36px 40px', textAlign: 'center' }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
