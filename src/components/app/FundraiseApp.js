@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { validateAbn, formatAbn } from '@/lib/abn';
+import { containsProfanity } from '@/lib/profanity';
 import LiveGrid from '@/components/app/LiveGrid';
 import StripeConnectSetup from '@/components/app/StripeConnectSetup';
 
@@ -860,6 +861,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
 
   const [step,            setStep]            = useState(savedDraft?.step ?? 0);
+  const [profanityFlags,  setProfanityFlags]  = useState({});
   const [fundraiserType,  setFundraiserType]  = useState(savedDraft?.fundraiserType ?? ''); // 'individual' | 'org'
   const [orgDetails,      setOrgDetails]      = useState(savedDraft?.orgDetails ?? { name: '', orgType: '', abn: '' });
   const [gridOpt,         setGridOpt]         = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
@@ -948,7 +950,11 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     ? payment.accountName.trim() && payment.bsb.trim() && payment.account.trim()
     : true;
 
+  const hasProfanityFlag = Object.values(profanityFlags).some(Boolean);
+  const flagField = (key, val) => setProfanityFlags((f) => ({ ...f, [key]: containsProfanity(val) }));
+
   const canNext = () => {
+    if (hasProfanityFlag) return false;
     if (step === 0) return fundraiserType === 'individual' || (fundraiserType === 'org' && orgDetails.name.trim());
     if (step === 1) return !!gridOpt;
     if (step === 2) return parseFloat(price) > 0;
@@ -1028,8 +1034,10 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                 placeholder="e.g. Sunbury Primary P&C"
                 value={orgDetails.name}
                 onChange={(e) => setOrgDetails((o) => ({ ...o, name: e.target.value }))}
+                onBlur={(e) => flagField('orgName', e.target.value)}
                 maxLength={100}
               />
+              {profanityFlags.orgName && <div style={{ marginTop: 5, fontSize: 12, color: '#E53E3E' }}>Please keep campaign content appropriate for all audiences.</div>}
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Organisation type</label>
@@ -1222,7 +1230,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             <div style={{ display: 'flex', gap: 12 }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label className="form-label">Description</label>
-                <input className="form-input" placeholder={i === 0 ? 'e.g. $150 cash' : i === 1 ? 'e.g. Restaurant voucher' : i === 2 ? 'e.g. $25 club drinks tab' : 'Enter prize description'} maxLength={80} value={p.desc} onChange={(e) => { const n = [...prizes]; n[i] = { ...n[i], desc: e.target.value }; setPrizes(n); }} />
+                <input className="form-input" placeholder={i === 0 ? 'e.g. $150 cash' : i === 1 ? 'e.g. Restaurant voucher' : i === 2 ? 'e.g. $25 club drinks tab' : 'Enter prize description'} maxLength={80} value={p.desc} onChange={(e) => { const n = [...prizes]; n[i] = { ...n[i], desc: e.target.value }; setPrizes(n); }} onBlur={(e) => flagField(`prize${i}`, e.target.value)} />
+                {profanityFlags[`prize${i}`] && <div style={{ marginTop: 5, fontSize: 12, color: '#E53E3E' }}>Please keep campaign content appropriate for all audiences.</div>}
               </div>
               <div className="form-group" style={{ width: 120 }}>
                 <label className="form-label">Value</label>
@@ -1264,7 +1273,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
           <div className="form-group">
             <label className="form-label">Campaign title</label>
             <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}>Tell people what they are supporting</div>
-            <input className="form-input" placeholder="e.g. Help our under 18s get to regionals" maxLength={80} value={campaign.title} onChange={(e) => setCampaign({ ...campaign, title: e.target.value })} />
+            <input className="form-input" placeholder="e.g. Help our under 18s get to regionals" maxLength={80} value={campaign.title} onChange={(e) => setCampaign({ ...campaign, title: e.target.value })} onBlur={(e) => flagField('title', e.target.value)} />
+            {profanityFlags.title && <div style={{ marginTop: 5, fontSize: 12, color: '#E53E3E' }}>Please keep campaign content appropriate for all audiences.</div>}
           </div>
           <div className="form-group">
             <label className="form-label">Your name <span style={{ color: '#CC0000' }}>*</span></label>
@@ -1280,11 +1290,13 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
           </div>
           <div className="form-group">
             <label className="form-label">Organisation name <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 400 }}>(optional)</span></label>
-            <input className="form-input" placeholder="Your school, club or charity" maxLength={100} value={campaign.org} onChange={(e) => setCampaign({ ...campaign, org: e.target.value })} />
+            <input className="form-input" placeholder="Your school, club or charity" maxLength={100} value={campaign.org} onChange={(e) => setCampaign({ ...campaign, org: e.target.value })} onBlur={(e) => flagField('org', e.target.value)} />
+            {profanityFlags.org && <div style={{ marginTop: 5, fontSize: 12, color: '#E53E3E' }}>Please keep campaign content appropriate for all audiences.</div>}
           </div>
           <div className="form-group">
             <label className="form-label">Description</label>
-            <textarea className="form-input" rows={3} placeholder="Tell your story: why you're fundraising and what the money supports" maxLength={500} value={campaign.description} onChange={(e) => setCampaign({ ...campaign, description: e.target.value })} style={{ resize: 'vertical' }} />
+            <textarea className="form-input" rows={3} placeholder="Tell your story: why you're fundraising and what the money supports" maxLength={500} value={campaign.description} onChange={(e) => setCampaign({ ...campaign, description: e.target.value })} onBlur={(e) => flagField('description', e.target.value)} style={{ resize: 'vertical' }} />
+            {profanityFlags.description && <div style={{ marginTop: 5, fontSize: 12, color: '#E53E3E' }}>Please keep campaign content appropriate for all audiences.</div>}
           </div>
           <div className="form-group">
             <label className="form-label">Campaign photo <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 400 }}>(optional)</span></label>
