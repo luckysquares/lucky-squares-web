@@ -74,7 +74,7 @@ export default function AdminLayout({ children }) {
           </Link>
         </div>
 
-        <nav style={{ flex: 1, padding: '12px 0' }}>
+        <nav style={{ padding: '12px 0' }}>
           {NAV.map(({ href, icon, label }) => {
             const active = pathname.startsWith(href);
             return (
@@ -93,7 +93,7 @@ export default function AdminLayout({ children }) {
           })}
         </nav>
 
-        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 'auto' }}>
           {email && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginBottom: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</div>}
           <button onClick={handleSignOut} style={{ width: '100%', background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.12)', color: 'rgba(255,255,255,.7)', borderRadius: 8, padding: '8px 0', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
             Sign out
