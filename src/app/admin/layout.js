@@ -121,7 +121,7 @@ function AdminLogin({ reason, onAuth }) {
   return (
     <div style={{ minHeight: '100vh', background: '#0F0B2A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ background: '#1A1650', borderRadius: 20, padding: 40, maxWidth: 380, width: '100%', textAlign: 'center' }}>
-        <Logo size={48} style={{ margin: '0 auto 20px' }} />
+        <Logo size={48} dark style={{ margin: '0 auto 20px' }} />
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Admin portal</h1>
         {reason === 'nonadmin' && (
           <p style={{ fontSize: 13, color: '#FF6B6B', marginBottom: 20 }}>This account does not have admin access.</p>
