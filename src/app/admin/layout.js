@@ -63,7 +63,7 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--cream)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(to right, #0F0B2A 220px, var(--cream) 220px)' }}>
 
       {/* Sidebar */}
       <aside style={{ width: 220, background: '#0F0B2A', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
