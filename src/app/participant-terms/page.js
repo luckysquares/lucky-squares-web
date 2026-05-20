@@ -29,9 +29,10 @@ export default function ParticipantTermsPage() {
 
             <Section n="1" title="Who You Are Dealing With">
               <p>
-                When you purchase a square in a Lucky Squares fundraiser, you are participating in a fundraising
-                activity organised and operated by the Organiser (the community group, sporting club, or charity
-                that created the fundraiser). You are not entering into a transaction with Lucky Squares Australia.
+                When you purchase a square in a fundraiser conducted through the Lucky Squares Australia platform,
+                you are participating in a fundraising activity organised and operated by the Organiser (the
+                community group, sporting club, or charity that created the fundraiser). You are not entering
+                into a transaction with Lucky Squares Australia.
               </p>
               <p>
                 Play With Heart Pty Ltd ACN 698 202 069 ABN 19 698 202 069 (trading as Lucky Squares Australia) provides the software platform only.
@@ -40,7 +41,7 @@ export default function ParticipantTermsPage() {
             </Section>
 
             <Section n="2" title="Your Purchase">
-              <SubSection n="2.1">By purchasing one or more squares, you are paying the Organiser for the chance to win a prize in a randomised draw conducted through the Platform.</SubSection>
+              <SubSection n="2.1">By purchasing one or more squares, you are paying the Organiser for the chance to win a prize in a randomised draw conducted by the Organiser using the Lucky Squares Australia platform.</SubSection>
               <SubSection n="2.2">The price per square, prize structure, draw method, and closing date are set by the Organiser and displayed on the fundraiser page. Lucky Squares Australia does not set or guarantee these details.</SubSection>
               <SubSection n="2.3">Your purchase does not guarantee that you will win a prize.</SubSection>
               <SubSection n="2.4">Each square is allocated a unique number between 1 and the grid size (25, 50, or 100). Square numbers are assigned sequentially in the order they are selected.</SubSection>
@@ -95,7 +96,7 @@ export default function ParticipantTermsPage() {
             </Section>
 
             <Section n="9" title="Eligibility">
-              <p>By participating in a Lucky Squares fundraiser, you confirm that:</p>
+              <p>By participating in a fundraiser through the Lucky Squares Australia platform, you confirm that:</p>
               <ul>
                 <li>You meet any minimum age requirement applicable in your jurisdiction</li>
                 <li>Your participation is permitted under the laws of your state or territory</li>

@@ -198,7 +198,7 @@ export default function HomePage() {
             <div className="pricing-card">
               <div className="pricing-name">Organisation</div>
               <div className="pricing-price">$149 <span>/ year</span></div>
-              <p className="pricing-desc">Run unlimited Lucky Squares campaigns per year for your school, club, or charity.</p>
+              <p className="pricing-desc">Run unlimited fundraising campaigns per year for your school, club, or charity using the Lucky Squares platform.</p>
               <ul className="pricing-features">
                 <li>Unlimited campaigns per year</li>
                 <li>Up to 10 live simultaneously</li>

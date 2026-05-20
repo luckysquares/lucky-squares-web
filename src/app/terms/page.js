@@ -23,7 +23,8 @@ export default function TermsPage() {
 
             <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.8, marginBottom: 32 }}>
               These Terms of Service (&ldquo;Terms&rdquo;) govern your use of the Lucky Squares Australia platform
-              (&ldquo;Platform&rdquo;). By creating an account or launching a fundraiser, you agree to be bound by these Terms.
+              (&ldquo;Platform&rdquo;). By creating an account as an Organiser or launching a fundraiser through the Platform,
+              you agree to be bound by these Terms.
             </p>
 
             <Section n="1" title="About Lucky Squares Australia">
@@ -82,7 +83,9 @@ export default function TermsPage() {
               <SubSection n="5.2" label="Permits and Authorisations">
                 Where required by applicable law, the Organiser must obtain all necessary permits, approvals, or
                 authorisations from the relevant state or territory gaming authority before launching a Fundraiser.
-                Lucky Squares Australia does not obtain, verify, or guarantee the existence of any such permits.
+                The Organiser is solely responsible for obtaining and verifying all required permits.
+                Lucky Squares Australia does not obtain, verify, or guarantee the existence of any such permits
+                and accepts no liability for any failure by the Organiser to comply with permit requirements.
               </SubSection>
               <SubSection n="5.3" label="Accurate Information">
                 The Organiser must ensure that all information provided on the Platform, including campaign descriptions,

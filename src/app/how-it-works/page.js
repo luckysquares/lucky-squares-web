@@ -17,7 +17,7 @@ export default function HowItWorksPage() {
             Setup and launch in under five minutes
           </h1>
           <p className="section-body" style={{ margin: '0 auto 48px', textAlign: 'center' }}>
-            LuckySquares makes running a Lucky Squares fundraiser simple. No spreadsheets, no unrecognisable handwriting, no cash handling, no stress.
+            LuckySquares gives your organisation everything it needs to run a Lucky Squares fundraiser. No spreadsheets, no unrecognisable handwriting, no cash handling, no stress.
           </p>
         </div>
       </section>

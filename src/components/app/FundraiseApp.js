@@ -247,7 +247,7 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
           <div style={{ flex: '1 1 320px', paddingTop: 4 }}>
             <div className="section-label">Free to start</div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,3.5vw,42px)', fontWeight: 900, color: 'var(--text)', margin: '12px 0 16px', lineHeight: 1.2 }}>
-              The easiest Lucky Squares fundraiser in Australia
+              The easiest way to run a Lucky Squares fundraiser in Australia
             </h1>
             <p style={{ fontSize: 16, color: 'var(--text2)', lineHeight: 1.7, margin: '0 0 36px', maxWidth: 460 }}>
               Set up your grid in minutes, share a link with your community, and watch the squares fill up. No spreadsheets, no cash handling, no stress.
