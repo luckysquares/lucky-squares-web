@@ -232,15 +232,24 @@ interface Message {
   content: string;
 }
 
+const ALLOWED_ORIGINS = new Set([
+  'https://luckysquares.com.au',
+  'https://dev.luckysquares.com.au',
+]);
+
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') ?? '';
+  const allowed = ALLOWED_ORIGINS.has(origin) ? origin : 'https://luckysquares.com.au';
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': 'https://luckysquares.com.au',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    });
+    return new Response(null, { headers: corsHeaders(req) });
   }
 
   if (req.method !== 'POST') {
@@ -291,7 +300,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ reply }), {
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://luckysquares.com.au',
+        ...corsHeaders(req),
       },
     });
   } catch (err) {
