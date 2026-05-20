@@ -355,7 +355,8 @@ function SectionTitle({ children }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-export default function AdminForecasting() {
+export default function AdminReporting() {
+  const [activeTab, setActiveTab] = useState('forecasting');
   const [assumptions, setAssumptions] = useState(DEFAULTS);
   const [scenario, setScenario] = useState('base');
   const [selectedMonth, setSelectedMonth] = useState(0);
@@ -482,11 +483,51 @@ export default function AdminForecasting() {
     <div style={{ maxWidth: 900 }}>
       {/* Page header */}
       <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>
-        Sales Forecasting
+        Reporting and Forecasting
       </h1>
-      <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 8 }}>
-        Platform revenue model — individual campaigns, organisation plans and Blitz events
+      <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 24 }}>
+        Platform analytics, campaign reporting and revenue forecasting
       </p>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 32, borderBottom: '2px solid #E5E0D5' }}>
+        {[
+          { key: 'reporting',    label: 'Reporting'    },
+          { key: 'forecasting',  label: 'Forecasting'  },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '10px 20px', fontSize: 14, fontWeight: 800,
+              fontFamily: 'inherit',
+              color: activeTab === key ? '#7C3AED' : 'var(--text2)',
+              borderBottom: activeTab === key ? '2px solid #7C3AED' : '2px solid transparent',
+              marginBottom: -2,
+              transition: 'all .15s',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Reporting tab — placeholder */}
+      {activeTab === 'reporting' && (
+        <div style={{ textAlign: 'center', padding: '80px 40px', color: 'var(--text2)' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', marginBottom: 8 }}>
+            Campaign Reporting
+          </h2>
+          <p style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 420, margin: '0 auto' }}>
+            Detailed campaign performance reporting is coming soon. This will cover squares sold, revenue per campaign, organiser activity, draw outcomes and buyer trends.
+          </p>
+        </div>
+      )}
+
+      {/* Forecasting tab */}
+      {activeTab === 'forecasting' && <>
       {loading && (
         <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>
           Loading actuals from Supabase...
@@ -949,6 +990,7 @@ export default function AdminForecasting() {
         Model assumptions stored in browser localStorage. TAM: {TAM.toLocaleString('en-AU')} eligible Australian organisations.
         All figures are projections only.
       </div>
+      </>}
     </div>
   );
 }
