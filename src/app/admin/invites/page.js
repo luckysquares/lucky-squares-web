@@ -10,7 +10,7 @@ const COUPON_OPTIONS = [
 ];
 
 function blankRow() {
-  return { id: Math.random().toString(36).slice(2), name: '', email: '', coupon: '' };
+  return { id: Math.random().toString(36).slice(2), name: '', email: '', coupon: 'free' };
 }
 
 export default function InvitesPage() {

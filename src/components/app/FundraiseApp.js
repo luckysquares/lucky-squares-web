@@ -19,7 +19,7 @@ const RESERVE_SECS = 420;
 const WARN_SECS    = 390;
 const MAX_CART     = 10;
 
-const WIZARD_STEPS = ['Grid Size', 'Pricing', 'Prizes', 'Campaign', 'Draw Rules', 'Payment', 'Review'];
+const WIZARD_STEPS = ['Who', 'Grid Size', 'Pricing', 'Prizes', 'Campaign', 'Draw Rules', 'Payment', 'Review'];
 
 const EMOJIS = ['🍀', '🌈', '🏆', '⚾', '🐨', '🏉', '⭐', '🎯', '💛', '🌺'];
 
@@ -855,11 +855,13 @@ function CampaignReport({ fundraiser, onBack }) {
 
 const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
 
-function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
+function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false }) {
   const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
 
-  const [step,      setStep]      = useState(savedDraft?.step ?? 0);
-  const [gridOpt,   setGridOpt]   = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
+  const [step,            setStep]            = useState(savedDraft?.step ?? 0);
+  const [fundraiserType,  setFundraiserType]  = useState(savedDraft?.fundraiserType ?? ''); // 'individual' | 'org'
+  const [orgDetails,      setOrgDetails]      = useState(savedDraft?.orgDetails ?? { name: '', orgType: '', abn: '' });
+  const [gridOpt,         setGridOpt]         = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
   const [price,     setPrice]     = useState(savedDraft?.price ?? '5');
   const [prizes,    setPrizes]    = useState(savedDraft?.prizes ?? [{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
   const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: '', state: 'SA', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
@@ -883,7 +885,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
   // Auto-save wizard state to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ step, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }));
+      localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ step, fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }));
     } catch {}
   }, [step, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment]);
 
@@ -939,20 +941,108 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
     : true;
 
   const canNext = () => {
-    if (step === 0) return !!gridOpt;
-    if (step === 1) return parseFloat(price) > 0;
-    if (step === 2) {
+    if (step === 0) return fundraiserType === 'individual' || (fundraiserType === 'org' && orgDetails.name.trim());
+    if (step === 1) return !!gridOpt;
+    if (step === 2) return parseFloat(price) > 0;
+    if (step === 3) {
       const filled = prizes.filter((p) => p.desc.trim());
       const totalPrizes = prizes.reduce((sum, p) => sum + parsePrizeValue(p.value), 0);
       const stateCap = STATE_PRIZE_CAPS[campaign.state || 'SA'] ?? 5000;
       return filled.length > 0 && filled.every((p) => p.donated || p.value.trim()) && totalPrizes <= stateCap;
     }
-    if (step === 3) return campaign.title.trim() && campaign.contactName.trim() && campaign.contactEmail.trim() && campaign.contactPhone.trim();
+    if (step === 4) return campaign.title.trim() && campaign.contactName.trim() && campaign.contactEmail.trim() && campaign.contactPhone.trim();
     if (step === PAYMENT_STEP) return bankComplete;
     return true;
   };
 
+  const ORG_TYPE_OPTIONS = [
+    { value: 'sporting_club',   label: 'Sporting club' },
+    { value: 'school',         label: 'School / P&C' },
+    { value: 'charity',        label: 'Charity' },
+    { value: 'community_group',label: 'Community group' },
+    { value: 'business',       label: 'Business' },
+    { value: 'other',          label: 'Other' },
+  ];
+
   const stepContent = [
+    <div key="who">
+      <h2 className="section-title">Who's running this fundraiser?</h2>
+      <p className="section-sub" style={{ marginBottom: 24 }}>This helps us set up the right payment details for your campaign.</p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+        {[
+          { type: 'individual', icon: '👤', title: 'Just me', desc: 'An individual running a personal fundraiser. Funds go to your own bank account.' },
+          { type: 'org',        icon: '🏢', title: 'An organisation', desc: 'A club, school, charity, or business. Funds go to your organisation\'s account.' },
+        ].map((opt) => (
+          <div
+            key={opt.type}
+            className="scratch-card"
+            style={{ padding: '20px 24px', cursor: 'pointer', borderColor: fundraiserType === opt.type ? 'var(--green)' : undefined, borderWidth: fundraiserType === opt.type ? 2 : 1.5 }}
+            onClick={() => setFundraiserType(opt.type)}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: fundraiserType === opt.type ? '#D4F5E9' : '#F0EDE5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, transition: 'all .2s' }}>
+                {opt.icon}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 2 }}>{opt.title}</div>
+                <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>{opt.desc}</div>
+              </div>
+              {fundraiserType === opt.type && <div style={{ fontSize: 20, color: 'var(--green)', flexShrink: 0 }}>✓</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {fundraiserType === 'individual' && (
+        <div style={{ background: '#FFFBEB', border: '1.5px solid #F59E0B', borderRadius: 12, padding: '16px 20px' }}>
+          <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 6, color: '#92400E' }}>A note on personal fundraising</div>
+          <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
+            As an individual organiser, you are acting as the facilitator of this fundraiser. You are responsible for paying out prizes to winners and ensuring funds are used as described. Funds raised will transfer to your personal bank account via Stripe.
+          </div>
+        </div>
+      )}
+
+      {fundraiserType === 'org' && (
+        <div className="scratch-card" style={{ padding: 24 }}>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Organisation details</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Organisation name <span style={{ color: 'var(--orange)' }}>*</span></label>
+              <input
+                className="form-input"
+                placeholder="e.g. Sunbury Primary P&C"
+                value={orgDetails.name}
+                onChange={(e) => setOrgDetails((o) => ({ ...o, name: e.target.value }))}
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Organisation type</label>
+              <select
+                className="form-input"
+                value={orgDetails.orgType}
+                onChange={(e) => setOrgDetails((o) => ({ ...o, orgType: e.target.value }))}
+              >
+                <option value="">Select a type…</option>
+                {ORG_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>ABN <span style={{ fontWeight: 400, fontSize: 11 }}>(optional)</span></label>
+              <input
+                className="form-input"
+                placeholder="e.g. 12 345 678 901"
+                value={orgDetails.abn}
+                onChange={(e) => setOrgDetails((o) => ({ ...o, abn: e.target.value }))}
+                maxLength={14}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>,
+
     <div key="grid">
       <h2 className="section-title">Choose grid size</h2>
       <p className="section-sub" style={{ marginBottom: 24 }}>How many squares will you sell?</p>
@@ -1398,7 +1488,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
                   if (!pendingLaunchData) return;
                   setBankSaveError(false);
                   setBankSaving(true);
-                  const id = await onSaveDraft({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
+                  const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
                   setBankSaving(false);
                   if (id) { setBankDraftId(id); } else { setBankSaveError(true); }
                 }}>Try again</button>
@@ -1497,7 +1587,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
             }}>Next →</button>
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }, true); }}>
+              <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }, true); }}>
                 Save as draft
               </button>
               <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={() => setShowLaunchModal(true)}>
@@ -1526,7 +1616,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
         const isFree    = finalFee === 0;
         const fmt       = (n) => Number.isInteger(n) ? String(n) : n.toFixed(2);
         const launchData = {
-          gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment,
+          fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment,
           finalFee,
           couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null,
         };
@@ -1536,14 +1626,14 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
               await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
             }
             closeLaunchModal();
-            clearDraft(); onComplete({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
+            clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
           } else if (payment.method === 'stripe') {
             closeLaunchModal();
             setPendingLaunchData(launchData);
             setBankPhase(true);
             setBankSaving(true);
             setBankSaveError(false);
-            const id = await onSaveDraft({ gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
+            const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
             setBankSaving(false);
             if (id) {
               setBankDraftId(id);
@@ -1558,10 +1648,16 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft }) {
         return (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
             <div className="scratch-card" style={{ padding: 36, maxWidth: 440, width: '100%', textAlign: 'center' }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div>
-              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Launch your fundraiser</h2>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>{isFree ? '🎉' : '🚀'}</div>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
+                {isFree && isFoundingMember ? 'Your first campaign is on us' : 'Launch your fundraiser'}
+              </h2>
               <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 24, lineHeight: 1.6 }}>
-                A one-off platform fee applies to go live. Once paid, your fundraiser is active and buyers can start purchasing squares immediately.
+                {isFree && isFoundingMember
+                  ? 'As a founding member, your first campaign launches for free. Apply your coupon code below and go live instantly.'
+                  : isFree
+                    ? 'Your coupon covers the full launch fee. Apply it below and go live instantly.'
+                    : 'A one-off platform fee applies to go live. Once paid, your fundraiser is active and buyers can start purchasing squares immediately.'}
               </p>
 
               {/* Fee breakdown */}
@@ -1912,6 +2008,15 @@ export default function FundraiseApp() {
       payment: data.payment,
     };
     if (supabaseConfigured && user?.id) {
+      let orgId = null;
+      if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
+        const { data: oid } = await getSupabaseClient().rpc('upsert_my_org', {
+          p_name: sanitize(data.orgDetails.name),
+          p_abn: sanitize(data.orgDetails.abn) || null,
+          p_org_type: data.orgDetails.orgType || null,
+        });
+        orgId = oid;
+      }
       const { data: saved, error } = await getSupabaseClient()
         .from('fundraisers')
         .insert({
@@ -1926,6 +2031,8 @@ export default function FundraiseApp() {
           draw_type: data.drawRules.type, draw_date: data.drawRules.date || null,
           payment_method: data.payment.method, bank_account_name: sanitize(data.payment.accountName) || null,
           bank_bsb: sanitize(data.payment.bsb) || null, bank_account: sanitize(data.payment.account) || null,
+          fundraiser_type: data.fundraiserType || 'individual',
+          org_id: orgId,
         })
         .select().single();
       if (!error && saved) {
@@ -1983,6 +2090,15 @@ export default function FundraiseApp() {
     if (!supabaseConfigured || !user?.id) return null;
     const db = getSupabaseClient();
     const grid = data.gridOpt?.size || 100;
+    let orgId = null;
+    if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
+      const { data: oid } = await db.rpc('upsert_my_org', {
+        p_name: sanitize(data.orgDetails.name),
+        p_abn: sanitize(data.orgDetails.abn) || null,
+        p_org_type: data.orgDetails.orgType || null,
+      });
+      orgId = oid;
+    }
     const { data: saved, error } = await db.from('fundraisers').insert({
       owner_id: user.id, title: sanitize(data.campaign.title || 'New Fundraiser'),
       org: sanitize(data.campaign.org) || null,
@@ -1997,6 +2113,8 @@ export default function FundraiseApp() {
       payment_method: data.payment.method,
       bank_account_name: sanitize(data.payment.accountName) || null,
       bank_bsb: sanitize(data.payment.bsb) || null, bank_account: sanitize(data.payment.account) || null,
+      fundraiser_type: data.fundraiserType || 'individual',
+      org_id: orgId,
     }).select().single();
     if (error || !saved) { console.error('handleSaveDraft error:', error); return null; }
     const prizeRows = data.prizes.filter((p) => p.desc)
@@ -2012,7 +2130,15 @@ export default function FundraiseApp() {
     if (!supabaseConfigured || !user?.id) return;
     const db = getSupabaseClient();
     const grid = data.gridOpt?.size || 100;
-
+    let orgId = null;
+    if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
+      const { data: oid } = await db.rpc('upsert_my_org', {
+        p_name: sanitize(data.orgDetails.name),
+        p_abn: sanitize(data.orgDetails.abn) || null,
+        p_org_type: data.orgDetails.orgType || null,
+      });
+      orgId = oid;
+    }
     const { data: saved, error } = await db.from('fundraisers').insert({
       owner_id:          user.id,
       title:             sanitize(data.campaign.title || 'New Fundraiser'),
@@ -2034,6 +2160,8 @@ export default function FundraiseApp() {
       bank_account_name: sanitize(data.payment.accountName) || null,
       bank_bsb:          sanitize(data.payment.bsb) || null,
       bank_account:      sanitize(data.payment.account) || null,
+      fundraiser_type:   data.fundraiserType || 'individual',
+      org_id:            orgId,
     }).select().single();
 
     if (error || !saved) { console.error('Draft save failed:', error); return; }
@@ -2089,7 +2217,7 @@ export default function FundraiseApp() {
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Referral prompt modal */}
