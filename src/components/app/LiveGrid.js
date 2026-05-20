@@ -8,6 +8,7 @@ const RESERVE_SECS   = 420;
 const WARN_SECS      = 120;
 const MAX_CART       = 10;
 const PLATFORM_FEES  = { 25: 9, 50: 14, 100: 19 };
+const BUYER_STORAGE_KEY = 'ls_buyer_details';
 
 const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 const parsePrizeValue = (v) => parseFloat(String(v ?? '').replace(/[^0-9.]/g, '')) || 0;
@@ -81,9 +82,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [showShare,   setShowShare]   = useState(false);
   const [timerSecs,   setTimerSecs]   = useState(RESERVE_SECS);
   const [timerPaused, setTimerPaused] = useState(false);
-  const [buyerName,   setBuyerName]   = useState(user?.name || '');
-  const [buyerEmail,  setBuyerEmail]  = useState('');
-  const [buyerPhone,  setBuyerPhone]  = useState('');
+  const savedBuyer = (() => { try { return JSON.parse(localStorage.getItem(BUYER_STORAGE_KEY) || 'null'); } catch { return null; } })();
+  const [buyerName,   setBuyerName]   = useState(user?.name || savedBuyer?.name || '');
+  const [buyerEmail,  setBuyerEmail]  = useState(savedBuyer?.email || '');
+  const [buyerPhone,  setBuyerPhone]  = useState(savedBuyer?.phone || '');
+  const [rememberMe,  setRememberMe]  = useState(!!savedBuyer);
   const [winner,      setWinner]      = useState(null);
   const [winners,     setWinners]     = useState([]);
   const [drawnResult,        setDrawnResult]        = useState(null); // null | int[]
@@ -236,6 +239,15 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     const ownerName = sanitize(buyerName || user?.name || 'Buyer');
     const safeEmail = sanitize(buyerEmail).toLowerCase();
     const safePhone = sanitize(buyerPhone);
+
+    try {
+      if (rememberMe && ownerName && safeEmail) {
+        localStorage.setItem(BUYER_STORAGE_KEY, JSON.stringify({ name: ownerName, email: safeEmail, phone: safePhone }));
+      } else {
+        localStorage.removeItem(BUYER_STORAGE_KEY);
+      }
+    } catch {}
+
 
     if (fundraiser.payment?.method === 'stripe') {
       if (!safeEmail || !ownerName) return;
@@ -565,6 +577,10 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
               <input className="form-input" type="tel" placeholder="04XX XXX XXX" maxLength={15} value={buyerPhone} onChange={(e) => setBuyerPhone(e.target.value)} />
               <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>Provided to the organiser only, in case you win and they need to reach you.</div>
             </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', paddingTop: 4 }}>
+              <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ width: 16, height: 16, flexShrink: 0, accentColor: 'var(--green)' }} />
+              <span style={{ fontSize: 13, color: 'var(--text2)' }}>Remember my details for next time</span>
+            </label>
           </div>
         </div>
         {['bank', 'bank_inperson'].includes(fundraiser.payment?.method) ? (
