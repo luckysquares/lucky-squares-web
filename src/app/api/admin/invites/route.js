@@ -124,7 +124,45 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    const { invites } = await req.json();
+    const body = await req.json();
+
+    // ── Resend an existing invite ─────────────────────────────────────────────
+    if (body.resend) {
+      const { name, email, coupon_code } = body;
+      if (!name?.trim() || !email?.trim()) {
+        return NextResponse.json({ error: 'Name and email required.' }, { status: 400 });
+      }
+
+      const resendKey = process.env.RESEND_API_KEY;
+      let couponLabel = null;
+      if (coupon_code) {
+        const supabase = getSupabase();
+        const { data: coupon } = await supabase.from('coupons').select('description').eq('code', coupon_code).single();
+        couponLabel = coupon?.description ?? null;
+      }
+
+      const subject = `An invitation from Jamie at LuckySquares Australia`;
+      const html    = inviteHtml(name.trim(), coupon_code ?? null, couponLabel);
+      const text    = `Hi ${name.trim().split(' ')[0]},\n\nI wanted to personally invite you to try LuckySquares Australia. Head to https://luckysquares.com.au to get started.\n\n${coupon_code ? `Your coupon code: ${coupon_code}\n\n` : ''}Best,\nJamie\nFounder, LuckySquares Australia`;
+
+      if (resendKey) {
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ from: FROM_EMAIL, to: email.trim(), reply_to: JAMIE_EMAIL, subject, html, text }),
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error(`[invites] Resend error for ${email} (${res.status}): ${errText}`);
+          return NextResponse.json({ error: `Send failed (${res.status})` }, { status: 502 });
+        }
+      }
+
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── Send new invites ──────────────────────────────────────────────────────
+    const { invites } = body;
     if (!Array.isArray(invites) || invites.length === 0) {
       return NextResponse.json({ error: 'No invites provided.' }, { status: 400 });
     }

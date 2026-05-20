@@ -14,11 +14,13 @@ function blankRow() {
 }
 
 export default function InvitesPage() {
-  const [rows,    setRows]    = useState([blankRow()]);
-  const [sending, setSending] = useState(false);
-  const [result,  setResult]  = useState(null);
-  const [log,     setLog]     = useState([]);
-  const [logLoad, setLogLoad] = useState(true);
+  const [rows,       setRows]       = useState([blankRow()]);
+  const [sending,    setSending]    = useState(false);
+  const [result,     setResult]     = useState(null);
+  const [log,        setLog]        = useState([]);
+  const [logLoad,    setLogLoad]    = useState(true);
+  const [resending,  setResending]  = useState({});   // id → true while in-flight
+  const [resendDone, setResendDone] = useState({});   // id → 'ok' | 'error'
 
   const fetchLog = useCallback(async () => {
     setLogLoad(true);
@@ -38,6 +40,23 @@ export default function InvitesPage() {
   const addRow = () => setRows((prev) => [...prev, blankRow()]);
 
   const removeRow = (id) => setRows((prev) => prev.length > 1 ? prev.filter((r) => r.id !== id) : prev);
+
+  const handleResend = async (entry) => {
+    setResending((prev) => ({ ...prev, [entry.id]: true }));
+    setResendDone((prev) => ({ ...prev, [entry.id]: null }));
+    try {
+      const res = await adminFetch('/api/admin/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resend: true, name: entry.name, email: entry.email, coupon_code: entry.coupon_code || null }),
+      });
+      setResendDone((prev) => ({ ...prev, [entry.id]: res.ok ? 'ok' : 'error' }));
+    } catch {
+      setResendDone((prev) => ({ ...prev, [entry.id]: 'error' }));
+    } finally {
+      setResending((prev) => ({ ...prev, [entry.id]: false }));
+    }
+  };
 
   const handleSend = async () => {
     const valid = rows.filter((r) => r.name.trim() && r.email.trim());
@@ -167,9 +186,9 @@ export default function InvitesPage() {
         <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, color: '#1A1209', margin: '0 0 16px' }}>Invite log</h2>
         <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #E5E0D5', overflow: 'hidden' }}>
           {/* Log header */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 160px 160px', gap: 16, padding: '12px 24px', background: '#FAFAF8', borderBottom: '1px solid #F0EAE0' }}>
-            {['Name', 'Email', 'Coupon', 'Sent'].map((h) => (
-              <div key={h} style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{h}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 160px 160px 80px', gap: 16, padding: '12px 24px', background: '#FAFAF8', borderBottom: '1px solid #F0EAE0' }}>
+            {['Name', 'Email', 'Coupon', 'Sent', ''].map((h, i) => (
+              <div key={i} style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{h}</div>
             ))}
           </div>
 
@@ -179,7 +198,7 @@ export default function InvitesPage() {
             <div style={{ padding: '32px 24px', textAlign: 'center', fontSize: 13, color: '#9C8060' }}>No invites sent yet.</div>
           ) : (
             log.map((entry) => (
-              <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 160px 160px', gap: 16, padding: '12px 24px', borderBottom: '1px solid #F8F5F0', fontSize: 13, color: '#1A1209', alignItems: 'center' }}>
+              <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 160px 160px 80px', gap: 16, padding: '12px 24px', borderBottom: '1px solid #F8F5F0', fontSize: 13, color: '#1A1209', alignItems: 'center' }}>
                 <div style={{ fontWeight: 600 }}>{entry.name}</div>
                 <div style={{ color: '#4A3728' }}>{entry.email}</div>
                 <div>
@@ -190,6 +209,21 @@ export default function InvitesPage() {
                 </div>
                 <div style={{ color: '#6B7280', fontSize: 12 }}>
                   {new Date(entry.sent_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+                <div>
+                  {resendDone[entry.id] === 'ok' ? (
+                    <span style={{ fontSize: 12, color: '#1A7A55', fontWeight: 700 }}>Sent</span>
+                  ) : resendDone[entry.id] === 'error' ? (
+                    <span style={{ fontSize: 12, color: '#C0392B', fontWeight: 700 }}>Failed</span>
+                  ) : (
+                    <button
+                      onClick={() => handleResend(entry)}
+                      disabled={resending[entry.id]}
+                      style={{ background: 'none', border: '1.5px solid #E5E0D5', borderRadius: 7, padding: '4px 10px', fontSize: 12, fontWeight: 700, color: '#4A3728', cursor: resending[entry.id] ? 'not-allowed' : 'pointer', opacity: resending[entry.id] ? 0.5 : 1, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                    >
+                      {resending[entry.id] ? '…' : 'Resend'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))
