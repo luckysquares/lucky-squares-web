@@ -22,7 +22,7 @@ export async function POST(req) {
     if (!userRes.ok) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const { id: userId } = await userRes.json();
 
-    const { fundraiser_id } = await req.json();
+    const { fundraiser_id, prefill } = await req.json();
     if (!fundraiser_id) return Response.json({ error: 'fundraiser_id required' }, { status: 400 });
 
     const db = supabase();
@@ -38,7 +38,12 @@ export async function POST(req) {
     let accountId = fundraiser.stripe_account_id;
 
     if (!accountId) {
-      const account = await stripe.accounts.create({
+      const isOrg       = prefill?.businessType === 'company';
+      const [firstName, ...rest] = (prefill?.name || '').trim().split(' ');
+      const lastName    = rest.join(' ') || undefined;
+      const abn         = prefill?.orgAbn ? prefill.orgAbn.replace(/\s/g, '') : undefined;
+
+      const accountParams = {
         controller: {
           stripe_dashboard: { type: 'none' },
           fees: { payer: 'application' },
@@ -50,7 +55,24 @@ export async function POST(req) {
           transfers: { requested: true },
         },
         country: 'AU',
-      });
+        email: prefill?.email || undefined,
+      };
+
+      if (isOrg) {
+        accountParams.business_type = 'company';
+        accountParams.company = {
+          ...(prefill?.orgName ? { name: prefill.orgName } : {}),
+          ...(abn ? { tax_id: abn } : {}),
+        };
+      } else {
+        accountParams.individual = {
+          ...(firstName ? { first_name: firstName } : {}),
+          ...(lastName  ? { last_name:  lastName  } : {}),
+          ...(prefill?.email ? { email: prefill.email } : {}),
+        };
+      }
+
+      const account = await stripe.accounts.create(accountParams);
       accountId = account.id;
       await db.from('fundraisers').update({ stripe_account_id: accountId }).eq('id', fundraiser_id);
     }

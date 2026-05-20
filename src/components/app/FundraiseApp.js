@@ -855,7 +855,7 @@ function CampaignReport({ fundraiser, onBack }) {
 
 const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
 
-function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false }) {
+function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false, userPrefill = null }) {
   const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
 
   const [step,            setStep]            = useState(savedDraft?.step ?? 0);
@@ -1498,6 +1498,9 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
               <StripeConnectSetup
                 fundraiserId={bankDraftId}
                 onComplete={() => setBankConnectDone(true)}
+                prefill={fundraiserType === 'org' && orgDetails.name.trim()
+                  ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, email: userPrefill?.email }
+                  : { name: userPrefill?.name, email: userPrefill?.email }}
               />
             )}
           </div>
@@ -1737,8 +1740,9 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
 }
 // ─── BankConnectScreen ────────────────────────────────────────────────────────
 
-function BankConnectScreen({ fundraiserId, onDone }) {
+function BankConnectScreen({ fundraiserId, onDone, user = null }) {
   const [done, setDone] = useState(false);
+  const prefill = user ? { name: user.name, email: user.email } : null;
   return (
     <div className="dot-bg" style={{ minHeight: '100vh' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
@@ -1760,7 +1764,7 @@ function BankConnectScreen({ fundraiserId, onDone }) {
               </div>
             ))}
           </div>
-          <StripeConnectSetup fundraiserId={fundraiserId} onComplete={() => setDone(true)} />
+          <StripeConnectSetup fundraiserId={fundraiserId} onComplete={() => setDone(true)} prefill={prefill} />
         </div>
         <button className="btn btn-purple btn-lg" style={{ width: '100%' }} disabled={!done} onClick={onDone}>
           {done ? 'Done — back to dashboard →' : 'Complete bank account setup above to continue'}
@@ -2216,8 +2220,8 @@ export default function FundraiseApp() {
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
-      {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} />}
+      {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email } : null} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Referral prompt modal */}

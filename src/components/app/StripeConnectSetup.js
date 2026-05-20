@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getSupabaseClient } from '@/lib/supabase/client';
 
-export default function StripeConnectSetup({ fundraiserId, onComplete }) {
+export default function StripeConnectSetup({ fundraiserId, onComplete, prefill = null }) {
   const containerRef = useRef(null);
   const [status, setStatus]   = useState('loading'); // loading | ready | checking | done | error
   const [errMsg, setErrMsg]   = useState('');
@@ -26,7 +26,7 @@ export default function StripeConnectSetup({ fundraiserId, onComplete }) {
                 'Content-Type': 'application/json',
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
-              body: JSON.stringify({ fundraiser_id: fundraiserId }),
+              body: JSON.stringify({ fundraiser_id: fundraiserId, prefill: prefill || null }),
             });
             const data = await res.json();
             if (!data.client_secret) throw new Error(data.error || 'Could not start bank setup');
