@@ -100,10 +100,12 @@ export default function PublicFundraiserPage({ params }) {
     if (!supabaseConfigured) { setNotFound(true); setLoading(false); return; }
     const supabase = getSupabaseClient();
     Promise.all([
-      supabase.from('fundraisers').select('*').eq('id', id).in('status', ['active', 'drawn']).single(),
+      supabase.from('fundraisers').select('*, profiles!owner_id(is_founding_member)').eq('id', id).in('status', ['active', 'drawn']).single(),
       supabase.from('prizes').select('*').eq('fundraiser_id', id).order('sort_order'),
     ]).then(([{ data, error }, { data: prizes }]) => {
-      if (error || !data) { setNotFound(true); } else { setFundraiser(dbToFundraiser(data, prizes || [])); }
+      if (error || !data) { setNotFound(true); } else {
+        setFundraiser({ ...dbToFundraiser(data, prizes || []), ownerIsFoundingMember: data.profiles?.is_founding_member ?? false });
+      }
       setLoading(false);
     });
   }, [id]);

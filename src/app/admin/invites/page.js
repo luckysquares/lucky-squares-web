@@ -19,8 +19,10 @@ export default function InvitesPage() {
   const [result,     setResult]     = useState(null);
   const [log,        setLog]        = useState([]);
   const [logLoad,    setLogLoad]    = useState(true);
-  const [resending,  setResending]  = useState({});   // id → true while in-flight
-  const [resendDone, setResendDone] = useState({});   // id → 'ok' | 'error'
+  const [resending,  setResending]  = useState({});
+  const [resendDone, setResendDone] = useState({});
+  const [waitlist,   setWaitlist]   = useState([]);
+  const [waitLoad,   setWaitLoad]   = useState(true);
 
   const fetchLog = useCallback(async () => {
     setLogLoad(true);
@@ -33,6 +35,13 @@ export default function InvitesPage() {
   }, []);
 
   useEffect(() => { fetchLog(); }, [fetchLog]);
+
+  useEffect(() => {
+    adminFetch('/api/waitlist').then(async (res) => {
+      if (res.ok) setWaitlist(await res.json());
+      setWaitLoad(false);
+    }).catch(() => setWaitLoad(false));
+  }, []);
 
   const updateRow = (id, field, value) =>
     setRows((prev) => prev.map((r) => r.id === id ? { ...r, [field]: value } : r));
@@ -224,6 +233,34 @@ export default function InvitesPage() {
                       {resending[entry.id] ? '…' : 'Resend'}
                     </button>
                   )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Waitlist */}
+      <div style={{ marginTop: 48 }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, color: '#1A1209', margin: '0 0 4px' }}>Waitlist</h2>
+        <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>People who signed up from the coming soon page.</p>
+        <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #E5E0D5', overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 160px', gap: 16, padding: '12px 24px', background: '#FAFAF8', borderBottom: '1px solid #F0EAE0' }}>
+            {['Name', 'Email', 'Joined'].map((h) => (
+              <div key={h} style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{h}</div>
+            ))}
+          </div>
+          {waitLoad ? (
+            <div style={{ padding: '32px 24px', textAlign: 'center', fontSize: 13, color: '#9C8060' }}>Loading…</div>
+          ) : waitlist.length === 0 ? (
+            <div style={{ padding: '32px 24px', textAlign: 'center', fontSize: 13, color: '#9C8060' }}>No waitlist signups yet.</div>
+          ) : (
+            waitlist.map((entry) => (
+              <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 160px', gap: 16, padding: '12px 24px', borderBottom: '1px solid #F8F5F0', fontSize: 13, color: '#1A1209', alignItems: 'center' }}>
+                <div style={{ fontWeight: 600 }}>{entry.name || <span style={{ color: '#C8BFB0' }}>—</span>}</div>
+                <div style={{ color: '#4A3728' }}>{entry.email}</div>
+                <div style={{ color: '#6B7280', fontSize: 12 }}>
+                  {new Date(entry.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </div>
               </div>
             ))

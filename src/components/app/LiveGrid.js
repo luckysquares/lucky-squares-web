@@ -800,6 +800,9 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           {!isOwner && fundraiser.contactName && (
             <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, textAlign: 'center', fontSize: 13, color: 'var(--text2)' }}>
               This fundraising campaign has been organised by <strong style={{ color: 'var(--text)' }}>{fundraiser.contactName}</strong>
+              {fundraiser.ownerIsFoundingMember && (
+                <span style={{ display: 'inline-block', marginLeft: 8, fontSize: 10, fontWeight: 800, color: '#92400E', background: '#FEF3C7', border: '1.5px solid #F59E0B', borderRadius: 20, padding: '2px 8px', letterSpacing: '0.5px', textTransform: 'uppercase', verticalAlign: 'middle' }}>Founding Member</span>
+              )}
             </div>
           )}
 

@@ -65,6 +65,14 @@ export default function AdminUsers() {
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, suspended: false, suspension_reason: null } : u));
   };
 
+  const toggleFoundingMember = async (u) => {
+    const newVal = !u.is_founding_member;
+    if (supabaseConfigured) {
+      await getSupabaseClient().rpc('admin_set_founding_member', { p_user_id: u.id, p_value: newVal });
+    }
+    setUsers((prev) => prev.map((p) => p.id === u.id ? { ...p, is_founding_member: newVal } : p));
+  };
+
   return (
     <div>
       <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Users</h1>
@@ -94,7 +102,12 @@ export default function AdminUsers() {
                 {filtered.map((u) => (
                   <tr key={u.id} style={{ borderBottom: '1px solid var(--border)', background: u.suspended ? '#FFF8F8' : 'transparent' }}>
                     <td style={{ padding: '12px 16px', fontWeight: 700 }}>
-                      {u.full_name || '—'}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        {u.full_name || '—'}
+                        {u.is_founding_member && (
+                          <span style={{ fontSize: 10, fontWeight: 800, color: '#92400E', background: '#FEF3C7', border: '1.5px solid #F59E0B', borderRadius: 20, padding: '2px 8px', letterSpacing: '0.5px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Founding Member</span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       <a href={`mailto:${u.email}`} style={{ color: 'var(--green)', fontWeight: 600 }}>{u.email}</a>
@@ -116,8 +129,15 @@ export default function AdminUsers() {
                     </td>
                     <td style={{ padding: '12px 16px', color: 'var(--text2)' }}>{fmtDate(u.created_at)}</td>
                     <td style={{ padding: '12px 16px' }}>
-                      <div style={{ display: 'flex', gap: 8 }}>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...u })}>Edit</button>
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: u.is_founding_member ? '#FEF3C7' : '#F9FAFB', color: u.is_founding_member ? '#92400E' : '#6B7280', border: `1px solid ${u.is_founding_member ? '#F59E0B' : '#D1D5DB'}`, fontSize: 11 }}
+                          onClick={() => toggleFoundingMember(u)}
+                        >
+                          {u.is_founding_member ? '★ Founding' : '☆ Founding'}
+                        </button>
                         {u.suspended ? (
                           <button
                             className="btn btn-sm"

@@ -70,9 +70,9 @@ const AU_STATES = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'];
 const STATE_PRIZE_CAPS = { ACT: 5000, NSW: 25000, NT: 5000, QLD: 2000, SA: 5000, TAS: 5000, VIC: 5000, WA: 10000 };
 const STATE_LABELS = { ACT: 'Australian Capital Territory', NSW: 'New South Wales', NT: 'Northern Territory', QLD: 'Queensland', SA: 'South Australia', TAS: 'Tasmania', VIC: 'Victoria', WA: 'Western Australia' };
 
-async function fetchPlan(userId) {
-  const { data } = await getSupabaseClient().from('profiles').select('plan').eq('id', userId).single();
-  return data?.plan ?? 'trial';
+async function fetchProfile(userId) {
+  const { data } = await getSupabaseClient().from('profiles').select('plan, is_founding_member').eq('id', userId).single();
+  return { plan: data?.plan ?? 'trial', isFoundingMember: data?.is_founding_member ?? false };
 }
 
 function dbToFundraiser(row, soldCount = 0, prizes = []) {
@@ -147,6 +147,9 @@ function AppHeader({ user, onLogout, onHome }) {
           {user && (
             <>
               <span style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 600 }}>{user.name}</span>
+              {user.isFoundingMember && (
+                <span style={{ fontSize: 10, fontWeight: 800, color: '#92400E', background: '#FEF3C7', border: '1.5px solid #F59E0B', borderRadius: 20, padding: '2px 8px', letterSpacing: '0.5px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Founding Member</span>
+              )}
               <button className="btn btn-outline btn-sm" onClick={onHome}>Dashboard</button>
               <button className="btn btn-outline btn-sm" onClick={onLogout}>Sign out</button>
             </>
@@ -1731,8 +1734,8 @@ export default function FundraiseApp() {
       if (session?.user) {
         const u = session.user;
         const supabase = getSupabaseClient();
-        const plan = await fetchPlan(u.id);
-        setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
+        const { plan, isFoundingMember } = await fetchProfile(u.id);
+        setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
         // Load org role (contributor or admin)
         const { data: oi } = await supabase.rpc('get_my_org_info');
         setOrgInfo(oi);
@@ -1745,7 +1748,11 @@ export default function FundraiseApp() {
         });
         setPhase('dashboard');
       } else {
-        setPhase(wantsRegister ? 'register' : 'login');
+        if (process.env.NEXT_PUBLIC_SITE_PHASE === 'preview' && typeof window !== 'undefined') {
+          window.location.href = '/coming-soon';
+        } else {
+          setPhase(wantsRegister ? 'register' : 'login');
+        }
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -1788,8 +1795,8 @@ export default function FundraiseApp() {
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
-    const plan = await fetchPlan(u.id);
-    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
+    const { plan, isFoundingMember } = await fetchProfile(u.id);
+    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
     await loadFundraisers(u.id);
     setPhase('dashboard');
   };
@@ -1804,9 +1811,9 @@ export default function FundraiseApp() {
     // If email confirmation is disabled, user is auto-confirmed with a session
     if (data?.session && data?.user) {
       const u = data.user;
-      const plan = await fetchPlan(u.id);
+      const { plan, isFoundingMember } = await fetchProfile(u.id);
       const firstName = name?.split(' ')[0] || u.email;
-      setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
+      setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
       const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
       if (storedRef) {
         await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
@@ -1836,9 +1843,9 @@ export default function FundraiseApp() {
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
-    const plan = await fetchPlan(u.id);
+    const { plan, isFoundingMember } = await fetchProfile(u.id);
     const firstName = u.user_metadata?.full_name?.split(' ')[0] || u.email;
-    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan });
+    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
     const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
     if (storedRef) {
       await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
