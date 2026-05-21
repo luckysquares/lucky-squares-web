@@ -273,12 +273,9 @@ export default function BetaTestPage() {
               <li>Is there a price point that would feel like a no-brainer for a school or club?</li>
               <li>Would the pricing put you off, or would you happily recommend it to a committee treasurer?</li>
             </ul>
-            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24 }}>
+            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7 }}>
               No right or wrong answers. Even "that feels expensive" is genuinely useful. You can also check out the <Link href="/pricing" style={{ color: 'var(--green)', fontWeight: 700 }}>full pricing page</Link> if you want context before you answer.
             </p>
-            <div style={{ textAlign: 'center' }}>
-              <a href="sms:0423795501?body=Pricing%20feedback:%20" className="btn btn-purple">SMS your thoughts →</a>
-            </div>
           </div>
         </div>
       </section>
@@ -299,12 +296,9 @@ export default function BetaTestPage() {
               <li>Is there anything about the design or wording that gives you pause?</li>
               <li>What is the one thing you would change if you could?</li>
             </ul>
-            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24 }}>
+            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7 }}>
               Gut reactions are just as valuable as detailed feedback here. If something feels off but you can not quite put your finger on why, tell us that too.
             </p>
-            <div style={{ textAlign: 'center' }}>
-              <a href="sms:0423795501?body=Look%20and%20feel%20feedback:%20" className="btn btn-purple">SMS your thoughts →</a>
-            </div>
           </div>
         </div>
       </section>
@@ -315,8 +309,11 @@ export default function BetaTestPage() {
           <div className="scratch-card" style={{ padding: '40px 36px' }}>
             <div style={{ fontSize: 36, marginBottom: 16 }}>📲</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>Found something? Just SMS me.</h2>
-            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24 }}>
+            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 16 }}>
               Screenshot it, take a photo of your screen, or just type what happened. Send it straight to Jamie on <strong style={{ color: 'var(--text)' }}>0423 795 501</strong>. No forms, no fuss.
+            </p>
+            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24 }}>
+              Once you have had a chance to explore, I will give you a call to hear your thoughts in person. Your feedback at this stage genuinely shapes the product, and I want to make sure I understand it properly.
             </p>
             <a href="sms:0423795501" className="btn btn-primary">SMS Jamie →</a>
           </div>
