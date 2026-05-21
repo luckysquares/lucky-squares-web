@@ -173,10 +173,8 @@ If someone sincerely asks whether you are AI, answer honestly and warmly: yes, y
 
 export async function POST(request) {
   if (!ANTHROPIC_API_KEY) {
-    console.error('mariposa-chat: no API key found. MARIPOSA_API_KEY present:', !!process.env.MARIPOSA_API_KEY, 'ANTHROPIC_API_KEY present:', !!process.env.ANTHROPIC_API_KEY);
-    return NextResponse.json({ reply: 'DEBUG: API key not configured' }, { status: 200 });
+    return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
   }
-  console.log('mariposa-chat: key found, length:', ANTHROPIC_API_KEY.length);
 
   let messages;
   try {
@@ -209,7 +207,7 @@ export async function POST(request) {
     if (!res.ok) {
       const err = await res.text();
       console.error('Anthropic error:', err);
-      return NextResponse.json({ reply: `DEBUG: Anthropic error ${res.status}: ${err}` }, { status: 200 });
+      return NextResponse.json({ error: 'AI service error' }, { status: 502 });
     }
 
     const data = await res.json();
