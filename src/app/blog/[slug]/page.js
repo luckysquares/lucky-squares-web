@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import MarketingNav from '@/components/marketing/MarketingNav';
+import BlogShareButtons from '@/components/marketing/BlogShareButtons';
 import Link from 'next/link';
+
+const SITE_URL = 'https://luckysquares.com.au';
 
 export const dynamic = 'force-dynamic';
 
@@ -162,6 +165,7 @@ export default async function BlogPostPage({ params }) {
   }
 
   const html = renderMarkdown(post.content);
+  const postUrl = `${SITE_URL}/blog/${slug}`;
 
   return (
     <>
@@ -199,16 +203,19 @@ export default async function BlogPostPage({ params }) {
             {post.title}
           </h1>
 
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 40, paddingBottom: 24, borderBottom: '1px solid var(--border)' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 15, fontWeight: 800, flexShrink: 0 }}>
-              {post.author.charAt(0).toUpperCase()}
+          <div style={{ display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 40, paddingBottom: 24, borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 15, fontWeight: 800, flexShrink: 0 }}>
+                {post.author.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>{post.author}</div>
+                {post.published_at && (
+                  <div style={{ fontSize: 12, color: 'var(--text2)' }}>{fmtDate(post.published_at)}</div>
+                )}
+              </div>
             </div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>{post.author}</div>
-              {post.published_at && (
-                <div style={{ fontSize: 12, color: 'var(--text2)' }}>{fmtDate(post.published_at)}</div>
-              )}
-            </div>
+            <BlogShareButtons url={postUrl} title={post.title} />
           </div>
         </div>
       </section>
@@ -233,6 +240,12 @@ export default async function BlogPostPage({ params }) {
           />
 
           <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
+            <div style={{ marginBottom: 24 }}>
+              <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 14 }}>
+                Found this useful? Share it with your club or community.
+              </p>
+              <BlogShareButtons url={postUrl} title={post.title} />
+            </div>
             <Link href="/blog" style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               ← Back to Blog
             </Link>
