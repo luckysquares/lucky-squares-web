@@ -9,7 +9,20 @@ function getSupabase() {
   return createClient(url, key);
 }
 
+async function verifyAdmin(req) {
+  const auth = req.headers.get('Authorization');
+  if (!auth?.startsWith('Bearer ')) return null;
+  const token = auth.slice(7);
+  const supabase = getSupabase();
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return null;
+  const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+  return profile?.is_admin ? user : null;
+}
+
 export async function POST(req) {
+  const user = await verifyAdmin(req);
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const formData = await req.formData();
     const file = formData.get('file');
