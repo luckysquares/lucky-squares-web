@@ -80,48 +80,58 @@ export default function CompliancePage() {
             </Section>
 
             <Section n="5" title="State and Territory Permit Requirements">
-              <p style={{ marginBottom: 20 }}>
+              <p style={{ marginBottom: 4 }}>
                 The following is a general summary of permit requirements for lucky squares style fundraisers
                 in each Australian jurisdiction. This summary is provided for information only and does not
                 constitute legal advice. Organisers should seek independent legal advice regarding their
                 specific obligations.
               </p>
+              <p style={{ marginBottom: 20, fontSize: 13, color: 'var(--text2)' }}>
+                Prize thresholds shown are the general no-permit limit for eligible incorporated associations
+                and registered charities. Different thresholds may apply depending on organisation type.
+                Accurate as at 21 May 2026.
+              </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                <Jurisdiction name="New South Wales" flag="🇦🇺">
+                <Jurisdiction name="New South Wales" cap="$25,000">
                   Minor gaming permits are required for most fundraising activities involving chance. Incorporated
-                  associations and registered charities may conduct certain activities without a permit below value
-                  thresholds. Relevant legislation: <em>Lotteries and Art Unions Act 1901</em>.
+                  associations and registered charities may conduct certain activities without a permit where the
+                  total prize value does not exceed $25,000. Relevant legislation: <em>Lotteries and Art Unions Act 1901</em>.
                 </Jurisdiction>
-                <Jurisdiction name="Victoria" flag="🇦🇺">
-                  Community and charity fundraising activities may require registration with the Victorian Commission
-                  for Gambling and Liquor Regulation (VCGLR). Incorporated associations have some exemptions.
+                <Jurisdiction name="Victoria" cap="$5,000">
+                  Community and charity fundraising activities may require registration with the Victorian Gambling
+                  and Casino Control Commission (VGCCC). Incorporated associations have some exemptions for
+                  activities where the total prize value does not exceed $5,000.
                   Relevant legislation: <em>Gambling Regulation Act 2003</em>.
                 </Jurisdiction>
-                <Jurisdiction name="Queensland" flag="🇦🇺">
+                <Jurisdiction name="Queensland" cap="$2,000">
                   Charitable gaming permits are required for most activities. The <em>Charitable and Non-Profit
-                  Gaming Act 1999</em> provides exemptions for certain low-value activities conducted by
-                  eligible organisations.
+                  Gaming Act 1999</em> provides exemptions for Category 1 activities conducted by eligible
+                  organisations where the total prize value does not exceed $2,000.
                 </Jurisdiction>
-                <Jurisdiction name="South Australia" flag="🇦🇺">
-                  Lucky envelopes and similar games of chance conducted by approved associations require a permit
-                  from Consumer and Business Services. Relevant legislation: <em>Lotteries Act 2019</em>.
+                <Jurisdiction name="South Australia" cap="$5,000">
+                  Lucky envelopes and similar games of chance conducted by approved associations may require a
+                  permit from Consumer and Business Services where the total prize value exceeds $5,000.
+                  Relevant legislation: <em>Lotteries Act 2019</em>.
                 </Jurisdiction>
-                <Jurisdiction name="Western Australia" flag="🇦🇺">
+                <Jurisdiction name="Western Australia" cap="$10,000">
                   Most fundraising games of chance require a permit from the Gaming and Wagering Commission.
-                  Some exemptions apply for small-scale activities. Relevant legislation: <em>Gaming and
-                  Wagering Commission Act 1987</em>.
+                  Some exemptions apply for small-scale activities where the total prize value does not exceed
+                  $10,000. Relevant legislation: <em>Gaming and Wagering Commission Act 1987</em>.
                 </Jurisdiction>
-                <Jurisdiction name="Tasmania" flag="🇦🇺">
-                  Permits are required for most fundraising activities involving chance. Relevant legislation:
-                  <em> Gaming Control Act 1993</em>.
+                <Jurisdiction name="Tasmania" cap="$5,000">
+                  Permits are required for most fundraising activities involving chance. Exemptions may apply
+                  for eligible organisations where the total prize value does not exceed $5,000.
+                  Relevant legislation: <em>Gaming Control Act 1993</em>.
                 </Jurisdiction>
-                <Jurisdiction name="Australian Capital Territory" flag="🇦🇺">
-                  Lottery permits are required for fundraising activities involving chance. Relevant legislation:
-                  <em> Lotteries Act 1964</em>.
+                <Jurisdiction name="Australian Capital Territory" cap="$5,000">
+                  Lottery permits are required for fundraising activities involving chance. Exemptions may apply
+                  for eligible organisations where the total prize value does not exceed $5,000.
+                  Relevant legislation: <em>Lotteries Act 1964</em>.
                 </Jurisdiction>
-                <Jurisdiction name="Northern Territory" flag="🇦🇺" last>
-                  Fundraising activities involving chance may require authorisation. Relevant legislation:
-                  <em> Gaming Machine Act 2005</em> and associated regulations.
+                <Jurisdiction name="Northern Territory" cap="$5,000" last>
+                  Fundraising activities involving chance may require authorisation. Exemptions may apply for
+                  eligible organisations where the total prize value does not exceed $5,000.
+                  Relevant legislation: <em>Gaming Control Act 1993</em> and associated regulations.
                 </Jurisdiction>
               </div>
             </Section>
@@ -143,11 +153,8 @@ export default function CompliancePage() {
             <Section n="7" title="Legal Review" last>
               <p>
                 This Compliance Statement and Lucky Squares Australia&apos;s overall platform model has been reviewed
-                by [Law Firm Name], [City], South Australia. A written legal opinion dated [Date] is held on file.
+                by Evyenia Walton, Lynch Meyer, Adelaide, South Australia. A written legal opinion is held on file.
               </p>
-              <div style={{ marginTop: 16, padding: '14px 18px', background: '#FFFBEC', border: '1.5px solid #F0D878', borderRadius: 10, fontSize: 13, color: '#9A6800' }}>
-                <strong>Note:</strong> This field to be completed following appointment for legal opinion.
-              </div>
             </Section>
 
           </div>
@@ -170,10 +177,21 @@ function Section({ n, title, children, last }) {
   );
 }
 
-function Jurisdiction({ name, children, last }) {
+function Jurisdiction({ name, cap, children, last }) {
   return (
     <div style={{ padding: '16px 0', borderBottom: last ? 'none' : '1px solid var(--border)' }}>
-      <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 6 }}>{name}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+        <span style={{ fontWeight: 800, fontSize: 14 }}>{name}</span>
+        {cap && (
+          <span style={{
+            fontSize: 11, fontWeight: 800, color: 'var(--green)',
+            background: 'rgba(0,169,110,.1)', border: '1px solid rgba(0,169,110,.25)',
+            borderRadius: 4, padding: '2px 7px', whiteSpace: 'nowrap',
+          }}>
+            No-permit limit: {cap}
+          </span>
+        )}
+      </div>
       <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.8, margin: 0 }}>{children}</p>
     </div>
   );
