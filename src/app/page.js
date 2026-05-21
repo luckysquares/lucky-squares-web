@@ -217,6 +217,20 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
+
+          {/* Foundation Member callout */}
+          <div style={{ marginTop: 48, background: 'linear-gradient(135deg, #6B46F5 0%, #a855f7 100%)', borderRadius: 16, padding: '28px 36px', maxWidth: 700, margin: '48px auto 0', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', color: '#fff' }}>
+            <div style={{ fontSize: 40, flexShrink: 0 }}>🌟</div>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, marginBottom: 6 }}>First 100 organisers get their first campaign free</div>
+              <div style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.6 }}>
+                Register and complete your first Lucky Squares campaign at no cost. Earn a permanent Foundation Member badge and go in the draw for a $150 voucher.
+              </div>
+            </div>
+            <Link href="/fundraise?register=1" className="btn" style={{ background: '#fff', color: '#6B46F5', fontWeight: 800, flexShrink: 0, whiteSpace: 'nowrap' }}>
+              Claim your spot →
+            </Link>
+          </div>
         </div>
       </section>
 

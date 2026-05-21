@@ -35,6 +35,7 @@ const TRANSACTIONAL_TYPES = new Set([
   'org_member_invite',
   'campaign_launched_notification',
   'account_suspended',
+  'foundation_member',
 ]);
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -136,6 +137,8 @@ function buildTemplate(type: string, d: any): { subject: string; text: string } 
     case 'org_member_invite':             return T.emailOrgMemberInvite(d);
     // Admin internal
     case 'admin_new_org_application':     return T.emailAdminNewOrgApplication(d);
+    // Foundation Member
+    case 'foundation_member':             return T.emailFoundationMember(d);
     // Welcome sequence
     case 'welcome_day1':                  return T.emailWelcomeDay1(d);
     case 'welcome_day3_no_campaign':      return T.emailWelcomeDay3NoCampaign(d);

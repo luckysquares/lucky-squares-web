@@ -8,6 +8,7 @@ import { validateAbn, formatAbn } from '@/lib/abn';
 import { containsProfanity } from '@/lib/profanity';
 import LiveGrid from '@/components/app/LiveGrid';
 import StripeConnectSetup from '@/components/app/StripeConnectSetup';
+import MemberBadge from '@/components/app/MemberBadge';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -73,8 +74,12 @@ const STATE_PRIZE_CAPS = { ACT: 5000, NSW: 25000, NT: 5000, QLD: 2000, SA: 5000,
 const STATE_LABELS = { ACT: 'Australian Capital Territory', NSW: 'New South Wales', NT: 'Northern Territory', QLD: 'Queensland', SA: 'South Australia', TAS: 'Tasmania', VIC: 'Victoria', WA: 'Western Australia' };
 
 async function fetchProfile(userId) {
-  const { data } = await getSupabaseClient().from('profiles').select('plan, is_founding_member').eq('id', userId).single();
-  return { plan: data?.plan ?? 'trial', isFoundingMember: data?.is_founding_member ?? false };
+  const { data } = await getSupabaseClient().from('profiles').select('plan, is_founding_member, is_beta_tester').eq('id', userId).single();
+  return {
+    plan:             data?.plan              ?? 'trial',
+    isFoundingMember: data?.is_founding_member ?? false,
+    isBetaTester:     data?.is_beta_tester     ?? false,
+  };
 }
 
 function dbToFundraiser(row, soldCount = 0, prizes = []) {
@@ -149,9 +154,7 @@ function AppHeader({ user, onLogout, onHome }) {
           {user && (
             <>
               <span style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 600 }}>{user.name}</span>
-              {user.isFoundingMember && (
-                <span style={{ fontSize: 10, fontWeight: 800, color: '#92400E', background: '#FEF3C7', border: '1.5px solid #F59E0B', borderRadius: 20, padding: '2px 8px', letterSpacing: '0.5px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Founding Member</span>
-              )}
+              <MemberBadge isFoundingMember={user.isFoundingMember} isBetaTester={user.isBetaTester} />
               <button className="btn btn-outline btn-sm" onClick={onHome}>Dashboard</button>
               <button className="btn btn-outline btn-sm" onClick={onLogout}>Sign out</button>
             </>
@@ -1877,8 +1880,8 @@ export default function FundraiseApp() {
       if (session?.user) {
         const u = session.user;
         const supabase = getSupabaseClient();
-        const { plan, isFoundingMember } = await fetchProfile(u.id);
-        setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
+        const { plan, isFoundingMember, isBetaTester } = await fetchProfile(u.id);
+        setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember, isBetaTester });
         // Load org role (contributor or admin)
         const { data: oi } = await supabase.rpc('get_my_org_info');
         setOrgInfo(oi);
@@ -2010,10 +2013,28 @@ export default function FundraiseApp() {
     setPhase('dashboard');
   }, []);
 
-  const handleDrawComplete = useCallback((fundraiserId) => {
+  const handleDrawComplete = useCallback(async (fundraiserId) => {
     setFundraisers((prev) => prev.map((f) => f.id === fundraiserId ? { ...f, status: 'drawn' } : f));
     setActiveFundraiser((prev) => prev?.id === fundraiserId ? { ...prev, status: 'drawn' } : prev);
-  }, []);
+    // Re-fetch profile so Foundation Member badge appears immediately after a successful draw
+    if (user?.id) {
+      const prevWasFoundingMember = user.isFoundingMember;
+      const { isFoundingMember, isBetaTester, plan } = await fetchProfile(user.id);
+      setUser((prev) => prev ? { ...prev, plan, isFoundingMember, isBetaTester } : prev);
+      // Send Foundation Member congratulation email if this draw just earned them the badge
+      if (!prevWasFoundingMember && isFoundingMember && user.email) {
+        // Get member number (count of founding members)
+        const { data: countData } = await getSupabaseClient().rpc('get_founding_member_count');
+        const memberNum = typeof countData === 'number' ? countData : 1;
+        const drawnFundraiser = fundraisers.find((f) => f.id === fundraiserId);
+        sendTxEmail('foundation_member', user.email, {
+          first_name: user.name?.split(' ')[0] || 'there',
+          org_name:   drawnFundraiser?.org || user.org || 'your organisation',
+          member_num: memberNum,
+        });
+      }
+    }
+  }, [user?.id, user?.isFoundingMember, user?.email, user?.name, user?.org, fundraisers, sendTxEmail]);
 
   const handleLaunch = useCallback((fundraiserId) => {
     setFundraisers((prev) => prev.map((f) => f.id === fundraiserId ? { ...f, status: 'active' } : f));

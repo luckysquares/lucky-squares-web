@@ -868,3 +868,33 @@ ${SIG}
 You're receiving this because you opted in after purchasing squares in a previous ${d.organiser_name} fundraiser. To stop receiving these notifications, click the unsubscribe link in any Lucky Squares email.`,
   };
 }
+
+// ── Foundation Member congratulation ─────────────────────────────────────────
+
+export function emailFoundationMember(d: {
+  first_name: string;
+  org_name:   string;
+  member_num: number;
+}) {
+  return {
+    subject: `You're a Lucky Squares Foundation Member!`,
+    text: `Hi ${d.first_name},
+
+You did it. ${d.org_name}'s Lucky Squares draw is complete, and that makes you officially a Foundation Member.
+
+You're member #${d.member_num} out of 100. That's something to be proud of.
+
+Here's what comes with your Foundation Member status:
+
+A permanent Foundation Member badge (shown next to your name on every campaign you run from now on, so your community knows you were one of the first).
+
+You're in the draw for a $150 voucher of your choice, which we'll draw once all 100 Foundation Member spots are filled.
+
+One last thing: once your campaign is fully wrapped up and you've connected with your winners, we'd love a short note from you about the experience. A sentence or two is plenty. If you're happy to share, just reply to this email.
+
+Thank you for being here early. It means a lot to us.
+
+${SIG}`,
+  };
+}
+}
