@@ -406,7 +406,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
 
   const mergeTicket = async () => {
     if (!mergeInput.trim()) return;
-    // Accept either a ticket ID or ticket_ref like TKT-0001
+    // Accept either a ticket ID or ticket_ref like TK-0001
     const res  = await adminFetch(`/api/admin/support/tickets/${ticketId}/merge`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },

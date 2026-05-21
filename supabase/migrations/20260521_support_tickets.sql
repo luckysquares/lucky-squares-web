@@ -5,7 +5,7 @@ ALTER TABLE public.profiles
 -- Tickets
 CREATE TABLE IF NOT EXISTS public.support_tickets (
   id            uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
-  ticket_ref    text        UNIQUE NOT NULL, -- e.g. TKT-0001
+  ticket_ref    text        UNIQUE NOT NULL, -- e.g. TK-0001
   contact_name  text        NOT NULL,
   contact_email text        NOT NULL,
   subject       text        NOT NULL,
@@ -50,7 +50,7 @@ CREATE SEQUENCE IF NOT EXISTS support_ticket_seq START 1;
 CREATE OR REPLACE FUNCTION public.generate_ticket_ref()
 RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  NEW.ticket_ref := 'TKT-' || LPAD(nextval('support_ticket_seq')::text, 4, '0');
+  NEW.ticket_ref := 'TK-' || LPAD(nextval('support_ticket_seq')::text, 4, '0');
   RETURN NEW;
 END;
 $$;

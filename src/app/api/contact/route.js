@@ -132,7 +132,7 @@ export async function POST(req) {
   const subject = `${category?.trim() || 'General enquiry'} from ${name.trim()}`;
 
   // Create ticket in Supabase
-  let ticketRef = 'TKT-XXXX';
+  let ticketRef = 'TK-XXXX';
   let ticketId  = null;
 
   try {
