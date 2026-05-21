@@ -2,8 +2,9 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Fair Play Policy | Lucky Squares Australia',
+  title: 'Fair Play Policy',
   description: 'Our commitment to fair, honest use of the Lucky Squares platform by community organisations across Australia.',
+  alternates: { canonical: 'https://luckysquares.com.au/fair-play' },
 };
 
 export default function FairPlayPage() {

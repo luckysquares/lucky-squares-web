@@ -1,10 +1,14 @@
 import { Fraunces, Nunito } from 'next/font/google';
 import { Suspense } from 'react';
+import Script from 'next/script';
 import './globals.css';
 import Footer from '@/components/marketing/Footer';
 import ReferralCapture from '@/components/app/ReferralCapture';
 import MariposaChatWidget from '@/components/app/MariposaChatWidget';
 import { Analytics } from '@vercel/analytics/next';
+
+const GA_ID = 'G-X20WB95ZM1';
+const SITE_URL = 'https://luckysquares.com.au';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -27,18 +31,42 @@ export const viewport = {
 };
 
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Lucky Squares Australia: Fundraise with a Lucky Squares grid',
+    default: 'Lucky Squares Australia: Online Fundraising for Schools, Clubs and Charities',
     template: '%s | Lucky Squares Australia',
   },
   description:
     'The easiest way to run a Lucky Squares fundraiser in Australia. Set up your grid in minutes, sell squares online, and run a live draw. Perfect for schools, sports clubs, and charities.',
-  keywords: ['lucky squares', 'fundraiser', 'australia', 'school fundraiser', 'raffle', 'sports club'],
+  keywords: ['lucky squares', 'fundraiser', 'australia', 'school fundraiser', 'raffle', 'sports club', 'charity fundraising', 'P&C fundraiser'],
+  authors: [{ name: 'Lucky Squares Australia', url: SITE_URL }],
+  creator: 'Lucky Squares Australia',
   openGraph: {
-    title: 'Lucky Squares Australia',
-    description: 'Set up a Lucky Squares fundraiser in minutes. Sell squares, run your draw, raise funds.',
+    title: 'Lucky Squares Australia: Online Fundraising for Schools, Clubs and Charities',
+    description: 'Set up a Lucky Squares fundraiser in minutes. Sell squares online, run a live draw, and raise more for your community.',
+    url: SITE_URL,
+    siteName: 'Lucky Squares Australia',
     locale: 'en_AU',
     type: 'website',
+    images: [
+      {
+        url: '/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'Lucky Squares Australia — Online fundraising for schools, clubs and charities',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lucky Squares Australia: Online Fundraising for Schools, Clubs and Charities',
+    description: 'Set up a Lucky Squares fundraiser in minutes. Sell squares online, run a live draw, and raise more for your community.',
+    images: ['/og-default.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
 };
 
@@ -46,6 +74,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en-AU" className={`${fraunces.variable} ${nunito.variable}`}>
       <body style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {/* Google Analytics 4 */}
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="ga4-init" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+        `}</Script>
+
         <Suspense fallback={null}><ReferralCapture /></Suspense>
         <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>{children}</div>
         <Footer />

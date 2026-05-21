@@ -6,8 +6,9 @@ import Image from 'next/image';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Blog | Lucky Squares Australia',
-  description: 'Tips, stories and inspiration for community fundraisers across Australia.',
+  title: 'Fundraising Tips and Ideas',
+  description: 'Tips, ideas, and inspiration for community fundraisers across Australia. Advice for schools, sports clubs, charities, and P&Cs.',
+  alternates: { canonical: 'https://luckysquares.com.au/blog' },
 };
 
 function fmtDate(iso) {

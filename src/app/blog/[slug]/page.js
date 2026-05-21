@@ -114,11 +114,28 @@ async function getPost(slug) {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const post = await getPost(slug);
-  if (!post) return { title: 'Post not found | Lucky Squares Australia' };
+  if (!post) return { title: 'Post not found' };
+  const ogImages = post.cover_image_url
+    ? [{ url: post.cover_image_url, width: 1200, height: 630, alt: post.title }]
+    : [{ url: '/og-default.png', width: 1200, height: 630, alt: post.title }];
   return {
-    title: `${post.title} | Lucky Squares Australia`,
+    title: post.title,
     description: post.excerpt || undefined,
-    openGraph: post.cover_image_url ? { images: [post.cover_image_url] } : undefined,
+    alternates: { canonical: `https://luckysquares.com.au/blog/${slug}` },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt || undefined,
+      type: 'article',
+      url: `https://luckysquares.com.au/blog/${slug}`,
+      siteName: 'Lucky Squares Australia',
+      images: ogImages,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt || undefined,
+      images: [ogImages[0].url],
+    },
   };
 }
 

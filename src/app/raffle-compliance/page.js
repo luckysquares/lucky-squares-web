@@ -1,7 +1,9 @@
 import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
-  title: 'Raffle Compliance',
+  title: 'Raffle Compliance Guide',
+  description: 'State-by-state guide to raffle and lucky squares permit requirements in Australia. Understand your obligations before running a fundraiser.',
+  alternates: { canonical: 'https://luckysquares.com.au/raffle-compliance' },
 };
 
 export default function CompliancePage() {

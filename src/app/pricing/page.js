@@ -3,6 +3,8 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Pricing',
+  description: 'Start for free, or launch a live campaign for a flat $19 fee. No percentage cuts, no subscriptions. The Organisation plan is $149/year for unlimited campaigns.',
+  alternates: { canonical: 'https://luckysquares.com.au/pricing' },
 };
 
 export default function PricingPage() {

@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 
+export const metadata = {
+  title: 'Lucky Squares Australia: Online Fundraising for Schools, Clubs and Charities',
+  description: 'The easiest way to run a Lucky Squares fundraiser in Australia. Set up your grid in minutes, sell squares online, and run a live draw. Perfect for schools, sports clubs, and charities.',
+  alternates: { canonical: 'https://luckysquares.com.au' },
+};
+
 export default function HomePage() {
   return (
     <>
