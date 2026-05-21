@@ -32,6 +32,11 @@ export const viewport = {
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Lucky Squares',
+  },
   title: {
     default: 'Lucky Squares Australia: Online Fundraising for Schools, Clubs and Charities',
     template: '%s | Lucky Squares Australia',
