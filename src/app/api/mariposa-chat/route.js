@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const ANTHROPIC_API_KEY = process.env.MARIPOSA_API_KEY || process.env.ANTHROPIC_API_KEY;
 
 const SYSTEM_PROMPT = `CRITICAL FORMATTING RULES — follow these in every single response, no exceptions:
 1. NEVER use em dashes (the character that looks like this: —). Not once, not ever. Use a colon, comma, or parentheses instead.
