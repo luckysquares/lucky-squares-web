@@ -77,6 +77,19 @@ export default function NotFound() {
       <section style={{ padding: '64px 24px 80px', textAlign: 'center' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
 
+          {/* Secret shuffle */}
+          <button
+            onClick={() => setBlooper(BLOOPERS[Math.floor(Math.random() * BLOOPERS.length)])}
+            style={{
+              marginBottom: 16, background: 'none', border: 'none',
+              fontSize: 13, color: 'var(--text3)', cursor: 'pointer',
+              fontFamily: 'inherit', fontWeight: 600,
+              textDecoration: 'underline', textUnderlineOffset: 3,
+            }}
+          >
+            Show me another blooper
+          </button>
+
           {/* Image */}
           <div style={{
             width: 280, height: 280,
@@ -135,19 +148,6 @@ export default function NotFound() {
               Contact us
             </Link>
           </div>
-
-          {/* Reload for another */}
-          <button
-            onClick={() => setBlooper(BLOOPERS[Math.floor(Math.random() * BLOOPERS.length)])}
-            style={{
-              marginTop: 32, background: 'none', border: 'none',
-              fontSize: 13, color: 'var(--text3)', cursor: 'pointer',
-              fontFamily: 'inherit', fontWeight: 600,
-              textDecoration: 'underline', textUnderlineOffset: 3,
-            }}
-          >
-            Show me another blooper
-          </button>
 
         </div>
       </section>
