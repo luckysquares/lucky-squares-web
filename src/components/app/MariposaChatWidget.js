@@ -2,8 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const GREETING = `G'day! I'm Mariposa, a baseball-loving jackrabbit and your Lucky Squares guide. 🍀⚾
 
@@ -37,12 +35,9 @@ export default function MariposaChatWidget() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/mariposa-chat`, {
+      const res = await fetch('/api/mariposa-chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: next.filter((m) => m.role !== 'system') }),
       });
       const data = await res.json();
