@@ -2,8 +2,8 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Founding Members Beta | Lucky Squares Australia',
-  description: 'You\'ve been invited to help shape Lucky Squares Australia before we go live. Welcome, Founding Member.',
+  title: 'Beta Testers | Lucky Squares Australia',
+  description: 'You have been invited to help shape Lucky Squares Australia before we go live. Welcome, beta tester.',
   robots: 'noindex, nofollow',
 };
 
@@ -30,7 +30,7 @@ const TASKS = [
     emoji: '🎯',
     title: 'Buy squares on a demo campaign',
     steps: [
-      'Visit one of the demo campaigns below',
+      'Visit one of the demo campaigns below (they open in a new tab so you can come back here easily)',
       'Pick a few squares and go through the checkout',
       'Use the Stripe test card. Does the confirmation feel right?',
       'Check the grid updates in real time',
@@ -46,12 +46,31 @@ const TASKS = [
     ],
   },
   {
+    emoji: '📧',
+    title: 'Check your emails',
+    steps: [
+      'After signing up, buying squares, or contacting us, did you get a confirmation email?',
+      'Did it arrive quickly, or land in spam?',
+      'Does it look right? Does anything feel off or unprofessional?',
+    ],
+  },
+  {
+    emoji: '📤',
+    title: 'Share a campaign',
+    steps: [
+      'Launch a campaign and grab the share link',
+      'Send it to someone in WhatsApp, Messenger, or by text',
+      'Was sharing it easy and obvious? Does the link preview look good?',
+      'Did the other person understand what it was immediately?',
+    ],
+  },
+  {
     emoji: '📰',
     title: 'Browse the blog',
     steps: [
       'Check out the blog. Does the layout work well?',
       'Click into a few posts',
-      'Would you share any of them?',
+      'Would you share any of them in a club Facebook group?',
     ],
   },
   {
@@ -61,6 +80,26 @@ const TASKS = [
       'Open the site on your phone',
       'Try the grid on a small screen. Can you tap squares easily?',
       'Go through the whole checkout on mobile',
+      'Is anything hard to read, too small, or awkward to use?',
+    ],
+  },
+  {
+    emoji: '💸',
+    title: 'Trust the checkout',
+    steps: [
+      'When you get to the payment step, does it feel safe?',
+      'Does anything make you hesitate or second-guess?',
+      'Would you feel comfortable entering your real card details here?',
+    ],
+  },
+  {
+    emoji: '🎰',
+    title: 'Watch the live draw',
+    steps: [
+      'Run the draw on your test campaign',
+      'Watch the winning square get revealed',
+      'Was it exciting? Satisfying? Did it feel fair and trustworthy?',
+      'Would your club members enjoy watching this together?',
     ],
   },
   {
@@ -68,8 +107,10 @@ const TASKS = [
     title: 'Try to break it',
     steps: [
       'Submit empty forms',
-      'Try weird inputs: long names, emoji, special characters',
+      'Try weird inputs: very long names, emoji, special characters',
+      'Try naughty words (go on, we can take it)',
       'Go back and forward during checkout',
+      'Try the same action twice in a row',
       'Anything that feels wrong, note it down',
     ],
   },
@@ -84,7 +125,7 @@ export default function BetaTestPage() {
       <section className="section-hero-bg" style={{ padding: '72px 24px 64px', textAlign: 'center' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(107,70,245,.12)', borderRadius: 20, padding: '6px 16px', marginBottom: 24, fontSize: 13, fontWeight: 800, color: 'var(--purple)', textTransform: 'uppercase', letterSpacing: .5 }}>
-            🔒 Founding Members Only
+            🔒 Beta Testers Only
           </div>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(32px,5vw,52px)', fontWeight: 900, lineHeight: 1.1, marginBottom: 20 }}>
             You're one of the first people to see this. 👀
@@ -93,7 +134,7 @@ export default function BetaTestPage() {
             Lucky Squares Australia is almost ready to go live. Before we do, we want people we trust to kick the tyres, find the rough edges, and tell us what's not working.
           </p>
           <p style={{ fontSize: 16, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 540, margin: '0 auto' }}>
-            That's you. Welcome, Founding Member.
+            That's you. Welcome, trusty beta tester!
           </p>
         </div>
       </section>
@@ -105,7 +146,7 @@ export default function BetaTestPage() {
             <div style={{ fontSize: 36, marginBottom: 12 }}>🎁</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>A thank-you from me</h2>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 480, margin: '0 auto' }}>
-              As my way of saying thanks, every Founding Member who helps test the platform will receive <strong style={{ color: 'var(--purple)' }}>three free campaigns</strong> when we go live (no campaign fee, on me). Just let me know once you've put it through its paces.
+              As my way of saying thanks, every beta tester who helps put the platform through its paces will receive <strong style={{ color: 'var(--purple)' }}>three free campaigns</strong> when we go live (no campaign fee, on me). Just let me know once you've had a good go.
             </p>
             <p style={{ fontSize: 15, color: 'var(--text2)', marginTop: 16, fontWeight: 700 }}>Jamie</p>
           </div>
@@ -116,7 +157,13 @@ export default function BetaTestPage() {
       <section style={{ padding: '48px 24px 0' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Stripe test card</h2>
-          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 24 }}>Use these details anywhere a payment is required. No real money changes hands.</p>
+          <p style={{ fontSize: 15, color: 'var(--text2)', textAlign: 'center', lineHeight: 1.7, marginBottom: 6 }}>
+            How cool is this?! Online shopping that doesn't cost you anything!
+          </p>
+          <p style={{ fontSize: 15, color: 'var(--text2)', textAlign: 'center', lineHeight: 1.7, marginBottom: 24 }}>
+            It's like being given a penalty stroke in hockey with no goalkeeper. Just you, the stick, and an open net. Take all the time you want. Chip it in the corner. No one can stop you.
+          </p>
+          <p style={{ fontSize: 13, color: 'var(--text3)', textAlign: 'center', marginBottom: 24 }}>Use these details anywhere a payment is required. No real money changes hands.</p>
           <div className="scratch-card" style={{ padding: 28, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
             {[
               { label: 'Card number',     value: '4242 4242 4242 4242' },
@@ -138,7 +185,7 @@ export default function BetaTestPage() {
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Your testing checklist</h2>
           <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 8 }}>Please work through as many of these as you can. Note anything that feels broken, confusing, or just a bit off.</p>
-          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 32 }}>Talking of a bit off, you'll notice that all of the example campaigns and testimonials are fictional organisations. I used AI to help populate content until I've got enough testimonials from awesome people like you to share.</p>
+          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 32 }}>You'll notice all the example campaigns and testimonials are fictional organisations. That's deliberate while we're in beta. Real ones are coming soon.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {TASKS.map((task) => (
               <div key={task.title} className="scratch-card" style={{ padding: '24px 28px' }}>
@@ -163,10 +210,10 @@ export default function BetaTestPage() {
       <section style={{ padding: '0 24px 0' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Demo campaigns to buy squares on</h2>
-          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 28 }}>These are loaded with dummy data. Use the test card and go for it.</p>
+          <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 28 }}>These are loaded with dummy data. Use the test card and go for it. Each opens in a new tab so you can easily find your way back here.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {DEMO_CAMPAIGNS.map((c) => (
-              <Link key={c.id} href={`/f/${c.id}`} style={{ textDecoration: 'none' }} className="beta-campaign-link">
+              <a key={c.id} href={`/f/${c.id}`} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }} className="beta-campaign-link">
                 <div className="scratch-card beta-campaign-card" style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{ fontSize: 28, flexShrink: 0 }}>{c.emoji}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -177,9 +224,10 @@ export default function BetaTestPage() {
                     <div style={{ fontSize: 13, fontWeight: 800, color: c.sold === c.total ? 'var(--green)' : 'var(--purple)' }}>
                       {c.sold === c.total ? 'Full (draw ready)' : `${c.sold}/${c.total} sold`}
                     </div>
+                    <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>opens in new tab ↗</div>
                   </div>
                 </div>
-              </Link>
+              </a>
             ))}
           </div>
         </div>
@@ -190,7 +238,7 @@ export default function BetaTestPage() {
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Test on your phone</h2>
           <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 8 }}>
-            Point your phone camera at any QR code below to open that campaign directly on your device — no typing required.
+            Point your phone camera at any QR code below to open that campaign directly on your device. No typing required.
           </p>
           <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 28 }}>
             This is the most important test. Most real buyers will be on mobile. Check that you can pick a square, enter your details, and pay without any friction.
@@ -217,16 +265,16 @@ export default function BetaTestPage() {
             <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>💸</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 16, textAlign: 'center' }}>What do you think of the pricing?</h2>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 12 }}>
-              The platform charges <strong style={{ color: 'var(--text)' }}>$19 per live fundraising campaign</strong> — one flat fee, no percentage cuts, no hidden charges. For organisations running multiple campaigns there&apos;s an annual plan at $149/year for unlimited campaigns.
+              The platform charges <strong style={{ color: 'var(--text)' }}>$19 per live fundraising campaign</strong>, one flat fee with no percentage cuts and no hidden charges. For organisations running multiple campaigns there is an annual plan at $149/year for unlimited campaigns.
             </p>
-            <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 8 }}>We&apos;d love to know:</p>
+            <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 8 }}>We would love to know:</p>
             <ul style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, paddingLeft: 20, marginBottom: 20 }}>
               <li>Does $19 feel fair for what you get?</li>
               <li>Is there a price point that would feel like a no-brainer for a school or club?</li>
               <li>Would the pricing put you off, or would you happily recommend it to a committee treasurer?</li>
             </ul>
             <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24 }}>
-              No right or wrong answers — even &quot;that feels expensive&quot; is genuinely useful. You can also check out the <Link href="/pricing" style={{ color: 'var(--green)', fontWeight: 700 }}>full pricing page</Link> if you want context before you answer.
+              No right or wrong answers. Even "that feels expensive" is genuinely useful. You can also check out the <Link href="/pricing" style={{ color: 'var(--green)', fontWeight: 700 }}>full pricing page</Link> if you want context before you answer.
             </p>
             <div style={{ textAlign: 'center' }}>
               <a href="sms:0423795501?body=Pricing%20feedback:%20" className="btn btn-purple">SMS your thoughts →</a>
@@ -236,7 +284,7 @@ export default function BetaTestPage() {
       </section>
 
       {/* Feedback CTA */}
-      <section style={{ padding: '0 24px 80px' }}>
+      <section style={{ padding: '48px 24px 80px' }}>
         <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
           <div className="scratch-card" style={{ padding: '40px 36px' }}>
             <div style={{ fontSize: 36, marginBottom: 16 }}>📲</div>

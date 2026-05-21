@@ -10,6 +10,11 @@ const BETA_LOCKED = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
+  // ── /betatest: never accessible on live site ────────────────────────────
+  if (pathname.startsWith('/betatest') && process.env.NEXT_PUBLIC_SITE_PHASE !== 'beta') {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   // ── Beta gate: lock campaign/registration routes on production ───────────
   if (process.env.NEXT_PUBLIC_SITE_PHASE === 'beta') {
     const locked = BETA_LOCKED.some((p) => pathname.startsWith(p))
