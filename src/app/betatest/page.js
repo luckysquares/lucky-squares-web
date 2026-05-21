@@ -161,7 +161,7 @@ export default function BetaTestPage() {
             How cool is this?! Online shopping that doesn't cost you anything!
           </p>
           <p style={{ fontSize: 15, color: 'var(--text2)', textAlign: 'center', lineHeight: 1.7, marginBottom: 24 }}>
-            It's like being given a penalty stroke in hockey with no goalkeeper. Just you, the stick, and an open net. Take all the time you want. Chip it in the corner. No one can stop you.
+            It's like being given a penalty stroke in hockey with no goalkeeper. Just you, the stick, and an open net. Take all the time you want. Flick it in the corner. No one can stop you.
           </p>
           <p style={{ fontSize: 13, color: 'var(--text3)', textAlign: 'center', marginBottom: 24 }}>Use these details anywhere a payment is required. No real money changes hands.</p>
           <div className="scratch-card" style={{ padding: 28, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
