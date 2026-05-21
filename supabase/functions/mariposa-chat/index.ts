@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
   }
 
   if (!ANTHROPIC_API_KEY) {
-    return new Response('API key not configured', { status: 500 });
+    return new Response('API key not configured', { status: 500, headers: corsHeaders(req) });
   }
 
   try {
@@ -283,17 +283,17 @@ Deno.serve(async (req) => {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022',
+        model: 'claude-3-haiku-20240307',
         max_tokens: 300,
         system: SYSTEM_PROMPT,
-        messages: messages.slice(-10), // keep last 10 messages for context
+        messages: messages.slice(-10),
       }),
     });
 
     if (!res.ok) {
       const err = await res.text();
       console.error(`Anthropic error: ${err}`);
-      return new Response('AI service error', { status: 502 });
+      return new Response('AI service error', { status: 502, headers: corsHeaders(req) });
     }
 
     const data = await res.json();
@@ -307,6 +307,6 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error('mariposa-chat error:', err);
-    return new Response('Internal error', { status: 500 });
+    return new Response('Internal error', { status: 500, headers: corsHeaders(req) });
   }
 });
