@@ -71,6 +71,7 @@ export default function OrgSignupPage() {
   const [error,       setError]       = useState('');
   const [abnExists,   setAbnExists]   = useState(false);
   const [abnChecking, setAbnChecking] = useState(false);
+  const [abnLookup,   setAbnLookup]   = useState(null); // { name, active, entityType, state } | null
   const [emailExists, setEmailExists] = useState(false);
   const [emailChecking, setEmailChecking] = useState(false);
 
@@ -79,10 +80,31 @@ export default function OrgSignupPage() {
   const abnTouched = abnDigits.length > 0;
 
   const checkAbn = async () => {
-    if (!abnValid || !supabaseConfigured) return;
+    if (!abnValid) return;
     setAbnChecking(true);
-    const { data } = await getSupabaseClient().rpc('org_abn_exists', { p_abn: abnDigits });
-    setAbnExists(!!data);
+    setAbnLookup(null);
+
+    // Live ABR lookup
+    try {
+      const res  = await fetch(`/api/abn-lookup?abn=${abnDigits}`);
+      const data = await res.json();
+      if (data.found) {
+        setAbnLookup(data);
+        // Auto-fill org name if empty
+        if (!orgName.trim() && data.name) setOrgName(data.name);
+      } else {
+        setAbnLookup({ found: false });
+      }
+    } catch {
+      // silently skip if lookup fails — don't block the form
+    }
+
+    // Check if ABN already registered in our DB
+    if (supabaseConfigured) {
+      const { data } = await getSupabaseClient().rpc('org_abn_exists', { p_abn: abnDigits });
+      setAbnExists(!!data);
+    }
+
     setAbnChecking(false);
   };
 
@@ -94,8 +116,10 @@ export default function OrgSignupPage() {
     setEmailChecking(false);
   };
 
+  const abnInactive = abnLookup?.found && !abnLookup.active;
+
   const canSubmit =
-    orgName.trim() && abnValid && !abnExists && orgType &&
+    orgName.trim() && abnValid && !abnExists && !abnInactive && orgType &&
     street.trim() && suburb.trim() && state && postcode.trim() &&
     name.trim() && email.trim() && !emailExists && phone.trim() &&
     password.length >= 8 && password === confirm && agreed && agreedFairPlay;
@@ -266,7 +290,7 @@ export default function OrgSignupPage() {
                       placeholder="XX XXX XXX XXX"
                       maxLength={14}
                       value={abn}
-                      onChange={(e) => { setAbn(formatAbn(e.target.value)); setAbnExists(false); }}
+                      onChange={(e) => { setAbn(formatAbn(e.target.value)); setAbnExists(false); setAbnLookup(null); }}
                       onBlur={checkAbn}
                       style={{
                         borderColor: abnTouched ? (abnExists || !abnValid ? '#FF4444' : '#00C875') : undefined,
@@ -276,12 +300,24 @@ export default function OrgSignupPage() {
                       <span style={{ fontSize: 12, color: '#CC0000' }}>Please enter a valid 11-digit ABN.</span>
                     )}
                     {abnValid && abnChecking && (
-                      <span style={{ fontSize: 12, color: 'var(--text2)' }}>Checking…</span>
+                      <span style={{ fontSize: 12, color: 'var(--text2)' }}>Verifying with ABR…</span>
                     )}
                     {abnValid && !abnChecking && abnExists && (
                       <span style={{ fontSize: 12, color: '#CC0000' }}>This ABN is already registered. If this is your organisation, please <a href="/fundraise" style={{ color: '#CC0000', fontWeight: 700 }}>sign in</a> or <a href="/contact" style={{ color: '#CC0000', fontWeight: 700 }}>contact us</a>.</span>
                     )}
-                    {abnValid && !abnChecking && !abnExists && (
+                    {abnValid && !abnChecking && !abnExists && abnLookup?.found === false && (
+                      <span style={{ fontSize: 12, color: '#CC0000' }}>This ABN was not found in the ABR. Please check and try again.</span>
+                    )}
+                    {abnValid && !abnChecking && !abnExists && abnLookup?.found && !abnLookup.active && (
+                      <span style={{ fontSize: 12, color: '#CC0000' }}>This ABN is cancelled or inactive. Please use a current ABN.</span>
+                    )}
+                    {abnValid && !abnChecking && !abnExists && abnLookup?.found && abnLookup.active && (
+                      <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>
+                        ✓ {abnLookup.name || 'ABN verified'}
+                        {abnLookup.entityType ? ` — ${abnLookup.entityType}` : ''}
+                      </span>
+                    )}
+                    {abnValid && !abnChecking && !abnExists && !abnLookup && (
                       <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>ABN format valid ✓</span>
                     )}
                     <span style={{ fontSize: 12, color: 'var(--text2)' }}>
