@@ -53,7 +53,7 @@ export const metadata = {
         url: '/og-default.png',
         width: 1200,
         height: 630,
-        alt: 'Lucky Squares Australia — Online fundraising for schools, clubs and charities',
+        alt: 'Lucky Squares Australia: Online fundraising for schools, clubs and charities',
       },
     ],
   },
