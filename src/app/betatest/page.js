@@ -283,6 +283,32 @@ export default function BetaTestPage() {
         </div>
       </section>
 
+      {/* Look and feel */}
+      <section style={{ padding: '48px 24px 0' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <div className="scratch-card" style={{ padding: '36px 40px' }}>
+            <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>🎨</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 16, textAlign: 'center' }}>And finally ... what do you think of the look and feel?</h2>
+            <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 16 }}>
+              You have now seen a fair bit of the site. We would love your honest first impressions.
+            </p>
+            <ul style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, paddingLeft: 20, marginBottom: 20 }}>
+              <li>What impression does the site give you? Does it feel trustworthy? Professional? Fun?</li>
+              <li>Would you feel comfortable handing over your email address or payment details?</li>
+              <li>Does it feel like something a school P&C, a footy club, or a charity committee would take seriously?</li>
+              <li>Is there anything about the design or wording that gives you pause?</li>
+              <li>What is the one thing you would change if you could?</li>
+            </ul>
+            <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24 }}>
+              Gut reactions are just as valuable as detailed feedback here. If something feels off but you can not quite put your finger on why, tell us that too.
+            </p>
+            <div style={{ textAlign: 'center' }}>
+              <a href="sms:0423795501?body=Look%20and%20feel%20feedback:%20" className="btn btn-purple">SMS your thoughts →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Feedback CTA */}
       <section style={{ padding: '48px 24px 80px' }}>
         <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
