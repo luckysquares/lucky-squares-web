@@ -81,7 +81,7 @@ export default function NotFound() {
           <div style={{
             width: 280, height: 280,
             margin: '0 auto 32px',
-            borderRadius: '50%',
+            borderRadius: 16,
             background: 'var(--cream2)',
             border: '3px solid var(--border)',
             overflow: 'hidden',
