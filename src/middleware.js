@@ -10,8 +10,8 @@ const BETA_LOCKED = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // ── /betatest: never accessible on live site ────────────────────────────
-  if (pathname.startsWith('/betatest') && process.env.NEXT_PUBLIC_SITE_PHASE !== 'beta') {
+  // ── /betatest: never accessible on the production site ──────────────────
+  if (pathname.startsWith('/betatest') && process.env.VERCEL_ENV === 'production') {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
