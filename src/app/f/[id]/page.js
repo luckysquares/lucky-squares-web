@@ -200,15 +200,6 @@ export default function PublicFundraiserPage({ params }) {
         </div>
       </header>
 
-      {fundraiser.imageUrl && (
-        <div style={{ width: '100%', maxHeight: 320, overflow: 'hidden', lineHeight: 0 }}>
-          <img
-            src={fundraiser.imageUrl}
-            alt={fundraiser.title}
-            style={{ width: '100%', maxHeight: 320, objectFit: 'cover', objectPosition: 'center' }}
-          />
-        </div>
-      )}
       <LiveGrid fundraiser={fundraiser} user={null} onBack={null} />
       <ReportCampaign fundraiserId={fundraiser.id} />
     </>
