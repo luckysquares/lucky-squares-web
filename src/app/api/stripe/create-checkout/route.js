@@ -66,6 +66,10 @@ export async function POST(req) {
       payment_intent_data: {
         transfer_data: { destination: fundraiser.stripe_account_id },
         transfer_group: fundraiser_id,
+        // Retain the tx fee in the platform account to cover Stripe's processing cost.
+        // Without this, the full buyer payment passes to the organiser and Lucky Squares
+        // is out of pocket on every transaction.
+        application_fee_amount: Math.round(txFee * 100),
       },
       metadata: {
         fundraiser_id,
