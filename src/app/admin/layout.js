@@ -119,7 +119,8 @@ function AdminLogin({ reason, onAuth }) {
   const handleSend = async () => {
     setLoading(true); setError('');
     if (!supabaseConfigured) { setSent(true); setLoading(false); return; }
-    const { error: e } = await getSupabaseClient().auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/admin/dashboard` } });
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    const { error: e } = await getSupabaseClient().auth.signInWithOtp({ email, options: { emailRedirectTo: `${siteUrl}/admin/dashboard` } });
     if (e) { setError(e.message); } else { setSent(true); }
     setLoading(false);
   };
