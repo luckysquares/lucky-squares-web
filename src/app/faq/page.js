@@ -174,6 +174,76 @@ const FAQS = [
       },
     ],
   },
+  {
+    category: 'Lucky Squares Glossary',
+    emoji: '📖',
+    items: [
+      {
+        q: 'Lucky Square',
+        a: 'A single numbered cell on the grid. You buy one (or up to ten), and if your number comes up in the draw, you win. Simple as that.',
+      },
+      {
+        q: 'LiveGrid',
+        a: 'The interactive numbered grid at the heart of every campaign. It updates in real time as squares are reserved and sold, so everyone watching sees the same thing at the same moment.',
+      },
+      {
+        q: 'Campaign',
+        a: 'A Lucky Squares fundraising event. We deliberately avoid the words "raffle" or "lottery" because a Campaign is its own thing: a grid-based, community-driven fundraiser with a transparent live draw.',
+      },
+      {
+        q: 'Organiser',
+        a: 'The person or organisation running a Campaign. The Organiser sets up the grid, sets the price per square and prizes, shares the link with their community, and runs the draw when ready.',
+      },
+      {
+        q: 'Participant',
+        a: 'Anyone who buys squares in a Campaign. Not a punter, not a ticket holder: a Participant. They pick their squares, pay the Organiser, and watch the LiveGrid.',
+      },
+      {
+        q: 'Org Admin',
+        a: 'The person who established or is responsible for an Organisation\'s Lucky Squares account. The Org Admin controls the account, manages billing, and can assign Org Assistants to help run Campaigns.',
+      },
+      {
+        q: 'Org Assistant',
+        a: 'A person assigned by an Org Admin to help run an Organisation\'s Campaigns. Org Assistants can create and manage Campaigns on behalf of the Organisation.',
+      },
+      {
+        q: 'Organisation Member',
+        a: 'An Organisation that holds an annual Lucky Squares membership, giving them access to unlimited Campaigns (up to 10 running simultaneously). Designed for schools, sporting clubs, and charities that fundraise throughout the year.',
+      },
+      {
+        q: 'The Draw',
+        a: 'The moment of truth. When the Organiser is ready, they click Run Draw and the platform randomly selects one of the sold squares as the winner. The result is recorded instantly, cannot be changed, and is shown live on the grid for everyone watching.',
+      },
+      {
+        q: 'Club Mode',
+        a: 'A full-screen, stripped-back view of the LiveGrid designed for in-person square selling at events such as club nights, fetes, and sporting events. Once a buyer completes their purchase and sees the confirmation screen, the Organiser taps "Payment received, next buyer" and the screen resets for the next person.',
+      },
+      {
+        q: 'Rainbow Square',
+        a: 'A square gifted to a Campaign by Lucky Squares Australia. It appears on the LiveGrid as an animated, rainbow-coloured square: cycling through all the colours of the spectrum. It enters the draw the same as any other sold square.',
+      },
+      {
+        q: 'Reserved',
+        a: 'A square that has been selected by a Participant but not yet paid for. Reserved squares are shown in orange on the LiveGrid and held for 7 minutes while the Participant completes checkout. If the timer expires without payment, the square is released back to the grid.',
+      },
+      {
+        q: 'Break-even',
+        a: 'The point at which the funds raised from squares sold cover the cost of the non-donated prizes. Campaigns that have not reached break-even within 30 days of launch are automatically cancelled and Stripe payments are refunded.',
+      },
+      {
+        q: 'Campaign Fee',
+        a: 'The flat $19 fee charged when an Organiser launches a Campaign and makes it live. It covers access to the platform for the life of that Campaign. There are no ongoing fees and we do not take a percentage of funds raised.',
+      },
+      {
+        q: 'Lucky Squares Blitz',
+        a: 'A whole-of-club fundraising event where multiple Campaigns run simultaneously across a club\'s teams or groups, all under one coordinated push. Coming soon.',
+      },
+      {
+        q: 'Mariposa (Mari)',
+        a: 'Our AI guide. Full name Maria Conejo, but everyone calls her Mariposa (or Mari for short). She is a baseball-loving jackrabbit from Woodland River and she knows everything about Lucky Squares. Look for the purple chat button in the corner of any page.',
+      },
+    ],
+  },
 ];
 
 function Accordion({ question, answer, link }) {
