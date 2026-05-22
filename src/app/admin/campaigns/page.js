@@ -102,6 +102,7 @@ export default function AdminCampaigns() {
         p_contact_name: editing.contact_name, p_contact_email: editing.contact_email,
         p_contact_phone: editing.contact_phone, p_description: editing.description,
         p_image_url: editing.image_url ?? null,
+        p_image_focal_y: editing.image_focal_y ?? 50,
       });
     }
     setCampaigns((prev) => prev.map((c) => c.id === editing.id ? { ...c, ...editing } : c));
@@ -315,12 +316,24 @@ export default function AdminCampaigns() {
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Campaign photo</label>
               {editing.image_url && (
-                <img src={editing.image_url} alt="Campaign" style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 10, marginBottom: 8, display: 'block' }} />
+                <img src={editing.image_url} alt="Campaign" style={{ width: '100%', height: 140, objectFit: 'cover', objectPosition: `center ${editing.image_focal_y ?? 50}%`, borderRadius: 10, marginBottom: 8, display: 'block' }} />
               )}
               <label style={{ display: 'inline-block', cursor: 'pointer' }}>
                 <span className="btn btn-outline btn-sm">{imageUploading ? 'Uploading…' : editing.image_url ? 'Replace image' : 'Upload image'}</span>
                 <input type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} disabled={imageUploading} onChange={(e) => e.target.files[0] && handleImageUpload(e.target.files[0])} />
               </label>
+              {editing.image_url && (
+                <div style={{ marginTop: 10 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span>Image position</span>
+                    <span>{(editing.image_focal_y ?? 50) < 40 ? 'Upper' : (editing.image_focal_y ?? 50) > 60 ? 'Lower' : 'Centre'}</span>
+                  </label>
+                  <input type="range" min={0} max={100} value={editing.image_focal_y ?? 50} onChange={(e) => setEditing((p) => ({ ...p, image_focal_y: Number(e.target.value) }))} style={{ width: '100%', accentColor: 'var(--purple)' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>
+                    <span>Top</span><span>Bottom</span>
+                  </div>
+                </div>
+              )}
             </div>
             <div style={{ marginBottom: 24 }}>
               <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Description</label>

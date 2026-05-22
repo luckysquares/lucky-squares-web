@@ -101,6 +101,7 @@ function dbToFundraiser(row, soldCount = 0, prizes = []) {
     winnerSquareNums: Array.isArray(row.winner_square_nums) ? row.winner_square_nums : (row.winner_square_num != null ? [row.winner_square_num] : []),
     launchedAt:      row.launched_at || null,
     imageUrl:        row.image_url || null,
+    imageFocalY:     row.image_focal_y ?? 50,
     state:           row.state || 'SA',
     totalPrizeValue: prizes.reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0),
     prizes: prizes
@@ -872,6 +873,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [prizes,    setPrizes]    = useState(savedDraft?.prizes ?? [{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
   const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: '', state: 'SA', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
   const [campaignImageUrl,  setCampaignImageUrl]  = useState(savedDraft?.campaignImageUrl ?? '');
+  const [imageFocalY,       setImageFocalY]       = useState(savedDraft?.imageFocalY ?? 50);
   const [imageUploading,    setImageUploading]    = useState(false);
   const [drawRules,         setDrawRules]         = useState(savedDraft?.drawRules ?? { type: 'manual', date: '' });
   const [payment,           setPayment]           = useState(savedDraft?.payment ?? { method: 'inperson', accountName: '', bsb: '', account: '' });
@@ -901,7 +903,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   // Auto-save wizard state to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ step, fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }));
+      localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ step, fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment }));
     } catch {}
   }, [step, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment]);
 
@@ -1308,18 +1310,30 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             <label className="form-label">Campaign photo <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 400 }}>(optional)</span></label>
             <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Show supporters what they are fundraising for</div>
             {campaignImageUrl ? (
-              <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--border)' }}>
-                <img src={campaignImageUrl} alt="Campaign" style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
-                {imageUploading && (
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 700 }}>
-                    Uploading...
+              <div>
+                <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--border)' }}>
+                  <img src={campaignImageUrl} alt="Campaign" style={{ width: '100%', height: 200, objectFit: 'cover', objectPosition: `center ${imageFocalY}%`, display: 'block' }} />
+                  {imageUploading && (
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 700 }}>
+                      Uploading...
+                    </div>
+                  )}
+                  {!imageUploading && (
+                    <button onClick={() => { setCampaignImageUrl(''); setImageFocalY(50); }} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,.55)', color: '#fff', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span>Image position</span>
+                    <span>{imageFocalY === 0 ? 'Top' : imageFocalY === 100 ? 'Bottom' : imageFocalY < 40 ? 'Upper' : imageFocalY > 60 ? 'Lower' : 'Centre'}</span>
+                  </label>
+                  <input type="range" min={0} max={100} value={imageFocalY} onChange={(e) => setImageFocalY(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--purple)' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>
+                    <span>Top</span><span>Bottom</span>
                   </div>
-                )}
-                {!imageUploading && (
-                  <button onClick={() => setCampaignImageUrl('')} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,.55)', color: '#fff', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
-                    Remove
-                  </button>
-                )}
+                </div>
               </div>
             ) : (
               <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '28px 20px', border: '2px dashed var(--border2)', borderRadius: 12, cursor: 'pointer', background: 'var(--cream)', transition: 'border-color .15s' }}>
@@ -1531,7 +1545,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                   if (!pendingLaunchData) return;
                   setBankSaveError(false);
                   setBankSaving(true);
-                  const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
+                  const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment });
                   setBankSaving(false);
                   if (id) { setBankDraftId(id); } else { setBankSaveError(true); }
                 }}>Try again</button>
@@ -1633,7 +1647,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             }}>Next →</button>
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment }, true); }}>
+              <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment }, true); }}>
                 Save as draft
               </button>
               <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={() => setShowLaunchModal(true)}>
@@ -1679,7 +1693,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             setBankPhase(true);
             setBankSaving(true);
             setBankSaveError(false);
-            const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment });
+            const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment });
             setBankSaving(false);
             if (id) {
               setBankDraftId(id);
@@ -2092,7 +2106,7 @@ export default function FundraiseApp() {
           contact_name: sanitize(data.campaign.contactName) || null,
           contact_email: sanitize(data.campaign.contactEmail) || null,
           contact_phone: sanitize(data.campaign.contactPhone) || null,
-          emoji: nf.emoji, image_url: data.campaignImageUrl || null, description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
+          emoji: nf.emoji, image_url: data.campaignImageUrl || null, image_focal_y: data.imageFocalY ?? 50, description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
           state: data.campaign.state || 'SA',
           grid_size: nf.grid, price_per_sq: nf.pricePerSq, status: nf.status,
           launched_at: nf.status === 'active' ? new Date().toISOString() : null,
@@ -2184,7 +2198,7 @@ export default function FundraiseApp() {
       contact_name: sanitize(data.campaign.contactName) || null,
       contact_email: sanitize(data.campaign.contactEmail) || null,
       contact_phone: sanitize(data.campaign.contactPhone) || null,
-      emoji: data.campaign.emoji || '🍀', image_url: data.campaignImageUrl || null,
+      emoji: data.campaign.emoji || '🍀', image_url: data.campaignImageUrl || null, image_focal_y: data.imageFocalY ?? 50,
       description: sanitize(data.campaign.description), thank_you: sanitize(data.campaign.thankYou),
       state: data.campaign.state || 'SA',
       grid_size: grid, price_per_sq: parseFloat(data.price) || 10, status: 'draft',
@@ -2227,6 +2241,7 @@ export default function FundraiseApp() {
       contact_phone:     sanitize(data.campaign.contactPhone) || null,
       emoji:             data.campaign.emoji || '🍀',
       image_url:         data.campaignImageUrl || null,
+      image_focal_y:     data.imageFocalY ?? 50,
       description:       sanitize(data.campaign.description),
       thank_you:         sanitize(data.campaign.thankYou),
       state:             data.campaign.state || 'SA',

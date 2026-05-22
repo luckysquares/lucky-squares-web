@@ -784,7 +784,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
       <div className="dot-bg">
         {fundraiser.imageUrl && (
           <div style={{ width: '100%', maxHeight: 280, overflow: 'hidden' }}>
-            <img src={fundraiser.imageUrl} alt={fundraiser.title} style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block' }} />
+            <img src={fundraiser.imageUrl} alt={fundraiser.title} style={{ width: '100%', maxHeight: 280, objectFit: 'cover', objectPosition: `center ${fundraiser.imageFocalY ?? 50}%`, display: 'block' }} />
           </div>
         )}
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
