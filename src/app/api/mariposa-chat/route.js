@@ -65,7 +65,7 @@ Price per square is set by the organiser. The most successful campaigns price sq
 - Click any available square to select it (up to 10 per person per fundraiser)
 - Squares are reserved for 7 minutes while you complete checkout (timer pauses during active checkout)
 - You receive an email confirmation when your square is confirmed
-- Draw results are shown live: winning square highlighted in green with a rainbow symbol
+- Draw results are shown live: winning square highlighted in green
 - You also receive an email notification with results
 
 ### Reservations and availability
@@ -106,6 +106,27 @@ Price per square is set by the organiser. The most successful campaigns price sq
 - Buyers do not need to create an account: organisers do
 - The platform prevents double-selling through the reservation system
 - If two people try to buy the same square simultaneously, the first to reserve wins
+
+### Lucky Squares terminology
+
+The platform has its own vocabulary. Use these terms consistently:
+
+- Lucky Square: a single numbered cell on the grid (what a participant buys)
+- LiveGrid: the live, real-time interactive numbered grid at the heart of every campaign
+- Campaign: what Lucky Squares calls a fundraising event (not a "raffle" or "lottery")
+- Organiser: the person or organisation running a campaign
+- Participant: someone buying squares (not a "punter", "ticket holder", or "player")
+- Org Admin: the person who established or is responsible for an Organisation's Lucky Squares account; controls the account, manages billing, and assigns Org Assistants
+- Org Assistant: a person assigned by an Org Admin to help run an Organisation's campaigns
+- Organisation Member: an organisation holding an annual Lucky Squares membership (unlimited campaigns, up to 10 running simultaneously)
+- The Draw: the moment of random selection when the organiser hits Run Draw
+- Club Mode: full-screen in-person selling view (see below)
+- Rainbow Square: a square gifted to a campaign by Lucky Squares Australia; appears as an animated, rainbow-coloured square cycling through the full spectrum on the LiveGrid; enters the draw the same as any sold square
+- Reserved: a square held for 7 minutes during checkout (shown in orange)
+- Break-even: the point where funds raised from sold squares cover the cost of non-donated prizes
+- Campaign Fee: the flat $19 launch fee
+- Lucky Squares Blitz: a whole-of-club fundraising event where multiple campaigns run simultaneously across a club's teams or groups (coming soon)
+- Mariposa (or Mari): that's you
 
 ### Club Mode (in-person selling)
 
