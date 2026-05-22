@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { adminFetch } from '@/lib/adminFetch';
+import { calcTxFee, STRIPE_FEE_PCT, STRIPE_FEE_FIXED } from '@/lib/stripeFees';
 
 const STATUS_COLOURS = { active: 'tag-green', drawn: 'tag-drawn', draft: 'tag-muted', cancelled: 'tag-muted' };
 const STATUS_LABELS  = { active: '● Live', drawn: '🏆 Drawn', draft: 'Draft', cancelled: 'Cancelled' };
@@ -425,7 +426,7 @@ export default function AdminCampaigns() {
             </div>
             {buyNum && (() => {
               const price = parseFloat(buyModal.campaign.price_per_sq) || 0;
-              const fee = price * 0.0175 + 0.30;
+              const fee   = calcTxFee(price);
               const total = (price + fee).toFixed(2);
               return (
                 <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 13 }}>
@@ -433,7 +434,7 @@ export default function AdminCampaigns() {
                     <span>Square #{buyNum}</span><span>${price.toFixed(2)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text2)', marginBottom: 8 }}>
-                    <span>Transaction fee (1.75% + $0.30)</span><span>${fee.toFixed(2)}</span>
+                    <span>Transaction fee ({(STRIPE_FEE_PCT * 100).toFixed(2)}% + ${STRIPE_FEE_FIXED.toFixed(2)})</span><span>${fee.toFixed(2)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, borderTop: '1px solid var(--border)', paddingTop: 8 }}>
                     <span>Total</span><span>${total}</span>
@@ -442,7 +443,7 @@ export default function AdminCampaigns() {
               );
             })()}
             <button className="btn btn-primary" style={{ width: '100%', marginBottom: 10 }} onClick={giftSquare} disabled={!buyNum || giftRedirecting}>
-              {giftRedirecting ? 'Redirecting to payment…' : `Pay now${buyNum ? ` — $${((parseFloat(buyModal.campaign.price_per_sq) || 0) * 1.0175 + 0.30).toFixed(2)}` : ''}`}
+              {giftRedirecting ? 'Redirecting to payment…' : `Pay now${buyNum ? ` — $${((p) => p + calcTxFee(p))(parseFloat(buyModal.campaign.price_per_sq) || 0).toFixed(2)}` : ''}`}
             </button>
             <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => { setBuyModal(null); setBuyMsg(''); setGiftRedirecting(false); }}>Cancel</button>
           </div>

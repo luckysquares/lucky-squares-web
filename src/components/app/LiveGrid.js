@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import SharePanel from './SharePanel';
 import MemberBadge from './MemberBadge';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
+import { calcTxFee, STRIPE_FEE_PCT, STRIPE_FEE_FIXED } from '@/lib/stripeFees';
 
 const RESERVE_SECS   = 420;
 const WARN_SECS      = 120;
@@ -389,7 +390,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const timerPct     = (timerSecs / RESERVE_SECS) * 100;
   const timerWarning = timerSecs <= WARN_SECS;
   const subtotal     = cart.length * fundraiser.pricePerSq;
-  const txFee        = subtotal > 0 ? Math.round(((subtotal * 0.017) + 0.30) * 100) / 100 : 0;
+  const txFee        = subtotal > 0 ? Math.round(calcTxFee(subtotal) * 100) / 100 : 0;
   const totalCost    = subtotal + txFee;
   const mySquares    = squares.filter((sq) => sq.status === 'mine');
   const gridClass    = fundraiser.grid === 25 ? 'grid-25' : 'grid-100';
@@ -659,7 +660,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                 <span>${txFee.toFixed(2)}</span>
               </div>
               <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 14, lineHeight: 1.5 }}>
-                Processing fee (1.7% + 30c) is passed on to your total so the full amount raised goes to the cause.
+                Processing fee ({(STRIPE_FEE_PCT * 100).toFixed(2)}% + {STRIPE_FEE_FIXED.toFixed(0)}c) is passed on to your total so the full amount raised goes to the cause.
               </div>
             </>
           )}

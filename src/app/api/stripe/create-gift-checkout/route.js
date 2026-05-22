@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { getAdminClient as supabase } from '@/lib/supabase/server';
+import { calcTxFee } from '@/lib/stripeFees';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -21,7 +22,7 @@ export async function POST(req) {
     if (error || !fundraiser) return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
 
     const price = parseFloat(fundraiser.price_per_sq);
-    const txFee = price * 0.017 + 0.30;
+    const txFee = calcTxFee(price);
     const total = Math.round((price + txFee) * 100);
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au';

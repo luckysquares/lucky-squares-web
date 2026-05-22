@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { getAdminClient as supabase } from '@/lib/supabase/server';
+import { calcTxFee } from '@/lib/stripeFees';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -39,9 +40,9 @@ export async function POST(req) {
       return Response.json({ error: 'Stripe not configured for this fundraiser' }, { status: 400 });
     }
 
-    const subtotal = parseFloat(fundraiser.price_per_sq) * square_numbers.length;
-    const txFee = subtotal * 0.017 + 0.30;
-    const total = Math.round((subtotal + txFee) * 100); // cents
+    const subtotal      = parseFloat(fundraiser.price_per_sq) * square_numbers.length;
+    const txFee         = calcTxFee(subtotal);
+    const total         = Math.round((subtotal + txFee) * 100); // cents
     const subtotalCents = Math.round(subtotal * 100);
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au';
