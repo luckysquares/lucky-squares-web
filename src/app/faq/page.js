@@ -142,8 +142,12 @@ const FAQS = [
         a: 'No. Lucky Squares Australia charges only a flat Campaign Fee at launch. We do not take a percentage of your fundraising proceeds. The only transaction-related costs are secure online payment processing fees, which apply only when participants choose to pay by card.',
       },
       {
-        q: 'Are prices inclusive of GST?',
-        a: 'Campaign Fees are inclusive of GST where applicable. Online payment processing fees follow the payment provider\'s own GST treatment. Lucky Squares Australia will issue a tax invoice for all Campaign Fee charges upon request.',
+        q: 'Does the Campaign Fee include GST?',
+        a: 'Lucky Squares Australia (Play With Heart Pty Ltd) is not currently registered for GST. The $19 Campaign Fee contains no GST component and is charged as a flat fee. If our GST registration status changes, we will update our pricing and notify organisers accordingly.',
+      },
+      {
+        q: 'Do organisers need to charge GST on funds raised through Lucky Squares?',
+        a: 'GST treatment of fundraising proceeds depends on your organisation\'s GST registration status and the nature of the activity. Most fundraising activities conducted by incorporated associations, registered charities, and sporting clubs benefit from favourable GST treatment under ATO guidelines, and proceeds from a genuine fundraising event are generally not subject to GST even for GST-registered organisations. However, every organisation\'s circumstances are different. Lucky Squares Australia does not provide tax advice. We recommend consulting your accountant or referring to the ATO\'s guidance on fundraising and GST if you are unsure of your obligations.',
       },
     ],
   },
