@@ -49,7 +49,7 @@ export default function AdminLayout({ children }) {
 
   const handleSignOut = async () => {
     if (supabaseConfigured) await getSupabaseClient().auth.signOut();
-    router.push('/admin');
+    setStatus('unauth');
   };
 
   if (status === 'loading') {
