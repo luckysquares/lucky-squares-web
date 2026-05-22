@@ -1,6 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+
+// Extract fundraiser ID from /f/[id] paths
+function useFundraiserId() {
+  const pathname = usePathname();
+  const match = pathname?.match(/^\/f\/([0-9a-f-]{36})/i);
+  return match ? match[1] : null;
+}
 
 
 const GREETING = `G'day! I'm Mariposa, a baseball-loving jackrabbit and your Lucky Squares guide. 🍀⚾
@@ -10,6 +18,7 @@ Whether you're setting up your first fundraiser, figuring out how squares work, 
 What can I help you with today?`;
 
 export default function MariposaChatWidget() {
+  const fundraiserId = useFundraiserId();
   const [open,     setOpen]     = useState(false);
   const [messages, setMessages] = useState([{ role: 'assistant', content: GREETING }]);
   const [input,    setInput]    = useState('');
@@ -38,7 +47,10 @@ export default function MariposaChatWidget() {
       const res = await fetch('/api/mariposa-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: next.filter((m) => m.role !== 'system') }),
+        body: JSON.stringify({
+          messages:      next.filter((m) => m.role !== 'system'),
+          fundraiser_id: fundraiserId,
+        }),
       });
       const data = await res.json();
       setMessages((prev) => [...prev, { role: 'assistant', content: data.reply ?? "Hmm, I fumbled that one! Try again?" }]);

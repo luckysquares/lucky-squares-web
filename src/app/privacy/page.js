@@ -62,6 +62,20 @@ export default function PrivacyPage() {
                   <li>General geographic location (country and city level, derived from IP address)</li>
                 </ul>
               </SubSection>
+              <SubSection label="Mariposa Chat">
+                <p style={{ marginBottom: 8 }}>
+                  The Platform includes an AI-powered chat assistant called Mariposa. When you use the chat,
+                  we log the content of your conversation (both your messages and Mariposa&rsquo;s responses)
+                  along with a randomly generated session identifier and, where applicable, the fundraiser
+                  page you were visiting at the time.
+                </p>
+                <p>
+                  Chat logs are retained for 90 days and are then automatically deleted. They are used to
+                  improve the quality and accuracy of Mariposa&rsquo;s responses and to identify common
+                  questions. Conversation logs are not shared with third parties and are not linked to any
+                  personal account unless you are also logged in as an Organiser during the same session.
+                </p>
+              </SubSection>
             </Section>
 
             <Section n="3" title="How We Use Your Information">
@@ -124,7 +138,8 @@ export default function PrivacyPage() {
             <Section n="6" title="Data Retention">
               <SubSection n="6.1">Organiser account information is retained for the duration of the account and for seven years following account closure for legal and tax compliance purposes.</SubSection>
               <SubSection n="6.2">Participant information relating to a specific fundraiser is retained for one year (12 months) following the close of that fundraiser, or after one year of inactivity on our platform, after which it is de-identified or anonymised.</SubSection>
-              <SubSection n="6.3">You may request deletion of your personal information at any time, subject to any legal retention obligations.</SubSection>
+              <SubSection n="6.3">Mariposa chat logs are retained for 90 days and are then automatically and permanently deleted.</SubSection>
+              <SubSection n="6.4">You may request deletion of your personal information at any time, subject to any legal retention obligations.</SubSection>
             </Section>
 
             <Section n="7" title="Your Rights">
@@ -143,7 +158,9 @@ export default function PrivacyPage() {
               <SubSection label="Essential cookies">
                 The Platform uses cookies to maintain your session while you are logged in and to remember
                 your preferences (such as grid display settings). These cookies are necessary for the
-                Platform to function correctly.
+                Platform to function correctly. A separate cookie (<code>mariposa_sid</code>) is used to
+                maintain continuity within a Mariposa chat session. This cookie does not identify you
+                personally and expires after one year.
               </SubSection>
               <SubSection label="Analytics cookies (Google Analytics 4)">
                 <p style={{ marginBottom: 10 }}>

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getAdminClient as getSupabase } from '@/lib/supabase/server';
+import { randomUUID } from 'crypto';
 
 const ANTHROPIC_API_KEY = process.env.MARIPOSA_API_KEY || process.env.ANTHROPIC_API_KEY;
 
@@ -190,15 +192,23 @@ If someone sincerely asks whether you are AI, answer honestly and warmly: yes, y
 - Never use markdown bold (**text**) in your responses. Write in plain conversational prose.
 - Sign off messages with warmth: "Go get 'em!", "You've got this!", "That's a great catch!", "Batter up!" etc.`;
 
+const SESSION_COOKIE = 'mariposa_sid';
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
 export async function POST(request) {
   if (!ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
   }
 
-  let messages;
+  // ── Session cookie ────────────────────────────────────────────────────────
+  const existingSid = request.cookies.get(SESSION_COOKIE)?.value;
+  const sessionId   = existingSid ?? randomUUID();
+
+  let messages, fundraiserId;
   try {
     const body = await request.json();
-    messages = body.messages ?? [];
+    messages      = body.messages      ?? [];
+    fundraiserId  = body.fundraiser_id ?? null;
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
@@ -206,6 +216,9 @@ export async function POST(request) {
   if (!messages.length) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
   }
+
+  // The last message in the array is the user's most recent input
+  const userMessage = messages[messages.length - 1]?.content ?? '';
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -229,9 +242,27 @@ export async function POST(request) {
       return NextResponse.json({ error: 'AI service error' }, { status: 502 });
     }
 
-    const data = await res.json();
+    const data  = await res.json();
     const reply = data.content?.[0]?.text ?? "Sorry, I couldn't catch that one! Try again?";
-    return NextResponse.json({ reply });
+
+    // ── Log both sides of the exchange (fire-and-forget) ─────────────────────
+    const db = getSupabase();
+    db.from('mariposa_chats').insert([
+      { session_id: sessionId, fundraiser_id: fundraiserId, role: 'user',      content: userMessage },
+      { session_id: sessionId, fundraiser_id: fundraiserId, role: 'assistant', content: reply       },
+    ]).then(({ error }) => {
+      if (error) console.error('mariposa_chats insert error:', error.message);
+    });
+
+    // ── Build response and (re)set session cookie ─────────────────────────────
+    const response = NextResponse.json({ reply });
+    response.cookies.set(SESSION_COOKIE, sessionId, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path:     '/',
+      maxAge:   COOKIE_MAX_AGE,
+    });
+    return response;
 
   } catch (err) {
     console.error('mariposa-chat error:', err);
