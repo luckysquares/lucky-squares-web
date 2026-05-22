@@ -1156,8 +1156,29 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
           <label className="form-label">Price per square (AUD)</label>
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 18, fontWeight: 800, color: 'var(--text2)' }}>$</span>
-            <input className="form-input" type="number" min="1" step="1" value={price} onChange={(e) => setPrice(e.target.value)} style={{ paddingLeft: 36, fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-serif)' }} />
+            <input
+              className="form-input"
+              type="number"
+              min="1"
+              step="1"
+              value={price}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                setPrice(val === '' ? '' : String(parseInt(val, 10)));
+              }}
+              onBlur={(e) => {
+                const val = parseInt(e.target.value, 10);
+                setPrice(String(isNaN(val) || val < 1 ? 1 : val));
+              }}
+              style={{ paddingLeft: 36, fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-serif)' }}
+            />
           </div>
+          {parseFloat(price) > 15 && (
+            <div style={{ marginTop: 12, background: '#FFF8E1', border: '1.5px solid #FDE68A', borderRadius: 12, padding: '14px 18px', fontSize: 13, color: '#92400E', lineHeight: 1.6 }}>
+              <strong>Just a heads up:</strong> in our experience, the sweet spot for successful Lucky Squares campaigns is around $2 to $5 per square. At higher prices, some supporters may hesitate. Remember, if someone wants to spend $20 they can always buy multiple squares — 10 at $2 or 4 at $5. You know your community best, but it's worth keeping the barrier to entry low.
+            </div>
+          )}
+          <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>Whole dollar amounts only. No cents.</p>
         </div>
         <div className="form-group" style={{ marginTop: 20 }}>
           <label className="form-label">State / Territory</label>
