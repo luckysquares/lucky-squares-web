@@ -28,10 +28,14 @@ export async function POST(req) {
     // ── Admin gift square payment ─────────────────────────────────────────────
     if (action === 'admin_gift') {
       const squareNum = parseInt(session.metadata.square_number);
-      await db.rpc('admin_gift_square', {
+      const { error: giftError } = await db.rpc('admin_gift_square', {
         p_fundraiser_id: fundraiser_id,
         p_square_number: squareNum,
       });
+      if (giftError) {
+        console.error('admin_gift_square error:', giftError);
+        return new Response('Failed to gift square', { status: 500 });
+      }
       return new Response('ok', { status: 200 });
     }
 
