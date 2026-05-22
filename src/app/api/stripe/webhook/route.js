@@ -36,6 +36,11 @@ export async function POST(req) {
         console.error('admin_gift_square error:', giftError);
         return new Response('Failed to gift square', { status: 500 });
       }
+      // Store payment_intent_id so cancellation refund loop can return Lucky Squares' money
+      await db.from('squares')
+        .update({ payment_intent_id: session.payment_intent })
+        .eq('fundraiser_id', fundraiser_id)
+        .eq('number', squareNum);
       return new Response('ok', { status: 200 });
     }
 
