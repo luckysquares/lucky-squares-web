@@ -13,6 +13,7 @@ const NAV = [
   { href: '/admin/users',          icon: '👤',  label: 'Users'         },
   { href: '/admin/coupons',        icon: '🎟️',  label: 'Coupons'       },
   { href: '/admin/blog',           icon: '✍️',  label: 'Blog'          },
+  { href: '/admin/waitlist',        icon: '⏳',  label: 'Waitlist'      },
   { href: '/admin/invites',        icon: '✉️',  label: 'Invites'       },
   { href: '/admin/emails',         icon: '📧',  label: 'Emails'        },
   { href: '/admin/support',        icon: '🎧',  label: 'Support'       },
