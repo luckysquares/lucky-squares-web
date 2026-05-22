@@ -30,6 +30,7 @@ export default function AdminCampaigns() {
   const [giftRedirecting, setGiftRedirecting] = useState(false);
   const [payoutNotes,  setPayoutNotes]  = useState('');
   const [processingId, setProcessingId] = useState(null);
+  const [cancelling,   setCancelling]   = useState(null); // campaign being cancelled
 
   useEffect(() => {
     load();
@@ -142,6 +143,28 @@ export default function AdminCampaigns() {
       alert('Could not start payment. Please try again.');
       setGiftRedirecting(false);
     }
+  };
+
+  const confirmCancel = async () => {
+    if (!cancelling) return;
+    const id = cancelling.id;
+    setCancelling((c) => ({ ...c, loading: true }));
+    try {
+      const res = await adminFetch('/api/admin/campaigns/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaign_id: id }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        alert('Cancellation failed: ' + (json.error || 'Unknown error'));
+      } else {
+        setCampaigns((prev) => prev.map((c) => c.id === id ? { ...c, status: 'cancelled' } : c));
+      }
+    } catch (err) {
+      alert('Cancellation failed: ' + err.message);
+    }
+    setCancelling(null);
   };
 
   return (
@@ -286,6 +309,9 @@ export default function AdminCampaigns() {
                         <button className="btn btn-outline btn-sm" onClick={() => openBuyModal(c)}>🍀 Gift square</button>
                       )}
                       <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...c })}>Edit</button>
+                      {c.status === 'active' && (
+                        <button className="btn btn-sm" style={{ background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', fontWeight: 700 }} onClick={() => setCancelling(c)}>Cancel</button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -342,6 +368,39 @@ export default function AdminCampaigns() {
             <div style={{ display: 'flex', gap: 12 }}>
               <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setEditing(null)}>Cancel</button>
               <button className="btn btn-primary" style={{ flex: 2 }} onClick={saveEdit} disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel campaign confirmation modal */}
+      {cancelling && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
+          <div className="scratch-card" style={{ padding: 36, maxWidth: 460, width: '100%' }}>
+            <div style={{ fontSize: 36, marginBottom: 12, textAlign: 'center' }}>⚠️</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 800, marginBottom: 12, textAlign: 'center' }}>Cancel this campaign?</h2>
+            <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 8, lineHeight: 1.7 }}>
+              <strong>{cancelling.title}</strong> will be immediately cancelled.
+            </p>
+            {cancelling.payment_method === 'stripe' ? (
+              <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 24, lineHeight: 1.7 }}>
+                All Stripe payments will be <strong>automatically refunded</strong> and buyers will receive an email notification. The organiser will also be notified.
+              </p>
+            ) : (
+              <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 24, lineHeight: 1.7 }}>
+                This campaign uses <strong>{PAYMENT_LABELS[cancelling.payment_method] ?? cancelling.payment_method}</strong> payments. The organiser will be notified and must arrange refunds directly with buyers.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setCancelling(null)} disabled={cancelling.loading}>Keep campaign</button>
+              <button
+                className="btn"
+                style={{ flex: 1, background: '#DC2626', color: '#fff', fontWeight: 700 }}
+                onClick={confirmCancel}
+                disabled={cancelling.loading}
+              >
+                {cancelling.loading ? 'Cancelling…' : 'Yes, cancel it'}
+              </button>
             </div>
           </div>
         </div>
