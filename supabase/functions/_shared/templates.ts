@@ -233,11 +233,11 @@ export function emailDrawCompleteOrganiser(d: {
     .join('\n');
 
   const nextSteps = d.is_stripe
-    ? `Because your campaign used online payments, here's what happens next:
+    ? `Because your campaign used online card payments, here is what happens next:
 
 - Winners have been notified by email automatically.
-- Your net funds raised (total collected minus platform fee and prize amounts) will be transferred to your registered account within 2 business days.
-- Prize delivery is handled directly between you and each winner. Use the contact details in your campaign report to get in touch with them and arrange handover.`
+- Your funds (${amt(d.amount_raised)}) have been transferred and will appear in your registered bank account within 2 business days.
+- Prize delivery is handled directly between you and each winner. Use the contact details in your campaign report to get in touch and arrange handover.`
     : `Next steps:
 
 1. Winners have been notified by email automatically.

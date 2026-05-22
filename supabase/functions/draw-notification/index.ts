@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import Stripe from 'https://esm.sh/stripe@14';
 import { sendEmail, ADMIN_EMAIL } from '../_shared/resend.ts';
 import {
   emailDrawCompleteOrganiser,
@@ -10,6 +11,11 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
+
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
+  apiVersion: '2024-04-10',
+  httpClient: Stripe.createFetchHttpClient(),
+});
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
@@ -35,6 +41,7 @@ Deno.serve(async (req) => {
       id, title, org, contact_name, contact_email, contact_phone,
       payment_method, grid_size, price_per_sq,
       bank_account_name, bank_bsb, bank_account,
+      stripe_account_id,
       winner_square_num, winner_square_nums
     `)
     .eq('id', fundraiserId)
@@ -51,9 +58,32 @@ Deno.serve(async (req) => {
     .eq('fundraiser_id', fundraiserId)
     .eq('status', 'sold');
 
-  const soldSquares = squares ?? [];
-  const soldCount   = soldSquares.length;
-  const fundsRaised = (soldCount * parseFloat(f.price_per_sq)).toFixed(2);
+  const soldSquares    = squares ?? [];
+  const soldCount      = soldSquares.length;
+  const fundsRaised    = (soldCount * parseFloat(f.price_per_sq)).toFixed(2);
+  const fundsRaisedCents = Math.round(soldCount * parseFloat(f.price_per_sq) * 100);
+  const isStripe       = f.payment_method === 'stripe';
+
+  // ── Automatic Stripe payout (Stripe campaigns only) ──────────────────────
+  // Transfer the net proceeds to the organiser's connected account immediately
+  // after the draw. Stripe's standard T+2 payout schedule then automatically
+  // deposits the funds into the organiser's bank within 2 business days.
+  let transferResult: { ok: boolean; transferId?: string; error?: string } = { ok: true };
+  if (isStripe && f.stripe_account_id && fundsRaisedCents > 0) {
+    try {
+      const transfer = await stripe.transfers.create({
+        amount:        fundsRaisedCents,
+        currency:      'aud',
+        destination:   f.stripe_account_id,
+        transfer_group: fundraiserId,
+        description:   `Payout for ${f.title} — draw complete`,
+      });
+      transferResult = { ok: true, transferId: transfer.id };
+    } catch (err: any) {
+      console.error('Stripe transfer failed:', err);
+      transferResult = { ok: false, error: err?.message ?? 'Unknown error' };
+    }
+  }
 
   // Fetch prizes
   const { data: prizes } = await supabase
@@ -82,11 +112,22 @@ Deno.serve(async (req) => {
   });
 
   const firstName  = (f.contact_name ?? 'there').split(' ')[0];
-  const isStripe   = f.payment_method === 'stripe';
 
   // 1. Email admin (internal notification)
   const winnerSummary = winners.map((w) => `#${w.square_number} (${w.buyer_name})`).join(', ');
   const paymentLabel  = { stripe: 'Online card (Stripe)', bank: 'Bank transfer', bank_inperson: 'In person + bank transfer', inperson: 'In person' }[f.payment_method as string] ?? f.payment_method;
+
+  let payoutLine: string;
+  if (isStripe) {
+    if (transferResult.ok) {
+      payoutLine = `Stripe transfer triggered automatically: $${fundsRaised} to ${f.stripe_account_id} (transfer ${transferResult.transferId}). Organiser should receive funds within 2 business days.`;
+    } else {
+      payoutLine = `ACTION REQUIRED: automatic Stripe transfer FAILED. Error: ${transferResult.error}\nManual transfer needed: $${fundsRaised} to connected account ${f.stripe_account_id ?? 'UNKNOWN'}.`;
+    }
+  } else {
+    payoutLine = `No payout action needed (organiser collects directly).`;
+  }
+
   const adminBody = [
     `Lucky Squares Draw Notification`,
     `${'─'.repeat(40)}`,
@@ -100,16 +141,20 @@ Deno.serve(async (req) => {
     `Funds raised: $${fundsRaised}`,
     `Payment method: ${paymentLabel}`,
     ``,
-    `Winning square(s): #${winnerNums.join(', ')}`,
-    isStripe ? `\nACTION REQUIRED: transfer net funds to organiser after verifying draw.` : `\nNo payout action needed (organiser collects directly).`,
-    (f.bank_bsb || f.bank_account) ? `\nOrganiser bank: ${f.bank_account_name ?? ''} | BSB: ${f.bank_bsb ?? ''} | Acct: ${f.bank_account ?? ''}` : '',
+    `Winning square(s): ${winnerSummary}`,
+    ``,
+    payoutLine,
     ``,
     `Admin portal: https://luckysquares.com.au/admin/campaigns`,
-  ].filter((l) => l !== undefined).join('\n');
+  ].join('\n');
+
+  const adminSubject = isStripe && !transferResult.ok
+    ? `ACTION REQUIRED: Stripe transfer failed — ${f.title}`
+    : `Draw complete — ${f.title}`;
 
   await sendEmail({
     to:      ADMIN_EMAIL,
-    subject: isStripe ? `ADMIN NOTICE: Draw complete, payout needed — ${f.title}` : `ADMIN NOTICE: Draw complete — ${f.title}`,
+    subject: adminSubject,
     text:    adminBody,
   });
 

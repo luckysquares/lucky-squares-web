@@ -65,12 +65,11 @@ export async function POST(req) {
       mode: 'payment',
       customer_email: buyer_email,
       payment_intent_data: {
-        transfer_data: { destination: fundraiser.stripe_account_id },
+        // Funds stay in the Lucky Squares platform account until the draw completes.
+        // draw-notification transfers the net proceeds to the organiser's connected
+        // account automatically after the draw, from where Stripe pays out to their
+        // bank within 2 business days.
         transfer_group: fundraiser_id,
-        // Retain the tx fee in the platform account to cover Stripe's processing cost.
-        // Without this, the full buyer payment passes to the organiser and Lucky Squares
-        // is out of pocket on every transaction.
-        application_fee_amount: Math.round(txFee * 100),
       },
       metadata: {
         fundraiser_id,
