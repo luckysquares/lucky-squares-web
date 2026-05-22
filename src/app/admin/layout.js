@@ -138,7 +138,7 @@ function AdminLogin({ reason, onAuth }) {
             <input
               className="form-input"
               type="email"
-              placeholder="admin@luckysquares.com.au"
+              placeholder="Administrator email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
