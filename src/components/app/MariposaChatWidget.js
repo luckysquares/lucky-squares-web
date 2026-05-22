@@ -10,6 +10,18 @@ function useFundraiserId() {
   return match ? match[1] : null;
 }
 
+// Read visitor's first name from the buyer details saved by the checkout "remember me" feature
+function useVisitorName() {
+  const [name, setName] = useState(null);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('ls_buyer_details') || 'null');
+      if (saved?.name) setName(saved.name.trim().split(' ')[0]); // first name only
+    } catch { /* ignore */ }
+  }, []);
+  return name;
+}
+
 
 const GREETING = `G'day! I'm Mariposa, a baseball-loving jackrabbit and your Lucky Squares guide. 🍀⚾
 
@@ -19,6 +31,7 @@ What can I help you with today?`;
 
 export default function MariposaChatWidget() {
   const fundraiserId = useFundraiserId();
+  const visitorName  = useVisitorName();
   const [open,     setOpen]     = useState(false);
   const [messages, setMessages] = useState([{ role: 'assistant', content: GREETING }]);
   const [input,    setInput]    = useState('');
@@ -50,6 +63,7 @@ export default function MariposaChatWidget() {
         body: JSON.stringify({
           messages:      next.filter((m) => m.role !== 'system'),
           fundraiser_id: fundraiserId,
+          visitor_name:  visitorName,
         }),
       });
       const data = await res.json();

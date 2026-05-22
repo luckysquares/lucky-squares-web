@@ -204,11 +204,12 @@ export async function POST(request) {
   const existingSid = request.cookies.get(SESSION_COOKIE)?.value;
   const sessionId   = existingSid ?? randomUUID();
 
-  let messages, fundraiserId;
+  let messages, fundraiserId, visitorName;
   try {
     const body = await request.json();
     messages      = body.messages      ?? [];
     fundraiserId  = body.fundraiser_id ?? null;
+    visitorName   = typeof body.visitor_name === 'string' ? body.visitor_name.slice(0, 50).trim() : null;
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
@@ -219,6 +220,11 @@ export async function POST(request) {
 
   // The last message in the array is the user's most recent input
   const userMessage = messages[messages.length - 1]?.content ?? '';
+
+  // Append visitor name hint to system prompt when available
+  const systemPrompt = visitorName
+    ? `${SYSTEM_PROMPT}\n\n- The person you are talking with appears to be named ${visitorName}. Use their first name naturally and warmly once early in your reply if it fits. Do not repeat it in every message.`
+    : SYSTEM_PROMPT;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -231,7 +237,7 @@ export async function POST(request) {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 300,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: messages.slice(-10),
       }),
     });
