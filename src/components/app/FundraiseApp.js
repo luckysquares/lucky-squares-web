@@ -1360,7 +1360,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
               <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '28px 20px', border: '2px dashed var(--border2)', borderRadius: 12, cursor: 'pointer', background: 'var(--cream)', transition: 'border-color .15s' }}>
                 <span style={{ fontSize: 32 }}>📷</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text2)' }}>Tap to upload a photo</span>
-                <span style={{ fontSize: 12, color: 'var(--muted)' }}>JPG, PNG or WEBP · max 5 MB</span>
+                <span style={{ fontSize: 12, color: 'var(--muted)' }}>JPG, PNG or WEBP · max 5 MB · landscape works best · we'll compress and optimise it automatically</span>
                 <input type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={(e) => e.target.files[0] && handleImageSelect(e.target.files[0])} />
               </label>
             )}

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import sharp from 'sharp';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
 export async function POST(req) {
@@ -27,14 +28,18 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Image must be under 5 MB' }, { status: 400 });
     }
 
-    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
-    const path = `uploads/${Date.now()}.${ext}`;
     const bytes = await file.arrayBuffer();
+    const compressed = await sharp(Buffer.from(bytes))
+      .resize(1600, 900, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+
+    const path = `uploads/${Date.now()}.webp`;
 
     const supabase = getSupabase();
     const { data, error } = await supabase.storage
       .from('fundraiser-images')
-      .upload(path, Buffer.from(bytes), { contentType: file.type, upsert: true });
+      .upload(path, compressed, { contentType: 'image/webp', upsert: true });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
