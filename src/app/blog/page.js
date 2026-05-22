@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { getAnonClient } from '@/lib/supabase/server';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -17,10 +17,7 @@ function fmtDate(iso) {
 }
 
 async function getPosts() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return [];
-  const supabase = createClient(url, key);
+  const supabase = getAnonClient();
   const { data, error } = await supabase
     .from('blog_posts')
     .select('id, slug, title, excerpt, author, cover_image_url, tags, published_at')

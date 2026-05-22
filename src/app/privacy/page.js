@@ -56,9 +56,10 @@ export default function PrivacyPage() {
               <SubSection label="Automatically Collected Information">
                 <ul>
                   <li>Browser type and device information</li>
-                  <li>IP address</li>
+                  <li>IP address (anonymised for analytics purposes)</li>
                   <li>Pages visited and time spent on the Platform</li>
                   <li>Referral source</li>
+                  <li>General geographic location (country and city level, derived from IP address)</li>
                 </ul>
               </SubSection>
             </Section>
@@ -92,6 +93,7 @@ export default function PrivacyPage() {
                   <li><strong>Stripe</strong>: secure online payment processing. Card details are handled exclusively by Stripe and are never stored on Lucky Squares systems. Stripe operates under PCI-DSS compliance.</li>
                   <li><strong>Supabase</strong>: secure database and file storage (Australian data residency)</li>
                   <li><strong>Resend</strong>: transactional email communications (confirmation emails, draw notifications)</li>
+                  <li><strong>Google Analytics 4</strong>: anonymous website usage analytics. Google Analytics collects information about how visitors use the Platform (pages visited, session duration, general location, device type). This data is aggregated and does not identify individual users. See Section 8 for more detail.</li>
                 </ul>
                 <p style={{ marginTop: 10 }}>
                   These providers are contractually required to handle your information securely and only
@@ -137,14 +139,35 @@ export default function PrivacyPage() {
               <p>To exercise any of these rights, <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>contact us</a>.</p>
             </Section>
 
-            <Section n="8" title="Cookies">
-              <p>The Platform uses cookies and similar technologies to:</p>
-              <ul>
-                <li>Maintain your session while using the Platform</li>
-                <li>Remember your preferences</li>
-                <li>Analyse Platform usage and performance</li>
-              </ul>
-              <p>You may disable cookies in your browser settings, however this may affect the functionality of the Platform.</p>
+            <Section n="8" title="Cookies and Analytics">
+              <SubSection label="Essential cookies">
+                The Platform uses cookies to maintain your session while you are logged in and to remember
+                your preferences (such as grid display settings). These cookies are necessary for the
+                Platform to function correctly.
+              </SubSection>
+              <SubSection label="Analytics cookies (Google Analytics 4)">
+                <p style={{ marginBottom: 10 }}>
+                  We use Google Analytics 4 to understand how visitors use the Platform. Google Analytics
+                  collects anonymous usage data, including pages visited, time spent on each page, general
+                  geographic location (country and city level), device type, and referral source.
+                </p>
+                <p style={{ marginBottom: 10 }}>
+                  Google Analytics sets cookies prefixed with <code>_ga</code>. IP addresses are anonymised
+                  before being stored. This data is aggregated and does not identify you personally.
+                </p>
+                <p>
+                  You can opt out of Google Analytics tracking at any time by installing the{' '}
+                  <a href="https://tools.google.com/dlpage/gaoptout" style={{ color: 'var(--green)', fontWeight: 700 }} target="_blank" rel="noopener noreferrer">
+                    Google Analytics Opt-out Browser Add-on
+                  </a>{' '}
+                  or by adjusting your browser&rsquo;s cookie settings.
+                </p>
+              </SubSection>
+              <SubSection label="Managing cookies">
+                You may disable cookies in your browser settings. Disabling essential cookies may affect
+                the functionality of the Platform. Disabling analytics cookies will not affect your ability
+                to use the Platform.
+              </SubSection>
             </Section>
 
             <Section n="9" title="Marketing Communications and Opt-Out">

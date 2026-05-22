@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
 
 const VALID_REASONS = ['inappropriate_content', 'suspicious_activity', 'misleading_information', 'spam', 'other'];
-
-function getSupabase() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-}
 
 export async function POST(req) {
   try {

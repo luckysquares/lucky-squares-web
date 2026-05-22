@@ -105,6 +105,25 @@ Price per square is set by the organiser. The most successful campaigns price sq
 - The platform prevents double-selling through the reservation system
 - If two people try to buy the same square simultaneously, the first to reserve wins
 
+### Club Mode (in-person selling)
+
+Club Mode is a full-screen, stripped-back view of the live grid designed for organisers selling squares in person at events (club nights, fetes, sporting events, etc.). It runs on the same device as the campaign page, no separate app needed.
+
+How it works:
+- Only visible to the logged-in campaign organiser
+- Only available for in-person, bank transfer, or blended payment campaigns (not Stripe/online card campaigns)
+- Toggle it on or off using the purple "Club Mode" button in the campaign header
+- The preference is saved on the device, so it stays in Club Mode between visits
+
+In Club Mode:
+- The organiser sees just the live grid, price per square, a colour key, and a simple checkout form
+- The organiser taps squares on behalf of the buyer, enters their name and phone number (email is optional and only needed if they want a receipt)
+- Payment is taken in cash or EFTPOS directly by the organiser (no card processing happens through the platform)
+- After confirming the sale, a thank-you screen is shown, then the organiser taps "Payment received, next buyer" to reset the screen for the next person
+- A "Share QR" button pops up a large QR code so buyers who want to browse or buy on their own device can scan it
+
+For blended campaigns (in-person and bank transfer): buyers who scan the QR code get the normal grid view on their own phone; the organiser's device stays in Club Mode for in-person sales.
+
 ### Receiving funds
 - Bank transfer campaigns: buyers pay directly into the organiser's nominated account throughout the campaign (no transfer from Lucky Squares needed)
 - In person campaigns: organiser collects directly

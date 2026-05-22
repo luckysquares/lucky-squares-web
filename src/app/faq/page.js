@@ -81,6 +81,10 @@ const FAQS = [
         a: 'Yes. During setup you can add as many prizes as you like, including 1st, 2nd, 3rd, and additional places. Prize descriptions and values are displayed on the fundraiser page so participants know what they could win.',
       },
       {
+        q: 'What is Club Mode?',
+        a: 'Club Mode is a full-screen, stripped-back view of your live grid designed for in-person square selling at events such as club nights, fetes, and sporting events. When you switch to Club Mode on your phone or tablet, you see just the live grid, price per square, and a simple checkout form for recording each sale. Once a buyer has made their purchase and seen the confirmation screen, you tap "Payment received, next buyer" to reset the screen ready for the next person. Club Mode is only available to the campaign organiser and only for campaigns using in-person, bank transfer, or blended payment methods.',
+      },
+      {
         q: 'Is there a plan for organisations that run fundraisers regularly?',
         a: 'Yes. The Organisation plan is $149 per year and gives you unlimited Lucky Squares campaigns with up to 10 running simultaneously. It\'s designed for schools, sporting clubs, and charities that fundraise throughout the year. One account per organisation, verified by ABN.',
         link: { label: 'Register your organisation', href: '/org-signup' },

@@ -46,11 +46,12 @@ const SAMPLE_CAMPAIGNS = [
 ];
 
 export default function FeelingLuckyPage() {
-  const [campaigns,  setCampaigns]  = useState([]);
-  const [selected,   setSelected]   = useState(null);
-  const [spinning,   setSpinning]   = useState(false);
-  const [hasSpun,    setHasSpun]    = useState(false);
-  const [loadError,  setLoadError]  = useState(false);
+  const [campaigns,       setCampaigns]       = useState([]);
+  const [selected,        setSelected]        = useState(null);
+  const [spinning,        setSpinning]        = useState(false);
+  const [hasSpun,         setHasSpun]         = useState(false);
+  const [loadError,       setLoadError]       = useState(false);
+  const [noRealCampaigns, setNoRealCampaigns] = useState(false);
 
   useEffect(() => {
     if (!supabaseConfigured) { setCampaigns(SAMPLE_CAMPAIGNS); return; }
@@ -62,7 +63,8 @@ export default function FeelingLuckyPage() {
         .eq('status', 'active')
         .eq('payment_method', 'stripe');
 
-      if (error || !rows?.length) { setCampaigns(SAMPLE_CAMPAIGNS); if (error) setLoadError(true); return; }
+      if (error) { setCampaigns(SAMPLE_CAMPAIGNS); setLoadError(true); return; }
+      if (!rows?.length) { setNoRealCampaigns(true); return; }
 
       const ids = rows.map((r) => r.id);
       const [{ data: stats }, { data: prizes }] = await Promise.all([
@@ -98,16 +100,17 @@ export default function FeelingLuckyPage() {
   }, []);
 
   const randomise = useCallback(() => {
-    if (!campaigns.length || spinning) return;
+    if (spinning) return;
     setSpinning(true);
     setHasSpun(true);
     setTimeout(() => {
+      if (noRealCampaigns || !campaigns.length) { setSpinning(false); return; }
       const pool = campaigns.filter((c) => c.id !== selected?.id);
       const pick = pool.length ? pool[Math.floor(Math.random() * pool.length)] : campaigns[Math.floor(Math.random() * campaigns.length)];
       setSelected(pick);
       setSpinning(false);
     }, 700);
-  }, [campaigns, selected, spinning]);
+  }, [campaigns, selected, spinning, noRealCampaigns]);
 
   const isDemo = !supabaseConfigured || loadError;
 
@@ -132,7 +135,7 @@ export default function FeelingLuckyPage() {
           <button
             className="btn btn-gold btn-xl"
             onClick={randomise}
-            disabled={spinning || !campaigns.length}
+            disabled={spinning || (!campaigns.length && !noRealCampaigns)}
             style={{ gap: 10, fontSize: 18 }}
           >
             <span style={{ display: 'inline-block', animation: spinning ? 'spin 0.5s linear infinite' : 'none' }}>
@@ -238,7 +241,7 @@ export default function FeelingLuckyPage() {
 
                   {/* CTA */}
                   {selected.available > 0 ? (
-                    <Link href={`/f/${selected.id}`} className="btn btn-gold btn-lg" style={{ width: '100%', justifyContent: 'center' }}>
+                    <Link href={`/f/${selected.id}`} className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }}>
                       Support this fundraiser →
                     </Link>
                   ) : (
@@ -269,12 +272,25 @@ export default function FeelingLuckyPage() {
         <section className="section section-solid-bg" style={{ paddingTop: 0, paddingBottom: 64 }}>
           <div className="section-inner" style={{ maxWidth: 560, textAlign: 'center' }}>
             <div className="scratch-card" style={{ padding: '48px 36px' }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🍀</div>
-              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>No live campaigns right now</h2>
-              <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
-                Check back soon. New fundraisers go live all the time. Or if your group is ready to raise some funds, start your own.
-              </p>
-              <Link href="/fundraise?register=1" className="btn btn-gold">Start a fundraiser free →</Link>
+              {noRealCampaigns ? (
+                <>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>🎲</div>
+                  <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>Oops... nothing to show yet!</h2>
+                  <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+                    We&apos;re in early release and there are no fundraisers live just yet. Check back soon, or be one of the first to start your own.
+                  </p>
+                  <Link href="/fundraise?register=1" className="btn btn-gold">Start a fundraiser free →</Link>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>🍀</div>
+                  <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>No live campaigns right now</h2>
+                  <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+                    Check back soon. New fundraisers go live all the time. Or if your group is ready to raise some funds, start your own.
+                  </p>
+                  <Link href="/fundraise?register=1" className="btn btn-gold">Start a fundraiser free →</Link>
+                </>
+              )}
             </div>
           </div>
         </section>

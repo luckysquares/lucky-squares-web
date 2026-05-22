@@ -5,6 +5,7 @@ import { use } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 import LiveGrid from '@/components/app/LiveGrid';
+import ClubGrid from '@/components/app/ClubGrid';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
 function dbToFundraiser(row, prizes = []) {
@@ -90,11 +91,29 @@ function HamburgerMenu() {
   );
 }
 
+// Club Mode is only available for non-Stripe payment methods
+const CLUB_MODE_PAYMENT_METHODS = ['inperson', 'bank', 'bank_inperson'];
+
 export default function PublicFundraiserPage({ params }) {
   const { id } = use(params);
-  const [fundraiser, setFundraiser] = useState(null);
-  const [loading,    setLoading]    = useState(true);
-  const [notFound,   setNotFound]   = useState(false);
+  const [fundraiser,   setFundraiser]   = useState(null);
+  const [loading,      setLoading]      = useState(true);
+  const [notFound,     setNotFound]     = useState(false);
+  const [isOrganiser,  setIsOrganiser]  = useState(false);
+  const [clubMode,     setClubMode]     = useState(false);
+
+  // Initialise Club Mode from localStorage after mount
+  useEffect(() => {
+    try { setClubMode(localStorage.getItem(`ls_clubmode_${id}`) === '1'); } catch {}
+  }, [id]);
+
+  const toggleClubMode = () => {
+    setClubMode((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(`ls_clubmode_${id}`, next ? '1' : '0'); } catch {}
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!supabaseConfigured) { setNotFound(true); setLoading(false); return; }
@@ -102,13 +121,19 @@ export default function PublicFundraiserPage({ params }) {
     Promise.all([
       supabase.from('fundraisers').select('*, profiles!owner_id(is_founding_member, is_beta_tester)').eq('id', id).in('status', ['active', 'drawn']).single(),
       supabase.from('prizes').select('*').eq('fundraiser_id', id).order('sort_order'),
-    ]).then(([{ data, error }, { data: prizes }]) => {
+      supabase.auth.getUser(),
+    ]).then(([{ data, error }, { data: prizes }, { data: { user } }]) => {
       if (error || !data) { setNotFound(true); } else {
         setFundraiser({
           ...dbToFundraiser(data, prizes || []),
           ownerIsFoundingMember: data.profiles?.is_founding_member ?? false,
           ownerIsBetaTester:     data.profiles?.is_beta_tester     ?? false,
+          ownerId: data.owner_id,
         });
+        // Check if the logged-in user is the campaign organiser
+        if (user?.id && data.owner_id && user.id === data.owner_id) {
+          setIsOrganiser(true);
+        }
       }
       setLoading(false);
     });
@@ -134,6 +159,14 @@ export default function PublicFundraiserPage({ params }) {
     </div>
   );
 
+  // ── Club Mode — full-screen stripped view for in-person selling ──────────────
+  const clubModeAvailable = isOrganiser && CLUB_MODE_PAYMENT_METHODS.includes(fundraiser.payment?.method);
+
+  if (clubMode && clubModeAvailable) {
+    return <ClubGrid fundraiser={fundraiser} onToggle={toggleClubMode} />;
+  }
+
+  // ── Normal campaign view ────────────────────────────────────────────────────
   return (
     <>
       <div className="rainbow-strip" />
@@ -151,6 +184,16 @@ export default function PublicFundraiserPage({ params }) {
           ))}
           <Link href="/fundraise?register=1" className="btn btn-primary btn-sm" style={{ marginLeft: 8 }}>Start for free →</Link>
         </nav>
+        {/* Club Mode toggle — only shown to the logged-in organiser of this campaign */}
+        {clubModeAvailable && (
+          <button
+            onClick={toggleClubMode}
+            style={{ background: 'var(--purple)', color: '#fff', border: 'none', borderRadius: 20, padding: '7px 14px', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', flexShrink: 0 }}
+            title="Switch to Club Mode for in-person square selling"
+          >
+            🏟️ Club Mode
+          </button>
+        )}
         {/* Mobile hamburger */}
         <div className="fundraiser-mobile-nav">
           <HamburgerMenu />

@@ -1,14 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
 const SITE_URL = 'https://luckysquares.com.au';
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-  );
-}
-
 export default async function sitemap() {
   const staticPages = [
     { url: SITE_URL,                              priority: 1.0,  changeFrequency: 'weekly'  },

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient as supabase } from '@/lib/supabase/server';
 import Logo from '@/components/ui/Logo';
 
 const STATE_LABELS = {
@@ -15,12 +15,6 @@ const PAYMENT_LABELS = {
   inperson: 'in-person payment',
 };
 
-function supabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-  );
-}
 
 export async function generateMetadata({ params }) {
   const { id } = await params;

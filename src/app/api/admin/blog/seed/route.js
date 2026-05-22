@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from '@/lib/supabase/server';
 
 const SEED_TOPICS = [
   { title: 'How to Run a Lucky Squares Fundraiser That Sells Out', audience: 'Club and school fundraising coordinators', tone: 'Helpful and informative', keyPoints: 'Grid selection, pricing per square, sharing the link, running the draw, maximising participation' },
@@ -83,11 +83,7 @@ Tags must be 2-3 lowercase values from: fundraising, sport, community, marketing
 
 export async function POST(req) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  const url    = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key    = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
   if (!apiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not set' }, { status: 503 });
-  if (!url || !key) return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 });
 
   const { index } = await req.json();
   if (typeof index !== 'number' || index < 0 || index >= SEED_TOPICS.length) {
@@ -95,7 +91,7 @@ export async function POST(req) {
   }
 
   const topic = SEED_TOPICS[index];
-  const supabase = createClient(url, key);
+  const supabase = getAdminClient();
 
   const slug = toSlug(topic.title);
   const { data: existing } = await supabase.from('blog_posts').select('id').eq('slug', slug).maybeSingle();

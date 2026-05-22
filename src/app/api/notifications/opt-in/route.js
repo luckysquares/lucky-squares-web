@@ -1,12 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient as supabase } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-
-function supabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-  );
-}
 
 export async function POST(req) {
   try {

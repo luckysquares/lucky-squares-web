@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
 const SUPPORT_FROM  = 'support@luckysquares.com.au';
 const INTERNAL_TO   = 'jamie@luckysquares.com.au';
-
-function getSupabase() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-}
 
 function safe(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
