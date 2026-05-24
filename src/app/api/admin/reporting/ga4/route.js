@@ -150,7 +150,7 @@ export async function GET(req) {
     if (!batchRes.ok) {
       const err = await batchRes.text();
       console.error('[ga4] API error:', err);
-      return NextResponse.json({ error: `GA4 API error: ${batchRes.status}` }, { status: 502 });
+      return NextResponse.json({ error: `GA4 API error: ${batchRes.status} — ${err}` }, { status: 502 });
     }
 
     const { reports } = await batchRes.json();
