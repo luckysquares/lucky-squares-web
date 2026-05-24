@@ -9,6 +9,7 @@ export default function MariposaLogsPage() {
   const [messages,    setMessages]    = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [loadError,   setLoadError]   = useState('');
   const [search,      setSearch]      = useState('');
   const [filterType,  setFilterType]  = useState('all'); // all | fundraiser | general
 
@@ -16,25 +17,29 @@ export default function MariposaLogsPage() {
 
   const loadSessions = async () => {
     setLoading(true);
+    setLoadError('');
     if (!supabaseConfigured) { setSessions(DEMO_SESSIONS); setLoading(false); return; }
 
-    // Aggregate by session_id: last message time, message count, fundraiser_id
     const { data, error } = await getSupabaseClient()
       .from('mariposa_chats')
       .select('session_id, fundraiser_id, created_at, fundraisers(title, org)')
       .order('created_at', { ascending: false })
       .limit(2000);
 
-    if (error) { console.error(error); setLoading(false); return; }
+    if (error) {
+      setLoadError(`${error.message} (${error.code})`);
+      setLoading(false);
+      return;
+    }
 
-    // Group into sessions
+    // Group rows into sessions client-side
     const map = new Map();
     for (const row of (data ?? [])) {
       if (!map.has(row.session_id)) {
         map.set(row.session_id, {
           session_id:    row.session_id,
           fundraiser_id: row.fundraiser_id,
-          fundraiser:    row.fundraisers,
+          fundraiser:    row.fundraisers ?? null,
           last_at:       row.created_at,
           count:         1,
         });
@@ -45,8 +50,7 @@ export default function MariposaLogsPage() {
       }
     }
 
-    const sorted = [...map.values()].sort((a, b) => b.last_at.localeCompare(a.last_at));
-    setSessions(sorted);
+    setSessions([...map.values()].sort((a, b) => b.last_at.localeCompare(a.last_at)));
     setLoading(false);
   };
 
@@ -63,11 +67,11 @@ export default function MariposaLogsPage() {
 
     const { data, error } = await getSupabaseClient()
       .from('mariposa_chats')
-      .select('*')
+      .select('id, role, content, created_at')
       .eq('session_id', session.session_id)
       .order('created_at', { ascending: true });
 
-    if (error) console.error(error);
+    if (error) console.error('loadMessages error:', error);
     setMessages(data ?? []);
     setLoadingMsgs(false);
   };
@@ -93,7 +97,12 @@ export default function MariposaLogsPage() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Mariposa chat logs</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, margin: 0 }}>Mariposa chat logs</h1>
+        <button onClick={loadSessions} disabled={loading} className="btn btn-outline btn-sm">
+          {loading ? 'Loading…' : '↻ Refresh'}
+        </button>
+      </div>
       <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 28 }}>All conversations, retained for 90 days. Purged daily.</p>
 
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
@@ -117,6 +126,10 @@ export default function MariposaLogsPage() {
 
           {loading ? (
             <div style={{ color: 'var(--text2)', fontSize: 13, padding: '20px 0' }}>Loading sessions…</div>
+          ) : loadError ? (
+            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '12px 14px', fontSize: 12, color: '#B91C1C', lineHeight: 1.6 }}>
+              <strong>RPC error:</strong> {loadError}
+            </div>
           ) : filtered.length === 0 ? (
             <div style={{ color: 'var(--text2)', fontSize: 13, padding: '20px 0' }}>No sessions found.</div>
           ) : (

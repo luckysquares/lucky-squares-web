@@ -20,7 +20,7 @@ function customerAutoReplyHtml(name, ticketRef, subject) {
         <tr><td style="text-align:center;padding-bottom:28px">
           <span style="font-size:28px">🍀</span>
           <div style="font-size:18px;font-weight:900;color:#1A1209;letter-spacing:-0.5px;margin-top:4px">Lucky Squares</div>
-          <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">Australia — Support</div>
+          <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">Australia: Support</div>
         </td></tr>
         <tr><td style="background:#FFFFFF;border-radius:16px;padding:36px 40px;border:1.5px solid #E5E0D5;box-shadow:0 2px 12px rgba(61,46,26,0.07)">
           <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#1A1209">Hi ${safe(name.split(' ')[0])},</p>
@@ -59,7 +59,7 @@ function internalNotificationHtml(name, email, category, subject, message, ticke
           <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">New Support Ticket</div>
         </td></tr>
         <tr><td style="background:#FFFFFF;border-radius:16px;padding:36px 40px;border:1.5px solid #E5E0D5;box-shadow:0 2px 12px rgba(61,46,26,0.07)">
-          <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#1A1209">New support ticket — ${safe(ticketRef)}</p>
+          <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#1A1209">New support ticket: ${safe(ticketRef)}</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.7;color:#4A3728">
             <tr><td style="padding:8px 0;border-bottom:1px solid #F0EAE0;font-weight:700;width:110px">Ticket</td><td style="padding:8px 0;border-bottom:1px solid #F0EAE0;font-weight:700;color:#7C3AED">${safe(ticketRef)}</td></tr>
             <tr><td style="padding:8px 0;border-bottom:1px solid #F0EAE0;font-weight:700">Name</td><td style="padding:8px 0;border-bottom:1px solid #F0EAE0">${safe(name)}</td></tr>

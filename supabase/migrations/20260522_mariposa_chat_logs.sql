@@ -13,12 +13,21 @@ create index if not exists idx_mariposa_chats_session    on public.mariposa_chat
 create index if not exists idx_mariposa_chats_created_at on public.mariposa_chats (created_at);
 create index if not exists idx_mariposa_chats_fundraiser on public.mariposa_chats (fundraiser_id) where fundraiser_id is not null;
 
--- Row-level security: only service role can read/write (admin UI goes through API)
+-- Row-level security
 alter table public.mariposa_chats enable row level security;
 
--- No public access — all reads/writes go through service role key
-create policy "service role only" on public.mariposa_chats
-  using (false);
+-- Admins can read all rows via the authenticated browser client
+create policy "admin_select_mariposa_chats" on public.mariposa_chats
+  for select
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid()
+        and is_admin = true
+    )
+  );
+
+-- No public/participant access — inserts go through the service role key in the API route
 
 -- ── 90-day retention purge ────────────────────────────────────────────────────
 

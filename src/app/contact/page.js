@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 
 const CATEGORIES = [
@@ -64,9 +65,12 @@ export default function ContactPage() {
                 <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '48px 40px', textAlign: 'center' }}>
                   <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
                   <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', margin: '0 0 10px' }}>Message sent</h2>
-                  <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, margin: 0 }}>
+                  <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, margin: '0 0 24px' }}>
                     Thanks for reaching out, {name.split(' ')[0]}. We will get back to you at <strong>{email}</strong> within one business day.
                   </p>
+                  <Link href="/" className="btn btn-outline" style={{ display: 'inline-block' }}>
+                    Return to front page
+                  </Link>
                 </div>
               ) : (
                 <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', padding: '36px 40px' }}>

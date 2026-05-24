@@ -151,7 +151,21 @@ For blended campaigns (in-person and bank transfer): buyers who scan the QR code
 ### Receiving funds
 - Bank transfer campaigns: buyers pay directly into the organiser's nominated account throughout the campaign (no transfer from Lucky Squares needed)
 - In person campaigns: organiser collects directly
-- Stripe/online card campaigns: Lucky Squares transfers net funds to the organiser's registered bank account within 2 business days of the draw completing
+- Stripe/online card campaigns: funds flow to the organiser automatically as squares are sold. Lucky Squares holds a prize reserve (equal to the total cash prize value) on the platform until the draw. All other square revenue is transferred to the organiser's Stripe connected account immediately after each sale. At draw time, the prize reserve is also released to the organiser's Stripe connected account. Stripe then deposits funds to the organiser's registered bank account on its standard schedule (typically 2 business days for Australia). The organiser is responsible for paying prize winners directly from the funds they receive.
+
+### Stripe Connect identity verification
+- Organisers who choose online card payments must complete a one-time identity verification through Stripe Connect before launching
+- This is required by Australian financial regulations (AML/KYC law), not a Lucky Squares policy
+- What Stripe asks for: full name, date of birth, home address, TFN, bank account (BSB and account number), and an identity document (driver's licence or passport). For organisations: ABN and business details are also required
+- Verification takes about 5 minutes and is completed once during campaign setup. It applies to all future campaigns on the same account
+- Without completing verification, a Stripe campaign cannot be launched
+- If an organiser asks about this, reassure them it is standard, secure, and handled entirely by Stripe
+
+### Prize winners (Stripe campaigns)
+- After the draw, cash prize winners receive a warm, personalised email asking them to submit their bank details via a secure link so the organiser can pay them directly
+- Lucky Squares passes the bank details to the organiser and holds them briefly before deleting them from the system
+- Winners are told to contact the organiser directly if they have not received their prize money within a couple of business days
+- Donated prizes (physical items, experiences, etc.) are arranged directly between the organiser and the winner: Lucky Squares is not involved
 
 ### Refunds
 - Refund requests go to the organiser, not Lucky Squares (unless the platform was used improperly)

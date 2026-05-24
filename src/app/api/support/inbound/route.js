@@ -66,8 +66,16 @@ export async function POST(req) {
   }
 
   try {
-    // Resend webhook payload: { type, created_at, data: { email_id, from, to, subject, ... } }
-    const { email_id, from: fromField, to: toField } = event.data ?? {};
+    // Resend inbound webhook payload:
+    // { type, created_at, data: { email_id, from, to, subject, text, html, headers, attachments } }
+    const {
+      email_id,
+      from:    fromField,
+      to:      toField,
+      subject: emailSubject,
+      text:    payloadText,
+      html:    payloadHtml,
+    } = event.data ?? {};
 
     const ticketId = parseTicketId(toField);
     if (!ticketId) {
@@ -75,13 +83,20 @@ export async function POST(req) {
       return NextResponse.json({ ok: true }); // Accept but ignore
     }
 
-    const supabase   = getSupabase();
-    const resendKey  = process.env.RESEND_API_KEY;
+    const supabase  = getSupabase();
+    const resendKey = process.env.RESEND_API_KEY;
 
-    // Fetch full email content (text/html not included in webhook payload)
-    const emailDetail = resendKey ? await fetchEmailBody(email_id, resendKey) : null;
-    const text = emailDetail?.text ?? '';
-    const html = emailDetail?.html ?? '';
+    // Use body from webhook payload directly. Fall back to API fetch only if both are missing
+    // (older Resend webhook versions may not include body in payload).
+    let text = payloadText ?? '';
+    let html = payloadHtml ?? '';
+
+    if (!text && !html && email_id && resendKey) {
+      console.log('[inbound] Body not in payload — fetching from Resend API');
+      const emailDetail = await fetchEmailBody(email_id, resendKey);
+      text = emailDetail?.text ?? '';
+      html = emailDetail?.html ?? '';
+    }
 
     // Fetch ticket
     const { data: ticket, error: tErr } = await supabase
@@ -109,6 +124,7 @@ export async function POST(req) {
       .trim();
 
     if (!cleanBody) {
+      console.warn('[inbound] Empty body after cleaning — email not logged. email_id:', email_id, 'subject:', emailSubject);
       return NextResponse.json({ ok: true });
     }
 

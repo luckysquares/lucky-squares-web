@@ -235,9 +235,11 @@ export function emailDrawCompleteOrganiser(d: {
   const nextSteps = d.is_stripe
     ? `Because your campaign used online card payments, here is what happens next:
 
-- Winners have been notified by email automatically.
-- Your funds (${amt(d.amount_raised)}) have been transferred and will appear in your registered bank account within 2 business days.
-- Prize delivery is handled directly between you and each winner. Use the contact details in your campaign report to get in touch and arrange handover.`
+- Winners have been notified by email and asked to provide their bank details via a secure claim link. You will receive an email with each winner's details as they submit them.
+- Once you have a winner's bank details, transfer their prize directly from your bank account. Aim to pay within a few business days of receiving their details.
+- Your square sales were transferred to your connected bank account progressively as each square sold. The full prize reserve has also been transferred to your account to cover winner payments.
+
+For donated prizes, or if a winner has not submitted their details within a few days, you can contact them directly using the details in your campaign report.`
     : `Next steps:
 
 1. Winners have been notified by email automatically.
@@ -870,6 +872,102 @@ You're receiving this because you opted in after purchasing squares in a previou
 }
 
 // ── Foundation Member congratulation ─────────────────────────────────────────
+
+// ── Prize claim emails ────────────────────────────────────────────────────────
+
+// Sent to a winner (Stripe campaign, non-donated prize) with a link to submit bank details.
+export function emailDrawResultWinnerClaim(d: {
+  buyer_name:        string;
+  campaign_title:    string;
+  org_name:          string;
+  winning_square:    number;
+  prize_place:       string;
+  prize_description: string;
+  contact_email:     string;
+  claim_url:         string;
+}) {
+  return {
+    subject: `You won in ${d.campaign_title}!`,
+    text: `Hi ${firstName(d.buyer_name)},
+
+Congratulations, you're a winner!
+
+${d.campaign_title} has been drawn and your square #${d.winning_square} won the ${d.prize_place}.
+
+Prize: ${d.prize_description}
+
+To receive your prize, ${d.org_name} will transfer the funds directly to your bank account. Please use the link below to securely submit your bank details:
+
+${d.claim_url}
+
+It takes less than a minute. Your details are only shared with ${d.org_name} and are automatically deleted after 7 days.
+
+If you'd prefer not to use the link, contact ${d.org_name} directly at ${d.contact_email} to arrange an alternative.
+
+Thanks for supporting ${d.org_name}. Enjoy your prize!
+
+${SIG}`,
+  };
+}
+
+// Sent to the organiser when a winner submits their bank details.
+export function emailOrganizerPrizeClaim(d: {
+  organiser_first_name: string;
+  campaign_title:       string;
+  winner_name:          string;
+  winner_email:         string;
+  prize_place:          string;
+  prize_description:    string;
+  bank_account_name:    string;
+  bank_bsb:             string;
+  bank_account:         string;
+}) {
+  return {
+    subject: `Prize claim received: ${d.prize_place} for ${d.campaign_title}`,
+    text: `Hi ${d.organiser_first_name},
+
+A winner from ${d.campaign_title} has submitted their bank details for the ${d.prize_place}.
+
+Winner: ${d.winner_name} (${d.winner_email})
+Prize: ${d.prize_description}
+
+Bank transfer details:
+
+  Account name: ${d.bank_account_name}
+  BSB: ${d.bank_bsb}
+  Account number: ${d.bank_account}
+
+Please transfer the prize amount to the above account as soon as possible. The winner has been told to expect payment within a few business days.
+
+IMPORTANT: For security, these bank details will be automatically deleted from our system after 7 days. Please save them and action this payment promptly.
+
+${SIG}`,
+  };
+}
+
+// Sent to the winner after they submit their bank details.
+export function emailWinnerClaimConfirmation(d: {
+  buyer_name:        string;
+  campaign_title:    string;
+  org_name:          string;
+  prize_description: string;
+  contact_email:     string;
+}) {
+  return {
+    subject: `Your bank details have been received`,
+    text: `Hi ${firstName(d.buyer_name)},
+
+We have received your bank details and passed them on to ${d.org_name}.
+
+They will arrange your prize transfer (${d.prize_description}) as soon as possible. Please allow a few business days for the payment to arrive.
+
+If you have not received your prize within 5 business days, contact ${d.org_name} directly at ${d.contact_email}.
+
+Thanks again for supporting ${d.org_name}!
+
+${SIG}`,
+  };
+}
 
 export function emailFoundationMember(d: {
   first_name: string;

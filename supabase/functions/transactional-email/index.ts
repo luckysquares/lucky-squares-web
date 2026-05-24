@@ -36,6 +36,9 @@ const TRANSACTIONAL_TYPES = new Set([
   'campaign_launched_notification',
   'account_suspended',
   'foundation_member',
+  // Prize claim flow
+  'organizer_prize_claim',
+  'winner_claim_confirmation',
 ]);
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -139,6 +142,9 @@ function buildTemplate(type: string, d: any): { subject: string; text: string } 
     case 'admin_new_org_application':     return T.emailAdminNewOrgApplication(d);
     // Foundation Member
     case 'foundation_member':             return T.emailFoundationMember(d);
+    // Prize claim flow
+    case 'organizer_prize_claim':         return T.emailOrganizerPrizeClaim(d);
+    case 'winner_claim_confirmation':     return T.emailWinnerClaimConfirmation(d);
     // Welcome sequence
     case 'welcome_day1':                  return T.emailWelcomeDay1(d);
     case 'welcome_day3_no_campaign':      return T.emailWelcomeDay3NoCampaign(d);

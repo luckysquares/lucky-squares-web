@@ -41,7 +41,11 @@ const FAQS = [
       },
       {
         q: 'How do I get paid?',
-        a: 'You have four options. In person: collect payment yourself via cash or EFTPOS when you approach participants. Bank transfer: participants pay directly into your nominated BSB/account with no transaction fees. In person and bank transfer: participants choose whichever suits them. Secure online card payment: participants pay by card online via Stripe, with a 1.75% + 30c transaction fee per purchase added to the square price.',
+        a: 'You have four payment options. In person: collect cash or EFTPOS from participants directly. Bank transfer: participants pay into your nominated BSB and account number with no transaction fees. In person and bank transfer: participants choose whichever suits them. Secure online card payment: participants pay by card via Stripe and funds are transferred directly to your connected bank account as squares are sold. A transaction fee of 1.7% + $0.30 per purchase (paid by the buyer on top of the square price) covers all payment processing. Online card payments require a free Stripe Connect account linked to your Lucky Squares profile.',
+      },
+      {
+        q: 'What is Stripe Connect and why do I need to verify my identity?',
+        a: 'Stripe Connect is how Lucky Squares transfers online card payments directly to your bank account. To comply with Australian financial regulations (including Anti-Money Laundering and Know Your Customer laws), Stripe is required to verify the identity of all account holders before funds can be transferred. This is the same process as opening a bank account. You will be asked to provide your full legal name, date of birth, residential address, and a government-issued photo ID such as a drivers licence or passport. This is a legal requirement, not a Lucky Squares policy. Your information is held securely by Stripe and is not stored by Lucky Squares.',
       },
       {
         q: 'Do I need a permit to run a Lucky Squares fundraiser?',
@@ -54,7 +58,7 @@ const FAQS = [
       },
       {
         q: 'When do I receive the funds raised?',
-        a: 'This depends on how you set up your payment method. Bank transfer: buyers pay directly into your nominated BSB/account number throughout the campaign. You have the funds as they arrive, with no transfer needed from Lucky Squares. In person: you collect payment directly from participants. Online card via Stripe: Lucky Squares collects the funds on your behalf and transfers the net amount (after transaction fees) to your nominated bank account within 2 business days of the draw completing.',
+        a: 'This depends on your payment method. Bank transfer: buyers pay directly into your nominated BSB and account number throughout the campaign. You have the funds as they arrive. In person: you collect payment directly from participants. Online card via Stripe: funds transfer to your connected bank account progressively as each square is sold. A portion is held back on the platform to cover the prize pool. When the draw is complete, the full prize reserve is also transferred to your account and you pay the winners directly. There is no waiting until after the draw for the bulk of your funds.',
       },
       {
         q: 'What happens if not all squares sell before my draw date?',
@@ -109,7 +113,7 @@ const FAQS = [
       },
       {
         q: 'How will I know if I have won?',
-        a: 'Draw results are shown live on the fundraiser page. The winning square is highlighted in green with a rainbow symbol. If you have purchased squares, you will also receive an email notification. Winners are contacted by the Organiser with instructions for claiming their prize.',
+        a: 'Draw results are shown live on the fundraiser page. The winning square is highlighted with a rainbow symbol. If you have purchased squares, you will also receive an email notification. For campaigns using online card payments, winning participants will receive a follow-up email asking for bank account details so the organiser can pay the prize directly. For bank transfer and in person campaigns, the organiser will contact you with prize instructions. If you have not heard from the organiser within a couple of days of the draw, reach out to them directly.',
       },
       {
         q: 'Is my payment secure?',
@@ -131,7 +135,7 @@ const FAQS = [
     items: [
       {
         q: 'What does the processing fee cover?',
-        a: 'A processing fee of 1.7% + $0.30 is added to the participant total only when payment is made by secure online card payment. No processing fee applies to bank transfer or in person payments. The fee is displayed clearly before participants confirm their purchase.',
+        a: 'A transaction fee of 1.7% + $0.30 is added on top of the square price only when payment is made by secure online card payment. The buyer pays this fee, not the organiser. No processing fee applies to bank transfer or in person payments. The fee amount is displayed clearly before participants confirm their purchase.',
       },
       {
         q: 'Is the Campaign Fee refundable?',

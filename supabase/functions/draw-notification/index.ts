@@ -4,6 +4,7 @@ import { sendEmail, ADMIN_EMAIL } from '../_shared/resend.ts';
 import {
   emailDrawCompleteOrganiser,
   emailDrawResultWinner,
+  emailDrawResultWinnerClaim,
   emailDrawResultDidNotWin,
 } from '../_shared/templates.ts';
 
@@ -68,12 +69,12 @@ Deno.serve(async (req) => {
   // With the split-at-purchase model, non-prize funds are already transferred to
   // the organiser's connected account in real time as squares are sold.
   //
-  // At draw time we only need to handle the prize reserve held on the platform:
-  //   · Cash prizes → paid to winners (admin-initiated — see winner payout alert below)
-  //   · Remainder   → transferred to organiser now (donated prizes, unsold threshold, etc.)
+  // At draw time we transfer the full prize reserve to the organiser. They are
+  // responsible for paying winners directly from their connected account.
+  // Lucky Squares does not handle winner payouts.
   //
-  // IDEMPOTENCY: Same PENDING sentinel pattern as before — only the first call
-  // to draw-notification will execute the transfer.
+  // IDEMPOTENCY: The payout_queue PENDING sentinel prevents double-transfer if
+  // this function is called more than once for the same fundraiser.
 
   let transferResult: { ok: boolean; transferId?: string; error?: string; skipped?: boolean } = { ok: true };
 
@@ -86,8 +87,14 @@ Deno.serve(async (req) => {
 
   const prizeReserveHeld = fReserve?.prize_reserve_held_cents ?? 0;
 
-  // Sum of non-donated cash prizes actually won (matched to winner squares).
-  // Donated prizes are physical items — no cash payout required from the reserve.
+  // Resolve winner square numbers up front (needed for prize matching below).
+  const winnerNums: number[] = Array.isArray(f.winner_square_nums)
+    ? f.winner_square_nums
+    : f.winner_square_num != null ? [f.winner_square_num] : [];
+
+  // Fetch all prizes to work out cash prize totals for the admin email summary.
+  // The organiser is responsible for paying winners directly from their connected account,
+  // so the full prize reserve held on the platform is transferred to them at draw time.
   const { data: allPrizes } = await supabase
     .from('prizes')
     .select('value, donated, sort_order')
@@ -95,16 +102,17 @@ Deno.serve(async (req) => {
     .order('sort_order');
 
   const winnerPrizes = (allPrizes ?? []).slice(0, winnerNums.length);
-  const cashPrizesTotalCents = winnerPrizes.reduce((sum, p, i) => {
+  const cashPrizesTotalCents = winnerPrizes.reduce((sum, p) => {
     if (p.donated) return sum;
     const val = parseFloat((p.value || '').replace(/[^0-9.]/g, '')) || 0;
     return sum + Math.round(val * 100);
   }, 0);
 
-  // Whatever is left in the reserve after covering cash prizes goes to the organiser now.
-  const remainderToOrganiserCents = Math.max(0, prizeReserveHeld - cashPrizesTotalCents);
+  // Transfer the full prize reserve to the organiser. They are responsible for
+  // paying winners directly. cashPrizesTotalCents is informational only (admin email).
+  const prizeReserveToTransferCents = prizeReserveHeld;
 
-  if (isStripe && f.stripe_account_id && remainderToOrganiserCents > 0) {
+  if (isStripe && f.stripe_account_id && prizeReserveToTransferCents > 0) {
     // Step 1: Atomically claim the payout slot.
     const { data: claimed } = await supabase
       .from('payout_queue')
@@ -123,7 +131,7 @@ Deno.serve(async (req) => {
       const existingId = existing?.stripe_transfer_id;
 
       if (existingId && existingId !== 'PENDING' && existingId !== 'FAILED') {
-        console.log(`[draw-notification] Remainder transfer already processed for ${fundraiserId}: ${existingId}`);
+        console.log(`[draw-notification] Prize reserve transfer already processed for ${fundraiserId}: ${existingId}`);
         transferResult = { ok: true, transferId: existingId, skipped: true };
       } else if (existingId === 'PENDING') {
         console.warn(`[draw-notification] Transfer already in progress for ${fundraiserId} — skipping.`);
@@ -136,14 +144,14 @@ Deno.serve(async (req) => {
     if (!transferResult.skipped) {
       try {
         const transfer = await stripe.transfers.create({
-          amount:         remainderToOrganiserCents,
+          amount:         prizeReserveToTransferCents,
           currency:       'aud',
           destination:    f.stripe_account_id,
           transfer_group: fundraiserId,
-          description:    `Prize reserve remainder for ${f.title} — draw complete`,
+          description:    `Prize reserve for ${f.title} — draw complete`,
           metadata: {
             fundraiser_id:          fundraiserId,
-            type:                   'prize_reserve_remainder',
+            type:                   'prize_reserve_full',
             prize_reserve_held:     String(prizeReserveHeld),
             cash_prizes_total:      String(cashPrizesTotalCents),
           },
@@ -180,10 +188,6 @@ Deno.serve(async (req) => {
   const prizeList = (prizesWithDesc ?? []).filter((p) => p.description);
 
   // Map winner square numbers to buyer details
-  const winnerNums: number[] = Array.isArray(f.winner_square_nums)
-    ? f.winner_square_nums
-    : f.winner_square_num != null ? [f.winner_square_num] : [];
-
   const winners = winnerNums.map((num, i) => {
     const sq = soldSquares.find((s) => s.number === num);
     return {
@@ -219,23 +223,22 @@ Deno.serve(async (req) => {
 
   let payoutLine: string;
   if (isStripe) {
-    const reserveHeldDollars    = (prizeReserveHeld / 100).toFixed(2);
-    const cashPrizesDollars     = (cashPrizesTotalCents / 100).toFixed(2);
-    const remainderDollars      = (remainderToOrganiserCents / 100).toFixed(2);
+    const reserveHeldDollars = (prizeReserveHeld / 100).toFixed(2);
+    const cashPrizesDollars  = (cashPrizesTotalCents / 100).toFixed(2);
 
-    const remainderLine = remainderToOrganiserCents > 0
+    const transferLine = prizeReserveToTransferCents > 0
       ? transferResult.skipped
-        ? `Reserve remainder ($${remainderDollars}) already transferred. No action required.`
+        ? `Prize reserve ($${reserveHeldDollars}) already transferred to organiser. No action required.`
         : transferResult.ok
-          ? `Reserve remainder ($${remainderDollars}) transferred to organiser (${transferResult.transferId}).`
-          : `ACTION REQUIRED: reserve remainder transfer FAILED ($${remainderDollars}). Error: ${transferResult.error}\nTo retry: set payout_queue.stripe_transfer_id = NULL for fundraiser_id = '${fundraiserId}'.`
-      : `No reserve remainder to transfer (all held funds allocated to winner prizes).`;
+          ? `Prize reserve ($${reserveHeldDollars}) transferred to organiser (${transferResult.transferId}).`
+          : `ACTION REQUIRED: prize reserve transfer FAILED ($${reserveHeldDollars}). Error: ${transferResult.error}\nTo retry: set payout_queue.stripe_transfer_id = NULL for fundraiser_id = '${fundraiserId}'.`
+      : `No prize reserve to transfer (nothing held on platform).`;
 
-    const winnerPayoutBlock = winnerPayoutLines.length > 0
-      ? `ACTION REQUIRED — pay the following winners from the $${reserveHeldDollars} prize reserve:\n${winnerPayoutLines.join('\n')}\n\nTotal cash prizes: $${cashPrizesDollars}`
-      : `No cash prize payouts required (all prizes donated).`;
+    const winnerInfoBlock = winnerPayoutLines.length > 0
+      ? `The organiser is responsible for paying the following winners from their connected account:\n${winnerPayoutLines.join('\n')}\n\nTotal cash prizes: $${cashPrizesDollars}\n\nWinners will be asked to supply bank details via a claim link. The organiser will receive their details by email.`
+      : `All prizes are donated items (no cash payouts required).`;
 
-    payoutLine = [remainderLine, '', winnerPayoutBlock].join('\n');
+    payoutLine = [transferLine, '', winnerInfoBlock].join('\n');
   } else {
     payoutLine = `No Stripe payout needed (organiser collects directly).`;
   }
@@ -260,7 +263,7 @@ Deno.serve(async (req) => {
     `Admin portal: https://luckysquares.com.au/admin/campaigns`,
   ].join('\n');
 
-  const needsAction = (isStripe && !transferResult.ok && !transferResult.skipped) || winnerPayoutLines.length > 0;
+  const needsAction = isStripe && !transferResult.ok && !transferResult.skipped;
   const adminSubject = needsAction
     ? `ACTION REQUIRED: Draw complete — ${f.title}`
     : `Draw complete — ${f.title}`;
@@ -287,6 +290,7 @@ Deno.serve(async (req) => {
   }
 
   // 3. Email each buyer (winner or no-win)
+  const appUrl            = Deno.env.get('APP_URL') ?? 'https://luckysquares.com.au';
   const winnerNums_set    = new Set(winnerNums);
   const uniqueBuyers      = [...new Map(soldSquares.filter((s) => s.buyer_email).map((s) => [s.buyer_email, s])).values()];
   const winnerSummaryList = winners.map((w) => ({
@@ -302,18 +306,75 @@ Deno.serve(async (req) => {
 
     if (buyerWins.length > 0) {
       for (const winningNum of buyerWins) {
-        const w = winners.find((x) => x.square_number === winningNum);
+        const wIdx = winnerNums.indexOf(winningNum);
+        const w    = winners.find((x) => x.square_number === winningNum);
         if (!w) continue;
-        const tpl = emailDrawResultWinner({
-          buyer_name:        buyer.buyer_name ?? 'there',
-          campaign_title:    f.title,
-          org_name:          f.org,
-          winning_square:    winningNum,
-          prize_place:       w.place,
-          prize_description: w.prize,
-          contact_email:     f.contact_email ?? '',
-        });
-        await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
+
+        // Stripe campaigns with a non-donated cash prize: collect bank details via claim link.
+        // All other cases: standard winner email (organiser contacts them directly).
+        const isCashPrize = isStripe && wIdx >= 0 && !winnerPrizes[wIdx]?.donated;
+
+        if (isCashPrize) {
+          // Create a prize_claim row — token is auto-generated by the DB default.
+          const { data: claim, error: claimErr } = await supabase
+            .from('prize_claims')
+            .insert({
+              fundraiser_id:        fundraiserId,
+              winner_square_number: winningNum,
+              buyer_name:           w.buyer_name,
+              buyer_email:          w.buyer_email ?? buyer.buyer_email,
+              place:                w.place,
+              prize_description:    w.prize,
+              campaign_title:       f.title,
+              org_name:             f.org,
+              contact_email:        f.contact_email ?? '',
+            })
+            .select('token')
+            .single();
+
+          if (claimErr) {
+            console.error('[draw-notification] Failed to create prize_claim:', claimErr);
+          }
+
+          if (claim?.token) {
+            const claimUrl = `${appUrl}/claim-prize/${claim.token}`;
+            const tpl = emailDrawResultWinnerClaim({
+              buyer_name:        buyer.buyer_name ?? 'there',
+              campaign_title:    f.title,
+              org_name:          f.org,
+              winning_square:    winningNum,
+              prize_place:       w.place,
+              prize_description: w.prize,
+              contact_email:     f.contact_email ?? '',
+              claim_url:         claimUrl,
+            });
+            await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
+          } else {
+            // Fallback: send standard winner email so the winner is not left without notice.
+            const tpl = emailDrawResultWinner({
+              buyer_name:        buyer.buyer_name ?? 'there',
+              campaign_title:    f.title,
+              org_name:          f.org,
+              winning_square:    winningNum,
+              prize_place:       w.place,
+              prize_description: w.prize,
+              contact_email:     f.contact_email ?? '',
+            });
+            await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
+          }
+        } else {
+          // Non-Stripe, or donated prize: organiser arranges prize delivery directly.
+          const tpl = emailDrawResultWinner({
+            buyer_name:        buyer.buyer_name ?? 'there',
+            campaign_title:    f.title,
+            org_name:          f.org,
+            winning_square:    winningNum,
+            prize_place:       w.place,
+            prize_description: w.prize,
+            contact_email:     f.contact_email ?? '',
+          });
+          await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
+        }
       }
     } else {
       const tpl = emailDrawResultDidNotWin({
