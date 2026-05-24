@@ -100,12 +100,14 @@ export default async function CertificatePage({ params }) {
     .cert-id{font-family:monospace;font-size:12px;font-weight:800;color:#7C3AED;letter-spacing:1px}
     .print-btn{display:block;margin:24px auto 0;max-width:720px;background:#7C3AED;color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;text-align:center;font-family:inherit;width:100%}
     .print-btn:hover{background:#6D28D9}
-    /* ── Print: single A4 page ─────────────────────────────────────── */
+    /* ── Print: single A4 page, full colour ───────────────────────── */
     @page{size:A4 portrait;margin:10mm}
     @media print{
-      html,body{width:210mm;height:297mm}
-      .cert-page{background:#fff;padding:0;min-height:0}
-      .cert{border:1px solid #ccc;box-shadow:none;border-radius:0;padding:0;max-width:100%;margin:0;border:none}
+      /* Preserve all background colours and images exactly as on screen */
+      *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+      html,body{width:210mm}
+      .cert-page{background:#F5F3EE;padding:0;min-height:0}
+      .cert{box-shadow:none;border-radius:8px;padding:28px 36px;max-width:100%;margin:0}
       .hd{padding-bottom:10px;margin-bottom:10px;border-bottom-width:1px}
       .hd-emoji{font-size:22px;margin-bottom:2px}
       .hd-name{font-size:14px}
