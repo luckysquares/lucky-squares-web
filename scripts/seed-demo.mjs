@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const URL = 'https://doftrlgqrxfjzpayukcq.supabase.co';
-const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZnRybGdxcnhmanpwYXl1a2NxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODczOTQ3MCwiZXhwIjoyMDk0MzE1NDcwfQ.AWu1oMkX9UrNMpCWCSwCtbKihps64kLLfBW4GeHs0hs';
+const URL = 'https://yymppdzohiekzmjlbdqx.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5bXBwZHpvaGlla3ptamxiZHF4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTM2NjA1MSwiZXhwIjoyMDk0OTQyMDUxfQ.OmCH_2JOiv4sNN6CqFhyE8QIt1CvPrOmogVh2RO3WPE';
 const sb = createClient(URL, KEY, { auth: { autoRefreshToken: false, persistSession: false } });
 
 const DEMO_PASSWORD = 'Demo1234!';
@@ -11,7 +11,7 @@ const ORGANISERS = [
   { email: 'marcus.webb@werribeejuniorfc.com.au',  name: 'Marcus Webb',       org: 'Werribee Junior Football Club' },
   { email: 'pandc@sunburyprimary.vic.edu.au',       name: 'Priya Nair',        org: 'Sunbury Primary School P&C' },
   { email: 'treasurer@baysideslsc.com.au',          name: 'Danni Forsyth',     org: 'Bayside Surf Lifesaving Club' },
-  { email: 'jamie@glenelgbaseball.com.au',          name: 'Jamie Stott',       org: 'Glenelg Baseball Club — Chuggernauts' },
+  { email: 'jamie@glenelgbaseball.com.au',          name: 'Jamie Stott',       org: 'Glenelg Baseball Club: Chuggernauts' },
   { email: 'hello@wildlifefriendssa.org.au',        name: 'Helen Cartwright',  org: 'Wildlife Friends SA' },
 ];
 
@@ -93,7 +93,7 @@ const CAMPAIGNS = [
   {
     organiserIdx: 3,
     title:        'PANPACS Gold Coast 2026 — Chuggernauts Women\'s Baseball',
-    org:          'Glenelg Baseball Club — Chuggernauts',
+    org:          'Glenelg Baseball Club: Chuggernauts',
     emoji:        '⚾',
     description:  'The Chuggernauts are heading to the Pan Pacific Masters Games on the Gold Coast in November 2026 — one of the biggest masters sports events in the world! We\'re raising funds to help cover travel, accommodation, entry fees and uniforms for our squad of 14 women aged 35 and over. Most of us have been playing together for years and this is a once-in-a-lifetime opportunity to represent South Australia on an international stage. Every square brings us one step closer to the Gold Coast!',
     thank_you:    'You absolute champion! The Chuggernauts are so grateful for your support. We\'ll be wearing your good wishes on our sleeves when we take the field on the Gold Coast. Go Chuggernauts! ⚾',
