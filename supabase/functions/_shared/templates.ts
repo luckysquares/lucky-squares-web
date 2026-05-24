@@ -467,17 +467,38 @@ ${SIG}`,
 export function emailOrgApplicationApproved(d: {
   first_name: string;
   org_name: string;
+  portal_url?: string;
 }) {
+  const url = d.portal_url || 'https://luckysquares.com.au/org/dashboard';
   return {
     subject: `Great news: ${d.org_name} is approved!`,
     text: `Hi ${d.first_name},
 
 We've reviewed your application and ${d.org_name} has been approved for the Lucky Squares Organisation Plan.
 
-Your account has been upgraded and you now have access to all organisation features. Head to your dashboard to get your next campaign started:
-https://luckysquares.com.au/fundraise
+Your account has been upgraded and you now have access to all organisation features. Sign in to your organisation portal to get started:
+${url}
 
 Welcome to the team. We're really glad to have ${d.org_name} on board. If there's anything we can do to help you hit the ground running, just reply to this email.
+
+${SIG}`,
+  };
+}
+
+export function emailOrgApplicationRejected(d: {
+  first_name: string;
+  org_name: string;
+}) {
+  return {
+    subject: `Your Lucky Squares application`,
+    text: `Hi ${d.first_name},
+
+Thank you for applying for the Lucky Squares Organisation Plan for ${d.org_name}.
+
+After reviewing your application, we are unable to approve it at this time. If you believe this is an error or would like more information, please reply to this email and we will be happy to help.
+
+You can still run individual campaigns as a personal organiser:
+https://luckysquares.com.au/fundraise
 
 ${SIG}`,
   };

@@ -32,6 +32,7 @@ const TRANSACTIONAL_TYPES = new Set([
   'org_square_sold',
   'org_application_received',
   'org_application_approved',
+  'org_application_rejected',
   'org_member_invite',
   'campaign_launched_notification',
   'account_suspended',
@@ -128,6 +129,7 @@ function buildTemplate(type: string, d: any): { subject: string; text: string } 
     case 'org_monthly_summary':           return T.emailOrgMonthlySummary(d);
     case 'org_application_received':      return T.emailOrgApplicationReceived(d);
     case 'org_application_approved':      return T.emailOrgApplicationApproved(d);
+    case 'org_application_rejected':      return T.emailOrgApplicationRejected(d);
     // Buyer
     case 'campaign_launched_notification': return T.emailCampaignLaunchedNotification(d);
     case 'square_purchase_confirmation':  return T.emailSquarePurchaseConfirmation(d);
