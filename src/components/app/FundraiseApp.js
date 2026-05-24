@@ -699,6 +699,17 @@ function FundraiserCard({ f, onView, onReport, onConnectBank }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
         <button className="btn btn-primary btn-sm" style={{ width: '100%' }} onClick={onView}>View my campaign →</button>
         <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={onReport}>View campaign report</button>
+        {f.status === 'drawn' && (
+          <a
+            href={`/f/${f.id}/certificate`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-outline btn-sm"
+            style={{ width: '100%', textAlign: 'center', textDecoration: 'none', display: 'block' }}
+          >
+            📜 Download integrity certificate
+          </a>
+        )}
       </div>
     </div>
   );

@@ -494,6 +494,7 @@ export default function AdminReporting() {
       <div style={{ display: 'flex', gap: 4, marginBottom: 32, borderBottom: '2px solid #E5E0D5' }}>
         {[
           { key: 'reporting',    label: 'Reporting'    },
+          { key: 'financials',   label: 'Financials'   },
           { key: 'forecasting',  label: 'Forecasting'  },
         ].map(({ key, label }) => (
           <button
@@ -514,7 +515,8 @@ export default function AdminReporting() {
         ))}
       </div>
 
-      {activeTab === 'reporting' && <ReportingTab />}
+      {activeTab === 'reporting'   && <ReportingTab />}
+      {activeTab === 'financials'  && <FinancialsTab />}
 
       {/* Forecasting tab */}
       {activeTab === 'forecasting' && <>
@@ -1396,6 +1398,132 @@ function ReportingTab() {
           </Card>
         </>
       )}
+    </div>
+  );
+}
+
+// ── Financials Tab ────────────────────────────────────────────────────────────
+
+function FinancialsTab() {
+  const [data,    setData]    = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState('');
+  const [filter,  setFilter]  = useState('all'); // all | active | drawn
+
+  useEffect(() => {
+    adminFetch('/api/admin/reporting/financials')
+      .then((r) => r.json())
+      .then((j) => { if (j.error) setError(j.error); else setData(j); })
+      .catch(() => setError('Could not load financial data'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ color: 'var(--text2)', fontSize: 13, padding: '40px 0' }}>Loading financial data…</div>;
+  if (error)   return <div style={{ color: '#DC2626', fontSize: 13, padding: '40px 0' }}>{error}</div>;
+  if (!data)   return null;
+
+  const { summary, campaigns } = data;
+  const aud = (cents) => `$${(cents / 100).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const visible = campaigns.filter((c) => filter === 'all' || c.status === filter);
+
+  return (
+    <div>
+      {/* Summary KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
+        {[
+          { label: 'Gross collected',     value: aud(summary.totalGrossCents),    colour: '#16A34A', sub: `${summary.launched} campaigns` },
+          { label: 'Platform fees earned', value: aud(summary.totalFeesCents),     colour: '#7C3AED', sub: `$19 per launched campaign` },
+          { label: 'Prize reserve held',   value: aud(summary.totalReserveCents),  colour: '#F59E0B', sub: `${summary.active} active campaigns` },
+          { label: 'Transferred to orgs',  value: aud(summary.totalTransferCents), colour: '#2563EB', sub: 'Estimated (see note)' },
+        ].map((card) => (
+          <StatCard key={card.label} label={card.label} value={card.value} sub={card.sub} colour={card.colour} />
+        ))}
+      </div>
+
+      {/* Note */}
+      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', fontSize: 12, color: '#92400E', marginBottom: 28, lineHeight: 1.6 }}>
+        <strong>Note:</strong> "Transferred to orgs" is estimated as gross minus prize reserve.
+        Actual Stripe transfer records are the definitive source — check the Stripe dashboard using transfer group = fundraiser ID for each campaign.
+        Prize reserve for active campaigns is still held on the platform; it is released to the organiser at draw time after prize payouts.
+      </div>
+
+      {/* Filter */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {['all', 'active', 'drawn'].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            style={{
+              padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 700,
+              border: '1.5px solid', cursor: 'pointer', fontFamily: 'inherit',
+              background: filter === f ? '#7C3AED' : '#fff',
+              color:      filter === f ? '#fff' : 'var(--text2)',
+              borderColor: filter === f ? '#7C3AED' : '#E5E0D5',
+            }}
+          >
+            {f === 'all' ? `All (${campaigns.length})` : f === 'active' ? `Live (${summary.active})` : `Drawn (${summary.drawn})`}
+          </button>
+        ))}
+      </div>
+
+      {/* Campaign table */}
+      <div style={{ background: '#fff', border: '1.5px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 32 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+          <thead>
+            <tr style={{ background: '#F5F3EE' }}>
+              {['Campaign', 'Status', 'Sold', 'Gross', 'Fee', 'Prize reserve', 'Est. transferred', 'Certificate'].map((h) => (
+                <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 800, color: '#6B5E4E', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.8px', whiteSpace: 'nowrap' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {visible.length === 0 && (
+              <tr><td colSpan={8} style={{ padding: '24px 12px', color: 'var(--text2)', textAlign: 'center' }}>No campaigns</td></tr>
+            )}
+            {visible.map((c) => (
+              <tr key={c.id} style={{ borderTop: '1px solid #F0EAE0' }}>
+                <td style={{ padding: '10px 12px' }}>
+                  <div style={{ fontWeight: 700, color: '#1A1209', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={c.title}>{c.title}</div>
+                  <div style={{ fontSize: 11, color: '#9C8060', marginTop: 2 }}>{c.org}</div>
+                </td>
+                <td style={{ padding: '10px 12px' }}>
+                  <span style={{
+                    display: 'inline-block', padding: '2px 8px', borderRadius: 99, fontSize: 11, fontWeight: 700,
+                    background: c.status === 'active' ? '#DCFCE7' : c.status === 'drawn' ? '#F5F0FF' : '#F5F3EE',
+                    color:      c.status === 'active' ? '#16A34A' : c.status === 'drawn' ? '#7C3AED' : '#9C8060',
+                  }}>
+                    {c.status === 'active' ? '● Live' : c.status === 'drawn' ? '🏆 Drawn' : c.status}
+                  </span>
+                </td>
+                <td style={{ padding: '10px 12px', fontWeight: 700 }}>{c.sold}<span style={{ color: '#9C8060', fontWeight: 400 }}>/{c.gridSize}</span></td>
+                <td style={{ padding: '10px 12px', fontWeight: 800, color: '#16A34A' }}>{aud(c.grossCents)}</td>
+                <td style={{ padding: '10px 12px', color: '#7C3AED', fontWeight: 700 }}>{aud(c.feeCents)}</td>
+                <td style={{ padding: '10px 12px', color: '#F59E0B', fontWeight: 700 }}>{aud(c.reserveCents)}</td>
+                <td style={{ padding: '10px 12px', color: '#2563EB', fontWeight: 700 }}>{aud(c.transferCents)}</td>
+                <td style={{ padding: '10px 12px' }}>
+                  {c.status === 'drawn'
+                    ? <a href={`/f/${c.id}/certificate`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap' }}>View certificate →</a>
+                    : <span style={{ color: '#D1C5B5', fontSize: 11 }}>After draw</span>
+                  }
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          {visible.length > 0 && (
+            <tfoot>
+              <tr style={{ borderTop: '2px solid #E5E0D5', background: '#F5F3EE' }}>
+                <td colSpan={3} style={{ padding: '10px 12px', fontWeight: 800, fontSize: 12, color: '#6B5E4E' }}>Totals ({visible.length} campaigns)</td>
+                <td style={{ padding: '10px 12px', fontWeight: 900, color: '#16A34A' }}>{aud(visible.reduce((s, c) => s + c.grossCents, 0))}</td>
+                <td style={{ padding: '10px 12px', fontWeight: 900, color: '#7C3AED' }}>{aud(visible.reduce((s, c) => s + c.feeCents, 0))}</td>
+                <td style={{ padding: '10px 12px', fontWeight: 900, color: '#F59E0B' }}>{aud(visible.reduce((s, c) => s + c.reserveCents, 0))}</td>
+                <td style={{ padding: '10px 12px', fontWeight: 900, color: '#2563EB' }}>{aud(visible.reduce((s, c) => s + c.transferCents, 0))}</td>
+                <td />
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
     </div>
   );
 }
