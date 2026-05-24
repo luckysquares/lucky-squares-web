@@ -9,6 +9,17 @@ const STATUSES   = ['open', 'in_progress', 'waiting_customer', 'resolved', 'clos
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
 const CATEGORIES = ['general', 'billing', 'campaign_help', 'technical', 'abuse'];
 
+const CANNED_CATEGORIES = {
+  organiser_payments:  'Organiser: Payments',
+  organiser_campaigns: 'Organiser: Campaigns',
+  organiser_draw:      'Organiser: Draw & prizes',
+  organiser_payouts:   'Organiser: Payouts',
+  buyer_payments:      'Buyer: Payments',
+  buyer_prizes:        'Buyer: Prizes',
+  account:             'Account & access',
+  legal:               'Legal & compliance',
+};
+
 const STATUS_LABELS = {
   open:             'Open',
   in_progress:      'In progress',
@@ -333,6 +344,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
   const [sending,       setSending]       = useState(false);
   const [canned,        setCanned]        = useState([]);
   const [showCanned,    setShowCanned]    = useState(false);
+  const [cannedSearch,  setCannedSearch]  = useState('');
   const [adminProfiles, setAdminProfiles] = useState([]);
   const [mergeInput,    setMergeInput]    = useState('');
   const [showMerge,     setShowMerge]     = useState(false);
@@ -532,31 +544,71 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
           ))}
           <div style={{ marginLeft: 'auto', position: 'relative' }}>
             <button
-              onClick={() => setShowCanned((v) => !v)}
+              onClick={() => { setShowCanned((v) => !v); setCannedSearch(''); }}
               style={{ ...btn('#F5F3EE', '#4A3728'), border: '1.5px solid #E5E0D5', fontSize: 11 }}
             >
               Canned responses
             </button>
-            {showCanned && (
-              <div style={{ position: 'absolute', right: 0, bottom: '100%', marginBottom: 6, background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 10, padding: 8, width: 280, boxShadow: '0 4px 20px rgba(0,0,0,.1)', zIndex: 100, maxHeight: 260, overflowY: 'auto' }}>
-                {canned.length === 0 ? (
-                  <div style={{ fontSize: 12, color: '#9C8060', padding: '8px 4px' }}>No canned responses yet.</div>
-                ) : (
-                  canned.map((c) => (
-                    <div
-                      key={c.id}
-                      onClick={() => { setReplyBody(c.body); setShowCanned(false); }}
-                      style={{ padding: '8px 10px', borderRadius: 8, cursor: 'pointer', marginBottom: 4 }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#F5F3EE'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                    >
-                      <div style={{ fontWeight: 700, fontSize: 12, color: '#1A1209' }}>{c.title}</div>
-                      <div style={{ fontSize: 11, color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.body}</div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
+            {showCanned && (() => {
+              const firstName = (ticket.contact_name || '').split(' ')[0] || 'there';
+              const filtered  = canned.filter((c) =>
+                !cannedSearch || c.title.toLowerCase().includes(cannedSearch.toLowerCase()) || c.body.toLowerCase().includes(cannedSearch.toLowerCase())
+              );
+              // Group by category
+              const grouped = {};
+              for (const c of filtered) {
+                const key = c.category || '__none__';
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(c);
+              }
+              const categoryOrder = [...Object.keys(CANNED_CATEGORIES), '__none__'];
+              return (
+                <div style={{ position: 'absolute', right: 0, bottom: '100%', marginBottom: 6, background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 10, padding: 8, width: 320, boxShadow: '0 4px 20px rgba(0,0,0,.12)', zIndex: 100, maxHeight: 360, display: 'flex', flexDirection: 'column' }}>
+                  {/* Search */}
+                  <input
+                    autoFocus
+                    placeholder="Search responses..."
+                    value={cannedSearch}
+                    onChange={(e) => setCannedSearch(e.target.value)}
+                    style={{ padding: '6px 10px', borderRadius: 7, border: '1.5px solid #E5E0D5', fontSize: 12, fontFamily: 'inherit', marginBottom: 6, color: '#1A1209', flexShrink: 0 }}
+                  />
+                  <div style={{ overflowY: 'auto', flex: 1 }}>
+                    {filtered.length === 0 ? (
+                      <div style={{ fontSize: 12, color: '#9C8060', padding: '8px 4px' }}>No responses found.</div>
+                    ) : (
+                      categoryOrder.map((catKey) => {
+                        const items = grouped[catKey];
+                        if (!items || items.length === 0) return null;
+                        const catLabel = catKey === '__none__' ? 'General' : (CANNED_CATEGORIES[catKey] || catKey);
+                        return (
+                          <div key={catKey}>
+                            <div style={{ fontSize: 10, fontWeight: 800, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '6px 10px 3px' }}>{catLabel}</div>
+                            {items.map((c) => (
+                              <div
+                                key={c.id}
+                                onClick={() => {
+                                  setReplyBody(c.body.replace(/\{\{name\}\}/g, firstName));
+                                  setShowCanned(false);
+                                  setCannedSearch('');
+                                }}
+                                style={{ padding: '7px 10px', borderRadius: 7, cursor: 'pointer', marginBottom: 2 }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#F5F3EE'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                              >
+                                <div style={{ fontWeight: 700, fontSize: 12, color: '#1A1209' }}>{c.title}</div>
+                                <div style={{ fontSize: 11, color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {c.body.replace(/\{\{name\}\}/g, firstName)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -633,6 +685,7 @@ function CannedTab() {
   const [body,      setBody]      = useState('');
   const [category,  setCategory]  = useState('');
   const [saving,    setSaving]    = useState(false);
+  const [seeding,   setSeeding]   = useState(false);
 
   const fetchCanned = async () => {
     setLoading(true);
@@ -663,28 +716,61 @@ function CannedTab() {
     fetchCanned();
   };
 
+  const handleSeed = async () => {
+    if (!confirm('This will load 25 standard canned responses. Any existing responses with the same title will be skipped. Continue?')) return;
+    setSeeding(true);
+    await adminFetch('/api/admin/support/canned/seed', { method: 'POST' });
+    setSeeding(false);
+    fetchCanned();
+  };
+
+  // Group responses by category for display
+  const grouped = {};
+  for (const r of responses) {
+    const key = r.category || '__none__';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(r);
+  }
+  const categoryOrder = [...Object.keys(CANNED_CATEGORIES), '__none__'];
+
   return (
     <div style={{ maxWidth: 720 }}>
       {/* Create form */}
       <div style={{ ...card, marginBottom: 24 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 800, color: '#1A1209' }}>New canned response</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1A1209' }}>New canned response</h3>
+          <button
+            onClick={handleSeed}
+            disabled={seeding}
+            style={{ ...btn('#F5F3EE', '#4A3728'), border: '1.5px solid #E5E0D5', fontSize: 11, opacity: seeding ? 0.6 : 1 }}
+          >
+            {seeding ? 'Loading...' : 'Load default responses'}
+          </button>
+        </div>
         <input
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1.5px solid #E5E0D5', fontSize: 13, fontFamily: 'inherit', marginBottom: 10, color: '#1A1209', boxSizing: 'border-box' }}
         />
-        <textarea
-          placeholder="Response body..."
-          rows={4}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1.5px solid #E5E0D5', fontSize: 13, fontFamily: 'inherit', marginBottom: 10, resize: 'vertical', color: '#1A1209', boxSizing: 'border-box' }}
-        />
+        <div style={{ position: 'relative', marginBottom: 10 }}>
+          <textarea
+            placeholder="Response body... Use {{name}} where you want the customer's first name to appear."
+            rows={4}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1.5px solid #E5E0D5', fontSize: 13, fontFamily: 'inherit', resize: 'vertical', color: '#1A1209', boxSizing: 'border-box' }}
+          />
+          <span style={{ position: 'absolute', bottom: 8, right: 10, fontSize: 10, color: '#9C8060', pointerEvents: 'none', background: '#fff', padding: '1px 4px', borderRadius: 4 }}>
+            Use <code style={{ fontFamily: 'monospace', background: '#F0EDE5', padding: '1px 4px', borderRadius: 3 }}>{'{{name}}'}</code> for customer first name
+          </span>
+        </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ ...select }}>
             <option value="">No category</option>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
+            {Object.entries(CANNED_CATEGORIES).map(([key, label]) => (
+              <option key={key} value={key}>{label}</option>
+            ))}
           </select>
           <button
             onClick={handleCreate}
@@ -696,24 +782,31 @@ function CannedTab() {
         </div>
       </div>
 
-      {/* List */}
+      {/* List grouped by category */}
       {loading ? (
         <div style={{ color: '#9C8060', fontSize: 13 }}>Loading...</div>
       ) : responses.length === 0 ? (
-        <div style={{ color: '#9C8060', fontSize: 13 }}>No canned responses yet. Create one above.</div>
+        <div style={{ color: '#9C8060', fontSize: 13 }}>No canned responses yet. Create one above or click "Load default responses".</div>
       ) : (
-        responses.map((r) => (
-          <div key={r.id} style={{ ...card, marginBottom: 12, display: 'flex', gap: 12 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 800, fontSize: 14, color: '#1A1209', marginBottom: 4 }}>
-                {r.title}
-                {r.category && <span style={{ marginLeft: 8, background: '#F0EDE5', borderRadius: 4, padding: '1px 7px', fontSize: 10, fontWeight: 700, color: '#6B7280' }}>{CATEGORY_LABELS[r.category] || r.category}</span>}
-              </div>
-              <div style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.body}</div>
+        categoryOrder.map((catKey) => {
+          const items = grouped[catKey];
+          if (!items || items.length === 0) return null;
+          const catLabel = catKey === '__none__' ? 'General' : (CANNED_CATEGORIES[catKey] || catKey);
+          return (
+            <div key={catKey} style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10 }}>{catLabel}</div>
+              {items.map((r) => (
+                <div key={r.id} style={{ ...card, marginBottom: 10, display: 'flex', gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#1A1209', marginBottom: 4 }}>{r.title}</div>
+                    <div style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.body}</div>
+                  </div>
+                  <button onClick={() => handleDelete(r.id)} style={{ ...btn('#FEF2F2', '#DC2626'), border: '1px solid #FECACA', flexShrink: 0, alignSelf: 'flex-start' }}>Delete</button>
+                </div>
+              ))}
             </div>
-            <button onClick={() => handleDelete(r.id)} style={{ ...btn('#FEF2F2', '#DC2626'), border: '1px solid #FECACA', flexShrink: 0, alignSelf: 'flex-start' }}>Delete</button>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );
