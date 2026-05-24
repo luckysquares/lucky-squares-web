@@ -1,5 +1,8 @@
+import { headers } from 'next/headers';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Beta Testers | Lucky Squares Australia',
@@ -8,11 +11,11 @@ export const metadata = {
 };
 
 const DEMO_CAMPAIGNS = [
-  { id: 'd746fddb-f8bb-4a25-bfcb-a7d4a1df4e9e', emoji: '🏆', title: 'Werribee Junior FC: State Championships', org: 'Werribee Junior Football Club', sold: 50, total: 50 },
-  { id: '8cd6f1ef-1eb6-4dec-8ba6-f4e24a6dc4af', emoji: '🌱', title: 'New playground for Sunbury Primary', org: 'Sunbury Primary School P&C', sold: 27, total: 100 },
-  { id: '41466307-b68b-4b4c-bfc7-8c13547549c4', emoji: '⭐', title: 'New patrol boards: Bayside SLSC', org: 'Bayside Surf Lifesaving Club', sold: 16, total: 50 },
-  { id: '35e4dc13-13a0-43b2-81d0-20205e326e75', emoji: '⚾', title: 'PANPACS Gold Coast: Chuggernauts', org: 'Glenelg Baseball Club', sold: 50, total: 50 },
-  { id: '415ff60b-ed99-4050-9c07-c68f9e890713', emoji: '🐾', title: 'New rescue vehicle: Wildlife Friends SA', org: 'Wildlife Friends SA', sold: 12, total: 50 },
+  { id: 'a243f88f-827b-4487-a72c-57568d5175e9', emoji: '🏆', title: 'Werribee Junior FC: State Championships', org: 'Werribee Junior Football Club', sold: 50, total: 50 },
+  { id: '2fadda4a-0af2-4327-8816-a8502294f52d', emoji: '🌱', title: 'New playground for Sunbury Primary', org: 'Sunbury Primary School P&C', sold: 27, total: 100 },
+  { id: '7d139501-cc29-4d91-a436-905ac30d6d9f', emoji: '⭐', title: 'New patrol boards: Bayside SLSC', org: 'Bayside Surf Lifesaving Club', sold: 16, total: 50 },
+  { id: '22a991b6-fc81-4691-aeea-f3383301386b', emoji: '⚾', title: 'PANPACS Gold Coast: Chuggernauts', org: 'Glenelg Baseball Club: Chuggernauts', sold: 50, total: 50 },
+  { id: 'fbb226a7-9b87-44a7-af1a-fe702eeea99f', emoji: '🐾', title: 'New rescue vehicle: Wildlife Friends SA', org: 'Wildlife Friends SA', sold: 12, total: 50 },
 ];
 
 const TASKS = [
@@ -116,7 +119,12 @@ const TASKS = [
   },
 ];
 
-export default function BetaTestPage() {
+export default async function BetaTestPage() {
+  const headersList = await headers();
+  const host     = headersList.get('host') || 'luckysquares.com.au';
+  const protocol = host.startsWith('localhost') ? 'http' : 'https';
+  const baseUrl  = `${protocol}://${host}`;
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <MarketingNav />
@@ -245,7 +253,7 @@ export default function BetaTestPage() {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
             {DEMO_CAMPAIGNS.map((c) => {
-              const url = `https://luckysquares.com.au/f/${c.id}`;
+              const url = `${baseUrl}/f/${c.id}`;
               const qr = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}&bgcolor=FAFAF7&color=2D2A26&margin=8`;
               return (
                 <div key={c.id} className="scratch-card" style={{ padding: '20px 16px', textAlign: 'center' }}>
