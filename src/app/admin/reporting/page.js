@@ -1363,48 +1363,26 @@ function ReportingTab() {
             </Card>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-            {/* Top pages */}
-            <Card>
-              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Top pages</div>
+          {/* Top pages */}
+          <Card style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Top pages</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '0 32px' }}>
               {ga4.topPages.map((p, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid #F0EAE0' }}>
-                  <span style={{ fontSize: 12, color: '#4A3728', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }} title={p.path}>{p.path}</span>
+                  <span style={{ fontSize: 12, color: '#4A3728', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={p.path}>{p.path}</span>
                   <span style={{ fontSize: 12, fontWeight: 800, color: '#4A28D4', marginLeft: 8, whiteSpace: 'nowrap' }}>{p.views.toLocaleString('en-AU')} views</span>
                 </div>
               ))}
-            </Card>
+            </div>
+          </Card>
 
-            {/* Entry pages */}
-            <Card>
-              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Entry pages</div>
-              {ga4.landingPages.map((p, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid #F0EAE0' }}>
-                  <span style={{ fontSize: 12, color: '#4A3728', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }} title={p.path}>{p.path}</span>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#16A34A', marginLeft: 8, whiteSpace: 'nowrap' }}>{p.sessions.toLocaleString('en-AU')} sessions</span>
-                </div>
-              ))}
-            </Card>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 40 }}>
-            {/* Bouncy pages */}
-            <Card>
-              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>High bounce pages</div>
-              {ga4.bouncyPages.map((p, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid #F0EAE0' }}>
-                  <span style={{ fontSize: 12, color: '#4A3728', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }} title={p.path}>{p.path}</span>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#DC2626', marginLeft: 8, whiteSpace: 'nowrap' }}>{(p.bounceRate * 100).toFixed(0)}% bounce</span>
-                </div>
-              ))}
-            </Card>
-
-            {/* Geography */}
-            <Card>
-              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Top countries</div>
+          {/* Geography */}
+          <Card style={{ marginBottom: 40 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Top countries</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 32px' }}>
               {(() => {
                 const maxS = Math.max(...ga4.geography.map((g) => g.sessions), 1);
-                return ga4.geography.slice(0, 8).map((g) => (
+                return ga4.geography.slice(0, 10).map((g) => (
                   <div key={g.country} style={{ marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                       <span style={{ fontSize: 12, color: '#4A3728' }}>{g.country}</span>
@@ -1414,8 +1392,8 @@ function ReportingTab() {
                   </div>
                 ));
               })()}
-            </Card>
-          </div>
+            </div>
+          </Card>
         </>
       )}
     </div>
