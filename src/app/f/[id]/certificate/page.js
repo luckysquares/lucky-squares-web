@@ -73,38 +73,59 @@ export default async function CertificatePage({ params }) {
 
   const css = `
     *{box-sizing:border-box;margin:0;padding:0}
+    /* ── Screen styles ─────────────────────────────────────────────── */
     .cert-page{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#F5F3EE;color:#1A1209;padding:32px 16px 80px;min-height:100vh}
-    .cert{max-width:720px;margin:0 auto;background:#fff;border:2px solid #E5E0D5;border-radius:16px;padding:48px 52px;box-shadow:0 4px 24px rgba(61,46,26,.10)}
-    .hd{text-align:center;border-bottom:2px solid #E5E0D5;padding-bottom:28px;margin-bottom:28px}
-    .hd-emoji{font-size:36px;display:block;margin-bottom:6px}
-    .hd-name{font-size:20px;font-weight:900;letter-spacing:-.5px}
+    .cert{max-width:720px;margin:0 auto;background:#fff;border:2px solid #E5E0D5;border-radius:16px;padding:44px 52px;box-shadow:0 4px 24px rgba(61,46,26,.10)}
+    .hd{text-align:center;border-bottom:2px solid #E5E0D5;padding-bottom:22px;margin-bottom:22px}
+    .hd-emoji{font-size:32px;display:block;margin-bottom:4px}
+    .hd-name{font-size:18px;font-weight:900;letter-spacing:-.5px}
     .hd-sub{font-size:10px;font-weight:700;color:#6B7280;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-    .cert-title{font-size:26px;font-weight:900;color:#7C3AED;margin:20px 0 6px;letter-spacing:-.5px}
-    .cert-sub{font-size:13px;color:#9C8060;font-weight:600;letter-spacing:.5px}
-    .sec{margin-bottom:28px}
-    .sec-lbl{font-size:10px;font-weight:800;color:#9C8060;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F0EAE0}
-    .kv{display:grid;grid-template-columns:160px 1fr;gap:6px 16px}
-    .kv-k{font-size:13px;color:#9C8060;font-weight:600}
-    .kv-v{font-size:13px;color:#1A1209;font-weight:700}
-    .fboxes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    .fbox{background:#F5F3EE;border-radius:10px;padding:14px 16px;text-align:center}
-    .fbox-lbl{font-size:10px;font-weight:700;color:#9C8060;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px}
-    .fbox-val{font-size:18px;font-weight:900;color:#16A34A}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th{text-align:left;font-size:10px;font-weight:800;color:#9C8060;text-transform:uppercase;letter-spacing:1.2px;padding:0 12px 8px 0;border-bottom:1px solid #E5E0D5}
-    td{padding:9px 12px 9px 0;border-bottom:1px solid #F5F3EE;vertical-align:top}
+    .cert-title{font-size:24px;font-weight:900;color:#7C3AED;margin:16px 0 4px;letter-spacing:-.5px}
+    .cert-sub{font-size:12px;color:#9C8060;font-weight:600;letter-spacing:.5px}
+    .sec{margin-bottom:20px}
+    .sec-lbl{font-size:10px;font-weight:800;color:#9C8060;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #F0EAE0}
+    .kv{display:grid;grid-template-columns:160px 1fr;gap:4px 16px}
+    .kv-k{font-size:12px;color:#9C8060;font-weight:600}
+    .kv-v{font-size:12px;color:#1A1209;font-weight:700}
+    .fboxes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .fbox{background:#F5F3EE;border-radius:10px;padding:12px 14px;text-align:center}
+    .fbox-lbl{font-size:10px;font-weight:700;color:#9C8060;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px}
+    .fbox-val{font-size:16px;font-weight:900;color:#16A34A}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th{text-align:left;font-size:10px;font-weight:800;color:#9C8060;text-transform:uppercase;letter-spacing:1.2px;padding:0 12px 7px 0;border-bottom:1px solid #E5E0D5}
+    td{padding:7px 12px 7px 0;border-bottom:1px solid #F5F3EE;vertical-align:top}
     .badge{display:inline-block;background:#F5F0FF;color:#7C3AED;font-weight:800;font-size:11px;padding:2px 8px;border-radius:99px}
-    .attest{background:#F5F0FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:16px 20px;font-size:12px;line-height:1.7;color:#4A3728}
-    .footer{margin-top:32px;padding-top:20px;border-top:1px solid #E5E0D5;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#9C8060}
-    .cert-id{font-family:monospace;font-size:13px;font-weight:800;color:#7C3AED;letter-spacing:1px}
+    .attest{background:#F5F0FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:13px 18px;font-size:11.5px;line-height:1.6;color:#4A3728}
+    .footer{margin-top:20px;padding-top:14px;border-top:1px solid #E5E0D5;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#9C8060}
+    .cert-id{font-family:monospace;font-size:12px;font-weight:800;color:#7C3AED;letter-spacing:1px}
     .print-btn{display:block;margin:24px auto 0;max-width:720px;background:#7C3AED;color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;text-align:center;font-family:inherit;width:100%}
     .print-btn:hover{background:#6D28D9}
+    /* ── Print: single A4 page ─────────────────────────────────────── */
+    @page{size:A4 portrait;margin:10mm}
     @media print{
-      .cert-page{background:#fff;padding:0}
-      .cert{border:1.5px solid #ccc;box-shadow:none;border-radius:0;padding:32px 36px}
+      html,body{width:210mm;height:297mm}
+      .cert-page{background:#fff;padding:0;min-height:0}
+      .cert{border:1px solid #ccc;box-shadow:none;border-radius:0;padding:0;max-width:100%;margin:0;border:none}
+      .hd{padding-bottom:10px;margin-bottom:10px;border-bottom-width:1px}
+      .hd-emoji{font-size:22px;margin-bottom:2px}
+      .hd-name{font-size:14px}
+      .cert-title{font-size:18px;margin:8px 0 3px}
+      .cert-sub{font-size:10px}
+      .sec{margin-bottom:12px}
+      .sec-lbl{font-size:9px;margin-bottom:5px;padding-bottom:3px}
+      .kv{gap:3px 12px}
+      .kv-k,.kv-v{font-size:10px}
+      .fbox{padding:7px 10px}
+      .fbox-lbl{font-size:8px}
+      .fbox-val{font-size:13px}
+      table{font-size:10px}
+      th{font-size:8px;padding-bottom:5px}
+      td{padding:5px 10px 5px 0}
+      .attest{padding:9px 12px;font-size:9.5px;line-height:1.5;border-radius:6px}
+      .footer{margin-top:12px;padding-top:10px;font-size:9px}
+      .cert-id{font-size:10px}
       .print-btn{display:none}
     }
-    @page{margin:15mm}
   `;
 
   return (
