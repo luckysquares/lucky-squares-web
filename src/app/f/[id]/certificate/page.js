@@ -101,20 +101,20 @@ export default async function CertificatePage({ params }) {
     .print-btn{display:block;margin:24px auto 0;max-width:720px;background:#7C3AED;color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;text-align:center;font-family:inherit;width:100%}
     .print-btn:hover{background:#6D28D9}
     /* ── Print: single A4 page, full colour ───────────────────────── */
-    @page{size:A4 portrait;margin:10mm}
+    @page{size:A4 portrait;margin:12mm}
     @media print{
       /* Preserve all background colours and images exactly as on screen */
       *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-      /* Hide absolutely everything in the page except the certificate —
-         catches footer, chat widget, analytics scripts, anything else */
+      /* Hide everything except the certificate — catches any injected
+         widgets, analytics, or layout chrome that could overflow */
       body>*{display:none!important}
       body>.cert-page{display:block!important}
-      /* Lock to one page */
-      html,body{width:210mm!important;height:297mm!important;min-height:0!important;overflow:hidden!important}
+      /* Let the content be its natural height — no forced min-height that
+         could overflow Safari's reduced content area when headers/footers
+         are enabled. page-break-inside:avoid keeps the cert in one piece. */
+      html,body{min-height:0!important;overflow:visible!important}
       .cert-page{background:#F5F3EE;padding:0;min-height:0}
-      /* Cert fills the full A4 content area; footer pinned to bottom */
-      .cert{box-shadow:none;border-radius:8px;padding:32px 42px;max-width:100%;margin:0;min-height:277mm;display:flex;flex-direction:column}
-      .footer{margin-top:auto;padding-top:14px}
+      .cert{box-shadow:none;border-radius:8px;padding:28px 38px;max-width:100%;margin:0;page-break-inside:avoid;break-inside:avoid}
       .print-btn{display:none!important}
     }
   `;
