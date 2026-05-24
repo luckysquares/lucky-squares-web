@@ -51,8 +51,21 @@ export async function GET(req) {
   }
 
   const propertyId = process.env.GA4_PROPERTY_ID;
-  if (!propertyId || !process.env.GOOGLE_OAUTH_CLIENT_ID) {
-    return NextResponse.json({ error: 'GA4 not configured' }, { status: 503 });
+  const clientId   = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+
+  // Diagnostic — remove after confirming env vars are set
+  if (!propertyId || !clientId || !clientSecret || !refreshToken) {
+    return NextResponse.json({
+      error: 'GA4 not configured',
+      debug: {
+        GA4_PROPERTY_ID:            !!propertyId,
+        GOOGLE_OAUTH_CLIENT_ID:     !!clientId,
+        GOOGLE_OAUTH_CLIENT_SECRET: !!clientSecret,
+        GOOGLE_OAUTH_REFRESH_TOKEN: !!refreshToken,
+      },
+    }, { status: 503 });
   }
 
   try {
