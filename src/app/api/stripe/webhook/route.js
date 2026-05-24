@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { getAdminClient as supabase } from '@/lib/supabase/server';
+import { logException } from '@/lib/logError';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -18,6 +19,7 @@ export async function POST(req) {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
+    await logException(err, { route: '/api/stripe/webhook', source: 'server', metadata: { type: 'signature_verification_failed' } });
     return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
@@ -129,6 +131,7 @@ export async function POST(req) {
         await stripe.refunds.create({ payment_intent: session.payment_intent });
       } catch (refundErr) {
         console.error('[webhook] Auto-refund failed — manual action required:', refundErr);
+        await logException(refundErr, { route: '/api/stripe/webhook', source: 'server', metadata: { type: 'auto_refund_failed', payment_intent: session.payment_intent } });
       }
       return new Response('ok', { status: 200 });
     }
@@ -188,6 +191,7 @@ export async function POST(req) {
             // Admin will see the gap between payout_queue and transfers at draw time.
             console.error('[webhook] Organiser transfer failed:', transferErr.message,
               `— ${transferCents}c will need manual transfer for fundraiser ${fundraiser_id}`);
+            await logException(transferErr, { route: '/api/stripe/webhook', source: 'server', metadata: { type: 'transfer_failed', fundraiser_id, transfer_cents: transferCents } });
           }
         }
       }

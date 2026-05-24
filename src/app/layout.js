@@ -6,6 +6,7 @@ import './globals.css';
 import Footer from '@/components/marketing/Footer';
 import ReferralCapture from '@/components/app/ReferralCapture';
 import MariposaChatWidget from '@/components/app/MariposaChatWidget';
+import ErrorReporter from '@/components/app/ErrorReporter';
 import { Analytics } from '@vercel/analytics/next';
 
 const GA_ID = 'G-X20WB95ZM1';
@@ -102,6 +103,7 @@ export default async function RootLayout({ children }) {
         }
         {!isStandalone && <Footer />}
         {!isStandalone && <div data-mariposa-widget><MariposaChatWidget /></div>}
+        <ErrorReporter />
         <Analytics />
       </body>
     </html>
