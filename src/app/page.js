@@ -40,7 +40,7 @@ export default function HomePage() {
         </div>
 
         {/* mini grid preview */}
-        <div style={{ marginTop: 64, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginTop: 64, display: 'flex', justifyContent: 'center', padding: '0 16px' }}>
           <MiniGridPreview />
         </div>
       </section>
@@ -268,27 +268,35 @@ function MiniGridPreview() {
                   null,    'Noah',  null,    null,    'Isla',  'Ethan', null,   'Chloe', null,    'Oscar',
                   'Ruby',  null,    'Harry', null,    'Grace', null,    'Leo',  'Ava',   null,    null];
   return (
-    <div style={{ background: 'var(--card)', borderRadius: 20, padding: 20, boxShadow: '0 8px 40px rgba(61,46,26,.15)', border: '1.5px solid var(--border)', display: 'inline-block' }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text2)', marginBottom: 12, textAlign: 'center' }}>
-        Live grid preview
+    <>
+      <style>{`
+        .mini-grid-wrap { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 40px rgba(61,46,26,.15); border: 1.5px solid var(--border); width: 100%; max-width: 500px; box-sizing: border-box; }
+        .mini-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 44px)); gap: 4px; }
+        .mini-grid .sq { width: 100%; aspect-ratio: 1; font-size: 10px; border-radius: 7px; }
+        @media (max-width: 520px) { .mini-grid .sq { border-radius: 5px; font-size: 8px; } }
+      `}</style>
+      <div className="mini-grid-wrap">
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text2)', marginBottom: 12, textAlign: 'center' }}>
+          Live grid preview
+        </div>
+        <div className="mini-grid">
+          {states.map((state, i) => (
+            <div key={i} className={`sq ${state}`}>
+              <span className="sq-num">{i + 1}</span>
+              {names[i] && <span className="sq-label">{names[i]}</span>}
+              {state === 'in-cart' && <span className="sq-label" style={{ color: 'var(--green)' }}>✓</span>}
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 12, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          {[['#fff','#D4EFE6','Available'],['#D4F5E9','var(--green)','Mine'],['#FFF0E8','var(--orange)','Reserved'],['#F0EDE5','#DDD5C0','Sold']].map(([bg,bc,lbl]) => (
+            <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text2)', fontWeight: 700 }}>
+              <div style={{ width: 14, height: 14, borderRadius: 3, background: bg, border: `1.5px solid ${bc}` }} />
+              {lbl}
+            </div>
+          ))}
+        </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 44px)', gap: 4 }}>
-        {states.map((state, i) => (
-          <div key={i} className={`sq ${state}`} style={{ width: 44, height: 44, fontSize: 10, borderRadius: 7 }}>
-            <span className="sq-num">{i + 1}</span>
-            {names[i] && <span className="sq-label">{names[i]}</span>}
-            {state === 'in-cart' && <span className="sq-label" style={{ color: 'var(--green)' }}>✓</span>}
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: 12, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-        {[['#fff','#D4EFE6','Available'],['#D4F5E9','var(--green)','Mine'],['#FFF0E8','var(--orange)','Reserved'],['#F0EDE5','#DDD5C0','Sold']].map(([bg,bc,lbl]) => (
-          <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text2)', fontWeight: 700 }}>
-            <div style={{ width: 14, height: 14, borderRadius: 3, background: bg, border: `1.5px solid ${bc}` }} />
-            {lbl}
-          </div>
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
