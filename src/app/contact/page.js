@@ -130,18 +130,6 @@ export default function ContactPage() {
                   href: '/faq',
                   linkLabel: 'View FAQ →',
                 },
-                {
-                  icon: '🔒',
-                  title: 'Privacy enquiries',
-                  body: 'For privacy-related requests, use the form and select "General enquiry" — mention it is a privacy matter in your message.',
-                },
-                {
-                  icon: '📋',
-                  title: 'Compliance questions',
-                  body: 'For questions about raffle permits and state regulations, see our Raffle Compliance page.',
-                  href: '/raffle-compliance',
-                  linkLabel: 'Raffle compliance →',
-                },
               ].map((item) => (
                 <div key={item.title} style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)', border: '1.5px solid var(--border)', padding: '20px 22px' }}>
                   <div style={{ fontSize: 22, marginBottom: 8 }}>{item.icon}</div>
