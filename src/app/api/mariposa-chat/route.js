@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 import { randomUUID } from 'crypto';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const ANTHROPIC_API_KEY = process.env.MARIPOSA_API_KEY || process.env.ANTHROPIC_API_KEY;
 
@@ -219,6 +220,22 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 export async function POST(request) {
   if (!ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+  }
+
+  // ── Rate limiting ─────────────────────────────────────────────────────────
+  // 20 requests per IP per minute. Each request makes an Anthropic API call,
+  // so unbounded access would run up significant LLM costs and risk hitting
+  // Anthropic's own rate limits for all users.
+  const ip = getClientIp(request);
+  const { allowed: ipAllowed } = checkRateLimit(`mariposa:ip:${ip}`, {
+    limit:    20,
+    windowMs: 60 * 1000, // 1 minute
+  });
+  if (!ipAllowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a moment before sending another message.' },
+      { status: 429 },
+    );
   }
 
   // ── Session cookie ────────────────────────────────────────────────────────

@@ -27,6 +27,7 @@ create trigger trg_set_launched_at
 
 -- 3. Function called by the cron Edge Function to cancel an expired campaign
 --    Returns the cancelled fundraiser row so the Edge Function can process refunds.
+drop function if exists public.cancel_expired_campaigns();
 create or replace function public.cancel_expired_campaigns()
 returns table (
   id            uuid,

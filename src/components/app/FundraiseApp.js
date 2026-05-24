@@ -2289,10 +2289,13 @@ export default function FundraiseApp() {
       prizeRows.length ? db.from('prizes').insert(prizeRows) : Promise.resolve(),
     ]);
 
+    // NOTE: final_fee is intentionally NOT sent here — the server calculates the
+    // correct fee independently from the database and coupon validation. Never
+    // trust the client to supply a price.
     const res = await fetch('/api/stripe/create-launch-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fundraiser_id: saved.id, final_fee: data.finalFee, coupon_code: data.couponCode || '' }),
+      body: JSON.stringify({ fundraiser_id: saved.id, coupon_code: data.couponCode || '' }),
     });
     const { url, error: stripeErr } = await res.json();
     if (stripeErr || !url) { console.error('Checkout creation failed:', stripeErr); return; }

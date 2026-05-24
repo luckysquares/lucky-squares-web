@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const SUPPORT_FROM  = 'support@luckysquares.com.au';
 const INTERNAL_TO   = 'jamie@luckysquares.com.au';
@@ -101,6 +102,21 @@ async function sendEmail({ from, to, replyTo, subject, html, text }) {
 }
 
 export async function POST(req) {
+  // Rate limit: 5 submissions per IP per hour.
+  // Each submission creates a DB ticket and sends two Resend emails, so abuse
+  // would exhaust the email sending quota and flood the admin inbox.
+  const ip = getClientIp(req);
+  const { allowed } = checkRateLimit(`contact:${ip}`, {
+    limit:    5,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 },
+    );
+  }
+
   const { name, email, category, message } = await req.json();
 
   if (!name?.trim() || !email?.trim() || !message?.trim()) {
@@ -170,7 +186,7 @@ export async function POST(req) {
   await sendEmail({
     from:    SUPPORT_FROM,
     to:      email.trim(),
-    replyTo: SUPPORT_FROM,
+    replyTo: ticketId ? `support+${ticketId}@reply.luckysquares.com.au` : SUPPORT_FROM,
     subject: `Your message has been received [${ticketRef}]`,
     html:    customerAutoReplyHtml(name.trim(), ticketRef, subject),
     text:    `Hi ${name.trim().split(' ')[0]},\n\nThanks for reaching out. We have received your support request (${ticketRef}) and our team will get back to you within one business day.\n\nPlease keep your ticket reference handy: ${ticketRef}\n\nLucky Squares Australia Support Team`,

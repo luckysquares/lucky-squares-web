@@ -12,35 +12,68 @@ export async function POST(req) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // ── Input validation ─────────────────────────────────────────────────────
     if (square_numbers.length > 10) {
       return Response.json({ error: 'Maximum 10 squares per purchase' }, { status: 400 });
     }
 
-    const db = supabase();
-
-    const { data: takenSquares } = await db
-      .from('squares')
-      .select('number')
-      .eq('fundraiser_id', fundraiser_id)
-      .in('number', square_numbers)
-      .eq('paid', true);
-
-    if (takenSquares?.length > 0) {
-      return Response.json({ error: 'One or more squares are no longer available', taken: takenSquares.map((s) => s.number) }, { status: 409 });
+    // Deduplicate, reject non-positive integers. Range check (> grid_size)
+    // is handled below after we know the fundraiser's grid size.
+    const uniqueNums = [...new Set(square_numbers)];
+    if (uniqueNums.some((n) => !Number.isInteger(n) || n < 1)) {
+      return Response.json({ error: 'Invalid square numbers' }, { status: 400 });
     }
 
+    const db = supabase();
+
+    // Fetch fundraiser details — also need grid_size for the range check.
     const { data: fundraiser, error } = await db
       .from('fundraisers')
-      .select('title, org, price_per_sq, stripe_account_id, stripe_onboarding_complete')
+      .select('title, org, price_per_sq, stripe_account_id, stripe_onboarding_complete, grid_size')
       .eq('id', fundraiser_id)
       .single();
 
-    if (error || !fundraiser) return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
+    if (error || !fundraiser) {
+      return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
+    }
     if (!fundraiser.stripe_account_id) {
       return Response.json({ error: 'Stripe not configured for this fundraiser' }, { status: 400 });
     }
 
-    const subtotal      = parseFloat(fundraiser.price_per_sq) * square_numbers.length;
+    // Reject square numbers outside the grid (prevents phantom-square exploits)
+    if (uniqueNums.some((n) => n > fundraiser.grid_size)) {
+      return Response.json({ error: 'Square number out of range for this campaign' }, { status: 400 });
+    }
+
+    // ── Atomic server-side reservation (FIND-001) ────────────────────────────
+    // Replaces the previous non-atomic `paid = true` check.
+    //
+    // reserve_squares_for_checkout atomically marks all requested squares as
+    // 'reserved' in a single UPDATE, also extending any existing reservations.
+    // It returns any square numbers that could not be reserved because they are
+    // already 'sold'. If any are taken we abort — no Stripe session is created.
+    //
+    // This eliminates the TOCTOU race where two buyers could both pass the old
+    // availability check and both receive checkout sessions for the same square.
+    const { data: takenSquares, error: reserveErr } = await db.rpc(
+      'reserve_squares_for_checkout',
+      { p_fundraiser_id: fundraiser_id, p_square_numbers: uniqueNums },
+    );
+
+    if (reserveErr) {
+      console.error('reserve_squares_for_checkout error:', reserveErr);
+      return Response.json({ error: 'Failed to reserve squares. Please try again.' }, { status: 500 });
+    }
+
+    if (takenSquares && takenSquares.length > 0) {
+      return Response.json(
+        { error: 'One or more squares are no longer available', taken: takenSquares },
+        { status: 409 },
+      );
+    }
+
+    // ── Price calculation ────────────────────────────────────────────────────
+    const subtotal      = parseFloat(fundraiser.price_per_sq) * uniqueNums.length;
     const txFee         = calcTxFee(subtotal);
     const total         = Math.round((subtotal + txFee) * 100); // cents
     const subtotalCents = Math.round(subtotal * 100);
@@ -54,8 +87,8 @@ export async function POST(req) {
           price_data: {
             currency: 'aud',
             product_data: {
-              name: `${fundraiser.title} — Lucky Squares`,
-              description: `Square${square_numbers.length > 1 ? 's' : ''} #${square_numbers.join(', #')}`,
+              name:        `${fundraiser.title} — Lucky Squares`,
+              description: `Square${uniqueNums.length > 1 ? 's' : ''} #${uniqueNums.join(', #')}`,
             },
             unit_amount: total,
           },
@@ -75,12 +108,12 @@ export async function POST(req) {
         fundraiser_id,
         buyer_name,
         buyer_email,
-        buyer_phone: buyer_phone || '',
-        square_numbers: square_numbers.join(','),
+        buyer_phone:    buyer_phone || '',
+        square_numbers: uniqueNums.join(','),
         subtotal_cents: String(subtotalCents),
       },
       success_url: `${appUrl}/f/${fundraiser_id}?success=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/f/${fundraiser_id}`,
+      cancel_url:  `${appUrl}/f/${fundraiser_id}`,
     });
 
     return Response.json({ url: session.url });

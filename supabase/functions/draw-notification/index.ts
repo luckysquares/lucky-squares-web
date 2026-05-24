@@ -58,30 +58,93 @@ Deno.serve(async (req) => {
     .eq('fundraiser_id', fundraiserId)
     .eq('status', 'sold');
 
-  const soldSquares    = squares ?? [];
-  const soldCount      = soldSquares.length;
-  const fundsRaised    = (soldCount * parseFloat(f.price_per_sq)).toFixed(2);
+  const soldSquares      = squares ?? [];
+  const soldCount        = soldSquares.length;
+  const fundsRaised      = (soldCount * parseFloat(f.price_per_sq)).toFixed(2);
   const fundsRaisedCents = Math.round(soldCount * parseFloat(f.price_per_sq) * 100);
-  const isStripe       = f.payment_method === 'stripe';
+  const isStripe         = f.payment_method === 'stripe';
 
   // ── Automatic Stripe payout (Stripe campaigns only) ──────────────────────
-  // Transfer the net proceeds to the organiser's connected account immediately
-  // after the draw. Stripe's standard T+2 payout schedule then automatically
-  // deposits the funds into the organiser's bank within 2 business days.
-  let transferResult: { ok: boolean; transferId?: string; error?: string } = { ok: true };
+  // Transfer the net proceeds to the organiser's connected account after the draw.
+  // Stripe's T+2 payout schedule then deposits the funds into their bank account.
+  //
+  // IDEMPOTENCY: Before calling Stripe, we atomically claim a "PENDING" slot in
+  // the payout_queue row using a conditional UPDATE (WHERE stripe_transfer_id IS NULL).
+  // Only the first caller succeeds; concurrent or repeated calls hit 0 rows and skip.
+  // On success, the slot is updated with the real Stripe Transfer ID.
+  // On failure, it is marked 'FAILED' so admin alerts remain accurate.
+
+  let transferResult: { ok: boolean; transferId?: string; error?: string; skipped?: boolean } = { ok: true };
+
   if (isStripe && f.stripe_account_id && fundsRaisedCents > 0) {
-    try {
-      const transfer = await stripe.transfers.create({
-        amount:        fundsRaisedCents,
-        currency:      'aud',
-        destination:   f.stripe_account_id,
-        transfer_group: fundraiserId,
-        description:   `Payout for ${f.title} — draw complete`,
-      });
-      transferResult = { ok: true, transferId: transfer.id };
-    } catch (err: any) {
-      console.error('Stripe transfer failed:', err);
-      transferResult = { ok: false, error: err?.message ?? 'Unknown error' };
+    // Step 1: Atomically claim the payout slot.
+    const { data: claimed } = await supabase
+      .from('payout_queue')
+      .update({ stripe_transfer_id: 'PENDING' })
+      .eq('fundraiser_id', fundraiserId)
+      .is('stripe_transfer_id', null)
+      .select('id');
+
+    if (!claimed || claimed.length === 0) {
+      // Someone else already claimed this slot (or it was already processed).
+      // Fetch the current value so we can report correctly.
+      const { data: existing } = await supabase
+        .from('payout_queue')
+        .select('stripe_transfer_id')
+        .eq('fundraiser_id', fundraiserId)
+        .single();
+
+      const existingId = existing?.stripe_transfer_id;
+
+      if (existingId && existingId !== 'PENDING' && existingId !== 'FAILED') {
+        // Already paid out successfully on a previous call — safe to skip.
+        console.log(`[draw-notification] Payout already processed for ${fundraiserId}: ${existingId}`);
+        transferResult = { ok: true, transferId: existingId, skipped: true };
+      } else if (existingId === 'PENDING') {
+        // Another invocation is currently in flight. Log and continue to emails.
+        console.warn(`[draw-notification] Payout already in progress for ${fundraiserId} — skipping transfer.`);
+        transferResult = { ok: true, skipped: true };
+      } else {
+        // No payout_queue row found (unlikely but handle gracefully: campaign may
+        // have been drawn before the trigger existed). Proceed with the transfer.
+        console.warn(`[draw-notification] No payout_queue row for ${fundraiserId} — proceeding without idempotency anchor.`);
+      }
+    }
+
+    // Step 2: Perform the Stripe transfer only if we claimed the slot (or there
+    // was no payout_queue row to anchor to).
+    if (!transferResult.skipped) {
+      try {
+        const transfer = await stripe.transfers.create({
+          amount:         fundsRaisedCents,
+          currency:       'aud',
+          destination:    f.stripe_account_id,
+          transfer_group: fundraiserId,
+          description:    `Payout for ${f.title} — draw complete`,
+        });
+
+        transferResult = { ok: true, transferId: transfer.id };
+
+        // Step 3a: Record the successful transfer ID (replaces PENDING).
+        await supabase
+          .from('payout_queue')
+          .update({ stripe_transfer_id: transfer.id, status: 'processed', processed_at: new Date().toISOString() })
+          .eq('fundraiser_id', fundraiserId);
+
+      } catch (err: any) {
+        console.error('[draw-notification] Stripe transfer failed:', err);
+        transferResult = { ok: false, error: err?.message ?? 'Unknown error' };
+
+        // Step 3b: Mark as FAILED so admin can see and intervene. This also
+        // unblocks re-runs: a FAILED row cannot be re-claimed (PENDING guard won't
+        // match), so an admin would need to reset stripe_transfer_id to NULL if a
+        // manual retry is required.
+        await supabase
+          .from('payout_queue')
+          .update({ stripe_transfer_id: 'FAILED' })
+          .eq('fundraiser_id', fundraiserId)
+          .eq('stripe_transfer_id', 'PENDING');
+      }
     }
   }
 
@@ -111,18 +174,25 @@ Deno.serve(async (req) => {
     };
   });
 
-  const firstName  = (f.contact_name ?? 'there').split(' ')[0];
+  const firstName = (f.contact_name ?? 'there').split(' ')[0];
 
   // 1. Email admin (internal notification)
   const winnerSummary = winners.map((w) => `#${w.square_number} (${w.buyer_name})`).join(', ');
-  const paymentLabel  = { stripe: 'Online card (Stripe)', bank: 'Bank transfer', bank_inperson: 'In person + bank transfer', inperson: 'In person' }[f.payment_method as string] ?? f.payment_method;
+  const paymentLabel  = ({
+    stripe:       'Online card (Stripe)',
+    bank:         'Bank transfer',
+    bank_inperson: 'In person + bank transfer',
+    inperson:     'In person',
+  } as Record<string, string>)[f.payment_method] ?? f.payment_method;
 
   let payoutLine: string;
   if (isStripe) {
-    if (transferResult.ok) {
+    if (transferResult.skipped) {
+      payoutLine = `Payout already processed (Transfer ID: ${transferResult.transferId ?? 'in progress'}). No action required.`;
+    } else if (transferResult.ok) {
       payoutLine = `Stripe transfer triggered automatically: $${fundsRaised} to ${f.stripe_account_id} (transfer ${transferResult.transferId}). Organiser should receive funds within 2 business days.`;
     } else {
-      payoutLine = `ACTION REQUIRED: automatic Stripe transfer FAILED. Error: ${transferResult.error}\nManual transfer needed: $${fundsRaised} to connected account ${f.stripe_account_id ?? 'UNKNOWN'}.`;
+      payoutLine = `ACTION REQUIRED: automatic Stripe transfer FAILED. Error: ${transferResult.error}\nManual transfer needed: $${fundsRaised} to connected account ${f.stripe_account_id ?? 'UNKNOWN'}.\nTo retry, set payout_queue.stripe_transfer_id = NULL for fundraiser_id = '${fundraiserId}'.`;
     }
   } else {
     payoutLine = `No payout action needed (organiser collects directly).`;
@@ -148,7 +218,7 @@ Deno.serve(async (req) => {
     `Admin portal: https://luckysquares.com.au/admin/campaigns`,
   ].join('\n');
 
-  const adminSubject = isStripe && !transferResult.ok
+  const adminSubject = isStripe && !transferResult.ok && !transferResult.skipped
     ? `ACTION REQUIRED: Stripe transfer failed — ${f.title}`
     : `Draw complete — ${f.title}`;
 
@@ -174,9 +244,8 @@ Deno.serve(async (req) => {
   }
 
   // 3. Email each buyer (winner or no-win)
-  const winnerNums_set = new Set(winnerNums);
-  const uniqueBuyers   = [...new Map(soldSquares.filter((s) => s.buyer_email).map((s) => [s.buyer_email, s])).values()];
-
+  const winnerNums_set    = new Set(winnerNums);
+  const uniqueBuyers      = [...new Map(soldSquares.filter((s) => s.buyer_email).map((s) => [s.buyer_email, s])).values()];
   const winnerSummaryList = winners.map((w) => ({
     prize_place: w.place, prize_description: w.prize, square_number: w.square_number,
   }));
@@ -189,33 +258,34 @@ Deno.serve(async (req) => {
     const buyerWins = buyerSquareNums.filter((n) => winnerNums_set.has(n));
 
     if (buyerWins.length > 0) {
-      // Winner email (one per winning square)
       for (const winningNum of buyerWins) {
         const w = winners.find((x) => x.square_number === winningNum);
         if (!w) continue;
         const tpl = emailDrawResultWinner({
-          buyer_name:      buyer.buyer_name ?? 'there',
-          campaign_title:  f.title,
-          org_name:        f.org,
-          winning_square:  winningNum,
-          prize_place:     w.place,
+          buyer_name:        buyer.buyer_name ?? 'there',
+          campaign_title:    f.title,
+          org_name:          f.org,
+          winning_square:    winningNum,
+          prize_place:       w.place,
           prize_description: w.prize,
-          contact_email:   f.contact_email ?? '',
+          contact_email:     f.contact_email ?? '',
         });
         await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
       }
     } else {
-      // Did not win
       const tpl = emailDrawResultDidNotWin({
-        buyer_name:    buyer.buyer_name ?? 'there',
+        buyer_name:     buyer.buyer_name ?? 'there',
         campaign_title: f.title,
-        org_name:      f.org,
-        amount_raised: fundsRaised,
-        winners:       winnerSummaryList,
+        org_name:       f.org,
+        amount_raised:  fundsRaised,
+        winners:        winnerSummaryList,
       });
       await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, admin: true, organiser: !!f.contact_email, buyers: uniqueBuyers.length }), { status: 200 });
+  return new Response(
+    JSON.stringify({ ok: true, admin: true, organiser: !!f.contact_email, buyers: uniqueBuyers.length, transferResult }),
+    { status: 200 },
+  );
 });

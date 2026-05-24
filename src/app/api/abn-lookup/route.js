@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 // Extract a single XML tag value (first occurrence)
 function extractTag(xml, tag) {
@@ -24,6 +25,20 @@ function extractBlock(xml, tag) {
 }
 
 export async function GET(req) {
+  // Rate limit: 10 lookups per IP per minute.
+  // Each lookup proxies a request to the ABR API. The shared ABR authentication
+  // GUID can be suspended if hit too frequently, which would disable ABN
+  // validation for all users. The 5-minute Next.js cache handles repeat lookups
+  // for the same ABN; this guard protects against a burst of unique ABNs.
+  const ip = getClientIp(req);
+  const { allowed } = checkRateLimit(`abn:${ip}`, {
+    limit:    10,
+    windowMs: 60 * 1000, // 1 minute
+  });
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const abn = searchParams.get('abn')?.replace(/\s/g, '');
 

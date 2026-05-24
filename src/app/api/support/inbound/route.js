@@ -1,43 +1,87 @@
 import { NextResponse } from 'next/server';
+import { Webhook } from 'svix';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
 const INTERNAL_TO  = 'jamie@luckysquares.com.au';
 const SUPPORT_FROM = 'support@luckysquares.com.au';
 
 // Parse ticket ID from address like: support+{ticketId}@reply.luckysquares.com.au
-function parseTicketId(toAddress) {
-  if (!toAddress) return null;
-  // Handle array or comma-separated
-  const addresses = Array.isArray(toAddress) ? toAddress : [toAddress];
+// Also accepts root domain: support+{ticketId}@luckysquares.com.au
+function parseTicketId(toAddresses) {
+  if (!toAddresses) return null;
+  const addresses = Array.isArray(toAddresses) ? toAddresses : [toAddresses];
   for (const addr of addresses) {
-    const match = addr.match(/support\+([a-f0-9-]{36})@reply\.luckysquares\.com\.au/i);
+    const match = addr.match(/support\+([a-f0-9-]{36})@(?:reply\.)?luckysquares\.com\.au/i);
     if (match) return match[1];
   }
   return null;
 }
 
-export async function POST(req) {
+// Fetch the full email body from Resend (webhook payload only contains metadata)
+async function fetchEmailBody(emailId, apiKey) {
   try {
-    const body = await req.json();
+    const res = await fetch(`https://api.resend.com/emails/receiving/${emailId}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
 
-    const toField   = body.to || body.To || '';
-    const fromField = body.from || body.From || '';
-    const text      = body.text || body.Text || body.plain || '';
-    const html      = body.html || body.Html || '';
+export async function POST(req) {
+  // ── Signature verification (FIND-009) ────────────────────────────────────
+  // Resend signs webhooks using Svix. Reject any request that can't be verified.
+  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error('[inbound] RESEND_WEBHOOK_SECRET not set — rejecting request');
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+  }
 
-    // Try to parse ticket ID from the to field
-    const toAddresses = typeof toField === 'string'
-      ? toField.split(',').map((a) => a.trim())
-      : Array.isArray(toField) ? toField : [];
+  const rawBody = await req.text();
+  const svixHeaders = {
+    'svix-id':        req.headers.get('svix-id') ?? '',
+    'svix-timestamp': req.headers.get('svix-timestamp') ?? '',
+    'svix-signature': req.headers.get('svix-signature') ?? '',
+  };
 
-    const ticketId = parseTicketId(toAddresses);
+  try {
+    new Webhook(secret).verify(rawBody, svixHeaders);
+  } catch (err) {
+    console.warn('[inbound] Signature verification failed:', err.message);
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
 
+  let event;
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  // Only handle email.received events
+  if (event.type !== 'email.received') {
+    return NextResponse.json({ ok: true });
+  }
+
+  try {
+    // Resend webhook payload: { type, created_at, data: { email_id, from, to, subject, ... } }
+    const { email_id, from: fromField, to: toField } = event.data ?? {};
+
+    const ticketId = parseTicketId(toField);
     if (!ticketId) {
       console.warn('[inbound] Could not parse ticket ID from:', toField);
       return NextResponse.json({ ok: true }); // Accept but ignore
     }
 
-    const supabase = getSupabase();
+    const supabase   = getSupabase();
+    const resendKey  = process.env.RESEND_API_KEY;
+
+    // Fetch full email content (text/html not included in webhook payload)
+    const emailDetail = resendKey ? await fetchEmailBody(email_id, resendKey) : null;
+    const text = emailDetail?.text ?? '';
+    const html = emailDetail?.html ?? '';
 
     // Fetch ticket
     const { data: ticket, error: tErr } = await supabase
@@ -51,12 +95,12 @@ export async function POST(req) {
       return NextResponse.json({ ok: true });
     }
 
-    // Extract sender name from From field
-    const fromMatch  = fromField.match(/^(.+?)\s*<([^>]+)>/);
+    // Extract sender name from From field (e.g. "Jane Smith <jane@example.com>")
+    const fromMatch   = (fromField ?? '').match(/^(.+?)\s*<([^>]+)>/);
     const senderName  = fromMatch ? fromMatch[1].trim() : ticket.contact_name;
-    const senderEmail = fromMatch ? fromMatch[2].trim() : ticket.contact_email;
+    const senderEmail = fromMatch ? fromMatch[2].trim() : (fromField ?? ticket.contact_email);
 
-    // Use plain text; strip quoted history (lines starting with >)
+    // Prefer plain text; fall back to stripped HTML. Strip quoted reply history.
     const rawText   = text || html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const cleanBody = rawText
       .split('\n')
@@ -68,17 +112,17 @@ export async function POST(req) {
       return NextResponse.json({ ok: true });
     }
 
-    // Append message
+    // Append message to ticket
     await supabase.from('support_messages').insert({
-      ticket_id:   ticketId,
-      body:        cleanBody,
-      is_internal: false,
-      sender_type: 'customer',
+      ticket_id:    ticketId,
+      body:         cleanBody,
+      is_internal:  false,
+      sender_type:  'customer',
       sender_name:  senderName,
       sender_email: senderEmail,
     });
 
-    // Update ticket status: customer replied so it needs attention
+    // Customer replied — move ticket back to open so it gets attention
     if (ticket.status === 'waiting_customer' || ticket.status === 'in_progress') {
       await supabase
         .from('support_tickets')
@@ -86,12 +130,11 @@ export async function POST(req) {
         .eq('id', ticketId);
     }
 
-    // Notify internally
-    const resendKey = process.env.RESEND_API_KEY;
+    // Notify Jamie internally
     if (resendKey) {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from:    SUPPORT_FROM,
           to:      INTERNAL_TO,
@@ -105,6 +148,6 @@ export async function POST(req) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[inbound] Error:', err.message);
-    return NextResponse.json({ ok: true }); // Always 200 to Resend
+    return NextResponse.json({ ok: true }); // Always 200 so Resend doesn't retry
   }
 }

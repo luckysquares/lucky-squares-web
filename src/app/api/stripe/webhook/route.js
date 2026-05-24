@@ -87,18 +87,41 @@ export async function POST(req) {
 
     const squareNums = square_numbers.split(',').map(Number);
 
-    // Claim the squares
-    const { error: claimError } = await db.rpc('claim_squares', {
-      p_fundraiser_id: fundraiser_id,
+    // Claim the squares.
+    // FIND-008: claim_squares now returns INTEGER (count of squares actually claimed)
+    // and only updates squares with status = 'reserved'. If a square was already
+    // 'sold', it is silently skipped and not counted.
+    const { data: claimCount, error: claimError } = await db.rpc('claim_squares', {
+      p_fundraiser_id:  fundraiser_id,
       p_square_numbers: squareNums,
-      p_buyer_name: buyer_name,
-      p_buyer_email: buyer_email,
-      p_buyer_phone: buyer_phone || '',
+      p_buyer_name:     buyer_name,
+      p_buyer_email:    buyer_email,
+      p_buyer_phone:    buyer_phone || '',
     });
 
     if (claimError) {
       console.error('claim_squares error:', claimError);
       return new Response('Failed to claim squares', { status: 500 });
+    }
+
+    // FIND-001: Double-payment guard.
+    // If fewer squares were claimed than requested, some were already 'sold' by a
+    // prior payment (race condition at checkout creation time). Issue an automatic
+    // full refund for this duplicate payment and return 200 so Stripe stops retrying.
+    // The first buyer's payment and square ownership are preserved intact.
+    if (typeof claimCount === 'number' && claimCount < squareNums.length) {
+      console.error(
+        `[webhook] Double-payment detected — fundraiser ${fundraiser_id}: ` +
+        `expected to claim ${squareNums.length} squares, got ${claimCount}. ` +
+        `Auto-refunding payment_intent ${session.payment_intent}.`,
+      );
+      try {
+        await stripe.refunds.create({ payment_intent: session.payment_intent });
+      } catch (refundErr) {
+        console.error('[webhook] Auto-refund failed — manual action required:', refundErr);
+        // Return 200 regardless so Stripe does not retry. Manual refund needed.
+      }
+      return new Response('ok', { status: 200 });
     }
 
     // Mark squares as paid and record the Stripe payment_intent_id for audit
