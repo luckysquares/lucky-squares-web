@@ -105,27 +105,12 @@ export default async function CertificatePage({ params }) {
     @media print{
       /* Preserve all background colours and images exactly as on screen */
       *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-      html,body{width:210mm}
+      /* Lock to one page — kill any min-height:100vh from global styles */
+      html,body{width:210mm!important;height:297mm!important;min-height:0!important;overflow:hidden!important}
       .cert-page{background:#F5F3EE;padding:0;min-height:0}
-      .cert{box-shadow:none;border-radius:8px;padding:28px 36px;max-width:100%;margin:0}
-      .hd{padding-bottom:10px;margin-bottom:10px;border-bottom-width:1px}
-      .hd-emoji{font-size:22px;margin-bottom:2px}
-      .hd-name{font-size:14px}
-      .cert-title{font-size:18px;margin:8px 0 3px}
-      .cert-sub{font-size:10px}
-      .sec{margin-bottom:12px}
-      .sec-lbl{font-size:9px;margin-bottom:5px;padding-bottom:3px}
-      .kv{gap:3px 12px}
-      .kv-k,.kv-v{font-size:10px}
-      .fbox{padding:7px 10px}
-      .fbox-lbl{font-size:8px}
-      .fbox-val{font-size:13px}
-      table{font-size:10px}
-      th{font-size:8px;padding-bottom:5px}
-      td{padding:5px 10px 5px 0}
-      .attest{padding:9px 12px;font-size:9.5px;line-height:1.5;border-radius:6px}
-      .footer{margin-top:12px;padding-top:10px;font-size:9px}
-      .cert-id{font-size:10px}
+      /* Cert fills the full A4 content area; footer is pinned to the bottom */
+      .cert{box-shadow:none;border-radius:8px;padding:32px 42px;max-width:100%;margin:0;min-height:277mm;display:flex;flex-direction:column}
+      .footer{margin-top:auto;padding-top:14px}
       .print-btn{display:none}
     }
   `;
