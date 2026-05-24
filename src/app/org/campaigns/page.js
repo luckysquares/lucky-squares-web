@@ -7,7 +7,7 @@ import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 const DEMO_CAMPAIGNS = [
   { id: '1', title: 'Under 14s State Championships', status: 'active', grid_size: 50, sold_count: 37, price_per_sq: 5, launched_at: new Date(Date.now() - 5 * 86400000).toISOString(), draw_date: null, owner_name: 'Marcus Webb', emoji: '🏆', payment_method: 'bank' },
   { id: '2', title: 'New playground equipment', status: 'active', grid_size: 100, sold_count: 27, price_per_sq: 5, launched_at: new Date(Date.now() - 10 * 86400000).toISOString(), draw_date: null, owner_name: 'Priya Nair', emoji: '🌱', payment_method: 'bank' },
-  { id: '3', title: 'PANPACS Gold Coast 2026', status: 'drawn', grid_size: 50, sold_count: 50, price_per_sq: 5, launched_at: new Date(Date.now() - 20 * 86400000).toISOString(), draw_date: '2026-05-24', owner_name: 'Jamie Stott', emoji: '⚾', payment_method: 'bank' },
+  { id: '3', title: 'PANPACS Gold Coast 2026', status: 'drawn', grid_size: 50, sold_count: 50, price_per_sq: 5, launched_at: new Date(Date.now() - 20 * 86400000).toISOString(), draw_date: '2026-05-24', owner_name: 'Jamie', emoji: '⚾', payment_method: 'bank' },
   { id: '4', title: 'New patrol boards', status: 'active', grid_size: 50, sold_count: 16, price_per_sq: 10, launched_at: new Date(Date.now() - 8 * 86400000).toISOString(), draw_date: null, owner_name: 'Danni Forsyth', emoji: '⭐', payment_method: 'bank' },
   { id: '5', title: 'New rescue vehicle', status: 'active', grid_size: 50, sold_count: 12, price_per_sq: 5, launched_at: new Date(Date.now() - 3 * 86400000).toISOString(), draw_date: null, owner_name: 'Helen Cartwright', emoji: '🐾', payment_method: 'bank' },
 ];

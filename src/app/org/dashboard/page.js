@@ -12,7 +12,7 @@ const DEMO_STATS = { org_name: 'Demo Organisation', campaigns: 8, active: 2, dra
 const DEMO_CAMPAIGNS = [
   { id: '1', title: 'Under 14s State Championships', org: 'Demo Organisation', status: 'active', grid_size: 50, sold_count: 37, price_per_sq: 5, launched_at: new Date(Date.now() - 5 * 86400000).toISOString(), owner_name: 'Marcus Webb', emoji: '🏆', payment_method: 'bank' },
   { id: '2', title: 'New playground equipment', org: 'Demo Organisation', status: 'active', grid_size: 100, sold_count: 27, price_per_sq: 5, launched_at: new Date(Date.now() - 10 * 86400000).toISOString(), owner_name: 'Priya Nair', emoji: '🌱', payment_method: 'bank' },
-  { id: '3', title: 'PANPACS Gold Coast 2026', org: 'Demo Organisation', status: 'drawn', grid_size: 50, sold_count: 50, price_per_sq: 5, launched_at: new Date(Date.now() - 20 * 86400000).toISOString(), owner_name: 'Jamie Stott', emoji: '⚾', payment_method: 'bank' },
+  { id: '3', title: 'PANPACS Gold Coast 2026', org: 'Demo Organisation', status: 'drawn', grid_size: 50, sold_count: 50, price_per_sq: 5, launched_at: new Date(Date.now() - 20 * 86400000).toISOString(), owner_name: 'Jamie', emoji: '⚾', payment_method: 'bank' },
 ];
 
 export default function OrgDashboard() {

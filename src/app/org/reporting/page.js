@@ -10,7 +10,7 @@ function fmtAud(cents) {
 const DEMO_CAMPAIGNS = [
   { id: '1', title: 'Under 14s State Championships', status: 'active', grid_size: 50, sold_count: 37, price_per_sq: 5, launched_at: new Date(Date.now() - 5 * 86400000).toISOString(), owner_name: 'Marcus Webb', emoji: '🏆' },
   { id: '2', title: 'New playground equipment', status: 'active', grid_size: 100, sold_count: 27, price_per_sq: 5, launched_at: new Date(Date.now() - 10 * 86400000).toISOString(), owner_name: 'Priya Nair', emoji: '🌱' },
-  { id: '3', title: 'PANPACS Gold Coast 2026', status: 'drawn', grid_size: 50, sold_count: 50, price_per_sq: 5, launched_at: new Date(Date.now() - 20 * 86400000).toISOString(), owner_name: 'Jamie Stott', emoji: '⚾' },
+  { id: '3', title: 'PANPACS Gold Coast 2026', status: 'drawn', grid_size: 50, sold_count: 50, price_per_sq: 5, launched_at: new Date(Date.now() - 20 * 86400000).toISOString(), owner_name: 'Jamie', emoji: '⚾' },
   { id: '4', title: 'New patrol boards', status: 'active', grid_size: 50, sold_count: 16, price_per_sq: 10, launched_at: new Date(Date.now() - 8 * 86400000).toISOString(), owner_name: 'Danni Forsyth', emoji: '⭐' },
   { id: '5', title: 'New rescue vehicle', status: 'active', grid_size: 50, sold_count: 12, price_per_sq: 5, launched_at: new Date(Date.now() - 3 * 86400000).toISOString(), owner_name: 'Helen Cartwright', emoji: '🐾' },
 ];
