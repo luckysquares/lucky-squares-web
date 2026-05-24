@@ -1,6 +1,32 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
+const SITE_URL       = 'https://luckysquares.com.au';
+const INDEXNOW_KEY   = process.env.INDEXNOW_KEY || '50bb10538b3042f09dbf9aa4f030aa5b';
+
+// Ping Bing (IndexNow) and Google Search Console whenever a post is published.
+// Silent on failure — never blocks the save.
+async function pingSearchEngines(slug) {
+  const pageUrl    = `${SITE_URL}/blog/${slug}`;
+  const sitemapUrl = `${SITE_URL}/sitemap.xml`;
+
+  await Promise.allSettled([
+    // IndexNow — notifies Bing, DuckDuckGo, Yahoo, Yandex simultaneously
+    fetch('https://api.indexnow.org/indexnow', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({
+        host:    'luckysquares.com.au',
+        key:     INDEXNOW_KEY,
+        keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
+        urlList: [pageUrl],
+      }),
+    }),
+    // Google — ping sitemap so Googlebot recrawls promptly
+    fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`),
+  ]);
+}
+
 export async function GET() {
   try {
     const supabase = getSupabase();
@@ -31,6 +57,12 @@ export async function POST(req) {
       p_status:          status ?? 'draft',
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Ping search engines when publishing (not for drafts)
+    if (status === 'published' && slug) {
+      pingSearchEngines(slug).catch(() => {});
+    }
+
     return NextResponse.json({ id: data });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
