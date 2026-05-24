@@ -57,14 +57,14 @@ export async function GET(req) {
 
   // Diagnostic — remove after confirming env vars are set
   if (!propertyId || !clientId || !clientSecret || !refreshToken) {
+    const missing = [
+      !propertyId    && 'GA4_PROPERTY_ID',
+      !clientId      && 'GOOGLE_OAUTH_CLIENT_ID',
+      !clientSecret  && 'GOOGLE_OAUTH_CLIENT_SECRET',
+      !refreshToken  && 'GOOGLE_OAUTH_REFRESH_TOKEN',
+    ].filter(Boolean);
     return NextResponse.json({
-      error: 'GA4 not configured',
-      debug: {
-        GA4_PROPERTY_ID:            !!propertyId,
-        GOOGLE_OAUTH_CLIENT_ID:     !!clientId,
-        GOOGLE_OAUTH_CLIENT_SECRET: !!clientSecret,
-        GOOGLE_OAUTH_REFRESH_TOKEN: !!refreshToken,
-      },
+      error: `GA4 not configured — missing: ${missing.join(', ')}`,
     }, { status: 503 });
   }
 
