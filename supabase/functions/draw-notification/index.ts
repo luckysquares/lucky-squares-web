@@ -61,22 +61,50 @@ Deno.serve(async (req) => {
   const soldSquares      = squares ?? [];
   const soldCount        = soldSquares.length;
   const fundsRaised      = (soldCount * parseFloat(f.price_per_sq)).toFixed(2);
-  const fundsRaisedCents = Math.round(soldCount * parseFloat(f.price_per_sq) * 100);
   const isStripe         = f.payment_method === 'stripe';
 
   // ── Automatic Stripe payout (Stripe campaigns only) ──────────────────────
-  // Transfer the net proceeds to the organiser's connected account after the draw.
-  // Stripe's T+2 payout schedule then deposits the funds into their bank account.
   //
-  // IDEMPOTENCY: Before calling Stripe, we atomically claim a "PENDING" slot in
-  // the payout_queue row using a conditional UPDATE (WHERE stripe_transfer_id IS NULL).
-  // Only the first caller succeeds; concurrent or repeated calls hit 0 rows and skip.
-  // On success, the slot is updated with the real Stripe Transfer ID.
-  // On failure, it is marked 'FAILED' so admin alerts remain accurate.
+  // With the split-at-purchase model, non-prize funds are already transferred to
+  // the organiser's connected account in real time as squares are sold.
+  //
+  // At draw time we only need to handle the prize reserve held on the platform:
+  //   · Cash prizes → paid to winners (admin-initiated — see winner payout alert below)
+  //   · Remainder   → transferred to organiser now (donated prizes, unsold threshold, etc.)
+  //
+  // IDEMPOTENCY: Same PENDING sentinel pattern as before — only the first call
+  // to draw-notification will execute the transfer.
 
   let transferResult: { ok: boolean; transferId?: string; error?: string; skipped?: boolean } = { ok: true };
 
-  if (isStripe && f.stripe_account_id && fundsRaisedCents > 0) {
+  // Fetch prize reserve details and prizes to calculate what's owed to winners vs organiser.
+  const { data: fReserve } = await supabase
+    .from('fundraisers')
+    .select('prize_reserve_cents, prize_reserve_held_cents')
+    .eq('id', fundraiserId)
+    .single();
+
+  const prizeReserveHeld = fReserve?.prize_reserve_held_cents ?? 0;
+
+  // Sum of non-donated cash prizes actually won (matched to winner squares).
+  // Donated prizes are physical items — no cash payout required from the reserve.
+  const { data: allPrizes } = await supabase
+    .from('prizes')
+    .select('value, donated, sort_order')
+    .eq('fundraiser_id', fundraiserId)
+    .order('sort_order');
+
+  const winnerPrizes = (allPrizes ?? []).slice(0, winnerNums.length);
+  const cashPrizesTotalCents = winnerPrizes.reduce((sum, p, i) => {
+    if (p.donated) return sum;
+    const val = parseFloat((p.value || '').replace(/[^0-9.]/g, '')) || 0;
+    return sum + Math.round(val * 100);
+  }, 0);
+
+  // Whatever is left in the reserve after covering cash prizes goes to the organiser now.
+  const remainderToOrganiserCents = Math.max(0, prizeReserveHeld - cashPrizesTotalCents);
+
+  if (isStripe && f.stripe_account_id && remainderToOrganiserCents > 0) {
     // Step 1: Atomically claim the payout slot.
     const { data: claimed } = await supabase
       .from('payout_queue')
@@ -86,8 +114,6 @@ Deno.serve(async (req) => {
       .select('id');
 
     if (!claimed || claimed.length === 0) {
-      // Someone else already claimed this slot (or it was already processed).
-      // Fetch the current value so we can report correctly.
       const { data: existing } = await supabase
         .from('payout_queue')
         .select('stripe_transfer_id')
@@ -97,35 +123,34 @@ Deno.serve(async (req) => {
       const existingId = existing?.stripe_transfer_id;
 
       if (existingId && existingId !== 'PENDING' && existingId !== 'FAILED') {
-        // Already paid out successfully on a previous call — safe to skip.
-        console.log(`[draw-notification] Payout already processed for ${fundraiserId}: ${existingId}`);
+        console.log(`[draw-notification] Remainder transfer already processed for ${fundraiserId}: ${existingId}`);
         transferResult = { ok: true, transferId: existingId, skipped: true };
       } else if (existingId === 'PENDING') {
-        // Another invocation is currently in flight. Log and continue to emails.
-        console.warn(`[draw-notification] Payout already in progress for ${fundraiserId} — skipping transfer.`);
+        console.warn(`[draw-notification] Transfer already in progress for ${fundraiserId} — skipping.`);
         transferResult = { ok: true, skipped: true };
       } else {
-        // No payout_queue row found (unlikely but handle gracefully: campaign may
-        // have been drawn before the trigger existed). Proceed with the transfer.
         console.warn(`[draw-notification] No payout_queue row for ${fundraiserId} — proceeding without idempotency anchor.`);
       }
     }
 
-    // Step 2: Perform the Stripe transfer only if we claimed the slot (or there
-    // was no payout_queue row to anchor to).
     if (!transferResult.skipped) {
       try {
         const transfer = await stripe.transfers.create({
-          amount:         fundsRaisedCents,
+          amount:         remainderToOrganiserCents,
           currency:       'aud',
           destination:    f.stripe_account_id,
           transfer_group: fundraiserId,
-          description:    `Payout for ${f.title} — draw complete`,
+          description:    `Prize reserve remainder for ${f.title} — draw complete`,
+          metadata: {
+            fundraiser_id:          fundraiserId,
+            type:                   'prize_reserve_remainder',
+            prize_reserve_held:     String(prizeReserveHeld),
+            cash_prizes_total:      String(cashPrizesTotalCents),
+          },
         });
 
         transferResult = { ok: true, transferId: transfer.id };
 
-        // Step 3a: Record the successful transfer ID (replaces PENDING).
         await supabase
           .from('payout_queue')
           .update({ stripe_transfer_id: transfer.id, status: 'processed', processed_at: new Date().toISOString() })
@@ -135,10 +160,6 @@ Deno.serve(async (req) => {
         console.error('[draw-notification] Stripe transfer failed:', err);
         transferResult = { ok: false, error: err?.message ?? 'Unknown error' };
 
-        // Step 3b: Mark as FAILED so admin can see and intervene. This also
-        // unblocks re-runs: a FAILED row cannot be re-claimed (PENDING guard won't
-        // match), so an admin would need to reset stripe_transfer_id to NULL if a
-        // manual retry is required.
         await supabase
           .from('payout_queue')
           .update({ stripe_transfer_id: 'FAILED' })
@@ -148,14 +169,15 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Fetch prizes
-  const { data: prizes } = await supabase
+  // Re-use allPrizes fetched above (includes place/description for email templates).
+  // Filter to those with descriptions for the email display list.
+  const { data: prizesWithDesc } = await supabase
     .from('prizes')
     .select('place, description, value, sort_order')
     .eq('fundraiser_id', fundraiserId)
     .order('sort_order');
 
-  const prizeList = (prizes ?? []).filter((p) => p.description);
+  const prizeList = (prizesWithDesc ?? []).filter((p) => p.description);
 
   // Map winner square numbers to buyer details
   const winnerNums: number[] = Array.isArray(f.winner_square_nums)
@@ -185,17 +207,37 @@ Deno.serve(async (req) => {
     inperson:     'In person',
   } as Record<string, string>)[f.payment_method] ?? f.payment_method;
 
+  // Winner payout summary (cash prizes that need to be paid from the held reserve)
+  const winnerPayoutLines = winners
+    .map((w, i) => {
+      const p = winnerPrizes[i];
+      if (!p || p.donated) return null;
+      const val = (parseFloat((p.value || '').replace(/[^0-9.]/g, '')) || 0).toFixed(2);
+      return `  · ${w.place}: ${w.buyer_name} <${w.buyer_email ?? 'no email'}> — $${val} (square #${w.square_number})`;
+    })
+    .filter(Boolean);
+
   let payoutLine: string;
   if (isStripe) {
-    if (transferResult.skipped) {
-      payoutLine = `Payout already processed (Transfer ID: ${transferResult.transferId ?? 'in progress'}). No action required.`;
-    } else if (transferResult.ok) {
-      payoutLine = `Stripe transfer triggered automatically: $${fundsRaised} to ${f.stripe_account_id} (transfer ${transferResult.transferId}). Organiser should receive funds within 2 business days.`;
-    } else {
-      payoutLine = `ACTION REQUIRED: automatic Stripe transfer FAILED. Error: ${transferResult.error}\nManual transfer needed: $${fundsRaised} to connected account ${f.stripe_account_id ?? 'UNKNOWN'}.\nTo retry, set payout_queue.stripe_transfer_id = NULL for fundraiser_id = '${fundraiserId}'.`;
-    }
+    const reserveHeldDollars    = (prizeReserveHeld / 100).toFixed(2);
+    const cashPrizesDollars     = (cashPrizesTotalCents / 100).toFixed(2);
+    const remainderDollars      = (remainderToOrganiserCents / 100).toFixed(2);
+
+    const remainderLine = remainderToOrganiserCents > 0
+      ? transferResult.skipped
+        ? `Reserve remainder ($${remainderDollars}) already transferred. No action required.`
+        : transferResult.ok
+          ? `Reserve remainder ($${remainderDollars}) transferred to organiser (${transferResult.transferId}).`
+          : `ACTION REQUIRED: reserve remainder transfer FAILED ($${remainderDollars}). Error: ${transferResult.error}\nTo retry: set payout_queue.stripe_transfer_id = NULL for fundraiser_id = '${fundraiserId}'.`
+      : `No reserve remainder to transfer (all held funds allocated to winner prizes).`;
+
+    const winnerPayoutBlock = winnerPayoutLines.length > 0
+      ? `ACTION REQUIRED — pay the following winners from the $${reserveHeldDollars} prize reserve:\n${winnerPayoutLines.join('\n')}\n\nTotal cash prizes: $${cashPrizesDollars}`
+      : `No cash prize payouts required (all prizes donated).`;
+
+    payoutLine = [remainderLine, '', winnerPayoutBlock].join('\n');
   } else {
-    payoutLine = `No payout action needed (organiser collects directly).`;
+    payoutLine = `No Stripe payout needed (organiser collects directly).`;
   }
 
   const adminBody = [
@@ -218,8 +260,9 @@ Deno.serve(async (req) => {
     `Admin portal: https://luckysquares.com.au/admin/campaigns`,
   ].join('\n');
 
-  const adminSubject = isStripe && !transferResult.ok && !transferResult.skipped
-    ? `ACTION REQUIRED: Stripe transfer failed — ${f.title}`
+  const needsAction = (isStripe && !transferResult.ok && !transferResult.skipped) || winnerPayoutLines.length > 0;
+  const adminSubject = needsAction
+    ? `ACTION REQUIRED: Draw complete — ${f.title}`
     : `Draw complete — ${f.title}`;
 
   await sendEmail({

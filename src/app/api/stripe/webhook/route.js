@@ -3,6 +3,12 @@ import { getAdminClient as supabase } from '@/lib/supabase/server';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Parse a prize value string like "$1,000" or "500.00" into cents.
+function prizeValueToCents(value) {
+  const n = parseFloat((value || '').replace(/[^0-9.]/g, ''));
+  return isNaN(n) ? 0 : Math.round(n * 100);
+}
+
 export async function POST(req) {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
@@ -36,7 +42,6 @@ export async function POST(req) {
         console.error('admin_gift_square error:', giftError);
         return new Response('Failed to gift square', { status: 500 });
       }
-      // Store payment_intent_id so cancellation refund loop can return Lucky Squares' money
       await db.from('squares')
         .update({ payment_intent_id: session.payment_intent })
         .eq('fundraiser_id', fundraiser_id)
@@ -53,9 +58,21 @@ export async function POST(req) {
         .single();
 
       if (existing?.status !== 'active') {
+        // Calculate prize reserve: sum of non-donated cash prizes, locked at launch.
+        // Organisers cannot change prize values once a campaign is live.
+        const { data: prizes } = await db
+          .from('prizes')
+          .select('value, donated')
+          .eq('fundraiser_id', fundraiser_id);
+
+        const prizeReserveCents = (prizes || [])
+          .filter((p) => !p.donated)
+          .reduce((sum, p) => sum + prizeValueToCents(p.value), 0);
+
         await db.from('fundraisers').update({
-          status: 'active',
-          launched_at: new Date().toISOString(),
+          status:               'active',
+          launched_at:          new Date().toISOString(),
+          prize_reserve_cents:  prizeReserveCents,
         }).eq('id', fundraiser_id);
 
         if (coupon_code) {
@@ -87,10 +104,7 @@ export async function POST(req) {
 
     const squareNums = square_numbers.split(',').map(Number);
 
-    // Claim the squares.
-    // FIND-008: claim_squares now returns INTEGER (count of squares actually claimed)
-    // and only updates squares with status = 'reserved'. If a square was already
-    // 'sold', it is silently skipped and not counted.
+    // Claim the squares atomically (FIND-008: only reserved squares can be claimed).
     const { data: claimCount, error: claimError } = await db.rpc('claim_squares', {
       p_fundraiser_id:  fundraiser_id,
       p_square_numbers: squareNums,
@@ -104,27 +118,22 @@ export async function POST(req) {
       return new Response('Failed to claim squares', { status: 500 });
     }
 
-    // FIND-001: Double-payment guard.
-    // If fewer squares were claimed than requested, some were already 'sold' by a
-    // prior payment (race condition at checkout creation time). Issue an automatic
-    // full refund for this duplicate payment and return 200 so Stripe stops retrying.
-    // The first buyer's payment and square ownership are preserved intact.
+    // FIND-001: Double-payment guard — auto-refund if squares already sold.
     if (typeof claimCount === 'number' && claimCount < squareNums.length) {
       console.error(
         `[webhook] Double-payment detected — fundraiser ${fundraiser_id}: ` +
-        `expected to claim ${squareNums.length} squares, got ${claimCount}. ` +
-        `Auto-refunding payment_intent ${session.payment_intent}.`,
+        `expected ${squareNums.length} squares, claimed ${claimCount}. ` +
+        `Auto-refunding ${session.payment_intent}.`,
       );
       try {
         await stripe.refunds.create({ payment_intent: session.payment_intent });
       } catch (refundErr) {
         console.error('[webhook] Auto-refund failed — manual action required:', refundErr);
-        // Return 200 regardless so Stripe does not retry. Manual refund needed.
       }
       return new Response('ok', { status: 200 });
     }
 
-    // Mark squares as paid and record the Stripe payment_intent_id for audit
+    // Mark squares as paid and record payment_intent_id for audit trail.
     await db
       .from('squares')
       .update({ paid: true, payment_intent_id: session.payment_intent })
@@ -132,16 +141,67 @@ export async function POST(req) {
       .in('number', squareNums)
       .eq('buyer_email', buyer_email);
 
-    // Fetch fundraiser details for email
+    // ── Prize reserve split + immediate organiser transfer ────────────────────
+    // The buyer paid: subtotal (square revenue) + tx fee on top.
+    // Stripe's fee is covered by the tx fee the buyer paid — so subtotal_cents
+    // is clean revenue that hits the platform.
+    //
+    // claim_prize_reserve atomically works out how much of this payment needs to
+    // stay on the platform (prize reserve top-up) vs can go to the organiser now.
+    const subtotalCents = parseInt(subtotal_cents || '0');
+
+    const { data: fundraiserData } = await db
+      .from('fundraisers')
+      .select('stripe_account_id, prize_reserve_cents')
+      .eq('id', fundraiser_id)
+      .single();
+
+    if (fundraiserData?.stripe_account_id) {
+      const { data: reserve, error: reserveErr } = await db.rpc('claim_prize_reserve', {
+        p_fundraiser_id:  fundraiser_id,
+        p_subtotal_cents: subtotalCents,
+      });
+
+      if (reserveErr) {
+        console.error('[webhook] claim_prize_reserve error:', reserveErr.message);
+        // Money is safe on platform — continue without the transfer.
+      } else {
+        const transferCents = reserve?.[0]?.transfer_cents ?? 0;
+        const holdCents     = reserve?.[0]?.hold_cents     ?? subtotalCents;
+
+        if (transferCents > 0) {
+          try {
+            await stripe.transfers.create({
+              amount:         transferCents,
+              currency:       'aud',
+              destination:    fundraiserData.stripe_account_id,
+              transfer_group: fundraiser_id,
+              metadata: {
+                fundraiser_id,
+                type:             'square_proceeds',
+                payment_intent:   session.payment_intent,
+                held_for_prizes:  String(holdCents),
+              },
+            });
+          } catch (transferErr) {
+            // Transfer failure is not fatal — funds are safe on the platform.
+            // Admin will see the gap between payout_queue and transfers at draw time.
+            console.error('[webhook] Organiser transfer failed:', transferErr.message,
+              `— ${transferCents}c will need manual transfer for fundraiser ${fundraiser_id}`);
+          }
+        }
+      }
+    }
+
+    // ── Confirmation email to buyer ───────────────────────────────────────────
     const { data: fundraiser } = await db
       .from('fundraisers')
       .select('title, org, draw_type, draw_date, contact_name, contact_email')
       .eq('id', fundraiser_id)
       .single();
 
-    // Send confirmation email
     if (fundraiser) {
-      const subtotal = parseInt(subtotal_cents || 0) / 100;
+      const subtotal = subtotalCents / 100;
       const drawDesc = fundraiser.draw_type === 'auto' && fundraiser.draw_date
         ? `The draw will take place on ${new Date(fundraiser.draw_date).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}.`
         : 'The organiser will announce the draw date soon.';
@@ -160,11 +220,11 @@ export async function POST(req) {
           data: {
             buyer_name,
             campaign_title: fundraiser.title,
-            org_name: fundraiser.org,
+            org_name:       fundraiser.org,
             square_numbers: squareNums.join(', '),
-            amount_paid: subtotal.toFixed(2),
+            amount_paid:    subtotal.toFixed(2),
             draw_type_description: drawDesc,
-            campaign_url: `${appUrl}/f/${fundraiser_id}`,
+            campaign_url:   `${appUrl}/f/${fundraiser_id}`,
           },
         }),
       });
@@ -176,7 +236,7 @@ export async function POST(req) {
         .eq('fundraiser_id', fundraiser_id)
         .single();
 
-      const totalSold = Number(stats?.sold_count ?? 0);
+      const totalSold   = Number(stats?.sold_count ?? 0);
       const isFirstSale = totalSold === squareNums.length;
 
       if (isFirstSale && fundraiser?.contact_email) {
@@ -193,17 +253,17 @@ export async function POST(req) {
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
             body: JSON.stringify({
               type: 'square_sold',
-              to: fullFundraiser.contact_email,
+              to:   fullFundraiser.contact_email,
               data: {
-                first_name: (fullFundraiser.contact_name ?? 'there').split(' ')[0],
+                first_name:     (fullFundraiser.contact_name ?? 'there').split(' ')[0],
                 campaign_title: fundraiser.title,
-                org_name: fundraiser.org,
-                buyer_name: buyer_name,
-                square_number: squareNums[0],
-                sold_count: totalSold,
-                grid_size: fullFundraiser.grid_size,
-                amount_raised: amountRaised,
-                is_first: true,
+                org_name:       fundraiser.org,
+                buyer_name,
+                square_number:  squareNums[0],
+                sold_count:     totalSold,
+                grid_size:      fullFundraiser.grid_size,
+                amount_raised:  amountRaised,
+                is_first:       true,
               },
             }),
           }).catch(() => {});
