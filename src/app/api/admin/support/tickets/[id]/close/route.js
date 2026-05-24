@@ -37,7 +37,7 @@ function satisfactionEmailHtml(name, ticketRef, subject, ticketId) {
         <tr><td style="text-align:center;padding-bottom:28px">
           <span style="font-size:28px">🍀</span>
           <div style="font-size:18px;font-weight:900;color:#1A1209;letter-spacing:-0.5px;margin-top:4px">Lucky Squares</div>
-          <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">Australia — Support</div>
+          <div style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:1.5px;text-transform:uppercase">Australia: Support</div>
         </td></tr>
         <tr><td style="background:#FFFFFF;border-radius:16px;padding:36px 40px;border:1.5px solid #E5E0D5;box-shadow:0 2px 12px rgba(61,46,26,0.07)">
           <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#1A1209">Hi ${safe(name.split(' ')[0])},</p>

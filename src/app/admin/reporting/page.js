@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
+import { adminFetch } from '@/lib/adminFetch';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -513,18 +514,7 @@ export default function AdminReporting() {
         ))}
       </div>
 
-      {/* Reporting tab — placeholder */}
-      {activeTab === 'reporting' && (
-        <div style={{ textAlign: 'center', padding: '80px 40px', color: 'var(--text2)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', marginBottom: 8 }}>
-            Campaign Reporting
-          </h2>
-          <p style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 420, margin: '0 auto' }}>
-            Detailed campaign performance reporting is coming soon. This will cover squares sold, revenue per campaign, organiser activity, draw outcomes and buyer trends.
-          </p>
-        </div>
-      )}
+      {activeTab === 'reporting' && <ReportingTab />}
 
       {/* Forecasting tab */}
       {activeTab === 'forecasting' && <>
@@ -991,6 +981,285 @@ export default function AdminReporting() {
         All figures are projections only.
       </div>
       </>}
+    </div>
+  );
+}
+
+// ── Reporting Tab ─────────────────────────────────────────────────────────────
+
+function MiniBar({ value, max, colour = '#7C3AED' }) {
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ flex: 1, height: 8, background: '#F0EAE0', borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: colour, borderRadius: 4, transition: 'width .3s' }} />
+      </div>
+      <span style={{ fontSize: 11, fontWeight: 700, color: '#6B5E4E', minWidth: 28, textAlign: 'right' }}>{pct}%</span>
+    </div>
+  );
+}
+
+function StatCard({ label, value, sub, colour = '#7C3AED' }) {
+  return (
+    <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #E5E0D5', padding: '18px 22px' }}>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9B8F80', marginBottom: 8 }}>{label}</div>
+      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, color: colour }}>{value}</div>
+      {sub && <div style={{ fontSize: 12, color: '#9B8F80', marginTop: 4 }}>{sub}</div>}
+    </div>
+  );
+}
+
+function ReportingTab() {
+  const [campaigns, setCampaigns] = useState([]);
+  const [users,     setUsers]     = useState([]);
+  const [tickets,   setTickets]   = useState([]);
+  const [loading,   setLoading]   = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!supabaseConfigured) { setLoading(false); return; }
+      const sb = getSupabaseClient();
+
+      const [{ data: cData }, { data: pData }] = await Promise.all([
+        sb.rpc('admin_get_fundraisers'),
+        sb.rpc('admin_get_profiles'),
+      ]);
+
+      setCampaigns(cData ?? []);
+      setUsers(pData ?? []);
+
+      try {
+        const res  = await adminFetch('/api/admin/support/tickets?limit=500');
+        const json = await res.json();
+        setTickets(json.tickets ?? []);
+      } catch { /* support metrics optional */ }
+
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  if (loading) return <div style={{ color: 'var(--text2)', fontSize: 13, padding: '40px 0' }}>Loading reporting data…</div>;
+
+  // ── Campaign metrics ────────────────────────────────────────────────────
+  const launched  = campaigns.filter((c) => ['active', 'drawn'].includes(c.status));
+  const drawn     = campaigns.filter((c) => c.status === 'drawn');
+  const totalSold = campaigns.reduce((s, c) => s + (c.sold_count || 0), 0);
+  const totalRaised = campaigns.reduce((s, c) => s + (c.sold_count || 0) * Number(c.price_per_sq || 0), 0);
+  const platformFees = launched.length * 19;
+  const completionRate = launched.length > 0 ? Math.round((drawn.length / launched.length) * 100) : 0;
+  const avgSold = launched.length > 0 ? Math.round(totalSold / launched.length) : 0;
+
+  const stripeCampaigns = launched.filter((c) => c.payment_method === 'stripe');
+  const cashCampaigns   = launched.filter((c) => c.payment_method !== 'stripe');
+
+  const topCampaigns = [...campaigns]
+    .filter((c) => c.sold_count > 0)
+    .sort((a, b) => b.sold_count - a.sold_count)
+    .slice(0, 10);
+
+  const campaignsByMonth = {};
+  for (const c of campaigns) {
+    const key = c.created_at?.slice(0, 7);
+    if (key) campaignsByMonth[key] = (campaignsByMonth[key] || 0) + 1;
+  }
+
+  // ── User metrics ─────────────────────────────────────────────────────────
+  const usersByMonth = {};
+  for (const u of users) {
+    const key = u.created_at?.slice(0, 7);
+    if (key) usersByMonth[key] = (usersByMonth[key] || 0) + 1;
+  }
+  const allMonthKeys = [...new Set([...Object.keys(campaignsByMonth), ...Object.keys(usersByMonth)])].sort();
+  const maxMonthCampaigns = Math.max(...allMonthKeys.map((k) => campaignsByMonth[k] || 0), 1);
+  const maxMonthUsers     = Math.max(...allMonthKeys.map((k) => usersByMonth[k] || 0), 1);
+
+  // ── Support metrics ───────────────────────────────────────────────────────
+  const positiveCount = tickets.filter((t) => t.satisfaction === 'positive').length;
+  const negativeCount = tickets.filter((t) => t.satisfaction === 'negative').length;
+  const ratedCount    = positiveCount + negativeCount;
+  const satisfactionPct = ratedCount > 0 ? Math.round((positiveCount / ratedCount) * 100) : null;
+
+  const catLabels = { general: 'General', billing: 'Billing', campaign_help: 'Campaign Help', technical: 'Technical', abuse: 'Abuse' };
+  const ticketsByCat = {};
+  for (const t of tickets) ticketsByCat[t.category] = (ticketsByCat[t.category] || 0) + 1;
+  const maxCatCount = Math.max(...Object.values(ticketsByCat), 1);
+
+  return (
+    <div style={{ maxWidth: 900 }}>
+
+      {/* ── KPI Overview ──────────────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}><SectionTitle>Overview</SectionTitle></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 32 }}>
+        <StatCard label="Campaigns launched"  value={launched.length}                   colour="#7C3AED" sub={`${campaigns.length} total incl. drafts`} />
+        <StatCard label="Draws completed"     value={drawn.length}                      colour="#16A34A" sub={`${completionRate}% completion rate`} />
+        <StatCard label="Squares sold"        value={totalSold.toLocaleString('en-AU')} colour="#4A28D4" sub={`Avg ${avgSold} per campaign`} />
+        <StatCard label="Total raised"        value={aud(totalRaised)}                  colour="#16A34A" sub="Across all campaigns" />
+        <StatCard label="Platform fees"       value={aud(platformFees)}                 colour="#7C3AED" sub="$19 per launched campaign" />
+        <StatCard label="Registered users"    value={users.length}                      colour="#4A28D4" sub={`${stripeCampaigns.length} Stripe / ${cashCampaigns.length} cash campaigns`} />
+      </div>
+
+      {/* ── Campaign Performance ──────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}><SectionTitle>Campaign Performance</SectionTitle></div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <Card>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Status breakdown</div>
+          {[
+            { label: 'Active (live)',  count: campaigns.filter((c) => c.status === 'active').length,   colour: '#16A34A' },
+            { label: 'Draw complete', count: drawn.length,                                              colour: '#7C3AED' },
+            { label: 'Draft',         count: campaigns.filter((c) => c.status === 'draft').length,     colour: '#F59E0B' },
+            { label: 'Cancelled',     count: campaigns.filter((c) => c.status === 'cancelled').length, colour: '#9CA3AF' },
+          ].map(({ label, count, colour }) => (
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 2, background: colour, display: 'inline-block' }} />
+                <span style={{ fontSize: 13, color: '#6B5E4E' }}>{label}</span>
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 900, color: colour }}>{count}</span>
+            </div>
+          ))}
+        </Card>
+
+        <Card>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Payment method (launched)</div>
+          {[
+            { label: 'Stripe (online)', count: stripeCampaigns.length, colour: '#7C3AED' },
+            { label: 'Cash / bank',     count: cashCampaigns.length,   colour: '#F59E0B' },
+          ].map(({ label, count, colour }) => (
+            <div key={label} style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: '#6B5E4E' }}>{label}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: colour }}>{count}</span>
+              </div>
+              <MiniBar value={count} max={launched.length || 1} colour={colour} />
+            </div>
+          ))}
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #F0EAE0', fontSize: 12, color: '#9B8F80' }}>
+            Stripe campaigns raised {aud(stripeCampaigns.reduce((s, c) => s + (c.sold_count || 0) * Number(c.price_per_sq || 0), 0))} total
+          </div>
+        </Card>
+      </div>
+
+      {topCampaigns.length > 0 && (
+        <Card style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Top campaigns by squares sold</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '1.5px solid #E5E0D5' }}>
+                {['Campaign', 'Org', 'Status', 'Method', 'Sq. sold', 'Raised'].map((h) => (
+                  <th key={h} style={{ textAlign: h === 'Sq. sold' || h === 'Raised' ? 'right' : 'left', padding: '6px 8px', color: '#9B8F80', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {topCampaigns.map((c) => (
+                <tr key={c.id} style={{ borderBottom: '1px solid #F0EAE0' }}>
+                  <td style={{ padding: '10px 8px', fontWeight: 700, color: '#1A1209', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</td>
+                  <td style={{ padding: '10px 8px', color: '#4A3728', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.org}</td>
+                  <td style={{ padding: '10px 8px' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                      background: c.status === 'drawn' ? '#F0FDF4' : c.status === 'active' ? '#EFF6FF' : '#F9F8F6',
+                      color:      c.status === 'drawn' ? '#15803D' : c.status === 'active' ? '#1D4ED8' : '#9B8F80',
+                    }}>{c.status}</span>
+                  </td>
+                  <td style={{ padding: '10px 8px', color: '#6B5E4E', fontSize: 12 }}>{c.payment_method === 'stripe' ? '💳' : '💵'} {c.payment_method}</td>
+                  <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: '#7C3AED' }}>{(c.sold_count || 0).toLocaleString('en-AU')}</td>
+                  <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 700, color: '#16A34A' }}>{aud((c.sold_count || 0) * Number(c.price_per_sq || 0))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
+
+      {/* ── Monthly Activity ──────────────────────────────────────── */}
+      {allMonthKeys.length > 0 && (
+        <>
+          <div style={{ marginBottom: 12 }}><SectionTitle>Monthly Activity</SectionTitle></div>
+          <Card style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>New campaigns and user signups by month</div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: '1.5px solid #E5E0D5' }}>
+                  {['Month', 'New campaigns', '', 'New users', ''].map((h, i) => (
+                    <th key={i} style={{ textAlign: i === 1 || i === 3 ? 'right' : 'left', padding: '6px 8px', color: '#9B8F80', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', width: i === 2 || i === 4 ? 140 : 'auto' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {allMonthKeys.map((k) => {
+                  const d = new Date(k + '-01');
+                  const label = d.toLocaleDateString('en-AU', { month: 'short', year: 'numeric' });
+                  const cCount = campaignsByMonth[k] || 0;
+                  const uCount = usersByMonth[k] || 0;
+                  return (
+                    <tr key={k} style={{ borderBottom: '1px solid #F0EAE0' }}>
+                      <td style={{ padding: '10px 8px', fontWeight: 700, color: '#1A1209' }}>{label}</td>
+                      <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: '#7C3AED' }}>{cCount}</td>
+                      <td style={{ padding: '10px 8px' }}><MiniBar value={cCount} max={maxMonthCampaigns} colour="#7C3AED" /></td>
+                      <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: '#16A34A' }}>{uCount}</td>
+                      <td style={{ padding: '10px 8px' }}><MiniBar value={uCount} max={maxMonthUsers} colour="#16A34A" /></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </Card>
+        </>
+      )}
+
+      {/* ── Revenue Actuals ───────────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}><SectionTitle>Revenue Actuals</SectionTitle></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 32 }}>
+        <StatCard label="Platform fees collected" value={aud(platformFees)}   colour="#7C3AED" sub={`${launched.length} campaigns × $19`} />
+        <StatCard label="Total raised (all orgs)"  value={aud(totalRaised)}   colour="#16A34A" sub="Organiser-side revenue" />
+        <StatCard label="Stripe campaigns raised"  value={aud(stripeCampaigns.reduce((s, c) => s + (c.sold_count || 0) * Number(c.price_per_sq || 0), 0))} colour="#4A28D4" sub={`${stripeCampaigns.length} Stripe campaigns`} />
+        <StatCard label="Cash campaigns raised"    value={aud(cashCampaigns.reduce((s, c) => s + (c.sold_count || 0) * Number(c.price_per_sq || 0), 0))}   colour="#F59E0B" sub={`${cashCampaigns.length} cash campaigns`} />
+      </div>
+
+      {/* ── Support Satisfaction ──────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}><SectionTitle>Support Satisfaction</SectionTitle></div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 40 }}>
+        <Card>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Satisfaction score</div>
+          {satisfactionPct !== null ? (
+            <>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 48, fontWeight: 900, color: satisfactionPct >= 70 ? '#16A34A' : satisfactionPct >= 50 ? '#F59E0B' : '#DC2626', marginBottom: 8 }}>
+                {satisfactionPct}%
+              </div>
+              <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+                <span style={{ fontSize: 14 }}>👍 <strong>{positiveCount}</strong> positive</span>
+                <span style={{ fontSize: 14 }}>👎 <strong>{negativeCount}</strong> negative</span>
+              </div>
+              <MiniBar value={positiveCount} max={ratedCount} colour="#16A34A" />
+            </>
+          ) : (
+            <div style={{ color: '#9B8F80', fontSize: 13 }}>No survey responses yet. Surveys are sent when a ticket is closed.</div>
+          )}
+          <div style={{ marginTop: 16, fontSize: 12, color: '#9B8F80' }}>
+            {tickets.length} total tickets, {ratedCount} rated
+          </div>
+        </Card>
+
+        <Card>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Tickets by category</div>
+          {Object.keys(ticketsByCat).length === 0 ? (
+            <div style={{ color: '#9B8F80', fontSize: 13 }}>No tickets yet.</div>
+          ) : (
+            Object.entries(ticketsByCat)
+              .sort((a, b) => b[1] - a[1])
+              .map(([cat, count]) => (
+                <div key={cat} style={{ marginBottom: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ fontSize: 13, color: '#6B5E4E' }}>{catLabels[cat] || cat}</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: '#7C3AED' }}>{count}</span>
+                  </div>
+                  <MiniBar value={count} max={maxCatCount} colour="#7C3AED" />
+                </div>
+              ))
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
