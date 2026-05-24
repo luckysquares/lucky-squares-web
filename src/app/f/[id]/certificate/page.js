@@ -105,13 +105,17 @@ export default async function CertificatePage({ params }) {
     @media print{
       /* Preserve all background colours and images exactly as on screen */
       *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-      /* Lock to one page — kill any min-height:100vh from global styles */
+      /* Hide absolutely everything in the page except the certificate —
+         catches footer, chat widget, analytics scripts, anything else */
+      body>*{display:none!important}
+      body>.cert-page{display:block!important}
+      /* Lock to one page */
       html,body{width:210mm!important;height:297mm!important;min-height:0!important;overflow:hidden!important}
       .cert-page{background:#F5F3EE;padding:0;min-height:0}
-      /* Cert fills the full A4 content area; footer is pinned to the bottom */
+      /* Cert fills the full A4 content area; footer pinned to bottom */
       .cert{box-shadow:none;border-radius:8px;padding:32px 42px;max-width:100%;margin:0;min-height:277mm;display:flex;flex-direction:column}
       .footer{margin-top:auto;padding-top:14px}
-      .print-btn{display:none}
+      .print-btn{display:none!important}
     }
   `;
 
