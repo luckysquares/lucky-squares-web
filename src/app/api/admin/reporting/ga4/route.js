@@ -134,12 +134,12 @@ export async function GET(req) {
               metrics:    [{ name: 'sessions' }, { name: 'activeUsers' }],
               orderBys:   [{ metric: { metricName: 'sessions' }, desc: true }],
             },
-            // 6: Exit pages (pages with most exits)
+            // 6: Pages with high bounce rate (exit-signal proxy)
             {
               dateRanges: [dateRange(30)],
               dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
-              metrics:    [{ name: 'exits' }, { name: 'screenPageViews' }],
-              orderBys:   [{ metric: { metricName: 'exits' }, desc: true }],
+              metrics:    [{ name: 'bounceRate' }, { name: 'screenPageViews' }],
+              orderBys:   [{ metric: { metricName: 'screenPageViews' }, desc: true }],
               limit: 10,
             },
           ],
@@ -162,7 +162,7 @@ export async function GET(req) {
       metrics:    row.metricValues?.map((m) => m.value) ?? [],
     }));
 
-    const [trend, topPages, sources, landingPages, geography, devices, exitPages] = reports;
+    const [trend, topPages, sources, landingPages, geography, devices, bouncyPages] = reports;
 
     return NextResponse.json({
       trend: rows(trend).map((r) => ({
@@ -198,11 +198,11 @@ export async function GET(req) {
         sessions: parseInt(r.metrics[0], 10),
         users:    parseInt(r.metrics[1], 10),
       })),
-      exitPages: rows(exitPages).map((r) => ({
-        path:   r.dimensions[0],
-        title:  r.dimensions[1],
-        exits:  parseInt(r.metrics[0], 10),
-        views:  parseInt(r.metrics[1], 10),
+      bouncyPages: rows(bouncyPages).map((r) => ({
+        path:       r.dimensions[0],
+        title:      r.dimensions[1],
+        bounceRate: parseFloat(r.metrics[0]),
+        views:      parseInt(r.metrics[1], 10),
       })),
     });
 
