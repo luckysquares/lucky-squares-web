@@ -50,9 +50,12 @@ export async function middleware(request) {
     if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const response = NextResponse.next();
-  response.headers.set('x-pathname', pathname);
-  return response;
+  // Thread x-pathname as a *request* header so server components can read it
+  // via headers(). Setting it on the response is not enough — Next.js only
+  // forwards modified request headers to the rendering pipeline.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

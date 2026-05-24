@@ -1,5 +1,6 @@
 import { getAdminClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
+import PrintButton from './PrintButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -225,9 +226,7 @@ export default async function CertificatePage({ params }) {
         </div>
 
         {/* Print button — hidden in print */}
-        <button className="print-btn" onClick="window.print()">
-          Save as PDF / Print
-        </button>
+        <PrintButton />
       </div>
     </>
   );
