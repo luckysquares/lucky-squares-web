@@ -50,7 +50,9 @@ export async function middleware(request) {
     if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set('x-pathname', pathname);
+  return response;
 }
 
 export const config = {

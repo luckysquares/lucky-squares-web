@@ -1,6 +1,7 @@
 import { Fraunces, Nunito } from 'next/font/google';
 import { Suspense } from 'react';
 import Script from 'next/script';
+import { headers } from 'next/headers';
 import './globals.css';
 import Footer from '@/components/marketing/Footer';
 import ReferralCapture from '@/components/app/ReferralCapture';
@@ -75,23 +76,32 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') ?? '';
+  const isStandalone = pathname.endsWith('/certificate');
+
   return (
     <html lang="en-AU" className={`${fraunces.variable} ${nunito.variable}`}>
-      <body style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        {/* Google Analytics 4 */}
-        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-        <Script id="ga4-init" strategy="afterInteractive">{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_ID}', { page_path: window.location.pathname });
-        `}</Script>
-
-        <Suspense fallback={null}><ReferralCapture /></Suspense>
-        <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>{children}</div>
-        <Footer />
-        <div data-mariposa-widget><MariposaChatWidget /></div>
+      <body style={isStandalone ? {} : { display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {!isStandalone && (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+            <Script id="ga4-init" strategy="afterInteractive">{`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+            `}</Script>
+            <Suspense fallback={null}><ReferralCapture /></Suspense>
+          </>
+        )}
+        {isStandalone
+          ? children
+          : <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>{children}</div>
+        }
+        {!isStandalone && <Footer />}
+        {!isStandalone && <div data-mariposa-widget><MariposaChatWidget /></div>}
         <Analytics />
       </body>
     </html>

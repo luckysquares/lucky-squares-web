@@ -72,7 +72,7 @@ export default async function CertificatePage({ params }) {
 
   const css = `
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#F5F3EE;color:#1A1209;padding:32px 16px 80px}
+    .cert-page{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#F5F3EE;color:#1A1209;padding:32px 16px 80px;min-height:100vh}
     .cert{max-width:720px;margin:0 auto;background:#fff;border:2px solid #E5E0D5;border-radius:16px;padding:48px 52px;box-shadow:0 4px 24px rgba(61,46,26,.10)}
     .hd{text-align:center;border-bottom:2px solid #E5E0D5;padding-bottom:28px;margin-bottom:28px}
     .hd-emoji{font-size:36px;display:block;margin-bottom:6px}
@@ -99,7 +99,7 @@ export default async function CertificatePage({ params }) {
     .print-btn{display:block;margin:24px auto 0;max-width:720px;background:#7C3AED;color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;text-align:center;font-family:inherit;width:100%}
     .print-btn:hover{background:#6D28D9}
     @media print{
-      body{background:#fff;padding:0}
+      .cert-page{background:#fff;padding:0}
       .cert{border:1.5px solid #ccc;box-shadow:none;border-radius:0;padding:32px 36px}
       .print-btn{display:none}
     }
@@ -107,14 +107,9 @@ export default async function CertificatePage({ params }) {
   `;
 
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{certId} — Draw Integrity Certificate</title>
-        <style dangerouslySetInnerHTML={{ __html: css }} />
-      </head>
-      <body>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <div className="cert-page">
         <div className="cert">
 
           {/* Header */}
@@ -233,7 +228,7 @@ export default async function CertificatePage({ params }) {
         <button className="print-btn" onClick="window.print()">
           Save as PDF / Print
         </button>
-      </body>
-    </html>
+      </div>
+    </>
   );
 }

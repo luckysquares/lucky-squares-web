@@ -53,7 +53,7 @@ begin
       grid_size, price_per_sq, sold_count, funds_raised,
       payout_bsb, payout_account, payout_bank_name
     ) values (
-      new.id, new.user_id, new.title, new.org,
+      new.id, new.owner_id, new.title, new.org,
       new.contact_name, new.contact_email, new.payment_method,
       new.grid_size, new.price_per_sq, v_sold,
       v_sold * new.price_per_sq,
