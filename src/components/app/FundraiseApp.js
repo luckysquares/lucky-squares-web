@@ -1431,7 +1431,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
           { method: 'inperson',      icon: '🤝', title: 'In person',                     desc: 'Collect payment face-to-face via cash, card tap, or EFTPOS terminal. No online payment required.' },
           { method: 'bank',          icon: '🏦', title: 'Bank transfer',                 desc: 'Buyers pay via BSB/account number, free with no platform transaction fees.' },
           { method: 'bank_inperson', icon: '🤝', title: 'In person + bank transfer',     desc: 'Accept payment in person or by bank transfer. Your buyers choose whichever suits them.' },
-          { method: 'stripe',        icon: '💳', title: 'Online card payment',            desc: 'Buyers pay securely by card. A 1.75% + 30c processing fee is added to the buyer total. Funds transferred to your bank after the draw.' },
+          { method: 'stripe',        icon: '💳', title: 'Online card payment',            desc: 'Buyers pay securely by card. A 1.7% + 30c processing fee is added to the buyer total. Funds transferred to your bank after the draw.' },
         ].map((opt) => (
           <div key={opt.method} className="scratch-card" style={{ padding: '20px 24px', cursor: 'pointer', borderColor: payment.method === opt.method ? 'var(--purple)' : undefined, borderWidth: payment.method === opt.method ? 2 : 1.5 }} onClick={() => setPayment({ ...payment, method: opt.method })}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>

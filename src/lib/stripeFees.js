@@ -8,7 +8,7 @@
  * Lucky Squares absorbs Stripe's cost on those as cost of doing business.
  * These are for buyer square purchase transactions only.
  */
-export const STRIPE_FEE_PCT   = 0.0175; // 1.75% per transaction (Stripe AU standard rate)
+export const STRIPE_FEE_PCT   = 0.0170; // 1.7% per transaction (Stripe AU standard rate)
 export const STRIPE_FEE_FIXED = 0.30;   // $0.30 flat per transaction
 
 /**

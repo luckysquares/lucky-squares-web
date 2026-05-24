@@ -101,7 +101,7 @@ export default function PricingPage() {
             {[
               {
                 q: 'Are there payment processing fees?',
-                a: 'Only for secure online card payments (1.75% + 30c for Australian cards). These fees are passed on to buyers of squares, so you get to keep every dollar you raise. Bank transfers and in person payments have no processing fee at all.',
+                a: 'Only for secure online card payments (1.7% + 30c for Australian cards). These fees are passed on to buyers of squares, so you get to keep every dollar you raise. Bank transfers and in person payments have no processing fee at all.',
               },
               {
                 q: 'When do funds arrive in my account?',
