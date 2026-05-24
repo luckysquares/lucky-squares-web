@@ -75,6 +75,9 @@ export const metadata = {
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
+  verification: {
+    google: '1nLNp-dfjY8lWCR6K7l18oMGgiD4ZXlTe1Iu2biFmn4',
+  },
 };
 
 export default async function RootLayout({ children }) {
