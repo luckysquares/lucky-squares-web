@@ -1013,6 +1013,8 @@ function ReportingTab() {
   const [campaigns, setCampaigns] = useState([]);
   const [users,     setUsers]     = useState([]);
   const [tickets,   setTickets]   = useState([]);
+  const [ga4,       setGa4]       = useState(null);
+  const [ga4Error,  setGa4Error]  = useState('');
   const [loading,   setLoading]   = useState(true);
 
   useEffect(() => {
@@ -1033,6 +1035,13 @@ function ReportingTab() {
         const json = await res.json();
         setTickets(json.tickets ?? []);
       } catch { /* support metrics optional */ }
+
+      try {
+        const res  = await adminFetch('/api/admin/reporting/ga4');
+        const json = await res.json();
+        if (json.error) setGa4Error(json.error);
+        else setGa4(json);
+      } catch { setGa4Error('Could not load GA4 data'); }
 
       setLoading(false);
     };
@@ -1260,6 +1269,155 @@ function ReportingTab() {
           )}
         </Card>
       </div>
+
+      {/* ── GA4 Traffic ───────────────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}><SectionTitle>Website Traffic (last 30 days)</SectionTitle></div>
+      {ga4Error ? (
+        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '14px 18px', fontSize: 13, color: '#B91C1C', marginBottom: 32 }}>
+          GA4 error: {ga4Error}
+        </div>
+      ) : !ga4 ? (
+        <div style={{ color: '#9B8F80', fontSize: 13, marginBottom: 32 }}>GA4 not configured — add GA4_PROPERTY_ID, GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_OAUTH_REFRESH_TOKEN to Vercel environment variables.</div>
+      ) : (
+        <>
+          {/* KPI summary */}
+          {(() => {
+            const totalSessions = ga4.trend.reduce((s, d) => s + d.sessions, 0);
+            const totalUsers    = ga4.trend.reduce((s, d) => s + d.users, 0);
+            const totalNew      = ga4.trend.reduce((s, d) => s + d.newUsers, 0);
+            const topSource     = ga4.sources[0];
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, marginBottom: 24 }}>
+                <StatCard label="Sessions"      value={totalSessions.toLocaleString('en-AU')} colour="#4A28D4" sub="Last 30 days" />
+                <StatCard label="Users"         value={totalUsers.toLocaleString('en-AU')}    colour="#7C3AED" sub="Active users" />
+                <StatCard label="New users"     value={totalNew.toLocaleString('en-AU')}      colour="#16A34A" sub={`${totalUsers > 0 ? Math.round((totalNew / totalUsers) * 100) : 0}% of all users`} />
+                <StatCard label="Top channel"   value={topSource?.channel ?? 'N/A'}           colour="#F59E0B" sub={`${topSource?.sessions.toLocaleString('en-AU') ?? 0} sessions`} />
+              </div>
+            );
+          })()}
+
+          {/* Sessions trend sparkline */}
+          <Card style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Daily sessions (30 days)</div>
+            {(() => {
+              const maxS = Math.max(...ga4.trend.map((d) => d.sessions), 1);
+              return (
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 80 }}>
+                  {ga4.trend.map((d) => (
+                    <div
+                      key={d.date}
+                      title={`${d.date.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}: ${d.sessions} sessions`}
+                      style={{
+                        flex: 1,
+                        height: `${Math.max(4, (d.sessions / maxS) * 80)}px`,
+                        background: '#7C3AED',
+                        borderRadius: '2px 2px 0 0',
+                        opacity: 0.8,
+                        cursor: 'default',
+                      }}
+                    />
+                  ))}
+                </div>
+              );
+            })()}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#9B8F80', marginTop: 6 }}>
+              <span>30 days ago</span>
+              <span>Today</span>
+            </div>
+          </Card>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+            {/* Traffic sources */}
+            <Card>
+              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Traffic sources</div>
+              {(() => {
+                const maxS = Math.max(...ga4.sources.map((s) => s.sessions), 1);
+                return ga4.sources.map((s) => (
+                  <div key={s.channel} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <span style={{ fontSize: 13, color: '#6B5E4E' }}>{s.channel}</span>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: '#4A28D4' }}>{s.sessions.toLocaleString('en-AU')}</span>
+                    </div>
+                    <MiniBar value={s.sessions} max={maxS} colour="#4A28D4" />
+                  </div>
+                ));
+              })()}
+            </Card>
+
+            {/* Device breakdown */}
+            <Card>
+              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Devices</div>
+              {(() => {
+                const maxS = Math.max(...ga4.devices.map((d) => d.sessions), 1);
+                const icons = { desktop: '🖥️', mobile: '📱', tablet: '📱' };
+                return ga4.devices.map((d) => (
+                  <div key={d.device} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <span style={{ fontSize: 13, color: '#6B5E4E' }}>{icons[d.device] || '💻'} {d.device}</span>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: '#7C3AED' }}>{d.sessions.toLocaleString('en-AU')}</span>
+                    </div>
+                    <MiniBar value={d.sessions} max={maxS} colour="#7C3AED" />
+                  </div>
+                ));
+              })()}
+            </Card>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+            {/* Top pages */}
+            <Card>
+              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Top pages</div>
+              {ga4.topPages.map((p, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid #F0EAE0' }}>
+                  <span style={{ fontSize: 12, color: '#4A3728', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }} title={p.path}>{p.path}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#4A28D4', marginLeft: 8, whiteSpace: 'nowrap' }}>{p.views.toLocaleString('en-AU')} views</span>
+                </div>
+              ))}
+            </Card>
+
+            {/* Entry pages */}
+            <Card>
+              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Entry pages</div>
+              {ga4.landingPages.map((p, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid #F0EAE0' }}>
+                  <span style={{ fontSize: 12, color: '#4A3728', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }} title={p.path}>{p.path}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#16A34A', marginLeft: 8, whiteSpace: 'nowrap' }}>{p.sessions.toLocaleString('en-AU')} sessions</span>
+                </div>
+              ))}
+            </Card>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 40 }}>
+            {/* Exit pages */}
+            <Card>
+              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Exit pages</div>
+              {ga4.exitPages.map((p, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid #F0EAE0' }}>
+                  <span style={{ fontSize: 12, color: '#4A3728', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }} title={p.path}>{p.path}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#DC2626', marginLeft: 8, whiteSpace: 'nowrap' }}>{p.exits.toLocaleString('en-AU')} exits</span>
+                </div>
+              ))}
+            </Card>
+
+            {/* Geography */}
+            <Card>
+              <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Top countries</div>
+              {(() => {
+                const maxS = Math.max(...ga4.geography.map((g) => g.sessions), 1);
+                return ga4.geography.slice(0, 8).map((g) => (
+                  <div key={g.country} style={{ marginBottom: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, color: '#4A3728' }}>{g.country}</span>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: '#F59E0B' }}>{g.sessions.toLocaleString('en-AU')}</span>
+                    </div>
+                    <MiniBar value={g.sessions} max={maxS} colour="#F59E0B" />
+                  </div>
+                ));
+              })()}
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }
