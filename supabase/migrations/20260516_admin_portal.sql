@@ -85,9 +85,7 @@ returns table (
   phone         text,
   status        text,
   created_at    timestamptz
-) language plpgsql security definer as $$
-begin
-  return query
+) language sql security definer set search_path = public as $$
   select
     a.id, a.org_name, a.abn, a.org_type,
     a.street, a.suburb, a.state, a.postcode,
@@ -95,7 +93,6 @@ begin
     a.status, a.created_at
   from public.org_applications a
   order by a.created_at desc;
-end;
 $$;
 
 -- 6. RPC: admin update fundraiser fields

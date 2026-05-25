@@ -117,6 +117,10 @@ $$;
 
 -- ── Update admin_get_profiles to include is_beta_tester ───────────────────────
 
+-- language sql avoids the plpgsql RETURNS TABLE variable-scoping bug
+-- where output column names (id, email, etc.) become local variables that
+-- conflict with identically-named table columns, causing "column reference
+-- is ambiguous" errors at runtime even when fully qualified with a table alias.
 create or replace function public.admin_get_profiles()
 returns table (
   id                 uuid,
@@ -130,9 +134,7 @@ returns table (
   suspension_reason  text,
   suspended_at       timestamptz,
   created_at         timestamptz
-) language plpgsql security definer as $$
-begin
-  return query
+) language sql security definer set search_path = public as $$
   select
     p.id,
     u.email,
@@ -148,5 +150,4 @@ begin
   from public.profiles p
   join auth.users u on u.id = p.id
   order by p.created_at desc;
-end;
 $$;
