@@ -240,7 +240,7 @@ export default function HowItWorksPage() {
                   {[
                     { state: 'available', label: 'Available',    num: '5',  desc: 'White with a green border. Open for anyone to claim. Buyers click to add it to their cart.' },
                     { state: 'in-cart',   label: 'In your cart', num: '12', desc: 'Light green. The buyer has selected this square and it is sitting in their cart ready to checkout.' },
-                    { state: 'mine',      label: 'Your square',  num: '23', name: 'You',   desc: 'Bold green. Shown to the buyer who purchased it. Confirms their number is locked in.' },
+                    { state: 'mine',      label: 'Your square',  num: '23', name: 'You',   desc: 'Bold blue. Shown to the buyer who purchased it. Confirms their number is locked in.' },
                     { state: 'reserved',  label: 'Reserved',     num: '8',  desc: 'Orange. Someone else has this in their cart right now. Held for up to 7 minutes, then released automatically.' },
                     { state: 'taken',     label: 'Sold',         num: '11', name: 'Anna',  desc: 'Grey/beige. Purchased and no longer available. The buyer\'s first name is shown.' },
                     { state: 'winner',    label: 'Winning squares', num: '18', name: 'Dave', desc: 'Bright green with a glow. Shown after the draw. The winning squares are highlighted live for everyone on the page.' },
