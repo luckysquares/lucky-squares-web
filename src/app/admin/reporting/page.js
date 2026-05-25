@@ -1272,6 +1272,84 @@ function ReportingTab() {
         </Card>
       </div>
 
+      {/* ── Analytics Dashboards ──────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}><SectionTitle>Analytics Dashboards</SectionTitle></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 32 }}>
+        {[
+          {
+            icon: '▲',
+            iconBg: '#000',
+            iconColor: '#fff',
+            title: 'Vercel Analytics',
+            desc: 'Real-user Core Web Vitals, page views, and performance data from your Vercel deployment.',
+            href: 'https://vercel.com/luckysquares/lucky-squares-web/analytics',
+            label: 'Open Vercel Analytics',
+          },
+          {
+            icon: '📊',
+            iconBg: '#E8F0FE',
+            iconColor: '#4285F4',
+            title: 'Google Analytics 4',
+            desc: 'Sessions, traffic sources, user behaviour, conversions, and audience demographics.',
+            href: 'https://analytics.google.com/',
+            label: 'Open Google Analytics',
+          },
+          {
+            icon: '🔍',
+            iconBg: '#E6F4EA',
+            iconColor: '#34A853',
+            title: 'Google Search Console',
+            desc: 'Search queries, impressions, click-through rates, index coverage, and Core Web Vitals.',
+            href: 'https://search.google.com/search-console',
+            label: 'Open Search Console',
+          },
+          {
+            icon: '🔷',
+            iconBg: '#EFF6FF',
+            iconColor: '#1D4ED8',
+            title: 'Bing Webmaster Tools',
+            desc: 'Bing search performance, IndexNow submission history, and crawl diagnostics.',
+            href: 'https://www.bing.com/webmasters',
+            label: 'Open Bing Webmaster',
+          },
+        ].map((tool) => (
+          <a
+            key={tool.title}
+            href={tool.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: 'none', display: 'block' }}
+          >
+            <div style={{
+              background: '#fff',
+              borderRadius: 14,
+              border: '1.5px solid #E5E0D5',
+              padding: '20px 22px',
+              height: '100%',
+              transition: 'box-shadow .15s, border-color .15s',
+              cursor: 'pointer',
+            }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(61,46,26,0.12)'; e.currentTarget.style.borderColor = '#C4B9AA'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = '#E5E0D5'; }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: tool.iconBg, color: tool.iconColor,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: tool.icon === '▲' ? 14 : 16, fontWeight: 900, flexShrink: 0,
+                }}>
+                  {tool.icon}
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#1A1209' }}>{tool.title}</span>
+              </div>
+              <p style={{ fontSize: 12, color: '#9B8F80', lineHeight: 1.6, margin: '0 0 14px' }}>{tool.desc}</p>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED' }}>{tool.label} →</span>
+            </div>
+          </a>
+        ))}
+      </div>
+
       {/* ── GA4 Traffic ───────────────────────────────────────────── */}
       <div style={{ marginBottom: 12 }}><SectionTitle>Website Traffic (last 30 days)</SectionTitle></div>
       {ga4Error ? (
