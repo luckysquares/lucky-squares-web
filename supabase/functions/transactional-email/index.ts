@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     return new Response('type and to are required', { status: 400 });
   }
 
-  const template = buildTemplate(type, data ?? {});
+  const template = await buildTemplate(type, data ?? {});
   if (!template) {
     return new Response(`Unknown email type: ${type}`, { status: 400 });
   }
@@ -108,8 +108,45 @@ Deno.serve(async (req) => {
   return new Response(JSON.stringify({ ok: true, type }), { status: 200 });
 });
 
+// ── DB template override ─────────────────────────────────────────────────────
+// Replaces {{variable}} placeholders with values from the data object.
+function substituteVars(template: string, data: Record<string, unknown>): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+    const val = data[key];
+    return val !== undefined && val !== null ? String(val) : '';
+  });
+}
+
+// Checks the email_templates table for an admin override before falling back
+// to the hardcoded template. Silent on DB errors — always falls back.
+async function fetchDbTemplate(
+  type: string,
+  d: Record<string, unknown>,
+): Promise<{ subject: string; text: string } | null> {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/email_templates?key=eq.${encodeURIComponent(type)}&select=subject,body&limit=1`,
+      { headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` } },
+    );
+    if (!res.ok) return null;
+    const rows: { subject: string; body: string }[] = await res.json();
+    if (!rows.length) return null;
+    return {
+      subject: substituteVars(rows[0].subject, d),
+      text:    substituteVars(rows[0].body,    d),
+    };
+  } catch {
+    return null;
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildTemplate(type: string, d: any): { subject: string; text: string } | null {
+async function buildTemplate(type: string, d: any): Promise<{ subject: string; text: string } | null> {
+  // Check for an admin-edited override in the database first.
+  const dbOverride = await fetchDbTemplate(type, d);
+  if (dbOverride) return dbOverride;
+
+  // Fall back to hardcoded templates.
   switch (type) {
     // Organiser
     case 'organizer_welcome':             return T.emailOrganizerWelcome(d);

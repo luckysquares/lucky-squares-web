@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { adminFetch } from '@/lib/adminFetch';
 
 // ── Placeholder data ──────────────────────────────────────────────────────────
 
@@ -719,61 +720,162 @@ const EMAIL_GROUPS = [
 
 const ALL_ITEMS = EMAIL_GROUPS.flatMap((g) => g.items);
 
+// ── Variables available in templates ─────────────────────────────────────────
+const COMMON_VARS = [
+  'first_name','buyer_name','campaign_title','org_name','campaign_url',
+  'amount_raised','amount_paid','square_number','square_numbers','sold_count',
+  'grid_size','price_per_sq','draw_type_description','contact_email',
+  'contact_name','prize_description','prize_place','winning_square',
+  'invite_url','invited_by_name','expires_days','organiser_name',
+  'coupon_code','days_remaining','squares_needed','prize_summary',
+  'month_name','total_raised','total_squares_sold','draws_completed',
+  'active_campaign_count','abn','org_type','reason','campaign_limit',
+];
+
+// Substitute {{var}} in a string using the preview D object
+function previewSubstitute(str) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+    const val = D[key];
+    return val !== undefined && val !== null ? String(val) : `{{${key}}}`;
+  });
+}
+
 // ── Page component ────────────────────────────────────────────────────────────
 
 export default function EmailPreviewPage() {
-  const [selectedKey, setSelectedKey] = useState(ALL_ITEMS[0].key);
+  const [selectedKey,   setSelectedKey]   = useState(ALL_ITEMS[0].key);
+  const [mode,          setMode]          = useState('preview'); // 'preview' | 'edit'
+  const [customKeys,    setCustomKeys]    = useState(new Set());
+  const [dbTemplate,    setDbTemplate]    = useState(null);   // {subject,body} from DB or null
+  const [editSubject,   setEditSubject]   = useState('');
+  const [editBody,      setEditBody]      = useState('');
+  const [saving,        setSaving]        = useState(false);
+  const [saveMsg,       setSaveMsg]       = useState('');
 
-  const selected = ALL_ITEMS.find((i) => i.key === selectedKey);
-  const email = selected ? selected.render() : null;
+  // Load the list of customised template keys on mount
+  useEffect(() => {
+    adminFetch('/api/admin/emails/templates/list')
+      .then((r) => r.ok ? r.json() : [])
+      .then((rows) => setCustomKeys(new Set((rows || []).map((r) => r.key))))
+      .catch(() => {});
+  }, []);
+
+  // When selected template changes, load its DB override (if any)
+  const loadDbTemplate = useCallback(async (key) => {
+    setDbTemplate(null);
+    try {
+      const res = await adminFetch(`/api/admin/emails/templates/${key}`);
+      const data = await res.json();
+      setDbTemplate(data || null);
+      if (data) {
+        setEditSubject(data.subject);
+        setEditBody(data.body);
+      } else {
+        // Pre-populate with the hardcoded default
+        const item = ALL_ITEMS.find((i) => i.key === key);
+        const def  = item ? item.render() : null;
+        setEditSubject(def?.subject || '');
+        setEditBody(def?.text || '');
+      }
+    } catch {
+      setDbTemplate(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    setMode('preview');
+    setSaveMsg('');
+    loadDbTemplate(selectedKey);
+  }, [selectedKey, loadDbTemplate]);
+
+  const handleSave = async () => {
+    setSaving(true); setSaveMsg('');
+    try {
+      const res = await adminFetch(`/api/admin/emails/templates/${selectedKey}`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ subject: editSubject, body: editBody }),
+      });
+      if (res.ok) {
+        setSaveMsg('Saved');
+        setCustomKeys((prev) => new Set([...prev, selectedKey]));
+        setDbTemplate({ subject: editSubject, body: editBody });
+        setMode('preview');
+      } else {
+        setSaveMsg('Error saving');
+      }
+    } catch {
+      setSaveMsg('Error saving');
+    }
+    setSaving(false);
+  };
+
+  const handleReset = async () => {
+    if (!confirm('Reset this template to the default? Your edits will be permanently removed.')) return;
+    await adminFetch(`/api/admin/emails/templates/${selectedKey}`, { method: 'DELETE' });
+    setCustomKeys((prev) => { const s = new Set(prev); s.delete(selectedKey); return s; });
+    setDbTemplate(null);
+    const item = ALL_ITEMS.find((i) => i.key === selectedKey);
+    const def  = item ? item.render() : null;
+    setEditSubject(def?.subject || '');
+    setEditBody(def?.text || '');
+    setSaveMsg('Reset to default');
+    setMode('preview');
+  };
+
+  const selected    = ALL_ITEMS.find((i) => i.key === selectedKey);
+  const isCustom    = customKeys.has(selectedKey);
+  const previewEmail = dbTemplate
+    ? { subject: previewSubstitute(dbTemplate.subject), text: previewSubstitute(dbTemplate.body) }
+    : (selected ? selected.render() : null);
+
+  const inp = {
+    width: '100%', padding: '8px 12px', borderRadius: 8,
+    border: '1.5px solid #E5E0D5', fontSize: 13, fontFamily: 'inherit',
+    color: '#1A1209', boxSizing: 'border-box', background: '#fff',
+  };
 
   return (
     <div style={{ display: 'flex', gap: 0, minHeight: 'calc(100vh - 80px)', alignItems: 'flex-start' }}>
+
       {/* Sidebar */}
       <div style={{
-        width: 240,
-        flexShrink: 0,
-        background: '#fff',
-        border: '1.5px solid #E5E0D5',
-        borderRadius: 16,
-        overflow: 'hidden',
-        position: 'sticky',
-        top: 24,
-        maxHeight: 'calc(100vh - 108px)',
-        overflowY: 'auto',
+        width: 240, flexShrink: 0, background: '#fff',
+        border: '1.5px solid #E5E0D5', borderRadius: 16, overflow: 'hidden',
+        position: 'sticky', top: 24, maxHeight: 'calc(100vh - 108px)', overflowY: 'auto',
       }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #F0EAE0' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Email templates</div>
         </div>
-
         {EMAIL_GROUPS.map((group) => (
           <div key={group.label}>
             <div style={{ padding: '10px 20px 4px', fontSize: 10, fontWeight: 700, color: '#C8BFB0', textTransform: 'uppercase', letterSpacing: '0.9px' }}>
               {group.label}
             </div>
             {group.items.map((item) => {
-              const isActive = item.key === selectedKey;
+              const isActive  = item.key === selectedKey;
+              const isCust    = customKeys.has(item.key);
               return (
                 <button
                   key={item.key}
                   onClick={() => setSelectedKey(item.key)}
                   style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '8px 20px',
-                    fontSize: 13,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    width: '100%', textAlign: 'left', padding: '8px 20px', fontSize: 12,
                     fontWeight: isActive ? 700 : 400,
                     color: isActive ? '#1A7A55' : '#1A1209',
                     background: isActive ? '#F0FBF4' : 'transparent',
-                    border: 'none',
-                    borderLeft: isActive ? '3px solid #1A7A55' : '3px solid transparent',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    lineHeight: 1.4,
+                    border: 'none', borderLeft: isActive ? '3px solid #1A7A55' : '3px solid transparent',
+                    cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.4,
                   }}
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  {isCust && (
+                    <span style={{ fontSize: 9, fontWeight: 800, background: '#FEF3C7', color: '#92400E', borderRadius: 4, padding: '1px 5px', marginLeft: 4, flexShrink: 0 }}>
+                      CUSTOM
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -781,51 +883,151 @@ export default function EmailPreviewPage() {
         ))}
       </div>
 
-      {/* Preview panel */}
+      {/* Main panel */}
       <div style={{ flex: 1, minWidth: 0, paddingLeft: 24 }}>
-        <div style={{ marginBottom: 24 }}>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 900, color: '#1A1209', margin: '0 0 4px' }}>Email preview</h1>
-          <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Rendered with placeholder data. All text is from the live templates.</p>
+
+        {/* Page header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 900, color: '#1A1209', margin: '0 0 4px' }}>Email templates</h1>
+            <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
+              {mode === 'preview'
+                ? (isCustom ? 'Showing your custom version. Preview uses placeholder data.' : 'Showing default template. Preview uses placeholder data.')
+                : 'Editing mode. Use {{variable}} for dynamic values.'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {saveMsg && <span style={{ fontSize: 12, color: saveMsg.startsWith('Error') ? '#DC2626' : '#15803D', fontWeight: 700 }}>{saveMsg}</span>}
+            {mode === 'preview' && (
+              <button
+                onClick={() => { setMode('edit'); setSaveMsg(''); }}
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1.5px solid #E5E0D5', background: '#fff', color: '#1A1209', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Edit template
+              </button>
+            )}
+            {mode === 'edit' && (
+              <>
+                <button
+                  onClick={() => { setMode('preview'); setSaveMsg(''); }}
+                  style={{ padding: '8px 16px', borderRadius: 8, border: '1.5px solid #E5E0D5', background: '#fff', color: '#1A1209', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Cancel
+                </button>
+                {isCustom && (
+                  <button
+                    onClick={handleReset}
+                    style={{ padding: '8px 16px', borderRadius: 8, border: '1.5px solid #FECACA', background: '#FEF2F2', color: '#DC2626', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    Reset to default
+                  </button>
+                )}
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: saving ? '#E5E0D5' : '#7C3AED', color: saving ? '#9C8060' : '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  {saving ? 'Saving...' : 'Save template'}
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
-        {email && (
+        {/* Preview mode */}
+        {mode === 'preview' && previewEmail && (
           <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #E5E0D5', overflow: 'hidden' }}>
-            {/* Email header */}
             <div style={{ padding: '20px 28px', borderBottom: '1px solid #F0EAE0', background: '#FAFAF8' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px', paddingTop: 2, flexShrink: 0, width: 60 }}>Template</span>
-                <span style={{ fontSize: 13, fontFamily: 'monospace', color: '#4A3728', background: '#F0EAE0', padding: '1px 8px', borderRadius: 5 }}>{selectedKey}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px', paddingTop: 2, flexShrink: 0, width: 64 }}>Template</span>
+                <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#4A3728', background: '#F0EAE0', padding: '1px 8px', borderRadius: 5 }}>{selectedKey}</span>
+                {isCustom && <span style={{ fontSize: 10, fontWeight: 800, background: '#FEF3C7', color: '#92400E', borderRadius: 4, padding: '2px 7px' }}>CUSTOM</span>}
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px', paddingTop: 3, flexShrink: 0, width: 60 }}>Subject</span>
-                <span style={{ fontSize: 16, fontWeight: 700, color: '#1A1209', lineHeight: 1.4 }}>{email.subject}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px', paddingTop: 3, flexShrink: 0, width: 64 }}>Subject</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1209', lineHeight: 1.4 }}>{previewEmail.subject}</span>
               </div>
             </div>
-
-            {/* Email body */}
             <div style={{ padding: '28px 28px 20px' }}>
-              <pre style={{
-                fontFamily: '"Georgia", "Times New Roman", serif',
-                fontSize: 15,
-                lineHeight: 1.8,
-                color: '#1A1209',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                margin: 0,
-                maxWidth: 640,
-              }}>
-                {email.text}
+              <pre style={{ fontFamily: '"Georgia","Times New Roman",serif', fontSize: 14, lineHeight: 1.8, color: '#1A1209', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, maxWidth: 640 }}>
+                {previewEmail.text}
               </pre>
             </div>
+            <div style={{ padding: '12px 28px', borderTop: '1px solid #F0EAE0', background: '#FAFAF8', fontSize: 11, color: '#9C8060' }}>
+              {isCustom
+                ? 'This is your custom version. Click "Edit template" to modify it.'
+                : 'Using default template from code. Click "Edit template" to create a custom version.'}
+            </div>
+          </div>
+        )}
 
-            {/* Footer */}
-            <div style={{ padding: '14px 28px', borderTop: '1px solid #F0EAE0', background: '#FAFAF8' }}>
-              <p style={{ fontSize: 12, color: '#9C8060', margin: 0 }}>
-                Edit template source:{' '}
-                <code style={{ fontSize: 12, background: '#F0EAE0', padding: '1px 6px', borderRadius: 4 }}>
-                  supabase/functions/_shared/templates.ts
-                </code>
-              </p>
+        {/* Edit mode */}
+        {mode === 'edit' && (
+          <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+            {/* Editor */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #E5E0D5', padding: '24px 28px' }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 6 }}>Subject line</label>
+                  <input
+                    value={editSubject}
+                    onChange={(e) => setEditSubject(e.target.value)}
+                    style={inp}
+                    placeholder="Subject line..."
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 6 }}>Body</label>
+                  <textarea
+                    value={editBody}
+                    onChange={(e) => setEditBody(e.target.value)}
+                    rows={24}
+                    style={{ ...inp, resize: 'vertical', lineHeight: 1.7, fontFamily: 'monospace', fontSize: 12 }}
+                    placeholder="Email body... use {{variable}} for dynamic values."
+                  />
+                </div>
+              </div>
+
+              {/* Live preview */}
+              {editSubject && editBody && (
+                <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #E5E0D5', overflow: 'hidden', marginTop: 16 }}>
+                  <div style={{ padding: '12px 20px', borderBottom: '1px solid #F0EAE0', background: '#FAFAF8', fontSize: 11, fontWeight: 800, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                    Live preview (placeholder data)
+                  </div>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid #F0EAE0' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', marginRight: 8 }}>Subject:</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#1A1209' }}>{previewSubstitute(editSubject)}</span>
+                  </div>
+                  <div style={{ padding: '16px 20px' }}>
+                    <pre style={{ fontFamily: '"Georgia","Times New Roman",serif', fontSize: 13, lineHeight: 1.7, color: '#1A1209', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                      {previewSubstitute(editBody)}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Variables reference panel */}
+            <div style={{ width: 220, flexShrink: 0, background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 16, padding: '18px 16px', position: 'sticky', top: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12 }}>Available variables</div>
+              <div style={{ fontSize: 10, color: '#9C8060', marginBottom: 10, lineHeight: 1.5 }}>
+                Click to insert at cursor. Not all variables are present in every email — check the default template.
+              </div>
+              {COMMON_VARS.map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setEditBody((b) => b + `{{${v}}}`)}
+                  style={{
+                    display: 'inline-block', margin: '0 4px 6px 0',
+                    padding: '2px 8px', borderRadius: 4,
+                    background: '#F5F3EE', border: '1px solid #E5E0D5',
+                    fontSize: 10, fontFamily: 'monospace', color: '#4A3728',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {`{{${v}}}`}
+                </button>
+              ))}
             </div>
           </div>
         )}
