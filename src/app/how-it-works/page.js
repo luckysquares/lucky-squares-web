@@ -223,7 +223,7 @@ export default function HowItWorksPage() {
                       { s: 'available', n: 32             },
                       { s: 'taken',     n: 33, name: 'Grace' },
                       { s: 'available', n: 34             },
-                      { s: 'taken',     n: 35, name: 'Leo'   },
+                      { s: 'sponsored', n: 35, name: 'Acme' },
                       { s: 'available', n: 36             },
                     ].map((sq) => (
                       <div key={sq.n} className={`sq ${sq.s}`} style={{ width: 48, height: 48, borderRadius: 7, fontSize: 11, cursor: 'default' }}>
@@ -244,6 +244,7 @@ export default function HowItWorksPage() {
                     { state: 'reserved',  label: 'Reserved',     num: '8',  desc: 'Orange. Someone else has this in their cart right now. Held for up to 7 minutes, then released automatically.' },
                     { state: 'taken',     label: 'Sold',         num: '11', name: 'Anna',  desc: 'Grey/beige. Purchased and no longer available. The buyer\'s first name is shown.' },
                     { state: 'winner',    label: 'Winning squares', num: '18', name: 'Dave', desc: 'Bright green with a glow. Shown after the draw. The winning squares are highlighted live for everyone on the page.' },
+                    { state: 'sponsored', label: 'Sponsored square', num: '35', name: 'Acme', desc: 'Rainbow animated border. A local business or sponsor has purchased this square. A great way to involve community supporters and give them visibility on your grid.' },
                   ].map((sq) => (
                     <div key={sq.state} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', background: 'var(--cream)', borderRadius: 10, border: '1px solid var(--border)' }}>
                       <div className={`sq ${sq.state}`} style={{ width: 44, height: 44, borderRadius: 7, flexShrink: 0, fontSize: 11, cursor: 'default' }}>
