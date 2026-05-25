@@ -86,7 +86,7 @@ export default function AdminBlogPage() {
     if (!editing.title.trim()) { setSaveError('Title is required.'); return; }
     if (!editing.slug.trim())  { setSaveError('Slug is required.');  return; }
     setSaving(true); setSaveError('');
-    const tags = editing.tags.split(',').map((t) => t.trim()).filter(Boolean);
+    const tags = (editing.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
     const res = await adminFetch('/api/admin/blog', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -192,7 +192,7 @@ export default function AdminBlogPage() {
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
-  const tagChips = editing ? editing.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+  const tagChips = editing ? (editing.tags || '').split(',').map((t) => t.trim()).filter(Boolean) : [];
 
   return (
     <div>

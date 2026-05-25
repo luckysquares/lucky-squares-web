@@ -166,7 +166,6 @@ export default async function BlogPostPage({ params }) {
   const postUrl = `${SITE_URL}/blog/${slug}`;
 
   const breadcrumbSchema = {
-    '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
@@ -176,7 +175,6 @@ export default async function BlogPostPage({ params }) {
   };
 
   const blogPostingSchema = {
-    '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt || undefined,
@@ -215,7 +213,7 @@ export default async function BlogPostPage({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([blogPostingSchema, breadcrumbSchema]) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': [blogPostingSchema, breadcrumbSchema] }) }}
       />
       <MarketingNav />
 

@@ -10,44 +10,45 @@ export const metadata = {
   alternates: { canonical: SITE_URL },
 };
 
-const homeSchema = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Lucky Squares Australia',
-    alternateName: 'Play With Heart Pty Ltd',
-    url: SITE_URL,
-    logo: `${SITE_URL}/og-default.png`,
-    description: 'Lucky Squares Australia is an online platform that enables community organisations, schools, sporting clubs, and charities to run grid-based fundraisers easily.',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Adelaide',
-      addressRegion: 'SA',
-      addressCountry: 'AU',
-    },
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer support',
-      url: `${SITE_URL}/contact`,
-    },
-    sameAs: [],
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'Lucky Squares Australia',
-    url: SITE_URL,
-    description: 'Online fundraising platform for schools, sporting clubs, and charities in Australia.',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${SITE_URL}/blog?q={search_term_string}`,
+const homeSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      name: 'Lucky Squares Australia',
+      alternateName: 'Play With Heart Pty Ltd',
+      url: SITE_URL,
+      logo: `${SITE_URL}/og-default.png`,
+      description: 'Lucky Squares Australia is an online platform that enables community organisations, schools, sporting clubs, and charities to run grid-based fundraisers easily.',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Adelaide',
+        addressRegion: 'SA',
+        addressCountry: 'AU',
       },
-      'query-input': 'required name=search_term_string',
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        url: `${SITE_URL}/contact`,
+      },
+      sameAs: [],
     },
-  },
-];
+    {
+      '@type': 'WebSite',
+      name: 'Lucky Squares Australia',
+      url: SITE_URL,
+      description: 'Online fundraising platform for schools, sporting clubs, and charities in Australia.',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${SITE_URL}/blog?q={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
+};
 
 export default function HomePage() {
   return (
