@@ -97,7 +97,7 @@ $$;
 
 -- ── Admin RPC: summary counts ─────────────────────────────────────────────────
 
-create or replace function public.admin_error_log_summary()
+create or replace function public.admin_error_log_summary(p_days int default 7)
 returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
@@ -110,7 +110,10 @@ begin
   end if;
   select count(*) into v_today from public.error_logs where created_at > now() - interval '24 hours' and level = 'error';
   select count(*) into v_week  from public.error_logs where created_at > now() - interval '7 days'   and level = 'error';
-  select count(*) into v_open  from public.error_logs where resolved = false and level = 'error';
+  -- open count respects the same time window as the log list
+  select count(*) into v_open  from public.error_logs
+    where resolved = false and level = 'error'
+      and created_at > now() - (p_days || ' days')::interval;
   return jsonb_build_object('today', v_today, 'week', v_week, 'open', v_open);
 end;
 $$;

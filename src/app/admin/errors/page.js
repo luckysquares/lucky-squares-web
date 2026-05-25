@@ -45,11 +45,14 @@ export default function AdminErrors() {
   const [resolved,  setResolved]  = useState(false); // false = show open only
   const [acting,    setActing]    = useState({});
 
+  const [rpcError, setRpcError] = useState(null);
+
   const load = useCallback(async () => {
     setLoading(true);
+    setRpcError(null);
     if (!supabaseConfigured) { setLogs(DEMO_LOGS); setSummary({ today: 1, week: 3, open: 2 }); setLoading(false); return; }
     const sb = getSupabaseClient();
-    const [{ data: rows }, { data: sum }] = await Promise.all([
+    const [logsResult, sumResult] = await Promise.all([
       sb.rpc('admin_get_error_logs', {
         p_search:   search   || null,
         p_level:    level    || null,
@@ -59,10 +62,11 @@ export default function AdminErrors() {
         p_limit:    200,
         p_offset:   0,
       }),
-      sb.rpc('admin_error_log_summary'),
+      sb.rpc('admin_error_log_summary', { p_days: days }),
     ]);
-    setLogs(rows ?? []);
-    setSummary(sum ?? null);
+    if (logsResult.error) setRpcError(logsResult.error.message);
+    setLogs(logsResult.data ?? []);
+    setSummary(sumResult.data ?? null);
     setLoading(false);
   }, [search, level, source, resolved, days]);
 
@@ -141,6 +145,12 @@ export default function AdminErrors() {
           Include resolved
         </label>
       </div>
+
+      {rpcError && (
+        <div style={{ background: '#FEF2F2', border: '1.5px solid #FECACA', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#DC2626', fontWeight: 700 }}>
+          ⚠️ Error fetching logs: {rpcError}
+        </div>
+      )}
 
       <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 12, fontWeight: 700 }}>
         {loading ? 'Loading…' : `${logs.length} log${logs.length !== 1 ? 's' : ''}${!resolved ? ` (${openCount} open)` : ''}`}
