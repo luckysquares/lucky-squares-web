@@ -325,12 +325,12 @@ textarea { font-family: inherit; }
 
 /* ── app-specific: grid squares ── */
 @keyframes pulse-green {
-  0%,100% { box-shadow: 0 0 0 0   rgba(26,122,85,.55); }
-  50%      { box-shadow: 0 0 0 6px rgba(26,122,85,0); }
+  0%,100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.78; transform: scale(1.03); }
 }
 @keyframes pulse-orange {
-  0%,100% { box-shadow: 0 0 0 0   rgba(212,88,26,.55); }
-  50%      { box-shadow: 0 0 0 6px rgba(212,88,26,0); }
+  0%,100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.72; transform: scale(1.03); }
 }
 .sq {
   aspect-ratio: 1; border-radius: 6px; border: 1.5px solid transparent;
@@ -359,6 +359,7 @@ textarea { font-family: inherit; }
   border-color: #1A55A0;
   color: #fff;
   animation: pulse-green 2.2s ease infinite;
+  will-change: transform, opacity;
 }
 
 .sq.reserved {
@@ -366,6 +367,7 @@ textarea { font-family: inherit; }
   border-color: var(--orange2);
   color: var(--orange);
   animation: pulse-orange 1.5s ease infinite;
+  will-change: transform, opacity;
   cursor: default;
 }
 .sq.reserved:hover { transform: none; }

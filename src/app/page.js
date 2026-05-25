@@ -321,7 +321,7 @@ function MiniGridPreview() {
       <style>{`
         .mini-grid-wrap { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 40px rgba(61,46,26,.15); border: 1.5px solid var(--border); width: 100%; max-width: 500px; box-sizing: border-box; }
         .mini-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 44px)); gap: 4px; }
-        .mini-grid .sq { width: 100%; aspect-ratio: 1; font-size: 10px; border-radius: 7px; }
+        .mini-grid .sq { width: 100%; aspect-ratio: 1; font-size: 10px; border-radius: 7px; animation: none !important; will-change: auto !important; }
         @media (max-width: 520px) { .mini-grid .sq { border-radius: 5px; font-size: 8px; } }
       `}</style>
       <div className="mini-grid-wrap">

@@ -91,8 +91,8 @@ export default async function RootLayout({ children }) {
       <body style={isStandalone ? {} : { display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {!isStandalone && (
           <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-            <Script id="ga4-init" strategy="afterInteractive">{`
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="lazyOnload" />
+            <Script id="ga4-init" strategy="lazyOnload">{`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
