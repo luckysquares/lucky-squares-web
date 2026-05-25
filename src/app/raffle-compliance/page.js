@@ -152,8 +152,7 @@ export default function CompliancePage() {
 
             <Section n="7" title="Legal Review" last>
               <p>
-                This Compliance Statement and Lucky Squares Australia&apos;s overall platform model has been reviewed
-                by Evyenia Walton, Lynch Meyer, Adelaide, South Australia. A written legal opinion is held on file.
+                This Compliance Statement and Lucky Squares Australia&apos;s overall platform model has been subject to independent legal review. A written legal opinion is held on file.
               </p>
             </Section>
 
