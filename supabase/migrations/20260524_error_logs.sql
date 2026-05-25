@@ -42,18 +42,7 @@ create or replace function public.admin_get_error_logs(
   p_limit    int     default 200,
   p_offset   int     default 0
 )
-returns table (
-  id         uuid,
-  created_at timestamptz,
-  level      text,
-  source     text,
-  route      text,
-  message    text,
-  stack      text,
-  user_id    uuid,
-  metadata   jsonb,
-  resolved   boolean
-)
+returns setof public.error_logs
 language plpgsql security definer set search_path = public as $$
 begin
   if not exists (select 1 from public.profiles where id = auth.uid() and is_admin = true) then
@@ -61,22 +50,20 @@ begin
   end if;
 
   return query
-  select
-    e.id, e.created_at, e.level, e.source, e.route,
-    e.message, e.stack, e.user_id, e.metadata, e.resolved
-  from public.error_logs e
+  select el.*
+  from public.error_logs el
   where
-    (p_days    is null or e.created_at > now() - (p_days || ' days')::interval)
-    and (p_level   is null or e.level    = p_level)
-    and (p_source  is null or e.source   = p_source)
-    and (p_resolved is null or e.resolved = p_resolved)
+    (p_days     is null or el.created_at > now() - p_days * interval '1 day')
+    and (p_level   is null or el.level    = p_level)
+    and (p_source  is null or el.source   = p_source)
+    and (p_resolved is null or el.resolved = p_resolved)
     and (p_search  is null or (
-      to_tsvector('english', coalesce(e.message,'') || ' ' || coalesce(e.route,''))
+      to_tsvector('english', coalesce(el.message,'') || ' ' || coalesce(el.route,''))
         @@ plainto_tsquery('english', p_search)
-      or e.message ilike '%' || p_search || '%'
-      or e.route   ilike '%' || p_search || '%'
+      or el.message ilike '%' || p_search || '%'
+      or el.route   ilike '%' || p_search || '%'
     ))
-  order by e.created_at desc
+  order by el.created_at desc
   limit  p_limit
   offset p_offset;
 end;
