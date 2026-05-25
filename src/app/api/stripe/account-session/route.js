@@ -58,6 +58,7 @@ export async function POST(req) {
           ...(abn ? { tax_id: abn } : {}),
         };
       } else {
+        accountParams.business_type = 'individual';
         accountParams.individual = {
           ...(firstName ? { first_name: firstName } : {}),
           ...(lastName  ? { last_name:  lastName  } : {}),
