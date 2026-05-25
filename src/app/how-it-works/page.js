@@ -3,7 +3,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'How It Works',
-  description: 'Learn how Lucky Squares fundraisers work — create your grid, set a price per square, share the link, and run a live draw. Takes less than 5 minutes to set up.',
+  description: 'Learn how Lucky Squares fundraisers work: create your grid, set a price per square, share the link, and run a live draw. Takes less than 5 minutes to set up.',
   alternates: { canonical: 'https://luckysquares.com.au/how-it-works' },
 };
 

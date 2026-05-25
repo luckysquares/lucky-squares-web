@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Terms of Service',
+  description: 'Lucky Squares Australia Terms of Service. Covers organiser eligibility, campaign fees, obligations, prohibited uses, and liability for fundraising activities run through our platform.',
   alternates: { canonical: 'https://luckysquares.com.au/terms' },
 };
 

@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Privacy Policy',
+  description: 'Lucky Squares Australia Privacy Policy. How we collect, use, store, and protect personal information for organisers and participants. Data held in Australia.',
   alternates: { canonical: 'https://luckysquares.com.au/privacy' },
 };
 

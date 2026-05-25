@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Participant Terms',
+  description: 'Lucky Squares Australia Participant Terms. What you need to know before purchasing squares in a fundraiser: payments, draw rules, prizes, refunds, and your personal information.',
   alternates: { canonical: 'https://luckysquares.com.au/participant-terms' },
 };
 
