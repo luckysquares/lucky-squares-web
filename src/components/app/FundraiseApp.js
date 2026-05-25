@@ -1626,7 +1626,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     <div className="dot-bg" style={{ minHeight: '100vh' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-          <button className="btn btn-outline btn-sm" onClick={onCancel}>← Back</button>
+          <button className="btn btn-outline btn-sm" onClick={() => step > 0 ? setStep((s) => s - 1) : (clearDraft(), onCancel())}>{step === 0 ? '← Dashboard' : '← Back'}</button>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5 }}>Step {step + 1} of {WIZARD_STEPS.length}</div>
             <div style={{ fontSize: 14, fontWeight: 800 }}>{WIZARD_STEPS[step]}</div>
