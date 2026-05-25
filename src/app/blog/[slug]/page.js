@@ -276,7 +276,9 @@ export default async function BlogPostPage({ params }) {
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
-          <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
+          <RelatedLinks tags={post.tags} />
+
+          <div style={{ marginTop: 40, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
             <div style={{ marginBottom: 24 }}>
               <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 14 }}>
                 Found this useful? Share it with your club or community.
@@ -290,5 +292,43 @@ export default async function BlogPostPage({ params }) {
         </div>
       </section>
     </>
+  );
+}
+
+// ── Related internal links ────────────────────────────────────────────────────
+
+const ALL_LINKS = [
+  { key: 'how-it-works', title: 'How it works', desc: 'Set up your fundraiser grid in under five minutes.', href: '/how-it-works', tags: ['fundraising', 'lucky-squares', 'community', 'sport', 'education', 'volunteers', 'digital', 'marketing', 'planning'] },
+  { key: 'faq',          title: 'Frequently asked questions', desc: 'Everything organisers and participants need to know.', href: '/faq', tags: ['fundraising', 'lucky-squares', 'community', 'sport', 'education', 'volunteers', 'planning'] },
+  { key: 'compliance',   title: 'Raffle compliance guide', desc: 'State-by-state permit requirements for Australian fundraisers.', href: '/raffle-compliance', tags: ['planning', 'fundraising', 'community', 'education', 'volunteers'] },
+  { key: 'start',        title: 'Start a fundraiser free', desc: 'No credit card needed. Launch your first campaign today.', href: '/fundraise?register=1', tags: ['fundraising', 'lucky-squares', 'community', 'sport', 'education', 'volunteers', 'digital', 'marketing', 'sponsorship'] },
+];
+
+function RelatedLinks({ tags = [] }) {
+  // Pick up to 3 links whose tag list overlaps with the post's tags, favouring variety
+  const postTags = tags.map((t) => t.toLowerCase());
+  const matched = ALL_LINKS.filter((l) => l.tags.some((t) => postTags.includes(t)));
+  // Fall back to first 3 if no tag overlap (shouldn't happen)
+  const links = (matched.length >= 2 ? matched : ALL_LINKS).slice(0, 3);
+
+  return (
+    <div style={{ marginTop: 48, padding: '28px 32px', background: '#fff', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', boxShadow: 'var(--shadow)' }}>
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 16 }}>Keep exploring</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {links.map((l) => (
+          <Link
+            key={l.key}
+            href={l.href}
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '12px 16px', background: 'var(--cream)', borderRadius: 10, border: '1px solid var(--border)', textDecoration: 'none' }}
+          >
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text)', marginBottom: 2 }}>{l.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>{l.desc}</div>
+            </div>
+            <span style={{ color: 'var(--green)', fontWeight: 900, fontSize: 18, flexShrink: 0 }}>→</span>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -39,6 +39,15 @@ Content requirements:
 - Australian English, 600 to 900 words
 - Do not use em-dashes or middle dots
 - Use bullet points or numbered lists where helpful
+- Naturally include 2 to 3 internal links to relevant Lucky Squares Australia pages where they fit the context. Use markdown link syntax, e.g. [How it works](/how-it-works). Only link where it genuinely adds value for the reader.
+
+Available internal pages to link to (use only where relevant):
+- /how-it-works — how to set up and run a Lucky Squares fundraiser
+- /faq — frequently asked questions for organisers and participants
+- /raffle-compliance — state-by-state permit requirements for Australian fundraisers
+- /fundraise?register=1 — start a fundraiser (use as the call-to-action link)
+- /pricing — pricing plans (casual per campaign or annual organisation plan)
+- /contact — contact Lucky Squares Australia
 
 Tag requirements:
 - 2 to 4 lowercase tags from: fundraising, sport, community, marketing, education, digital, lucky-squares, planning, volunteers, sponsorship
