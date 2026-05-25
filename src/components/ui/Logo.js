@@ -1,4 +1,6 @@
-export default function Logo({ size = 44, dark = false }) {
+import Image from 'next/image';
+
+export default function Logo({ size = 44, dark = false, priority = false }) {
   if (dark) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
@@ -8,11 +10,13 @@ export default function Logo({ size = 44, dark = false }) {
     );
   }
   return (
-    <img
+    <Image
       src="/lucky-squares-logo.png"
       alt="Lucky Squares Australia"
-      height={size}
-      style={{ width: 'auto', display: 'block', objectFit: 'contain' }}
+      width={1600}
+      height={800}
+      priority={priority}
+      style={{ width: 'auto', height: size, display: 'block', objectFit: 'contain' }}
     />
   );
 }
