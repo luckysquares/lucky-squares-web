@@ -273,7 +273,7 @@ export default async function BetaTestPage() {
             <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>💸</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 16, textAlign: 'center' }}>What do you think of the pricing?</h2>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 12 }}>
-              The platform charges <strong style={{ color: 'var(--text)' }}>$19 per live fundraising campaign</strong>, one flat fee with no percentage cuts and no hidden charges. For organisations running multiple campaigns there is an annual plan at $149/year for unlimited campaigns.
+              The platform charges <strong style={{ color: 'var(--text)' }}>$19 per live fundraising campaign</strong>, one flat fee with no percentage cuts and no hidden charges. For organisations running multiple campaigns there is an annual plan at an introductory $149/year for unlimited campaigns.
             </p>
             <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 8 }}>We would love to know:</p>
             <ul style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, paddingLeft: 20, marginBottom: 20 }}>

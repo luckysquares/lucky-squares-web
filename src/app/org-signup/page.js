@@ -226,7 +226,7 @@ export default function OrgSignupPage() {
           <div className="section-label">Organisation plan</div>
           <h1 className="section-heading" style={{ margin: '0 auto 12px' }}>Register your organisation</h1>
           <p className="section-body" style={{ margin: '0 auto' }}>
-            $149 / year for UNLIMITED Lucky Squares fundraising campaigns
+            Introductory price: $149 / year for UNLIMITED Lucky Squares fundraising campaigns
           </p>
         </div>
       </section>
@@ -244,7 +244,7 @@ export default function OrgSignupPage() {
                 <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text)', marginBottom: 4 }}>
                   $149 <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text2)' }}>/year</span>
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 24 }}>Inclusive of GST</div>
+                <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 24 }}>Introductory price, inclusive of GST</div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {FEATURES.map((f) => (
                     <li key={f} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 14 }}>

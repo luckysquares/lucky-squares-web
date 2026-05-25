@@ -84,7 +84,7 @@ export const FAQS = [
       },
       {
         q: 'Is there a plan for organisations that run fundraisers regularly?',
-        a: "Yes. The Organisation plan is $149 per year and gives you unlimited Lucky Squares campaigns with up to 10 running simultaneously. It's designed for schools, sporting clubs, and charities that fundraise throughout the year. One account per organisation, verified by ABN.",
+        a: "Yes. The Organisation plan is an introductory $149 per year and gives you unlimited Lucky Squares campaigns with up to 10 running simultaneously. It's designed for schools, sporting clubs, and charities that fundraise throughout the year. One account per organisation, verified by ABN.",
         link: { label: 'Register your organisation', href: '/org-signup' },
       },
     ],

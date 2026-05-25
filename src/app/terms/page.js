@@ -70,7 +70,7 @@ export default function TermsPage() {
                 The Campaign Fee is charged to the Organiser at the time of launching a Fundraiser. Current fees are:
                 <FeeTable />
               </SubSection>
-              <SubSection n="4.2">The Campaign Fee is processed securely via our online payment provider and is charged in Australian dollars inclusive of GST where applicable.</SubSection>
+              <SubSection n="4.2">The Campaign Fee is processed securely via our online payment provider and is charged in Australian dollars inclusive of GST where applicable. The Organisation plan fee listed above is an introductory price.</SubSection>
               <SubSection n="4.3">The Campaign Fee is non-refundable once a Fundraiser has been launched, except where required by Australian Consumer Law.</SubSection>
               <SubSection n="4.4">Lucky Squares Australia reserves the right to amend Campaign Fees at any time. Amended fees will not apply to Fundraisers already launched prior to the fee change.</SubSection>
               <SubSection n="4.5">The Campaign Fee covers access to the Platform software tools only. It does not guarantee any particular outcome, number of participants, or funds raised.</SubSection>

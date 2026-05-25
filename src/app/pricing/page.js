@@ -3,7 +3,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Pricing',
-  description: 'Start for free, or launch a live campaign for a flat $19 fee. No percentage cuts, no subscriptions. The Organisation plan is $149/year for unlimited campaigns.',
+  description: 'Start for free, or launch a live campaign for a flat $19 fee. No percentage cuts, no subscriptions. The Organisation plan is an introductory $149/year for unlimited campaigns.',
   alternates: { canonical: 'https://luckysquares.com.au/pricing' },
 };
 
@@ -64,7 +64,10 @@ export default function PricingPage() {
             </div>
 
             <div className="pricing-card">
-              <div className="pricing-name">Organisation</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="pricing-name">Organisation</div>
+                <span className="tag" style={{ background: 'rgba(0,169,110,.08)', color: 'var(--green)', border: '1px solid rgba(0,169,110,.2)', fontSize: 10 }}>Introductory price</span>
+              </div>
               <div className="pricing-price">$149 <span>/ year</span></div>
               <p className="pricing-desc">Run unlimited fundraising campaigns per year for your school, club, or charity using the Lucky Squares platform.</p>
               <ul className="pricing-features">
@@ -126,7 +129,7 @@ export default function PricingPage() {
               },
               {
                 q: 'What is your fair play policy?',
-                a: 'We want to support clubs, schools, and community groups to raise funds in a cost-effective and easy way. The $149 Organisation plan is per organisation, not per league or state body. For example, a state-based sporting body cannot purchase one Organisation plan and extend it to every club under its umbrella. One organisational account per organisation. We do verify ABNs, so we will know.',
+                a: 'We want to support clubs, schools, and community groups to raise funds in a cost-effective and easy way. The Organisation plan (currently $149/year at our introductory price) is per organisation, not per league or state body. For example, a state-based sporting body cannot purchase one Organisation plan and extend it to every club under its umbrella. One organisational account per organisation. We do verify ABNs, so we will know.',
               },
             ].map((faq) => (
               <div key={faq.q} style={{ borderTop: '1px solid var(--border)', paddingTop: 20, marginTop: 20 }}>

@@ -248,7 +248,10 @@ export default function HomePage() {
             </div>
 
             <div className="pricing-card">
-              <div className="pricing-name">Organisation</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="pricing-name">Organisation</div>
+                <span className="tag" style={{ background: 'rgba(0,169,110,.08)', color: 'var(--green)', border: '1px solid rgba(0,169,110,.2)', fontSize: 10 }}>Introductory price</span>
+              </div>
               <div className="pricing-price">$149 <span>/ year</span></div>
               <p className="pricing-desc">Run unlimited fundraising campaigns per year for your school, club, or charity using the Lucky Squares platform.</p>
               <ul className="pricing-features">
