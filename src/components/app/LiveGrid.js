@@ -320,16 +320,21 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   };
 
   const handleDraw = async () => {
+    // Winner selection is server-side — requires Supabase connection.
+    if (!supabaseConfigured) return;
+
     const sold = squares.filter((sq) => sq.status === 'mine' || sq.status === 'taken');
     if (!sold.length) return;
 
+    // Break-even guard: warn organiser if prize costs exceed funds raised.
     const costPrizes = (fundraiser.prizes || []).reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0);
     if (costPrizes > 0 && sold.length * fundraiser.pricePerSq < costPrizes) {
       setShowBreakEvenModal(true);
       return;
     }
 
-    if (['bank', 'bank_inperson'].includes(fundraiser.payment?.method) && supabaseConfigured) {
+    // Unpaid guard: warn if any bank-transfer squares haven't been marked paid.
+    if (['bank', 'bank_inperson'].includes(fundraiser.payment?.method)) {
       const { data: unpaid } = await getSupabaseClient()
         .from('squares')
         .select('id', { count: 'exact', head: true })
@@ -343,47 +348,58 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
       }
     }
 
-    // Determine how many winners to draw (one per prize, minimum 1)
+    // One winner per prize (minimum 1). Prizes without a description are skipped.
     const activePrizes = (fundraiser.prizes || []).filter((p) => p.description);
     const numWinners   = Math.max(1, activePrizes.length);
 
-    // Shuffle sold squares and pick unique winners without replacement
-    const shuffled    = [...sold].sort(() => Math.random() - 0.5);
-    const pickedSquares = shuffled.slice(0, Math.min(numWinners, shuffled.length));
-
-    const newWinners = pickedSquares.map((sq, i) => ({
-      square: sq,
-      place:  activePrizes[i]?.place       || `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'}`,
-      prize:  activePrizes[i]?.description || '',
-      value:  activePrizes[i]?.value       || '',
-    }));
-
     setPhase('draw');
 
-    // Run DB save and animation timer in parallel
-    await Promise.all([
-      supabaseConfigured
-        ? getSupabaseClient().rpc('record_draw', { p_fundraiser_id: fundraiser.id, p_winner_square_nums: pickedSquares.map((sq) => sq.id) })
-        : Promise.resolve(),
+    // execute_draw selects winners server-side using PostgreSQL random() — not
+    // Math.random() — so the result is determined in the DB and cannot be
+    // influenced by client-side code. Run it in parallel with the 2.5 s animation.
+    const [{ data: drawnWinners, error: drawError }] = await Promise.all([
+      getSupabaseClient().rpc('execute_draw', {
+        p_fundraiser_id: fundraiser.id,
+        p_num_winners:   numWinners,
+      }),
       new Promise((resolve) => setTimeout(resolve, 2500)),
     ]);
 
+    if (drawError || !drawnWinners?.length) {
+      console.error('[handleDraw] execute_draw failed:', drawError?.message);
+      setPhase('browse'); // return user to the grid so they can retry
+      return;
+    }
+
+    // Map DB rows { square_num, buyer_name, buyer_email, buyer_phone }
+    // to the shape the winner display expects.
+    const newWinners = drawnWinners.map((w, i) => ({
+      square: {
+        id:          w.square_num,
+        owner:       w.buyer_name,
+        buyer_email: w.buyer_email,
+        phone:       w.buyer_phone,
+      },
+      place: activePrizes[i]?.place       || `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'}`,
+      prize: activePrizes[i]?.description || '',
+      value: activePrizes[i]?.value       || '',
+    }));
+
     onDrawComplete?.(fundraiser.id);
-    setWinner(pickedSquares[0]);
+    setWinner(newWinners[0]?.square ?? null);
     setWinners(newWinners);
-    setDrawnResult(pickedSquares.map((sq) => sq.id));
+    setDrawnResult(drawnWinners.map((w) => w.square_num));
     setPhase('winner');
 
-    // Fire-and-forget admin notification (best effort)
-    if (supabaseConfigured) {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      if (supabaseUrl) {
-        fetch(`${supabaseUrl}/functions/v1/draw-notification`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fundraiser_id: fundraiser.id }),
-        }).catch(() => {}); // silent fail — notification is non-critical
-      }
+    // Fire-and-forget: emails to organiser + all buyers, Stripe prize-reserve
+    // transfer. Silent fail — draw result is already saved in the DB.
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (supabaseUrl) {
+      fetch(`${supabaseUrl}/functions/v1/draw-notification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fundraiser_id: fundraiser.id }),
+      }).catch(() => {});
     }
   };
 
