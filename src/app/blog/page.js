@@ -80,8 +80,8 @@ function CompactCard({ post }) {
           </div>
         )}
         <div style={{ padding: '14px 16px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {post.tags?.[0] && (
-            <TagPill tag={post.tags[0]} />
+          {post.tags?.find(t => t !== 'seo_pillar') && (
+            <TagPill tag={post.tags.find(t => t !== 'seo_pillar')} />
           )}
           <h3 style={{
             fontFamily: 'var(--font-serif)',
@@ -195,7 +195,7 @@ export default async function BlogPage() {
                 )}
                 <div style={{ padding: '28px 32px 32px' }}>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-                    {featured.tags?.slice(0, 3).map((t) => <TagPill key={t} tag={t} />)}
+                    {featured.tags?.filter(t => t !== 'seo_pillar').slice(0, 3).map((t) => <TagPill key={t} tag={t} />)}
                   </div>
                   <h2 style={{
                     fontFamily: 'var(--font-serif)',
