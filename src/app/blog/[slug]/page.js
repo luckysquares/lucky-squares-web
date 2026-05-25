@@ -276,6 +276,7 @@ export default async function BlogPostPage({ params }) {
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
+          <FundraisingCTA />
           <RelatedLinks tags={post.tags} />
 
           <div style={{ marginTop: 40, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
@@ -292,6 +293,37 @@ export default async function BlogPostPage({ params }) {
         </div>
       </section>
     </>
+  );
+}
+
+// ── Fundraising CTA ──────────────────────────────────────────────────────────
+
+function FundraisingCTA() {
+  return (
+    <div style={{
+      marginTop: 48,
+      padding: '36px 40px',
+      background: 'linear-gradient(135deg, #f5f0ff 0%, #ede8ff 100%)',
+      borderRadius: 'var(--radius)',
+      border: '1.5px solid #d4c6ff',
+      textAlign: 'center',
+    }}>
+      <div style={{ fontSize: 36, marginBottom: 12 }}>🍀</div>
+      <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', marginBottom: 10, lineHeight: 1.3 }}>
+        Ready to run your own Lucky Squares fundraiser?
+      </h3>
+      <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 24, maxWidth: 480, margin: '0 auto 24px' }}>
+        Set up your grid in under five minutes, share the link with your community, and run a live draw when you&apos;re ready. No spreadsheets, no stress.
+      </p>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <Link href="/fundraise?register=1" className="btn btn-purple btn-lg">
+          Start your fundraiser free →
+        </Link>
+        <Link href="/how-it-works" className="btn btn-outline btn-lg">
+          See how it works
+        </Link>
+      </div>
+    </div>
   );
 }
 
