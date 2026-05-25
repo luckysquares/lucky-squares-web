@@ -49,6 +49,12 @@ export async function POST(req) {
         },
         country: 'AU',
         email: prefill?.email || undefined,
+        // Pre-fill business profile so Stripe doesn't ask during onboarding
+        business_profile: {
+          mcc: '8398', // Charitable and Social Service Organizations — Fundraising
+          url: 'https://luckysquares.com.au',
+          product_description: 'Online fundraising for schools, clubs and charities. Participants purchase squares in a Lucky Squares grid to raise money for their cause.',
+        },
       };
 
       if (isOrg) {

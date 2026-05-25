@@ -1586,7 +1586,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                   setBankSaving(true);
                   const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment });
                   setBankSaving(false);
-                  if (id) { setBankDraftId(id); } else { setBankSaveError(true); }
+                  if (id) { setBankDraftId(id); setPendingLaunchData((prev) => prev ? { ...prev, existingFundraiserId: id } : prev); } else { setBankSaveError(true); }
                 }}>Try again</button>
               </div>
             )}
@@ -1610,8 +1610,10 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                 setBankPhase(false); setBankPhaseRetro(false); setBankDraftId(null); setBankConnectDone(false);
                 if (user?.id) loadFundraisers(user.id);
                 setPhase('dashboard');
-              } else if (pendingLaunchData) {
-                await onLaunchPay(pendingLaunchData);
+              } else {
+                // Bank is done — show the payment modal now
+                setBankPhase(false);
+                setShowLaunchModal(true);
               }
             }}
           >
@@ -1689,7 +1691,26 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
               <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment }, true); }}>
                 Save as draft
               </button>
-              <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={() => setShowLaunchModal(true)}>
+              <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={async () => {
+                if (payment.method === 'stripe') {
+                  // For stripe: bank setup FIRST, then payment modal
+                  const baseFee  = PLATFORM_FEES[gridOpt?.size || 100];
+                  const finalFee = couponState === 'valid' && couponData
+                    ? couponData.type === 'percent' ? Math.max(0, baseFee * (1 - couponData.value / 100)) : Math.max(0, baseFee - couponData.value)
+                    : baseFee;
+                  const launchData = { fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment, finalFee, couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null, existingFundraiserId: null };
+                  setPendingLaunchData(launchData);
+                  setBankPhase(true);
+                  setBankSaving(true);
+                  setBankSaveError(false);
+                  const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment });
+                  setBankSaving(false);
+                  if (id) { setBankDraftId(id); setPendingLaunchData((prev) => ({ ...prev, existingFundraiserId: id })); }
+                  else { setBankSaveError(true); }
+                } else {
+                  setShowLaunchModal(true);
+                }
+              }}>
                 <span>🚀 Launch fundraiser</span>
                 <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.8 }}>
                   {couponState === 'valid' && couponData
@@ -1718,6 +1739,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
           fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment,
           finalFee,
           couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null,
+          // Preserve the draft fundraiser ID created during bank setup (stripe path)
+          existingFundraiserId: pendingLaunchData?.existingFundraiserId || null,
         };
         const doLaunch  = async () => {
           if (isFree) {
@@ -1726,20 +1749,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             }
             closeLaunchModal();
             clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
-          } else if (payment.method === 'stripe') {
-            closeLaunchModal();
-            setPendingLaunchData(launchData);
-            setBankPhase(true);
-            setBankSaving(true);
-            setBankSaveError(false);
-            const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment });
-            setBankSaving(false);
-            if (id) {
-              setBankDraftId(id);
-            } else {
-              setBankSaveError(true);
-            }
           } else {
+            // For both stripe and non-stripe paid launches — stripe already has existingFundraiserId set
             closeLaunchModal();
             await onLaunchPay(launchData);
           }
@@ -2262,50 +2273,87 @@ export default function FundraiseApp() {
     if (!supabaseConfigured || !user?.id) return;
     const db = getSupabaseClient();
     const grid = data.gridOpt?.size || 100;
-    let orgId = null;
-    if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
-      const { data: oid } = await db.rpc('upsert_my_org', {
-        p_name: sanitize(data.orgDetails.name),
-        p_abn: sanitize(data.orgDetails.abn) || null,
-        p_org_type: data.orgDetails.orgType || null,
-      });
-      orgId = oid;
+    let fundraiserId;
+
+    if (data.existingFundraiserId) {
+      // Stripe path: the draft was already created and has stripe_account_id linked.
+      // Just update the fields (in case anything changed) — don't recreate squares/prizes.
+      fundraiserId = data.existingFundraiserId;
+      let orgId = null;
+      if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
+        const { data: oid } = await db.rpc('upsert_my_org', {
+          p_name: sanitize(data.orgDetails.name),
+          p_abn: sanitize(data.orgDetails.abn) || null,
+          p_org_type: data.orgDetails.orgType || null,
+        });
+        orgId = oid;
+      }
+      await db.from('fundraisers').update({
+        title:             sanitize(data.campaign.title || 'New Fundraiser'),
+        org:               sanitize(data.campaign.org) || null,
+        contact_name:      sanitize(data.campaign.contactName) || null,
+        contact_email:     sanitize(data.campaign.contactEmail) || null,
+        contact_phone:     sanitize(data.campaign.contactPhone) || null,
+        emoji:             data.campaign.emoji || '🍀',
+        image_url:         data.campaignImageUrl || null,
+        image_focal_y:     data.imageFocalY ?? 50,
+        description:       sanitize(data.campaign.description),
+        thank_you:         sanitize(data.campaign.thankYou),
+        state:             data.campaign.state || 'SA',
+        grid_size:         grid,
+        price_per_sq:      parseFloat(data.price) || 10,
+        draw_type:         data.drawRules.type,
+        draw_date:         data.drawRules.date || null,
+        payment_method:    data.payment.method,
+        fundraiser_type:   data.fundraiserType || 'individual',
+        ...(orgId ? { org_id: orgId } : {}),
+      }).eq('id', fundraiserId);
+    } else {
+      // Non-stripe path (bank transfer / in-person): create a fresh fundraiser
+      let orgId = null;
+      if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
+        const { data: oid } = await db.rpc('upsert_my_org', {
+          p_name: sanitize(data.orgDetails.name),
+          p_abn: sanitize(data.orgDetails.abn) || null,
+          p_org_type: data.orgDetails.orgType || null,
+        });
+        orgId = oid;
+      }
+      const { data: saved, error } = await db.from('fundraisers').insert({
+        owner_id:          user.id,
+        title:             sanitize(data.campaign.title || 'New Fundraiser'),
+        org:               sanitize(data.campaign.org) || null,
+        contact_name:      sanitize(data.campaign.contactName) || null,
+        contact_email:     sanitize(data.campaign.contactEmail) || null,
+        contact_phone:     sanitize(data.campaign.contactPhone) || null,
+        emoji:             data.campaign.emoji || '🍀',
+        image_url:         data.campaignImageUrl || null,
+        image_focal_y:     data.imageFocalY ?? 50,
+        description:       sanitize(data.campaign.description),
+        thank_you:         sanitize(data.campaign.thankYou),
+        state:             data.campaign.state || 'SA',
+        grid_size:         grid,
+        price_per_sq:      parseFloat(data.price) || 10,
+        status:            'draft',
+        draw_type:         data.drawRules.type,
+        draw_date:         data.drawRules.date || null,
+        payment_method:    data.payment.method,
+        bank_account_name: sanitize(data.payment.accountName) || null,
+        bank_bsb:          sanitize(data.payment.bsb) || null,
+        bank_account:      sanitize(data.payment.account) || null,
+        fundraiser_type:   data.fundraiserType || 'individual',
+        org_id:            orgId,
+      }).select().single();
+      if (error || !saved) { console.error('Draft save failed:', error); return; }
+      fundraiserId = saved.id;
+      const prizeRows = data.prizes
+        .filter((p) => p.desc)
+        .map((p, i) => ({ fundraiser_id: fundraiserId, place: p.place, description: sanitize(p.desc), value: sanitize(p.value), donated: p.donated ?? false, sort_order: i }));
+      await Promise.all([
+        db.rpc('create_fundraiser_squares', { p_fundraiser_id: fundraiserId, p_grid_size: grid }),
+        prizeRows.length ? db.from('prizes').insert(prizeRows) : Promise.resolve(),
+      ]);
     }
-    const { data: saved, error } = await db.from('fundraisers').insert({
-      owner_id:          user.id,
-      title:             sanitize(data.campaign.title || 'New Fundraiser'),
-      org:               sanitize(data.campaign.org) || null,
-      contact_name:      sanitize(data.campaign.contactName) || null,
-      contact_email:     sanitize(data.campaign.contactEmail) || null,
-      contact_phone:     sanitize(data.campaign.contactPhone) || null,
-      emoji:             data.campaign.emoji || '🍀',
-      image_url:         data.campaignImageUrl || null,
-      image_focal_y:     data.imageFocalY ?? 50,
-      description:       sanitize(data.campaign.description),
-      thank_you:         sanitize(data.campaign.thankYou),
-      state:             data.campaign.state || 'SA',
-      grid_size:         grid,
-      price_per_sq:      parseFloat(data.price) || 10,
-      status:            'draft',
-      draw_type:         data.drawRules.type,
-      draw_date:         data.drawRules.date || null,
-      payment_method:    data.payment.method,
-      bank_account_name: sanitize(data.payment.accountName) || null,
-      bank_bsb:          sanitize(data.payment.bsb) || null,
-      bank_account:      sanitize(data.payment.account) || null,
-      fundraiser_type:   data.fundraiserType || 'individual',
-      org_id:            orgId,
-    }).select().single();
-
-    if (error || !saved) { console.error('Draft save failed:', error); return; }
-
-    const prizeRows = data.prizes
-      .filter((p) => p.desc)
-      .map((p, i) => ({ fundraiser_id: saved.id, place: p.place, description: sanitize(p.desc), value: sanitize(p.value), donated: p.donated ?? false, sort_order: i }));
-    await Promise.all([
-      db.rpc('create_fundraiser_squares', { p_fundraiser_id: saved.id, p_grid_size: grid }),
-      prizeRows.length ? db.from('prizes').insert(prizeRows) : Promise.resolve(),
-    ]);
 
     // NOTE: final_fee is intentionally NOT sent here — the server calculates the
     // correct fee independently from the database and coupon validation. Never
@@ -2313,7 +2361,7 @@ export default function FundraiseApp() {
     const res = await fetch('/api/stripe/create-launch-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fundraiser_id: saved.id, coupon_code: data.couponCode || '' }),
+      body: JSON.stringify({ fundraiser_id: fundraiserId, coupon_code: data.couponCode || '' }),
     });
     const { url, error: stripeErr } = await res.json();
     if (stripeErr || !url) { console.error('Checkout creation failed:', stripeErr); return; }

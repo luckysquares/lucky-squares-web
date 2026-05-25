@@ -35,8 +35,17 @@ export default function StripeConnectSetup({ fundraiserId, onComplete, prefill =
           appearance: {
             variables: {
               colorPrimary: '#7C3AED',
+              colorBackground: '#FAFAF5',
+              colorText: '#1A1A1A',
+              colorSecondaryText: '#6B7280',
+              colorBorder: '#E8E3DB',
               borderRadius: '12px',
-              fontFamily: 'inherit',
+              buttonPrimaryColorBackground: '#7C3AED',
+              buttonPrimaryColorText: '#FFFFFF',
+              buttonBorderRadius: '10px',
+              fontFamily: '"Nunito", "Nunito Sans", system-ui, -apple-system, sans-serif',
+              fontSizeBase: '14px',
+              spacingUnit: '4px',
             },
           },
         });
@@ -44,6 +53,10 @@ export default function StripeConnectSetup({ fundraiserId, onComplete, prefill =
         if (!mounted || !containerRef.current) return;
 
         const component = instance.create('account-onboarding');
+        // Only collect what's currently required — reduces the number of fields shown
+        try {
+          component.setCollectionOptions({ fields: 'currently_due', futureRequirements: 'omit' });
+        } catch {}
         component.setOnExit(async () => {
           if (!mounted) return;
           setStatus('checking');
