@@ -64,7 +64,7 @@ export default function FeelingLuckyPage() {
         .eq('payment_method', 'stripe');
 
       if (error) { setCampaigns(SAMPLE_CAMPAIGNS); setLoadError(true); return; }
-      if (!rows?.length) { setNoRealCampaigns(true); return; }
+      if (!rows?.length) { setNoRealCampaigns(true); setCampaigns(SAMPLE_CAMPAIGNS); return; }
 
       const ids = rows.map((r) => r.id);
       const [{ data: stats }, { data: prizes }] = await Promise.all([
@@ -104,7 +104,7 @@ export default function FeelingLuckyPage() {
     setSpinning(true);
     setHasSpun(true);
     setTimeout(() => {
-      if (noRealCampaigns || !campaigns.length) { setSpinning(false); return; }
+      if (!campaigns.length) { setSpinning(false); return; }
       const pool = campaigns.filter((c) => c.id !== selected?.id);
       const pick = pool.length ? pool[Math.floor(Math.random() * pool.length)] : campaigns[Math.floor(Math.random() * campaigns.length)];
       setSelected(pick);
@@ -112,7 +112,7 @@ export default function FeelingLuckyPage() {
     }, 700);
   }, [campaigns, selected, spinning, noRealCampaigns]);
 
-  const isDemo = !supabaseConfigured || loadError;
+  const isDemo = !supabaseConfigured || loadError || noRealCampaigns;
 
   return (
     <>
