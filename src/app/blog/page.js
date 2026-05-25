@@ -115,11 +115,15 @@ export default async function BlogPage() {
     );
   }
 
-  // Partition posts
-  const featured = posts[0];
-  const popular = posts.slice(1, 5);
-  const remaining = posts.slice(5);
-  const trending = posts.slice(1, 7);
+  // seo_pillar posts are excluded from all curated sections (featured, popular,
+  // trending, resources, categories) — they appear only in "All articles".
+  const editorial = posts.filter(p => !p.tags?.includes('seo_pillar'));
+
+  // Partition editorial posts
+  const featured  = editorial[0];
+  const popular   = editorial.slice(1, 5);
+  const remaining = editorial.slice(5);
+  const trending  = editorial.slice(1, 7);
 
   // Group remaining by first tag
   const categoryMap = {};
@@ -131,8 +135,8 @@ export default async function BlogPage() {
   }
   const categories = Object.entries(categoryMap);
 
-  // Fundraising resources (from all posts)
-  const resourcePosts = posts.filter(p =>
+  // Fundraising resources (editorial only)
+  const resourcePosts = editorial.filter(p =>
     p.tags?.includes('lucky-squares') || p.tags?.includes('fundraising')
   ).slice(0, 6);
 
