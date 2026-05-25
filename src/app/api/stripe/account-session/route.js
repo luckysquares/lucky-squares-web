@@ -57,6 +57,21 @@ export async function POST(req) {
 
     let accountId = profile?.stripe_account_id;
 
+    if (accountId) {
+      // Existing account — patch business_profile and statement descriptor in case
+      // this account was created before those pre-fills were added. Stripe ignores
+      // fields that are already set to the same value, so this is safe to call every time.
+      try {
+        await stripe.accounts.update(accountId, {
+          business_profile: BUSINESS_PROFILE,
+          settings: { payments: { statement_descriptor: 'LUCKY SQUARES' } },
+        });
+      } catch (patchErr) {
+        // Non-fatal — session creation below will still work.
+        console.warn('account-session: could not patch existing account:', patchErr.message);
+      }
+    }
+
     if (!accountId) {
       const isOrg      = prefill?.businessType === 'company';
       const nameParts  = (prefill?.name || '').trim().split(' ');
