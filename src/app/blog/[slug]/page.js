@@ -164,8 +164,48 @@ export default async function BlogPostPage({ params }) {
   const html = renderMarkdown(post.content);
   const postUrl = `${SITE_URL}/blog/${slug}`;
 
+  const blogPostingSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt || undefined,
+    url: postUrl,
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.updated_at || post.published_at || post.created_at,
+    author: {
+      '@type': 'Organization',
+      name: 'Lucky Squares Australia',
+      url: SITE_URL,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Lucky Squares Australia',
+      url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/og-default.png`,
+      },
+    },
+    ...(post.cover_image_url && {
+      image: {
+        '@type': 'ImageObject',
+        url: post.cover_image_url,
+        width: 1200,
+        height: 630,
+      },
+    }),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl,
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
+      />
       <MarketingNav />
 
       {post.cover_image_url && (

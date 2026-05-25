@@ -7,9 +7,44 @@ export const metadata = {
   alternates: { canonical: 'https://luckysquares.com.au/how-it-works' },
 };
 
+const howToSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to run a Lucky Squares fundraiser',
+  description: 'Set up and run a Lucky Squares grid-based fundraiser online in under five minutes. Share your link, sell squares to your community, and run a live draw.',
+  totalTime: 'PT5M',
+  step: [
+    {
+      '@type': 'HowToStep',
+      position: 1,
+      name: 'Create your grid',
+      text: 'Choose 25, 50, or 100 squares. Set your price per square, add your prizes, and write a short description of what you are raising money for. Takes about 5 minutes.',
+      url: 'https://luckysquares.com.au/how-it-works#step-1',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 2,
+      name: 'Share and sell',
+      text: 'Share your fundraiser link via social media, WhatsApp, email, or your club app. Buyers pick their squares and pay however suits them: in person, by bank transfer, or online by card.',
+      url: 'https://luckysquares.com.au/how-it-works#step-2',
+    },
+    {
+      '@type': 'HowToStep',
+      position: 3,
+      name: 'Run your draw',
+      text: 'When you are ready, hit the draw button. A winner is randomly selected from all purchased squares. Share the moment live.',
+      url: 'https://luckysquares.com.au/how-it-works#step-3',
+    },
+  ],
+};
+
 export default function HowItWorksPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
       <MarketingNav />
 
       <section className="section section-hero-bg" style={{ paddingTop: 80 }}>
