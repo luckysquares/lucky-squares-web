@@ -132,7 +132,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     supabase.rpc('expire_stale_reservations').then(() =>
       supabase.from('squares').select('*').eq('fundraiser_id', fundraiser.id).order('number')
         .then(({ data, error }) => {
-          setSquares(error || !data?.length ? makeGrid(fundraiser.grid) : data.map((row) => localizeSquare(row, myNumsRef.current)));
+          setSquares(data?.length ? data.map((row) => localizeSquare(row, myNumsRef.current)) : makeEmptyGrid(fundraiser.grid));
           setLoadingGrid(false);
         })
     );
