@@ -244,7 +244,7 @@ export default function HowItWorksPage() {
                     { state: 'reserved',  label: 'Reserved',     num: '8',  desc: 'Orange. Someone else has this in their cart right now. Held for up to 7 minutes, then released automatically.' },
                     { state: 'taken',     label: 'Sold',         num: '11', name: 'Anna',  desc: 'Grey/beige. Purchased and no longer available. The buyer\'s first name is shown.' },
                     { state: 'winner',    label: 'Winning squares', num: '18', name: 'Dave', desc: 'Bright green with a glow. Shown after the draw. The winning squares are highlighted live for everyone on the page.' },
-                    { state: 'sponsored', label: 'Sponsored square', num: '35', name: 'Acme', desc: 'Rainbow animated border. A local business or sponsor has purchased this square. A great way to involve community supporters and give them visibility on your grid.' },
+                    { state: 'sponsored', label: 'Sponsored square', num: '35', name: 'Acme', desc: 'Animated rainbow colour. Lucky Squares Australia has purchased this square because they wanted to support your cause.' },
                   ].map((sq) => (
                     <div key={sq.state} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', background: 'var(--cream)', borderRadius: 10, border: '1px solid var(--border)' }}>
                       <div className={`sq ${sq.state}`} style={{ width: 44, height: 44, borderRadius: 7, flexShrink: 0, fontSize: 11, cursor: 'default' }}>
@@ -280,6 +280,7 @@ export default function HowItWorksPage() {
                   { icon: '👤', title: 'Buyer names on the grid', desc: 'Sold squares display the buyer\'s first name. You can see at a glance who has purchased and which numbers they hold.' },
                   { icon: '✅', title: 'Marking payments received', desc: 'For in-person and bank transfer campaigns, you can mark individual squares as paid once you have collected the money. This keeps your records tidy.' },
                   { icon: '📤', title: 'Sharing your live grid', desc: 'Share your unique fundraiser link at any time. Buyers can check back on the grid to watch it fill up, which builds excitement and encourages others to buy in.' },
+                  { icon: '💳', title: 'Online campaigns run themselves', desc: 'For card payment campaigns, the platform handles everything automatically. Squares are marked as paid the moment payment is received, receipts are sent to buyers, and winners are notified after the draw. No manual follow-up needed.' },
                 ].map((item) => (
                   <div key={item.title} style={{ background: 'var(--cream)', borderRadius: 12, padding: '18px 20px', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
