@@ -224,7 +224,7 @@ export default function HomePage() {
                 <li>All screens &amp; draw features</li>
               </ul>
               <Link href="/fundraise?register=1" className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }}>
-                Get started free
+                Check it out for free
               </Link>
             </div>
 
