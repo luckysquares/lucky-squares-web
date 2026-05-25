@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Terms of Service',
+  alternates: { canonical: 'https://luckysquares.com.au/terms' },
 };
 
 export default function TermsPage() {

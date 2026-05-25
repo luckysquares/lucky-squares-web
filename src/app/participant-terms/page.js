@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Participant Terms',
+  alternates: { canonical: 'https://luckysquares.com.au/participant-terms' },
 };
 
 export default function ParticipantTermsPage() {

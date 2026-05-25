@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
   title: 'Privacy Policy',
+  alternates: { canonical: 'https://luckysquares.com.au/privacy' },
 };
 
 export default function PrivacyPage() {
