@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import MarketingNav from '@/components/marketing/MarketingNav';
 
 export const metadata = {
@@ -64,11 +65,13 @@ export default function HowItWorksPage() {
           <div className="steps-grid">
 
             <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
-                <img
+              <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)', position: 'relative' }}>
+                <Image
                   src="/sports-club-fundraiser.PNG"
                   alt="Campaign setup wizard screen"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  style={{ objectFit: 'cover', objectPosition: 'top' }}
                 />
               </div>
               <div className="step-card" style={{ padding: '24px 28px 28px' }}>
@@ -82,11 +85,13 @@ export default function HowItWorksPage() {
             </div>
 
             <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
-                <img
+              <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)', position: 'relative' }}>
+                <Image
                   src="/lucky-squares-fundraiser.PNG"
                   alt="Person selling squares on an iPad at a sporting event"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  style={{ objectFit: 'cover', objectPosition: 'center' }}
                 />
               </div>
               <div className="step-card" style={{ padding: '24px 28px 28px' }}>
@@ -99,11 +104,13 @@ export default function HowItWorksPage() {
             </div>
 
             <div style={{ background: '#fff', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', border: '1.5px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)' }}>
-                <img
+              <div style={{ width: '100%', height: 220, overflow: 'hidden', background: 'var(--cream2)', position: 'relative' }}>
+                <Image
                   src="/help-for-sports-clubs-to-raise-money.PNG"
                   alt="Winner announcement screen showing the winning square"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  style={{ objectFit: 'cover', objectPosition: 'top' }}
                 />
               </div>
               <div className="step-card" style={{ padding: '24px 28px 28px' }}>

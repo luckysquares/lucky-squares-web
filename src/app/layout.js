@@ -103,7 +103,7 @@ export default async function RootLayout({ children }) {
         )}
         {isStandalone
           ? children
-          : <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>{children}</div>
+          : <main style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>{children}</main>
         }
         {!isStandalone && <Footer />}
         {!isStandalone && <div data-mariposa-widget><MariposaChatWidget /></div>}
