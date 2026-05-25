@@ -61,9 +61,14 @@ export default function StripeConnectSetup({ fundraiserId, onComplete, prefill =
           if (!mounted) return;
           setStatus('checking');
           try {
+            const { data: { session: authSession } } = await getSupabaseClient().auth.getSession();
+            const authToken = authSession?.access_token;
             const res = await fetch('/api/stripe/check-account', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+              },
               body: JSON.stringify({ fundraiser_id: fundraiserId }),
             });
             const { complete } = await res.json();

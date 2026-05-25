@@ -74,11 +74,13 @@ const STATE_PRIZE_CAPS = { ACT: 5000, NSW: 25000, NT: 5000, QLD: 2000, SA: 5000,
 const STATE_LABELS = { ACT: 'Australian Capital Territory', NSW: 'New South Wales', NT: 'Northern Territory', QLD: 'Queensland', SA: 'South Australia', TAS: 'Tasmania', VIC: 'Victoria', WA: 'Western Australia' };
 
 async function fetchProfile(userId) {
-  const { data } = await getSupabaseClient().from('profiles').select('plan, is_founding_member, is_beta_tester').eq('id', userId).single();
+  const { data } = await getSupabaseClient().from('profiles').select('plan, is_founding_member, is_beta_tester, stripe_account_id, stripe_onboarding_complete').eq('id', userId).single();
   return {
-    plan:             data?.plan              ?? 'trial',
-    isFoundingMember: data?.is_founding_member ?? false,
-    isBetaTester:     data?.is_beta_tester     ?? false,
+    plan:                     data?.plan                      ?? 'trial',
+    isFoundingMember:         data?.is_founding_member        ?? false,
+    isBetaTester:             data?.is_beta_tester            ?? false,
+    stripeAccountId:          data?.stripe_account_id         ?? null,
+    stripeOnboardingComplete: data?.stripe_onboarding_complete ?? false,
   };
 }
 
@@ -1464,7 +1466,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
           <div style={{ fontSize: 32, marginBottom: 10 }}>💳</div>
           <div style={{ fontWeight: 800, marginBottom: 6 }}>Online card payments</div>
           <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
-            After saving your fundraiser, you&apos;ll connect your bank account from your dashboard. This takes about 2 minutes and only needs to be done once. Funds are transferred directly to your bank after the draw.
+            After completing your campaign details, you&apos;ll connect your bank account once as part of the launch process. This takes about 2 minutes. Funds are transferred directly to your bank account after the draw completes — Lucky Squares never holds your money.
           </div>
         </div>
       )}
@@ -1514,7 +1516,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             ['Price',            `$${price} per square`],
             ['Potential profit', `$${netRaised.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
             ['Draw',             drawRules.type === 'manual' ? 'Manual' : drawRules.type === 'full' ? 'When grid fills' : `Scheduled: ${drawRules.date || 'no date set'}`],
-            ['Payment',          payment.method === 'bank'          ? `Bank transfer${payment.bsb ? ` (BSB: ${payment.bsb})` : ''}`
+            ['Payment',          payment.method === 'stripe'        ? 'Online card payment (Stripe)'
+                               : payment.method === 'bank'          ? `Bank transfer${payment.bsb ? ` (BSB: ${payment.bsb})` : ''}`
                                : payment.method === 'bank_inperson' ? `In person + bank transfer${payment.bsb ? ` (BSB: ${payment.bsb})` : ''}`
                                : 'In person'],
           ];
@@ -1595,7 +1598,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                 fundraiserId={bankDraftId}
                 onComplete={() => setBankConnectDone(true)}
                 prefill={fundraiserType === 'org' && orgDetails.name.trim()
-                  ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, email: userPrefill?.email, phone: userPrefill?.phone }
+                  ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, orgType: orgDetails.orgType, email: userPrefill?.email, phone: userPrefill?.phone }
                   : { name: userPrefill?.name, email: userPrefill?.email, phone: userPrefill?.phone }}
               />
             )}
@@ -1611,7 +1614,11 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                 if (user?.id) loadFundraisers(user.id);
                 setPhase('dashboard');
               } else {
-                // Bank is done — show the payment modal now
+                // Bank is done — refresh profile to record stripeOnboardingComplete, then show payment modal
+                if (user?.id) {
+                  const { stripeAccountId, stripeOnboardingComplete } = await fetchProfile(user.id);
+                  setUser((prev) => prev ? { ...prev, stripeAccountId, stripeOnboardingComplete } : prev);
+                }
                 setBankPhase(false);
                 setShowLaunchModal(true);
               }
@@ -1693,6 +1700,11 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
               </button>
               <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={async () => {
                 if (payment.method === 'stripe') {
+                  if (user?.stripeOnboardingComplete) {
+                    // Already have a verified Stripe account — skip bank setup entirely
+                    setShowLaunchModal(true);
+                    return;
+                  }
                   // For stripe: bank setup FIRST, then payment modal
                   const baseFee  = PLATFORM_FEES[gridOpt?.size || 100];
                   const finalFee = couponState === 'valid' && couponData
@@ -1944,8 +1956,8 @@ export default function FundraiseApp() {
       if (session?.user) {
         const u = session.user;
         const supabase = getSupabaseClient();
-        const { plan, isFoundingMember, isBetaTester } = await fetchProfile(u.id);
-        setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, isBetaTester });
+        const { plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
+        setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete });
         // Load org role (contributor or admin)
         const { data: oi } = await supabase.rpc('get_my_org_info');
         setOrgInfo(oi);
@@ -2005,8 +2017,8 @@ export default function FundraiseApp() {
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
-    const { plan, isFoundingMember } = await fetchProfile(u.id);
-    setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember });
+    const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
+    setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
     await loadFundraisers(u.id);
     setPhase('dashboard');
   };
@@ -2021,9 +2033,9 @@ export default function FundraiseApp() {
     // If email confirmation is disabled, user is auto-confirmed with a session
     if (data?.session && data?.user) {
       const u = data.user;
-      const { plan, isFoundingMember } = await fetchProfile(u.id);
+      const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
       const firstName = name?.split(' ')[0] || 'there';
-      setUser({ id: u.id, name: name || u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: phone || u.user_metadata?.phone || '', plan, isFoundingMember });
+      setUser({ id: u.id, name: name || u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: phone || u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
       const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
       if (storedRef) {
         await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
@@ -2053,9 +2065,9 @@ export default function FundraiseApp() {
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
-    const { plan, isFoundingMember } = await fetchProfile(u.id);
+    const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
     const firstName = u.user_metadata?.full_name?.split(' ')[0] || 'there';
-    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember });
+    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
     const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
     if (storedRef) {
       await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
@@ -2276,8 +2288,8 @@ export default function FundraiseApp() {
     let fundraiserId;
 
     if (data.existingFundraiserId) {
-      // Stripe path: the draft was already created and has stripe_account_id linked.
-      // Just update the fields (in case anything changed) — don't recreate squares/prizes.
+      // Stripe path: draft already created during bank setup and has stripe_account_id linked.
+      // Update fields only — squares/prizes already exist from handleSaveDraft.
       fundraiserId = data.existingFundraiserId;
       let orgId = null;
       if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
@@ -2306,10 +2318,14 @@ export default function FundraiseApp() {
         draw_date:         data.drawRules.date || null,
         payment_method:    data.payment.method,
         fundraiser_type:   data.fundraiserType || 'individual',
+        // Ensure user-level stripe account is linked (account-session route also does this,
+        // but belt-and-braces in case the skip-bankPhase path is used)
+        ...(user?.stripeAccountId ? { stripe_account_id: user.stripeAccountId } : {}),
         ...(orgId ? { org_id: orgId } : {}),
       }).eq('id', fundraiserId);
     } else {
-      // Non-stripe path (bank transfer / in-person): create a fresh fundraiser
+      // Non-stripe path (bank transfer / in-person) OR stripe with skip-bankPhase:
+      // create a fresh fundraiser
       let orgId = null;
       if (data.fundraiserType === 'org' && data.orgDetails?.name?.trim()) {
         const { data: oid } = await db.rpc('upsert_my_org', {
@@ -2343,6 +2359,8 @@ export default function FundraiseApp() {
         bank_account:      sanitize(data.payment.account) || null,
         fundraiser_type:   data.fundraiserType || 'individual',
         org_id:            orgId,
+        // Link user-level Stripe account (set when payment.method === 'stripe' and skip-bankPhase)
+        stripe_account_id: data.payment.method === 'stripe' ? (user?.stripeAccountId || null) : null,
       }).select().single();
       if (error || !saved) { console.error('Draft save failed:', error); return; }
       fundraiserId = saved.id;
