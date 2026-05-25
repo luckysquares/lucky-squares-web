@@ -89,7 +89,9 @@ function dbToFundraiser(row, soldCount = 0, prizes = []) {
     org:             row.org,
     description:     row.description || '',
     thankYou:        row.thank_you || '',
-    contactName:     row.contact_name || '',
+    contactName:     row.contact_name  || '',
+    contactEmail:    row.contact_email || '',
+    contactPhone:    row.contact_phone || '',
     grid:            row.grid_size,
     pricePerSq:      parseFloat(row.price_per_sq),
     sold:            soldCount,
@@ -878,11 +880,11 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [step,            setStep]            = useState(savedDraft?.step ?? 0);
   const [profanityFlags,  setProfanityFlags]  = useState({});
   const [fundraiserType,  setFundraiserType]  = useState(savedDraft?.fundraiserType ?? ''); // 'individual' | 'org'
-  const [orgDetails,      setOrgDetails]      = useState(savedDraft?.orgDetails ?? { name: '', orgType: '', abn: '' });
+  const [orgDetails,      setOrgDetails]      = useState(savedDraft?.orgDetails ?? { name: userPrefill?.org || '', orgType: '', abn: '' });
   const [gridOpt,         setGridOpt]         = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
   const [price,     setPrice]     = useState(savedDraft?.price ?? '5');
   const [prizes,    setPrizes]    = useState(savedDraft?.prizes ?? [{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
-  const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: '', state: 'SA', contactName: '', contactEmail: '', contactPhone: '', description: '', thankYou: '', emoji: '🍀' });
+  const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: userPrefill?.org || '', state: 'SA', contactName: userPrefill?.name || '', contactEmail: userPrefill?.email || '', contactPhone: userPrefill?.phone || '', description: '', thankYou: '', emoji: '🍀' });
   const [campaignImageUrl,  setCampaignImageUrl]  = useState(savedDraft?.campaignImageUrl ?? '');
   const [imageFocalY,       setImageFocalY]       = useState(savedDraft?.imageFocalY ?? 50);
   const [imageUploading,    setImageUploading]    = useState(false);
@@ -2347,7 +2349,7 @@ export default function FundraiseApp() {
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email } : null} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: fundraisers[0]?.contactPhone || '' } : null} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Referral prompt modal */}
