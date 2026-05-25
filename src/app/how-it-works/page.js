@@ -151,7 +151,7 @@ export default function HowItWorksPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
                   { num: '1', icon: '⚙️', title: 'Grid and price', desc: 'Choose 25, 50, or 100 squares and set your price per square. The platform shows you a live estimate of how much you could raise at sell-out.' },
-                  { num: '2', icon: '🏆', title: 'Prizes', desc: 'Add your prizes: 1st, 2nd, 3rd and any extras. Give each a description, an estimated value, and tick "donated" if a local business has sponsored it.' },
+                  { num: '2', icon: '🏆', title: 'Prizes', desc: 'Choose how many prizes you want to offer. Add prize details, 1st, 2nd, 3rd and any extras. Give each a description, an estimated value, and tick "donated" if a local business has sponsored it.' },
                   { num: '3', icon: '📝', title: 'Campaign details', desc: 'Write a title, choose an emoji, and describe what the funds are going towards. This appears on the public page your buyers will see.' },
                   { num: '4', icon: '💳', title: 'Payment method', desc: 'Choose how you want to collect money: in person, bank transfer, both, or secure online card payments. You can offer more than one option.' },
                   { num: '5', icon: '👁️', title: 'Preview and launch', desc: 'Review everything before it goes live. When you are happy, click Launch. Your unique share link is ready to send to your community.' },
