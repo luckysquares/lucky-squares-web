@@ -74,13 +74,14 @@ const STATE_PRIZE_CAPS = { ACT: 5000, NSW: 25000, NT: 5000, QLD: 2000, SA: 5000,
 const STATE_LABELS = { ACT: 'Australian Capital Territory', NSW: 'New South Wales', NT: 'Northern Territory', QLD: 'Queensland', SA: 'South Australia', TAS: 'Tasmania', VIC: 'Victoria', WA: 'Western Australia' };
 
 async function fetchProfile(userId) {
-  const { data } = await getSupabaseClient().from('profiles').select('plan, is_founding_member, is_beta_tester, stripe_account_id, stripe_onboarding_complete').eq('id', userId).single();
+  const { data } = await getSupabaseClient().from('profiles').select('plan, is_founding_member, is_beta_tester, stripe_account_id, stripe_onboarding_complete, full_name').eq('id', userId).single();
   return {
     plan:                     data?.plan                      ?? 'trial',
     isFoundingMember:         data?.is_founding_member        ?? false,
     isBetaTester:             data?.is_beta_tester            ?? false,
     stripeAccountId:          data?.stripe_account_id         ?? null,
     stripeOnboardingComplete: data?.stripe_onboarding_complete ?? false,
+    fullName:                 data?.full_name                  ?? '',
   };
 }
 
@@ -887,11 +888,26 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [step,            setStep]            = useState(savedDraft?.step ?? 0);
   const [profanityFlags,  setProfanityFlags]  = useState({});
   const [fundraiserType,  setFundraiserType]  = useState(savedDraft?.fundraiserType ?? ''); // 'individual' | 'org'
-  const [orgDetails,      setOrgDetails]      = useState(savedDraft?.orgDetails ?? { name: userPrefill?.org || '', orgType: '', abn: '' });
+  const [orgDetails,      setOrgDetails]      = useState(() => {
+    const defaults = { name: userPrefill?.org || '', orgType: '', abn: '' };
+    if (!savedDraft?.orgDetails) return defaults;
+    return { ...defaults, ...savedDraft.orgDetails, name: savedDraft.orgDetails.name || userPrefill?.org || '' };
+  });
   const [gridOpt,         setGridOpt]         = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
   const [price,     setPrice]     = useState(savedDraft?.price ?? '5');
   const [prizes,    setPrizes]    = useState(savedDraft?.prizes ?? [{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }]);
-  const [campaign,       setCampaign]       = useState(savedDraft?.campaign ?? { title: '', org: userPrefill?.org || '', state: 'SA', contactName: userPrefill?.name || '', contactEmail: userPrefill?.email || '', contactPhone: userPrefill?.phone || '', description: '', thankYou: '', emoji: '🍀' });
+  const [campaign,       setCampaign]       = useState(() => {
+    const defaults = { title: '', org: userPrefill?.org || '', state: 'SA', contactName: userPrefill?.name || '', contactEmail: userPrefill?.email || '', contactPhone: userPrefill?.phone || '', description: '', thankYou: '', emoji: '🍀' };
+    if (!savedDraft?.campaign) return defaults;
+    // Merge draft over defaults, but fall back to prefill for any contact fields the draft left blank
+    return {
+      ...defaults,
+      ...savedDraft.campaign,
+      contactName:  savedDraft.campaign.contactName  || userPrefill?.name  || '',
+      contactEmail: savedDraft.campaign.contactEmail || userPrefill?.email || '',
+      contactPhone: savedDraft.campaign.contactPhone || userPrefill?.phone || '',
+    };
+  });
   const [campaignImageUrl,  setCampaignImageUrl]  = useState(savedDraft?.campaignImageUrl ?? '');
   const [imageFocalY,       setImageFocalY]       = useState(savedDraft?.imageFocalY ?? 50);
   const [imageUploading,    setImageUploading]    = useState(false);
@@ -1949,8 +1965,8 @@ export default function FundraiseApp() {
       if (session?.user) {
         const u = session.user;
         const supabase = getSupabaseClient();
-        const { plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
-        setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete });
+        const { plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete, fullName } = await fetchProfile(u.id);
+        setUser({ id: u.id, name: u.user_metadata?.full_name || fullName || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete });
         // Load org role (contributor or admin)
         const { data: oi } = await supabase.rpc('get_my_org_info');
         setOrgInfo(oi);
@@ -2010,8 +2026,8 @@ export default function FundraiseApp() {
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
-    const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
-    setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
+    const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete, fullName } = await fetchProfile(u.id);
+    setUser({ id: u.id, name: u.user_metadata?.full_name || fullName || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
     await loadFundraisers(u.id);
     setPhase('dashboard');
   };
@@ -2026,9 +2042,9 @@ export default function FundraiseApp() {
     // If email confirmation is disabled, user is auto-confirmed with a session
     if (data?.session && data?.user) {
       const u = data.user;
-      const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
+      const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete, fullName } = await fetchProfile(u.id);
       const firstName = name?.split(' ')[0] || 'there';
-      setUser({ id: u.id, name: name || u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: phone || u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
+      setUser({ id: u.id, name: name || u.user_metadata?.full_name || fullName || '', email: u.email, org: u.user_metadata?.organisation || '', phone: phone || u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
       const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
       if (storedRef) {
         await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
@@ -2058,9 +2074,9 @@ export default function FundraiseApp() {
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
-    const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete } = await fetchProfile(u.id);
-    const firstName = u.user_metadata?.full_name?.split(' ')[0] || 'there';
-    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
+    const { plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete, fullName } = await fetchProfile(u.id);
+    const firstName = u.user_metadata?.full_name?.split(' ')[0] || fullName?.split(' ')[0] || 'there';
+    setUser({ id: u.id, name: u.user_metadata?.full_name || fullName || u.email, email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, stripeAccountId, stripeOnboardingComplete });
     const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
     if (storedRef) {
       await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
