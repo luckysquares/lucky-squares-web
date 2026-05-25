@@ -2325,6 +2325,7 @@ export default function FundraiseApp() {
 
   const handleNewFundraiser = () => {
     if (!canCreate) return;
+    try { localStorage.removeItem(WIZARD_STORAGE_KEY); } catch {}
     setPhase('wizard');
   };
 
