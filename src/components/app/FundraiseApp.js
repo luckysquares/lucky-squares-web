@@ -903,7 +903,6 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [couponState,       setCouponState]       = useState('idle'); // idle | checking | valid | invalid
   const [couponData,        setCouponData]        = useState(null);   // { type, value }
   const [bankPhase,         setBankPhase]         = useState(false);
-  const [bankPhaseRetro,    setBankPhaseRetro]    = useState(false);
   const [bankDraftId,       setBankDraftId]       = useState(null);
   const [bankSaving,        setBankSaving]        = useState(false);
   const [bankSaveError,     setBankSaveError]     = useState(false);
@@ -1609,26 +1608,20 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             style={{ width: '100%' }}
             disabled={!bankConnectDone}
             onClick={async () => {
-              if (bankPhaseRetro) {
-                setBankPhase(false); setBankPhaseRetro(false); setBankDraftId(null); setBankConnectDone(false);
-                if (user?.id) loadFundraisers(user.id);
-                setPhase('dashboard');
-              } else {
-                // Bank is done — refresh profile to record stripeOnboardingComplete, then show payment modal
-                if (user?.id) {
-                  const { stripeAccountId, stripeOnboardingComplete } = await fetchProfile(user.id);
-                  setUser((prev) => prev ? { ...prev, stripeAccountId, stripeOnboardingComplete } : prev);
-                }
-                setBankPhase(false);
-                setShowLaunchModal(true);
+              // Bank is done — refresh profile to record stripeOnboardingComplete, then show payment modal
+              if (user?.id) {
+                const { stripeAccountId, stripeOnboardingComplete } = await fetchProfile(user.id);
+                setUser((prev) => prev ? { ...prev, stripeAccountId, stripeOnboardingComplete } : prev);
               }
+              setBankPhase(false);
+              setShowLaunchModal(true);
             }}
           >
-            {bankConnectDone ? (bankPhaseRetro ? 'Done →' : 'Continue to payment →') : 'Complete bank account setup above to continue'}
+            {bankConnectDone ? 'Continue to payment →' : 'Complete bank account setup above to continue'}
           </button>
           {!bankConnectDone && (
             <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text2)', marginTop: 12 }}>
-              {bankPhaseRetro ? 'Complete the bank account setup above to receive card payments.' : 'You must complete the bank account setup before your campaign can go live.'}
+              You must complete the bank account setup before your campaign can go live.
             </p>
           )}
         </div>
