@@ -541,7 +541,7 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, 
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <h1 className="section-title">G&apos;day, {user?.name?.split(' ')[0] ?? 'there'}! 👋</h1>
+            <h1 className="section-title">G&apos;day, {user?.name?.split(' ')[0] || 'there'}! 👋</h1>
             <p className="section-sub">
               {fundraisers.length === 0
                 ? "You don't have any active fundraising campaigns yet. Click New fundraiser below to get started."
@@ -1927,7 +1927,7 @@ export default function FundraiseApp() {
         const u = session.user;
         const supabase = getSupabaseClient();
         const { plan, isFoundingMember, isBetaTester } = await fetchProfile(u.id);
-        setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember, isBetaTester });
+        setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember, isBetaTester });
         // Load org role (contributor or admin)
         const { data: oi } = await supabase.rpc('get_my_org_info');
         setOrgInfo(oi);
@@ -1988,7 +1988,7 @@ export default function FundraiseApp() {
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
     const { plan, isFoundingMember } = await fetchProfile(u.id);
-    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
+    setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
     await loadFundraisers(u.id);
     setPhase('dashboard');
   };
@@ -2004,8 +2004,8 @@ export default function FundraiseApp() {
     if (data?.session && data?.user) {
       const u = data.user;
       const { plan, isFoundingMember } = await fetchProfile(u.id);
-      const firstName = name?.split(' ')[0] || u.email;
-      setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
+      const firstName = name?.split(' ')[0] || 'there';
+      setUser({ id: u.id, name: name || u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
       const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
       if (storedRef) {
         await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
@@ -2036,7 +2036,7 @@ export default function FundraiseApp() {
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
     const { plan, isFoundingMember } = await fetchProfile(u.id);
-    const firstName = u.user_metadata?.full_name?.split(' ')[0] || u.email;
+    const firstName = u.user_metadata?.full_name?.split(' ')[0] || 'there';
     setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
     const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
     if (storedRef) {
