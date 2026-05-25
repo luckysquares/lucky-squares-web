@@ -8,6 +8,18 @@ const PLATFORM_FEE_AUD = 19;
 
 export async function POST(req) {
   try {
+    // Authentication required — prevents unauthenticated parties from creating
+    // checkout sessions (and thus activating) any fundraiser they can guess the ID of.
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const userRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: process.env.SUPABASE_SERVICE_ROLE_KEY },
+    });
+    if (!userRes.ok) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const { id: userId } = await userRes.json();
+
     const body = await req.json();
     const fundraiser_id = body?.fundraiser_id;
     const coupon_code   = body?.coupon_code ? String(body.coupon_code).trim().toUpperCase().slice(0, 32) : null;
@@ -18,16 +30,19 @@ export async function POST(req) {
 
     const db = supabase();
 
-    // Verify the fundraiser exists and hasn't already been activated.
-    // Using the admin client so this check can't be bypassed by RLS.
+    // Verify the fundraiser exists, belongs to this user, and hasn't already been activated.
     const { data: fundraiser, error: frError } = await db
       .from('fundraisers')
-      .select('id, status, grid_size')
+      .select('id, status, grid_size, owner_id')
       .eq('id', fundraiser_id)
       .single();
 
     if (frError || !fundraiser) {
       return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
+    }
+
+    if (fundraiser.owner_id !== userId) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     if (fundraiser.status === 'active') {

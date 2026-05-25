@@ -2177,6 +2177,8 @@ export default function FundraiseApp() {
           bank_bsb: sanitize(data.payment.bsb) || null, bank_account: sanitize(data.payment.account) || null,
           fundraiser_type: data.fundraiserType || 'individual',
           org_id: orgId,
+          // Link user-level Stripe account for free stripe launches (paid path uses handleLaunchPay)
+          stripe_account_id: data.payment.method === 'stripe' ? (user?.stripeAccountId || null) : null,
         })
         .select().single();
       if (!error && saved) {
@@ -2322,7 +2324,7 @@ export default function FundraiseApp() {
         // but belt-and-braces in case the skip-bankPhase path is used)
         ...(user?.stripeAccountId ? { stripe_account_id: user.stripeAccountId } : {}),
         ...(orgId ? { org_id: orgId } : {}),
-      }).eq('id', fundraiserId);
+      }).eq('id', fundraiserId).eq('owner_id', user.id);
     } else {
       // Non-stripe path (bank transfer / in-person) OR stripe with skip-bankPhase:
       // create a fresh fundraiser
@@ -2376,9 +2378,14 @@ export default function FundraiseApp() {
     // NOTE: final_fee is intentionally NOT sent here — the server calculates the
     // correct fee independently from the database and coupon validation. Never
     // trust the client to supply a price.
+    const { data: { session: checkoutSession } } = await getSupabaseClient().auth.getSession();
+    const checkoutToken = checkoutSession?.access_token;
     const res = await fetch('/api/stripe/create-launch-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(checkoutToken ? { Authorization: `Bearer ${checkoutToken}` } : {}),
+      },
       body: JSON.stringify({ fundraiser_id: fundraiserId, coupon_code: data.couponCode || '' }),
     });
     const { url, error: stripeErr } = await res.json();

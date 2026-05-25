@@ -123,7 +123,7 @@ export async function POST(req) {
       },
     });
 
-    return Response.json({ client_secret: accountSession.client_secret, account_id: accountId });
+    return Response.json({ client_secret: accountSession.client_secret });
   } catch (err) {
     console.error('account-session error:', err);
     return Response.json({ error: err.message }, { status: 500 });
