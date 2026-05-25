@@ -1,8 +1,17 @@
 import { getAdminClient as supabase } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(req) {
   try {
+    // Rate limit: 20 opt-ins per IP per hour (generous for a post-purchase flow,
+    // tight enough to deter bulk email harvesting / spam sign-ups).
+    const ip = getClientIp(req);
+    const { allowed } = checkRateLimit(`opt-in:${ip}`, { limit: 20, windowMs: 60 * 60 * 1000 });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
     const { email, fundraiser_id } = await req.json();
     if (!email || !fundraiser_id) {
       return NextResponse.json({ error: 'email and fundraiser_id required' }, { status: 400 });

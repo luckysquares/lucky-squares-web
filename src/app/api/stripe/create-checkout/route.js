@@ -26,15 +26,19 @@ export async function POST(req) {
 
     const db = supabase();
 
-    // Fetch fundraiser details — also need grid_size for the range check.
+    // Fetch fundraiser details — only active campaigns can accept payments.
+    // Also need grid_size for the range check.
     const { data: fundraiser, error } = await db
       .from('fundraisers')
-      .select('title, org, price_per_sq, stripe_account_id, stripe_onboarding_complete, grid_size')
+      .select('title, org, price_per_sq, stripe_account_id, stripe_onboarding_complete, grid_size, status')
       .eq('id', fundraiser_id)
       .single();
 
     if (error || !fundraiser) {
       return Response.json({ error: 'Fundraiser not found' }, { status: 404 });
+    }
+    if (fundraiser.status !== 'active') {
+      return Response.json({ error: 'This campaign is not accepting payments' }, { status: 409 });
     }
     if (!fundraiser.stripe_account_id) {
       return Response.json({ error: 'Stripe not configured for this fundraiser' }, { status: 400 });
