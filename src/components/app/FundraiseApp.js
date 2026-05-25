@@ -244,6 +244,7 @@ const REGISTER_FEATURES = [
 function RegisterScreen({ onRegister, onBack, loading, error }) {
   const [name,  setName]  = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [org,   setOrg]   = useState('');
   const [pass,  setPass]  = useState('');
   return (
@@ -298,12 +299,16 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
                   <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="form-group">
+                  <label className="form-label">Phone</label>
+                  <input className="form-input" type="tel" placeholder="04XX XXX XXX" maxLength={20} value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </div>
+                <div className="form-group">
                   <label className="form-label">Password</label>
                   <input className="form-input" type="password" placeholder="8+ characters" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && onRegister({ name, email, org, password: pass })} />
+                    onKeyDown={(e) => e.key === 'Enter' && onRegister({ name, email, org, phone, password: pass })} />
                 </div>
                 {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
-                <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={loading} onClick={() => onRegister({ name, email, org, password: pass })}>
+                <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={loading} onClick={() => onRegister({ name, email, org, phone, password: pass })}>
                   {loading ? 'Creating account…' : 'Create account'}
                 </button>
               </div>
@@ -1590,8 +1595,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                 fundraiserId={bankDraftId}
                 onComplete={() => setBankConnectDone(true)}
                 prefill={fundraiserType === 'org' && orgDetails.name.trim()
-                  ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, email: userPrefill?.email }
-                  : { name: userPrefill?.name, email: userPrefill?.email }}
+                  ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, email: userPrefill?.email, phone: userPrefill?.phone }
+                  : { name: userPrefill?.name, email: userPrefill?.email, phone: userPrefill?.phone }}
               />
             )}
           </div>
@@ -1833,7 +1838,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
 
 function BankConnectScreen({ fundraiserId, onDone, user = null }) {
   const [done, setDone] = useState(false);
-  const prefill = user ? { name: user.name, email: user.email } : null;
+  const prefill = user ? { name: user.name, email: user.email, phone: user.phone || '' } : null;
   return (
     <div className="dot-bg" style={{ minHeight: '100vh' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
@@ -1929,7 +1934,7 @@ export default function FundraiseApp() {
         const u = session.user;
         const supabase = getSupabaseClient();
         const { plan, isFoundingMember, isBetaTester } = await fetchProfile(u.id);
-        setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember, isBetaTester });
+        setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, isBetaTester });
         // Load org role (contributor or admin)
         const { data: oi } = await supabase.rpc('get_my_org_info');
         setOrgInfo(oi);
@@ -1990,16 +1995,16 @@ export default function FundraiseApp() {
     if (error) { setAuthError(error.message); return; }
     const u = data.user;
     const { plan, isFoundingMember } = await fetchProfile(u.id);
-    setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
+    setUser({ id: u.id, name: u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember });
     await loadFundraisers(u.id);
     setPhase('dashboard');
   };
 
-  const handleRegister = async ({ name, email, org, password }) => {
+  const handleRegister = async ({ name, email, org, phone, password }) => {
     setAuthError('');
     if (!supabaseConfigured) { setPendingEmail(email); setPhase('verify'); return; }
     setAuthLoading(true);
-    const { data, error } = await getSupabaseClient().auth.signUp({ email, password, options: { data: { full_name: name, organisation: org } } });
+    const { data, error } = await getSupabaseClient().auth.signUp({ email, password, options: { data: { full_name: name, organisation: org, phone } } });
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     // If email confirmation is disabled, user is auto-confirmed with a session
@@ -2007,7 +2012,7 @@ export default function FundraiseApp() {
       const u = data.user;
       const { plan, isFoundingMember } = await fetchProfile(u.id);
       const firstName = name?.split(' ')[0] || 'there';
-      setUser({ id: u.id, name: name || u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
+      setUser({ id: u.id, name: name || u.user_metadata?.full_name || '', email: u.email, org: u.user_metadata?.organisation || '', phone: phone || u.user_metadata?.phone || '', plan, isFoundingMember });
       const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
       if (storedRef) {
         await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
@@ -2039,7 +2044,7 @@ export default function FundraiseApp() {
     const u = data.user;
     const { plan, isFoundingMember } = await fetchProfile(u.id);
     const firstName = u.user_metadata?.full_name?.split(' ')[0] || 'there';
-    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', plan, isFoundingMember });
+    setUser({ id: u.id, name: u.user_metadata?.full_name || u.email, email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember });
     const storedRef = typeof window !== 'undefined' ? localStorage.getItem('ls_ref') : null;
     if (storedRef) {
       await getSupabaseClient().rpc('apply_referral', { p_code: storedRef });
@@ -2349,7 +2354,7 @@ export default function FundraiseApp() {
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: fundraisers[0]?.contactPhone || '' } : null} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Referral prompt modal */}

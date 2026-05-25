@@ -63,6 +63,7 @@ export async function POST(req) {
           ...(firstName ? { first_name: firstName } : {}),
           ...(lastName  ? { last_name:  lastName  } : {}),
           ...(prefill?.email ? { email: prefill.email } : {}),
+          ...(prefill?.phone ? { phone: prefill.phone } : {}),
         };
       }
 
