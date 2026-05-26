@@ -13,12 +13,25 @@ const KNOWN_ROUTES = new Set([
 
 // Extract fundraiser UUID from the current URL.
 // Handles both legacy UUID paths (/f/uuid via redirect) and new slug paths (/sunbury-primary-2025).
+// Also listens for the 'ls:campaign-loaded' event dispatched by the campaign page itself,
+// which is more reliable than URL parsing (works for all URL formats, no timing issues).
 function useFundraiserId() {
   const pathname = usePathname();
   const [fundraiserId, setFundraiserId] = useState(null);
 
+  // Primary: listen for the campaign page to broadcast its resolved ID
   useEffect(() => {
-    // Try UUID anywhere in the path first (fast, no DB needed)
+    const handler = (e) => setFundraiserId(e.detail?.id ?? null);
+    window.addEventListener('ls:campaign-loaded', handler);
+    return () => window.removeEventListener('ls:campaign-loaded', handler);
+  }, []);
+
+  // Fallback: URL-based resolution — also resets the ID on every navigation
+  // so Mariposa doesn't carry campaign context to unrelated pages
+  useEffect(() => {
+    setFundraiserId(null); // clear on any navigation first
+
+    // Try UUID anywhere in the path (fast, no DB needed)
     const uuidMatch = pathname?.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
     if (uuidMatch) { setFundraiserId(uuidMatch[1]); return; }
 

@@ -141,6 +141,8 @@ export default function PublicFundraiserPage({ params }) {
             setIsOrganiser(true);
           }
           setLoading(false);
+          // Tell the Mariposa widget which campaign is loaded (more reliable than URL parsing)
+          window.dispatchEvent(new CustomEvent('ls:campaign-loaded', { detail: { id: data.id } }));
         });
     });
   }, [slug]);
