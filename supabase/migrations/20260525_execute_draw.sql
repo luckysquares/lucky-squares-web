@@ -1,3 +1,7 @@
+-- Add winner_square_nums column (int[]) to store multiple winner square numbers.
+-- winner_square_num (singular) is kept for backward compatibility.
+ALTER TABLE fundraisers ADD COLUMN IF NOT EXISTS winner_square_nums int[];
+
 -- ── execute_draw ────────────────────────────────────────────────────────────
 -- Replaces the client-side Math.random() winner selection in LiveGrid.js with
 -- server-side PostgreSQL random().
