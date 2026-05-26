@@ -1596,6 +1596,11 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
         ))}
       </div>
 
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#EEF2FF', border: '1.5px solid #C7D2FE', borderRadius: 12, padding: '14px 16px', marginBottom: 16, fontSize: 13, color: '#3730A3', lineHeight: 1.6 }}>
+        <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
+        <span><strong>Heads up:</strong> Stripe will ask for a customer support phone number. Just enter your contact number — it appears on payment receipts so buyers can reach you if needed.</span>
+      </div>
+
       <div className="scratch-card" style={{ padding: 28 }}>
         {bankSaving && (
           <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
