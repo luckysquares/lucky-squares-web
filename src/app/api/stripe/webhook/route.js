@@ -55,7 +55,7 @@ export async function POST(req) {
     if (action === 'launch') {
       const { data: existing } = await db
         .from('fundraisers')
-        .select('status')
+        .select('status, grid_size')
         .eq('id', fundraiser_id)
         .single();
 
@@ -76,6 +76,18 @@ export async function POST(req) {
           launched_at:          new Date().toISOString(),
           prize_reserve_cents:  prizeReserveCents,
         }).eq('id', fundraiser_id);
+
+        // Create one row per square in the squares table so buyers can reserve them.
+        // Uses upsert + ignoreDuplicates for idempotency (safe if webhook fires twice).
+        const gridSize = existing.grid_size;
+        if (gridSize) {
+          const squareRows = Array.from({ length: gridSize }, (_, i) => ({
+            fundraiser_id,
+            number: i + 1,
+            status: 'available',
+          }));
+          await db.from('squares').upsert(squareRows, { onConflict: 'fundraiser_id,number', ignoreDuplicates: true });
+        }
 
         if (coupon_code) {
           await db.rpc('redeem_coupon', { p_code: coupon_code });
