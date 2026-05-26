@@ -9,7 +9,7 @@ import { calcTxFee, STRIPE_FEE_PCT, STRIPE_FEE_FIXED } from '@/lib/stripeFees';
 const RESERVE_SECS   = 420;
 const WARN_SECS      = 120;
 const MAX_CART       = 10;
-const PLATFORM_FEES  = { 25: 9, 50: 14, 100: 19 };
+const PLATFORM_FEES  = { 25: 19, 50: 19, 100: 19 };
 const BUYER_STORAGE_KEY = 'ls_buyer_details';
 
 const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -240,13 +240,15 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     lastTapRef.current[sq.id] = now;
 
     if (fundraiser.status === 'draft' || fundraiser.status === 'drawn' || drawnResult !== null) return;
-    if (sq.status === 'reserved') { setReservedToast(true); setTimeout(() => setReservedToast(false), 3000); return; }
     if (sq.status === 'taken' || sq.status === 'mine') return;
+    // Check cart membership before reserved status — a square reserved by THIS user
+    // will have status 'reserved' in the DB, so we must dequeue it before that check fires.
     if (cart.includes(sq.id)) {
       setCart((prev) => prev.filter((id) => id !== sq.id));
       if (supabaseConfigured) await getSupabaseClient().rpc('release_square', { p_fundraiser_id: fundraiser.id, p_square_number: sq.id });
       return;
     }
+    if (sq.status === 'reserved') { setReservedToast(true); setTimeout(() => setReservedToast(false), 3000); return; }
     if (cart.length >= MAX_CART) { setCartToast(true); setTimeout(() => setCartToast(false), 3000); return; }
     if (supabaseConfigured) {
       const { data: reserved } = await getSupabaseClient().rpc('reserve_square', { p_fundraiser_id: fundraiser.id, p_square_number: sq.id });
