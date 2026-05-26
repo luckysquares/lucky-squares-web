@@ -985,7 +985,10 @@ textarea { font-family: inherit; }
     border-radius: 16px 16px 0 0;
     flex-direction: column; gap: 10px; padding: 14px 16px 28px; text-align: center;
     box-shadow: 0 -4px 24px rgba(0,0,0,.3);
+    max-width: 100% !important; margin: 0 !important;
   }
+  /* Spacer prevents fixed cart bar from covering bottom of grid */
+  .cart-bar-spacer { height: 180px; }
 }
 
 .beta-campaign-card { transition: box-shadow .15s; cursor: pointer; }

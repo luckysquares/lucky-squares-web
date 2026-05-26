@@ -116,7 +116,9 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const timerRef     = useRef(null);
   const prevLen      = useRef(0);
   const myNumsRef    = useRef(new Set());
-  const lastTapRef   = useRef({}); // debounce map: squareId → timestamp, prevents ghost double-taps on mobile
+  const lastTapRef      = useRef({}); // debounce map: squareId → timestamp, prevents ghost double-taps on mobile
+  const touchStartPos   = useRef({ x: 0, y: 0 }); // track touch-start coords to distinguish taps from scrolls
+  const lastTouchTime   = useRef(0);               // timestamp of last touch-handled tap, used to suppress synthetic onClick
 
   // Hoisted early so effects below can reference them
   const isOwner = !!onBack;
@@ -1023,7 +1025,21 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                 : sq.owner ? `#${sq.id}: ${sq.owner}` : `Square #${sq.id}`;
               const isSold = sq.status === 'taken' || sq.status === 'mine';
               return (
-                <div key={sq.id} className={`sq ${cls}`} onClick={() => toggleSquare(sq)} title={isSponsored ? undefined : tooltip}
+                <div key={sq.id} className={`sq ${cls}`}
+                  title={isSponsored ? undefined : tooltip}
+                  onTouchStart={(e) => { const t = e.touches[0]; touchStartPos.current = { x: t.clientX, y: t.clientY }; }}
+                  onTouchEnd={(e) => {
+                    const t = e.changedTouches[0];
+                    const dx = Math.abs(t.clientX - touchStartPos.current.x);
+                    const dy = Math.abs(t.clientY - touchStartPos.current.y);
+                    if (dx > 8 || dy > 8) return; // scroll/swipe — not a tap
+                    lastTouchTime.current = Date.now();
+                    toggleSquare(sq);
+                  }}
+                  onClick={() => {
+                    if (Date.now() - lastTouchTime.current < 500) return; // already handled by touch
+                    toggleSquare(sq);
+                  }}
                   onMouseEnter={isSold && sq.owner && !isSponsored ? (e) => { setHoveredSq(sq); setHoveredRect(e.currentTarget.getBoundingClientRect()); } : undefined}
                   onMouseLeave={isSold && !isSponsored ? () => { setHoveredSq(null); setHoveredRect(null); } : undefined}
                 >
@@ -1044,7 +1060,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                       {!isDrawn && sq.status === 'taken'    && sq.owner    && <span className="sq-label">{abbrevName(sq.owner)}</span>}
                       {!isDrawn && sq.status === 'mine'                    && <span className="sq-label" style={{ color: '#007A5C' }}>✓</span>}
                       {!isDrawn && sq.status === 'reserved' && secsLeft !== null && <span className="sq-timer">{fmtTime(secsLeft)}</span>}
-                      {!isDrawn && inCart && sq.status === 'available'     && <span className="sq-label" style={{ color: 'var(--green)' }}>✓</span>}
+                      {!isDrawn && inCart && <span className="sq-label" style={{ color: 'var(--green)' }}>✓</span>}
                     </>
                   )}
                 </div>
@@ -1052,8 +1068,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             })}
           </div>
 
+          {/* Spacer so the fixed cart bar on mobile doesn't cover the grid's bottom rows */}
+          {!isDrawn && cart.length > 0 && <div className="cart-bar-spacer" />}
+
           {!isDrawn && cart.length > 0 && (
-            <div className={`cart-bar${timerWarning ? ' warn' : ''}`} style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '24px auto 0', borderRadius: 16, overflow: 'hidden' }}>
+            <div className={`cart-bar${timerWarning ? ' warn' : ''}`} style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '24px auto 0' }}>
               <div className="timer-bar">
                 <div className="timer-fill" style={{ width: `${timerPct}%`, background: timerWarning ? 'var(--orange)' : 'var(--green)' }} />
               </div>
