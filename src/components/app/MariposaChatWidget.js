@@ -2,13 +2,39 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
-// Extract fundraiser UUID from campaign paths (supports both old /f/[uuid] and new /[slug] routes)
+// Named routes that are never campaign slugs — skip the DB lookup for these
+const KNOWN_ROUTES = new Set([
+  'fundraise', 'admin', 'org', 'blog', 'betatest', 'api',
+  'privacy', 'terms', 'faq', 'how-it-works', 'pricing',
+  'contact', 'coming-soon', 'feeling-lucky', 'org-signup',
+]);
+
+// Extract fundraiser UUID from the current URL.
+// Handles both legacy UUID paths (/f/uuid via redirect) and new slug paths (/sunbury-primary-2025).
 function useFundraiserId() {
   const pathname = usePathname();
-  // Match a UUID anywhere in the path (covers /f/uuid and direct /uuid routes)
-  const match = pathname?.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-  return match ? match[1] : null;
+  const [fundraiserId, setFundraiserId] = useState(null);
+
+  useEffect(() => {
+    // Try UUID anywhere in the path first (fast, no DB needed)
+    const uuidMatch = pathname?.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+    if (uuidMatch) { setFundraiserId(uuidMatch[1]); return; }
+
+    // For slug-based URLs: first path segment that isn't a known route
+    const segment = pathname?.split('/').filter(Boolean)[0];
+    if (!segment || KNOWN_ROUTES.has(segment) || !supabaseConfigured) return;
+
+    getSupabaseClient()
+      .from('fundraisers')
+      .select('id')
+      .eq('slug', segment)
+      .maybeSingle()
+      .then(({ data }) => { if (data?.id) setFundraiserId(data.id); });
+  }, [pathname]);
+
+  return fundraiserId;
 }
 
 // Read visitor's first name from the buyer details saved by the checkout "remember me" feature
