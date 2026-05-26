@@ -1345,15 +1345,14 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             {isHovSponsored ? (
               <>
                 <span style={{ fontSize: 16, lineHeight: 1 }}>🍀</span>
-                <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: '#9FD4B8', lineHeight: 1 }}>GIFT</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1 }}>Lucky Squares</span>
+                <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: '#9FD4B8', lineHeight: 1 }}>SPONSORED</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: '#D1FAE5', lineHeight: 1.3, textAlign: 'center', padding: '0 6px' }}>We bought this square because we like your cause</span>
               </>
             ) : (
               <>
-                <span style={{ fontSize: 20, fontWeight: 900, color: col, fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{hoveredSq.id}</span>
-                <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.2, textTransform: 'uppercase', color: col, opacity: isHovWinner ? 1 : .6, lineHeight: 1 }}>
-                  {isHovWinner ? '🏆 WINNER' : 'SOLD'}
-                </span>
+                {isHovWinner && <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: col, lineHeight: 1 }}>🏆 WINNER</span>}
+                <span style={{ fontSize: 22, fontWeight: 900, color: col, fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{hoveredSq.id}</span>
+                {!isHovWinner && <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.2, textTransform: 'uppercase', color: col, opacity: .6, lineHeight: 1 }}>SOLD</span>}
                 <span style={{ fontSize: 13, fontWeight: 700, color: col, lineHeight: 1 }}>{abbrevName(hoveredSq.owner)}</span>
               </>
             )}
