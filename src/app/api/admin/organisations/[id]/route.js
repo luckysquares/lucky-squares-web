@@ -72,11 +72,18 @@ export async function POST(req, { params }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au';
 
   if (action === 'approve') {
-    await sendEmail('org_application_approved', app.email, {
-      first_name: firstName,
-      org_name:   app.org_name,
-      portal_url: `${appUrl}/org/dashboard`,
-    });
+    await Promise.all([
+      sendEmail('org_application_approved', app.email, {
+        first_name: firstName,
+        org_name:   app.org_name,
+        portal_url: `${appUrl}/org/dashboard`,
+      }),
+      sendEmail('org_welcome', app.email, {
+        first_name:     firstName,
+        org_name:       app.org_name,
+        campaign_limit: 10,
+      }),
+    ]);
   } else {
     await sendEmail('org_application_rejected', app.email, {
       first_name: firstName,

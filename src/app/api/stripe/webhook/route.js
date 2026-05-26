@@ -212,7 +212,7 @@ export async function POST(req) {
     // ── Confirmation email to buyer ───────────────────────────────────────────
     const { data: fundraiser } = await db
       .from('fundraisers')
-      .select('title, org, draw_type, draw_date, contact_name, contact_email')
+      .select('title, org, draw_type, draw_date, contact_name, contact_email, owner_id, grid_size, price_per_sq')
       .eq('id', fundraiser_id)
       .single();
 
@@ -245,7 +245,7 @@ export async function POST(req) {
         }),
       });
 
-      // First-sale notification to organiser
+      // Sale notification to organiser (square_sold for standard plans; org_square_sold for org plan)
       const { data: stats } = await db
         .from('fundraiser_stats')
         .select('sold_count')
@@ -255,29 +255,59 @@ export async function POST(req) {
       const totalSold   = Number(stats?.sold_count ?? 0);
       const isFirstSale = totalSold === squareNums.length;
 
-      if (isFirstSale && fundraiser?.contact_email) {
-        const { data: fullFundraiser } = await db
-          .from('fundraisers')
-          .select('contact_email, contact_name, grid_size, price_per_sq')
-          .eq('id', fundraiser_id)
-          .single();
+      if (fundraiser?.contact_email) {
+        // Check if the campaign owner is on the org plan
+        let isOrgPlan = false;
+        if (fundraiser.owner_id) {
+          const { data: ownerProfile } = await db
+            .from('profiles')
+            .select('plan')
+            .eq('id', fundraiser.owner_id)
+            .single();
+          isOrgPlan = ownerProfile?.plan === 'org';
+        }
 
-        if (fullFundraiser?.contact_email) {
-          const amountRaised = (totalSold * parseFloat(fullFundraiser.price_per_sq || 0)).toFixed(2);
-          await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`, {
+        const amountRaised = (totalSold * parseFloat(fundraiser.price_per_sq || 0)).toFixed(2);
+        const txUrl        = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`;
+        const txHeaders    = { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` };
+
+        if (isOrgPlan) {
+          // Org plan: send org_square_sold for every sale (first and subsequent)
+          await fetch(txUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+            headers: txHeaders,
+            body: JSON.stringify({
+              type: 'org_square_sold',
+              to:   fundraiser.contact_email,
+              data: {
+                first_name:     (fundraiser.contact_name ?? 'there').split(' ')[0],
+                org_name:       fundraiser.org,
+                campaign_title: fundraiser.title,
+                buyer_name,
+                square_number:  squareNums[0],
+                sold_count:     totalSold,
+                grid_size:      fundraiser.grid_size,
+                amount_raised:  amountRaised,
+                is_first:       isFirstSale,
+              },
+            }),
+          }).catch(() => {});
+        } else if (isFirstSale) {
+          // Standard plan: send square_sold only on the first sale
+          await fetch(txUrl, {
+            method: 'POST',
+            headers: txHeaders,
             body: JSON.stringify({
               type: 'square_sold',
-              to:   fullFundraiser.contact_email,
+              to:   fundraiser.contact_email,
               data: {
-                first_name:     (fullFundraiser.contact_name ?? 'there').split(' ')[0],
+                first_name:     (fundraiser.contact_name ?? 'there').split(' ')[0],
                 campaign_title: fundraiser.title,
                 org_name:       fundraiser.org,
                 buyer_name,
                 square_number:  squareNums[0],
                 sold_count:     totalSold,
-                grid_size:      fullFundraiser.grid_size,
+                grid_size:      fundraiser.grid_size,
                 amount_raised:  amountRaised,
                 is_first:       true,
               },

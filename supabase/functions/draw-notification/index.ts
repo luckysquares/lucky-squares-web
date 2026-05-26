@@ -6,6 +6,7 @@ import {
   emailDrawResultWinner,
   emailDrawResultWinnerClaim,
   emailDrawResultDidNotWin,
+  emailFirstCampaignTips,
 } from '../_shared/templates.ts';
 
 const supabase = createClient(
@@ -42,7 +43,7 @@ Deno.serve(async (req) => {
       id, title, org, contact_name, contact_email, contact_phone,
       payment_method, grid_size, price_per_sq,
       bank_account_name, bank_bsb, bank_account,
-      stripe_account_id,
+      stripe_account_id, owner_id,
       winner_square_num, winner_square_nums,
       notifications_sent_at
     `)
@@ -299,6 +300,32 @@ Deno.serve(async (req) => {
       is_stripe:      isStripe,
     });
     await sendEmail({ to: f.contact_email, subject: tpl.subject, text: tpl.text });
+
+    // 2a. First-campaign tips: send once after the organiser's very first draw.
+    if (f.owner_id) {
+      const { count: drawnCount } = await supabase
+        .from('fundraisers')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', f.owner_id)
+        .eq('status', 'drawn');
+
+      if (drawnCount === 1) {
+        // This is (or just became) their first completed draw.
+        const prizeSummary = prizeList.length > 0
+          ? prizeList[0].description ?? 'a prize'
+          : 'a prize';
+        const campaignUrl = `${Deno.env.get('APP_URL') ?? 'https://luckysquares.com.au'}/f/${fundraiserId}`;
+        const tipsTpl = emailFirstCampaignTips({
+          first_name:     firstName,
+          campaign_title: f.title,
+          org_name:       f.org ?? '',
+          price_per_sq:   String(f.price_per_sq),
+          prize_summary:  prizeSummary,
+          campaign_url:   campaignUrl,
+        });
+        await sendEmail({ to: f.contact_email, subject: tipsTpl.subject, text: tipsTpl.text });
+      }
+    }
   }
 
   // 3. Email each buyer (winner or no-win)

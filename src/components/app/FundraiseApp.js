@@ -2211,6 +2211,18 @@ export default function FundraiseApp() {
         campaign_title: nf.title,
         campaign_url: campaignUrl,
       });
+      if (user?.plan === 'org') {
+        const maxRaise = (nf.grid * nf.pricePerSq).toFixed(2);
+        sendTxEmail('org_campaign_launched', user.email, {
+          first_name:     firstName,
+          org_name:       nf.org,
+          campaign_title: nf.title,
+          grid_size:      nf.grid,
+          price_per_sq:   nf.pricePerSq.toFixed(2),
+          max_raise:      maxRaise,
+          campaign_url:   campaignUrl,
+        });
+      }
       if (supabaseConfigured && user?.id) {
         getSupabaseClient().rpc('check_referral_reward', { p_user_id: user.id })
           .then(({ data: rewards }) => {
