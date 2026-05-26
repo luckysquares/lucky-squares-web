@@ -3,70 +3,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminFetch } from '@/lib/adminFetch';
 
-// ── Placeholder data ──────────────────────────────────────────────────────────
-
-const D = {
-  first_name: 'Jamie',
-  buyer_name: 'Alex Chen',
-  campaign_title: 'Sunbury Primary P&C Fundraiser',
-  org_name: 'Sunbury Primary School P&C',
-  amount_raised: '1250.00',
-  grid_size: 100,
-  sold_count: 73,
-  price_per_sq: '10',
-  max_raise: '1000.00',
-  campaign_url: 'https://luckysquares.com.au/c/sunbury-primary-2025',
-  square_number: 42,
-  square_numbers: '42, 67',
-  amount_paid: '20.00',
-  coupon_code: 'THANKS-XK9Q',
-  referred_name: 'Sunbury Netball Club',
-  reason: 'Suspected fraudulent activity on your account.',
-  campaign_limit: 5,
-  abn: '12 345 678 901',
-  org_type: 'P&C Association',
-  month_name: 'April 2025',
-  campaign_count: 3,
-  total_squares_sold: 218,
-  total_raised: '2180.00',
-  draws_completed: 2,
-  active_campaign_count: 1,
-  days_remaining: 9,
-  squares_needed: 4,
-  prize_summary: 'a $200 gift card',
-  sales_today: 5,
-  buyer_names: 'Sarah, Tom and 3 others',
-  draw_type_description: 'Random draw at close of campaign',
-  contact_email: 'treasurer@sunburypandc.org.au',
-  contact_name: 'Jamie',
-  prize_place: '1st',
-  prize_description: '$200 Coles Myer gift card',
-  winning_square: 42,
-  winners: [
-    { place: '1st', prize: '$200 Coles Myer gift card', square_number: 42, buyer_name: 'Alex Chen', prize_place: '1st', prize_description: '$200 Coles Myer gift card' },
-    { place: '2nd', prize: '$100 JB Hi-Fi gift card', square_number: 17, buyer_name: 'Sarah Johnson', prize_place: '2nd', prize_description: '$100 JB Hi-Fi gift card' },
-  ],
-  org_name_invited: 'Sunbury Primary School P&C',
-  invited_by_name: 'Jamie',
-  invite_url: 'https://luckysquares.com.au/join/abc123',
-  expires_days: 7,
-  organiser_name: 'Jamie',
-  season_name: 'Football season',
-  season_opener_line: 'The footy season is just getting started and clubs all over Australia are looking for easy ways to raise money for their communities.',
-};
-
+// ── Signature (hardcoded — not a variable) ────────────────────────────────────
 const SIG = `Cheers,\nThe Lucky Squares team\nhello@luckysquares.com.au`;
 
-function amt(v) {
-  return `$${String(v).replace(/^\$/, '')}`;
-}
-
-// ── Template renderers ────────────────────────────────────────────────────────
+// ── Template source definitions ───────────────────────────────────────────────
+// These show the real template source with {{variable}} placeholders.
+// Saving a customised version stores it in the DB; the edge function
+// substitutes {{variable}} at send time (same mechanism as DB overrides).
+// Templates with conditional branches show the primary version.
 
 function tplOrganizerWelcome() {
   return {
-    subject: `Welcome to Lucky Squares, ${D.first_name}!`,
-    text: `Hi ${D.first_name},
+    subject: `Welcome to Lucky Squares, {{first_name}}!`,
+    text: `Hi {{first_name}},
 
 Welcome aboard! You've just joined a community of Australian schools, clubs, and charities using Lucky Squares to run simple, fun fundraisers.
 
@@ -87,12 +36,12 @@ ${SIG}`,
 
 function tplCampaignLaunched() {
   return {
-    subject: `Your fundraiser is live, ${D.first_name}!`,
-    text: `Hi ${D.first_name},
+    subject: `Your fundraiser is live, {{first_name}}!`,
+    text: `Hi {{first_name}},
 
-${D.campaign_title} is live and ready for buyers. Here's your unique fundraiser link to share:
+{{campaign_title}} is live and ready for buyers. Here's your unique fundraiser link to share:
 
-${D.campaign_url}
+{{campaign_url}}
 
 A few tips to get your first squares sold quickly:
 
@@ -107,16 +56,15 @@ ${SIG}`,
 }
 
 function tplSquareSold() {
-  const subject = `You've sold your first square in ${D.campaign_title}!`;
-  const body = `Hi ${D.first_name},
-
-You've just sold your very first square in ${D.campaign_title} and we think that deserves a little celebration! Every great fundraiser starts exactly like this. The grid has officially come to life.
-
-${D.buyer_name} has claimed square #${D.square_number}. Now get sharing — the more people who see your link, the faster that grid fills up.`;
-
+  // Primary version: first square sold. The edge function also sends subsequent
+  // square sold notifications with a shorter body when is_first is false.
   return {
-    subject,
-    text: `${body}
+    subject: `You've sold your first square in {{campaign_title}}!`,
+    text: `Hi {{first_name}},
+
+You've just sold your very first square in {{campaign_title}} and we think that deserves a little celebration! Every great fundraiser starts exactly like this. The grid has officially come to life.
+
+{{buyer_name}} has claimed square #{{square_number}}. Now get sharing — the more people who see your link, the faster that grid fills up.
 
 ${SIG}
 
@@ -127,17 +75,17 @@ Prefer fewer emails? Log in to your dashboard to switch to a daily summary or tu
 
 function tplSquareDailyDigest() {
   return {
-    subject: `${D.sales_today} squares sold today in ${D.campaign_title}`,
-    text: `Hi ${D.first_name},
+    subject: `{{sales_today}} squares sold today in {{campaign_title}}`,
+    text: `Hi {{first_name}},
 
-Here's your daily update for ${D.campaign_title}.
+Here's your daily update for {{campaign_title}}.
 
-Squares sold today: ${D.sales_today} (${D.buyer_names})
-Running total: ${D.sold_count} of ${D.grid_size} squares sold, ${amt(D.amount_raised)} raised
+Squares sold today: {{sales_today}} ({{buyer_names}})
+Running total: {{sold_count}} of {{grid_size}} squares sold, ${{amount_raised}} raised
 
 Keep sharing your link to keep the momentum going!
 
-${D.campaign_url}
+{{campaign_url}}
 
 ${SIG}
 
@@ -148,14 +96,14 @@ Prefer fewer emails? Log in to your dashboard to manage notification settings.`,
 
 function tplSquareNoSalesNudge() {
   return {
-    subject: `A fresh share could get ${D.campaign_title} moving again`,
-    text: `Hi ${D.first_name},
+    subject: `A fresh share could get {{campaign_title}} moving again`,
+    text: `Hi {{first_name}},
 
-It's been a few days since the last square was sold in ${D.campaign_title}. A fresh share to your network is often all it takes to get things moving again.
+It's been a few days since the last square was sold in {{campaign_title}}. A fresh share to your network is often all it takes to get things moving again.
 
-${D.sold_count} of ${D.grid_size} squares sold so far. Here's your link to share:
+{{sold_count}} of {{grid_size}} squares sold so far. Here's your link to share:
 
-${D.campaign_url}
+{{campaign_url}}
 
 A personal message to 3 or 4 people who haven't bought yet often works better than a group post at this stage.
 
@@ -165,10 +113,10 @@ ${SIG}`,
 
 function tplExpiryReminder7() {
   return {
-    subject: `How's your fundraiser going, ${D.first_name}?`,
-    text: `Hi ${D.first_name},
+    subject: `How's your fundraiser going, {{first_name}}?`,
+    text: `Hi {{first_name}},
 
-${D.campaign_title} has been live for 7 days. You've sold ${D.sold_count} of ${D.grid_size} squares so far, which means $${D.amount_raised} raised for ${D.org_name}.
+{{campaign_title}} has been live for 7 days. You've sold {{sold_count}} of {{grid_size}} squares so far, which means ${{amount_raised}} raised for {{org_name}}.
 
 You've already covered your prize costs, so anything more you sell is pure profit for your cause. Keep going!
 
@@ -181,12 +129,12 @@ ${SIG}`,
 
 function tplExpiryReminder14() {
   return {
-    subject: `Two weeks in: ${D.sold_count} squares sold`,
-    text: `Hi ${D.first_name},
+    subject: `Two weeks in: {{sold_count}} squares sold`,
+    text: `Hi {{first_name}},
 
-${D.campaign_title} is two weeks old. You've sold ${D.sold_count} of ${D.grid_size} squares, raising $${D.amount_raised} so far.
+{{campaign_title}} is two weeks old. You've sold {{sold_count}} of {{grid_size}} squares, raising ${{amount_raised}} so far.
 
-You have ${D.days_remaining} days remaining before the campaign expires. If your fundraiser hasn't covered prize costs by day 30, it will be automatically cancelled and buyers will be refunded.
+You have {{days_remaining}} days remaining before the campaign expires. If your fundraiser hasn't covered prize costs by day 30, it will be automatically cancelled and buyers will be refunded.
 
 If you need a boost, now is a great time to personally message a few people who haven't bought yet. A direct message converts much better than a group post.
 
@@ -199,12 +147,12 @@ ${SIG}`,
 
 function tplExpiryReminder21() {
   return {
-    subject: `${D.days_remaining} days left for ${D.campaign_title}`,
-    text: `Hi ${D.first_name},
+    subject: `{{days_remaining}} days left for {{campaign_title}}`,
+    text: `Hi {{first_name}},
 
-Quick heads-up: ${D.campaign_title} expires in ${D.days_remaining} days.
+Quick heads-up: {{campaign_title}} expires in {{days_remaining}} days.
 
-You've sold ${D.sold_count} of ${D.grid_size} squares and raised $${D.amount_raised}.
+You've sold {{sold_count}} of {{grid_size}} squares and raised ${{amount_raised}}.
 
 You've covered your prize costs, which means you're good to draw whenever you're ready. You don't have to wait until day 30. Run your draw when it feels right!
 
@@ -219,10 +167,10 @@ ${SIG}`,
 
 function tplCampaignCancelledOrganiser() {
   return {
-    subject: `${D.campaign_title} has been cancelled`,
-    text: `Hi ${D.first_name},
+    subject: `{{campaign_title}} has been cancelled`,
+    text: `Hi {{first_name}},
 
-Unfortunately ${D.campaign_title} was cancelled because it didn't reach the minimum sales needed to cover prize costs before the 30-day limit.
+Unfortunately {{campaign_title}} was cancelled because it didn't reach the minimum sales needed to cover prize costs before the 30-day limit.
 
 All buyers will be refunded in full.
 
@@ -235,31 +183,25 @@ ${SIG}`,
 }
 
 function tplDrawCompleteOrganiser() {
-  const winnerLines = D.winners
-    .map((w) => `${w.place} Prize (${w.prize}): Square #${w.square_number}, ${w.buyer_name}`)
-    .join('\n');
-
-  const nextSteps = `Because your campaign used online payments, here's what happens next:
-
-- Winners have been notified by email automatically.
-- Your net funds raised (total collected minus platform fee and prize amounts) will be transferred to your registered account within 2 business days.
-- Prize delivery is handled directly between you and each winner. Use the contact details in your campaign report to get in touch with them and arrange handover.`;
-
   return {
     subject: `The draw is done! Here are your winners`,
-    text: `Hi ${D.first_name},
+    text: `Hi {{first_name}},
 
-Your draw for ${D.campaign_title} is complete. Here are your results:
+Your draw for {{campaign_title}} is complete. Here are your results:
 
-${winnerLines}
+{{winner_lines}}
 
-${nextSteps}
+Because your campaign used online card payments, here is what happens next:
 
-You raised ${amt(D.amount_raised)} for ${D.org_name} from ${D.sold_count} of ${D.grid_size} squares sold.
+- Winners have been notified by email and asked to provide their bank details via a secure claim link. You will receive an email with each winner's details as they submit them.
+- Once you have a winner's bank details, transfer their prize directly from your bank account. Aim to pay within a few business days of receiving their details.
+- Your square sales were transferred to your connected bank account progressively as each square sold. The full prize reserve has also been transferred to your account to cover winner payments.
+
+You raised ${{amount_raised}} for {{org_name}} from {{sold_count}} of {{grid_size}} squares sold.
 
 Want to share the result? Here's a quick message you can post:
 
-"${D.campaign_title} draw is done! Big thanks to everyone who took part. We raised ${amt(D.amount_raised)} for ${D.org_name}. Congratulations to all our winners!"
+"{{campaign_title}} draw is done! Big thanks to everyone who took part. We raised ${{amount_raised}} for {{org_name}}. Congratulations to all our winners!"
 
 Whenever you're ready to run your next campaign, we'll be here:
 https://luckysquares.com.au/fundraise
@@ -270,14 +212,14 @@ ${SIG}`,
 
 function tplReferralReward() {
   return {
-    subject: `You've earned a free campaign, ${D.first_name}!`,
-    text: `Hi ${D.first_name},
+    subject: `You've earned a free campaign, {{first_name}}!`,
+    text: `Hi {{first_name}},
 
-Great news: ${D.referred_name} just launched their first Lucky Squares fundraiser after you referred them. As promised, your next campaign is on us.
+Great news: {{referred_name}} just launched their first Lucky Squares fundraiser after you referred them. As promised, your next campaign is on us.
 
 Your free campaign coupon code is:
 
-${D.coupon_code}
+{{coupon_code}}
 
 Enter this code when launching your next campaign to waive the platform fee entirely.
 
@@ -290,11 +232,11 @@ ${SIG}`,
 function tplAccountSuspended() {
   return {
     subject: `Important notice about your Lucky Squares account`,
-    text: `Hi ${D.first_name},
+    text: `Hi {{first_name}},
 
 We're writing to let you know that your Lucky Squares account has been temporarily suspended.
 
-Reason: ${D.reason}
+Reason: {{reason}}
 
 While your account is suspended, you will not be able to launch new campaigns. Any campaigns already live and drawing will continue to operate normally.
 
@@ -306,14 +248,14 @@ ${SIG}`,
 
 function tplOrgWelcome() {
   return {
-    subject: `Welcome to Lucky Squares, ${D.org_name}!`,
-    text: `Hi ${D.first_name},
+    subject: `Welcome to Lucky Squares, {{org_name}}!`,
+    text: `Hi {{first_name}},
 
-Welcome to the Lucky Squares Organisation Plan. You're all set to run fundraising campaigns for ${D.org_name}.
+Welcome to the Lucky Squares Organisation Plan. You're all set to run fundraising campaigns for {{org_name}}.
 
 Here's what's available to you:
 
-- Up to ${D.campaign_limit} active campaigns at once
+- Up to {{campaign_limit}} active campaigns at once
 - Full campaign management and reporting
 - Buyer contact details for every campaign
 - Priority support
@@ -329,34 +271,31 @@ ${SIG}`,
 
 function tplOrgCampaignLaunched() {
   return {
-    subject: `New campaign live: ${D.campaign_title}`,
-    text: `Hi ${D.first_name},
+    subject: `New campaign live: {{campaign_title}}`,
+    text: `Hi {{first_name}},
 
-A new Lucky Squares campaign has just gone live under ${D.org_name}.
+A new Lucky Squares campaign has just gone live under {{org_name}}.
 
-Campaign: ${D.campaign_title}
-Grid size: ${D.grid_size} squares
-Price per square: $${D.price_per_sq}
-Potential raise at sell-out: $${D.max_raise}
+Campaign: {{campaign_title}}
+Grid size: {{grid_size}} squares
+Price per square: ${{price_per_sq}}
+Potential raise at sell-out: ${{max_raise}}
 
 View the campaign:
-${D.campaign_url}
+{{campaign_url}}
 
 ${SIG}`,
   };
 }
 
 function tplOrgSquareSold() {
-  const subject = `Your first square just sold in ${D.campaign_title}!`;
-  const body = `Hi ${D.first_name},
-
-The first square in ${D.campaign_title} has just been sold and we think that deserves a moment. This is where every successful fundraiser begins!
-
-${D.buyer_name} has claimed square #${D.square_number}. The grid is officially open for business.`;
-
   return {
-    subject,
-    text: `${body}
+    subject: `Your first square just sold in {{campaign_title}}!`,
+    text: `Hi {{first_name}},
+
+The first square in {{campaign_title}} has just been sold and we think that deserves a moment. This is where every successful fundraiser begins!
+
+{{buyer_name}} has claimed square #{{square_number}}. The grid is officially open for business.
 
 ${SIG}
 
@@ -366,19 +305,17 @@ Prefer fewer emails? Log in to your dashboard to switch to a daily summary or tu
 }
 
 function tplOrgMonthlySummary() {
-  const activeLine = `\nYou currently have ${D.active_campaign_count} active campaign running. Keep sharing those links!\n`;
-
   return {
-    subject: `Your Lucky Squares summary for ${D.month_name}`,
-    text: `Hi ${D.first_name},
+    subject: `Your Lucky Squares summary for {{month_name}}`,
+    text: `Hi {{first_name}},
 
-Here's a quick look at how ${D.org_name} performed on Lucky Squares in ${D.month_name}.
+Here's a quick look at how {{org_name}} performed on Lucky Squares in {{month_name}}.
 
-Campaigns run: ${D.campaign_count}
-Squares sold: ${D.total_squares_sold}
-Total raised: $${D.total_raised}
-Draws completed: ${D.draws_completed}
-${activeLine}
+Campaigns run: {{campaign_count}}
+Squares sold: {{total_squares_sold}}
+Total raised: ${{total_raised}}
+Draws completed: {{draws_completed}}
+
 Log in to your dashboard:
 https://luckysquares.com.au/fundraise
 
@@ -388,16 +325,16 @@ ${SIG}`,
 
 function tplOrgApplicationReceived() {
   return {
-    subject: `We've received your application, ${D.org_name}`,
-    text: `Hi ${D.first_name},
+    subject: `We've received your application, {{org_name}}`,
+    text: `Hi {{first_name}},
 
 Thanks for applying for the Lucky Squares Organisation Plan. We've received your application and will be in touch shortly.
 
 Here's what we received:
 
-Organisation: ${D.org_name}
-ABN: ${D.abn}
-Type: ${D.org_type}
+Organisation: {{org_name}}
+ABN: {{abn}}
+Type: {{org_type}}
 
 We review all applications personally and aim to get back to you within 2 business days.
 
@@ -409,15 +346,15 @@ ${SIG}`,
 
 function tplOrgApplicationApproved() {
   return {
-    subject: `Great news: ${D.org_name} is approved!`,
-    text: `Hi ${D.first_name},
+    subject: `Great news: {{org_name}} is approved!`,
+    text: `Hi {{first_name}},
 
-We've reviewed your application and ${D.org_name} has been approved for the Lucky Squares Organisation Plan.
+We've reviewed your application and {{org_name}} has been approved for the Lucky Squares Organisation Plan.
 
 Your account has been upgraded and you now have access to all organisation features. Head to your dashboard to get your next campaign started:
 https://luckysquares.com.au/fundraise
 
-Welcome to the team. We're really glad to have ${D.org_name} on board. If there's anything we can do to help you hit the ground running, just reply to this email.
+Welcome to the team. We're really glad to have {{org_name}} on board. If there's anything we can do to help you hit the ground running, just reply to this email.
 
 ${SIG}`,
   };
@@ -426,18 +363,18 @@ ${SIG}`,
 function tplSquarePurchaseConfirmation() {
   return {
     subject: `You're in! Squares confirmed`,
-    text: `Hi Alex,
+    text: `Hi {{buyer_name}},
 
-You've secured your squares in ${D.campaign_title} — good luck in the draw!
+You've secured your squares in {{campaign_title}} — good luck in the draw!
 
-Squares: #42, #67
-Amount paid: ${amt(D.amount_paid)}
-Draw: ${D.draw_type_description}
+Squares: #{{square_numbers}}
+Amount paid: ${{amount_paid}}
+Draw: {{draw_type_description}}
 
-Thanks for supporting ${D.org_name}'s fundraiser. We'll send you the result as soon as the draw is complete.
+Thanks for supporting {{org_name}}'s fundraiser. We'll send you the result as soon as the draw is complete.
 
 View the live grid:
-${D.campaign_url}
+{{campaign_url}}
 
 ${SIG}`,
   };
@@ -445,39 +382,35 @@ ${SIG}`,
 
 function tplDrawResultWinner() {
   return {
-    subject: `You won in ${D.campaign_title}!`,
-    text: `Hi Alex,
+    subject: `You won in {{campaign_title}}!`,
+    text: `Hi {{buyer_name}},
 
 Congratulations, you're a winner!
 
-${D.campaign_title} has been drawn and your square #${D.winning_square} won the ${D.prize_place}.
+{{campaign_title}} has been drawn and your square #{{winning_square}} won the {{prize_place}}.
 
-Prize: ${D.prize_description}
+Prize: {{prize_description}}
 
-${D.org_name} will be in touch shortly to arrange delivery of your prize. If you haven't heard from them within a few days, you can contact them directly at ${D.contact_email}.
+{{org_name}} will be in touch shortly to arrange delivery of your prize. If you haven't heard from them within a few days, you can contact them directly at {{contact_email}}.
 
-Thanks for supporting ${D.org_name}. Enjoy your prize!
+Thanks for supporting {{org_name}}. Enjoy your prize!
 
 ${SIG}`,
   };
 }
 
 function tplDrawResultNoWin() {
-  const winnerLines = D.winners
-    .map((w) => `${w.prize_place} (${w.prize_description}): Square #${w.square_number}`)
-    .join('\n');
-
   return {
-    subject: `The results are in for ${D.campaign_title}`,
-    text: `Hi Alex,
+    subject: `The results are in for {{campaign_title}}`,
+    text: `Hi {{buyer_name}},
 
-The draw for ${D.campaign_title} has been completed.
+The draw for {{campaign_title}} has been completed.
 
 The winning square(s):
 
-${winnerLines}
+{{winner_lines}}
 
-You didn't win this time, but your support made a real difference to ${D.org_name}. The fundraiser raised $${D.amount_raised} in total. Thank you for being part of it.
+You didn't win this time, but your support made a real difference to {{org_name}}. The fundraiser raised ${{amount_raised}} in total. Thank you for being part of it.
 
 ${SIG}`,
   };
@@ -485,12 +418,12 @@ ${SIG}`,
 
 function tplRefundNotification() {
   return {
-    subject: `Refund for your squares in ${D.campaign_title}`,
-    text: `Hi Alex,
+    subject: `Refund for your squares in {{campaign_title}}`,
+    text: `Hi {{buyer_name}},
 
-${D.campaign_title} has been cancelled before the draw took place.
+{{campaign_title}} has been cancelled before the draw took place.
 
-Your payment of $${D.amount_paid} for square(s) #${D.square_numbers} will be refunded in full.
+Your payment of ${{amount_paid}} for square(s) #{{square_numbers}} will be refunded in full.
 
 Your refund will appear on your card within 5 to 10 business days.
 
@@ -502,29 +435,29 @@ ${SIG}`,
 
 function tplCampaignLaunchedNotification() {
   return {
-    subject: `New fundraiser from ${D.organiser_name}: ${D.campaign_title}`,
+    subject: `New fundraiser from {{organiser_name}}: {{campaign_title}}`,
     text: `Hi there,
 
-You asked to be notified when ${D.organiser_name} launched their next fundraiser — and it's now live!
+You asked to be notified when {{organiser_name}} launched their next fundraiser — and it's now live!
 
-${D.campaign_title}
+{{campaign_title}}
 
 Get your squares here:
-${D.campaign_url}
+{{campaign_url}}
 
 Good luck!
 
 ${SIG}
 
 ---
-You're receiving this because you opted in after purchasing squares in a previous ${D.organiser_name} fundraiser. To stop receiving these notifications, click the unsubscribe link in any Lucky Squares email.`,
+You're receiving this because you opted in after purchasing squares in a previous {{organiser_name}} fundraiser. To stop receiving these notifications, click the unsubscribe link in any Lucky Squares email.`,
   };
 }
 
 function tplWelcomeDay1() {
   return {
     subject: `Set up your first campaign in 5 minutes`,
-    text: `Hi ${D.first_name},
+    text: `Hi {{first_name}},
 
 Now that you're set up, here's the quickest way to get your first fundraiser live.
 
@@ -546,7 +479,7 @@ ${SIG}`,
 function tplWelcomeDay3NoCampaign() {
   return {
     subject: `A primary school in Melbourne raised $1,000 in four days`,
-    text: `Hi ${D.first_name},
+    text: `Hi {{first_name}},
 
 We wanted to share a quick story from one of our organisers.
 
@@ -566,7 +499,7 @@ ${SIG}`,
 function tplWelcomeDay7NoCampaign() {
   return {
     subject: `Can we help you get started?`,
-    text: `Hi ${D.first_name},
+    text: `Hi {{first_name}},
 
 You signed up a week ago and we haven't seen a campaign from you yet. That's completely fine, life gets busy.
 
@@ -583,8 +516,8 @@ ${SIG}`,
 
 function tplFirstCampaignTips() {
   return {
-    subject: `Tips to sell out ${D.campaign_title} fast`,
-    text: `Hi ${D.first_name},
+    subject: `Tips to sell out {{campaign_title}} fast`,
+    text: `Hi {{first_name}},
 
 Congratulations on launching your first campaign! Here are a few things that work really well for getting squares sold quickly.
 
@@ -594,7 +527,7 @@ Make it visual. A screenshot of the grid with a few squares already sold creates
 
 Use this message as a template (feel free to edit it):
 
-"Hey! I'm running a Lucky Squares fundraiser for ${D.org_name}. Pick a number, pay $${D.price_per_sq}, and you're in the draw to win ${D.prize_summary}. Here's the link: ${D.campaign_url}"
+"Hey! I'm running a Lucky Squares fundraiser for {{org_name}}. Pick a number, pay ${{price_per_sq}}, and you're in the draw to win {{prize_summary}}. Here's the link: {{campaign_url}}"
 
 Good luck, we're rooting for you!
 
@@ -604,10 +537,10 @@ ${SIG}`,
 
 function tplReEngagement() {
   return {
-    subject: `Ready for your next fundraiser, ${D.first_name}?`,
-    text: `Hi ${D.first_name},
+    subject: `Ready for your next fundraiser, {{first_name}}?`,
+    text: `Hi {{first_name}},
 
-It's been a little while since your last Lucky Squares campaign. We hope ${D.org_name} is going well.
+It's been a little while since your last Lucky Squares campaign. We hope {{org_name}} is going well.
 
 When you're ready to run another fundraiser, everything is still set up and waiting for you. Your previous campaign details are saved in your dashboard so you can use them as a starting point.
 
@@ -622,10 +555,10 @@ ${SIG}`,
 
 function tplSeasonal() {
   return {
-    subject: `${D.season_name} is here: is ${D.org_name} ready to fundraise?`,
-    text: `Hi ${D.first_name},
+    subject: `{{season_name}} is here: is {{org_name}} ready to fundraise?`,
+    text: `Hi {{first_name}},
 
-${D.season_opener_line}
+{{season_opener_line}}
 
 It's one of the most popular times of year for Lucky Squares fundraisers. People are engaged, communities are gathering, and everyone's in the spirit of it.
 
@@ -640,15 +573,15 @@ ${SIG}`,
 
 function tplOrgMemberInvite() {
   return {
-    subject: `You've been invited to join ${D.org_name} on Lucky Squares`,
+    subject: `You've been invited to join {{org_name}} on Lucky Squares`,
     text: `Hi there,
 
-${D.invited_by_name} has invited you to join ${D.org_name} as a contributor on Lucky Squares Australia.
+{{invited_by_name}} has invited you to join {{org_name}} as a contributor on Lucky Squares Australia.
 
 As a contributor, you'll be able to view and help manage the organisation's fundraising campaigns.
 
-Accept your invite here (link expires in ${D.expires_days} days):
-${D.invite_url}
+Accept your invite here (link expires in {{expires_days}} days):
+{{invite_url}}
 
 If you don't have a Lucky Squares account yet, you'll be able to create one when you click the link above.
 
@@ -702,7 +635,6 @@ const EMAIL_GROUPS = [
   {
     label: 'Welcome sequence',
     items: [
-      { key: 'welcome_day1',                 label: 'Welcome Day 1',              render: tplWelcomeDay1 },
       { key: 'welcome_day3_no_campaign',     label: 'Welcome Day 3 (no campaign)', render: tplWelcomeDay3NoCampaign },
       { key: 'welcome_day7_no_campaign',     label: 'Welcome Day 7 (no campaign)', render: tplWelcomeDay7NoCampaign },
       { key: 'first_campaign_tips',          label: 'First campaign tips',        render: tplFirstCampaignTips },
@@ -720,7 +652,7 @@ const EMAIL_GROUPS = [
 
 const ALL_ITEMS = EMAIL_GROUPS.flatMap((g) => g.items);
 
-// ── Variables available in templates ─────────────────────────────────────────
+// ── Variables reference list ──────────────────────────────────────────────────
 const COMMON_VARS = [
   'first_name','buyer_name','campaign_title','org_name','campaign_url',
   'amount_raised','amount_paid','square_number','square_numbers','sold_count',
@@ -730,9 +662,46 @@ const COMMON_VARS = [
   'coupon_code','days_remaining','squares_needed','prize_summary',
   'month_name','total_raised','total_squares_sold','draws_completed',
   'active_campaign_count','abn','org_type','reason','campaign_limit',
+  'winner_lines','referred_name','season_name','season_opener_line',
+  'max_raise','sales_today','buyer_names','winner_lines',
 ];
 
-// Render a plain-text string with bare URLs converted to clickable <a> tags
+// ── Demo data for edit-mode live preview only ─────────────────────────────────
+const DEMO = {
+  first_name: 'Jamie', buyer_name: 'Alex Chen',
+  campaign_title: 'Sunbury Primary P&C Fundraiser',
+  org_name: 'Sunbury Primary School P&C',
+  amount_raised: '1250.00', grid_size: 100, sold_count: 73,
+  price_per_sq: '10', max_raise: '1000.00',
+  campaign_url: 'https://luckysquares.com.au/f/sunbury-primary-2025',
+  square_number: 42, square_numbers: '42, 67', amount_paid: '20.00',
+  coupon_code: 'THANKS-XK9Q', referred_name: 'Sunbury Netball Club',
+  reason: 'Suspected fraudulent activity on your account.',
+  campaign_limit: 10, abn: '12 345 678 901', org_type: 'P&C Association',
+  month_name: 'April 2025', campaign_count: 3, total_squares_sold: 218,
+  total_raised: '2180.00', draws_completed: 2, active_campaign_count: 1,
+  days_remaining: 9, squares_needed: 4, prize_summary: 'a $200 gift card',
+  sales_today: 5, buyer_names: 'Sarah, Tom and 3 others',
+  draw_type_description: 'Random draw at close of campaign',
+  contact_email: 'treasurer@sunburypandc.org.au', contact_name: 'Jamie',
+  prize_place: '1st', prize_description: '$200 Coles Myer gift card',
+  winning_square: 42,
+  winner_lines: '1st Prize ($200 Coles Myer gift card): Square #42, Alex Chen',
+  org_name_invited: 'Sunbury Primary School P&C', invited_by_name: 'Jamie',
+  invite_url: 'https://luckysquares.com.au/join/abc123', expires_days: 7,
+  organiser_name: 'Jamie', season_name: 'Football season',
+  season_opener_line: 'The footy season is just getting started and clubs all over Australia are looking for easy ways to raise money for their communities.',
+};
+
+function demoSubstitute(str) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+    const val = DEMO[key];
+    return val !== undefined && val !== null ? String(val) : `{{${key}}}`;
+  });
+}
+
+// ── Render plain text with clickable URLs ─────────────────────────────────────
 function TextWithLinks({ text }) {
   if (!text) return null;
   const URL_RE = /(https?:\/\/[^\s]+)/g;
@@ -748,28 +717,18 @@ function TextWithLinks({ text }) {
   );
 }
 
-// Substitute {{var}} in a string using the preview D object
-function previewSubstitute(str) {
-  if (!str) return str;
-  return str.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-    const val = D[key];
-    return val !== undefined && val !== null ? String(val) : `{{${key}}}`;
-  });
-}
-
 // ── Page component ────────────────────────────────────────────────────────────
 
 export default function EmailPreviewPage() {
   const [selectedKey,   setSelectedKey]   = useState(ALL_ITEMS[0].key);
-  const [mode,          setMode]          = useState('preview'); // 'preview' | 'edit'
+  const [mode,          setMode]          = useState('preview');
   const [customKeys,    setCustomKeys]    = useState(new Set());
-  const [dbTemplate,    setDbTemplate]    = useState(null);   // {subject,body} from DB or null
+  const [dbTemplate,    setDbTemplate]    = useState(null);
   const [editSubject,   setEditSubject]   = useState('');
   const [editBody,      setEditBody]      = useState('');
   const [saving,        setSaving]        = useState(false);
   const [saveMsg,       setSaveMsg]       = useState('');
 
-  // Load the list of customised template keys on mount
   useEffect(() => {
     adminFetch('/api/admin/emails/templates/list')
       .then((r) => r.ok ? r.json() : [])
@@ -777,7 +736,6 @@ export default function EmailPreviewPage() {
       .catch(() => {});
   }, []);
 
-  // When selected template changes, load its DB override (if any)
   const loadDbTemplate = useCallback(async (key) => {
     setDbTemplate(null);
     try {
@@ -789,7 +747,6 @@ export default function EmailPreviewPage() {
         setEditSubject(data.subject);
         setEditBody(data.body);
       } else {
-        // Pre-populate with the hardcoded default
         const item = ALL_ITEMS.find((i) => i.key === key);
         const def  = item ? item.render() : null;
         setEditSubject(def?.subject || '');
@@ -841,10 +798,13 @@ export default function EmailPreviewPage() {
     setMode('preview');
   };
 
-  const selected    = ALL_ITEMS.find((i) => i.key === selectedKey);
-  const isCustom    = customKeys.has(selectedKey);
+  const selected = ALL_ITEMS.find((i) => i.key === selectedKey);
+  const isCustom = customKeys.has(selectedKey);
+
+  // Preview shows the DB version if saved, otherwise the hardcoded source.
+  // Both show raw {{variables}} — no demo substitution in preview mode.
   const previewEmail = dbTemplate
-    ? { subject: previewSubstitute(dbTemplate.subject), text: previewSubstitute(dbTemplate.body) }
+    ? { subject: dbTemplate.subject, text: dbTemplate.body }
     : (selected ? selected.render() : null);
 
   const inp = {
@@ -871,8 +831,8 @@ export default function EmailPreviewPage() {
               {group.label}
             </div>
             {group.items.map((item) => {
-              const isActive  = item.key === selectedKey;
-              const isCust    = customKeys.has(item.key);
+              const isActive = item.key === selectedKey;
+              const isCust   = customKeys.has(item.key);
               return (
                 <button
                   key={item.key}
@@ -903,14 +863,13 @@ export default function EmailPreviewPage() {
       {/* Main panel */}
       <div style={{ flex: 1, minWidth: 0, paddingLeft: 24 }}>
 
-        {/* Page header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 900, color: '#1A1209', margin: '0 0 4px' }}>Email templates</h1>
             <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
               {mode === 'preview'
-                ? (isCustom ? 'Showing your custom version. Preview uses placeholder data.' : 'Showing default template. Preview uses placeholder data.')
-                : 'Editing mode. Use {{variable}} for dynamic values.'}
+                ? (isCustom ? 'Showing your saved custom version. {{variables}} are filled at send time.' : 'Showing default template source. {{variables}} are filled at send time.')
+                : 'Editing mode. Use {{variable}} for dynamic values. Live preview shows demo data.'}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -962,7 +921,7 @@ export default function EmailPreviewPage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px', paddingTop: 3, flexShrink: 0, width: 64 }}>Subject</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1209', lineHeight: 1.4 }}>{previewEmail.subject}</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1209', lineHeight: 1.4, fontFamily: 'monospace' }}>{previewEmail.subject}</span>
               </div>
             </div>
             <div style={{ padding: '28px 28px 20px' }}>
@@ -972,8 +931,8 @@ export default function EmailPreviewPage() {
             </div>
             <div style={{ padding: '12px 28px', borderTop: '1px solid #F0EAE0', background: '#FAFAF8', fontSize: 11, color: '#9C8060' }}>
               {isCustom
-                ? 'This is your custom version. Click "Edit template" to modify it.'
-                : 'Using default template from code. Click "Edit template" to create a custom version.'}
+                ? 'Saved custom version. Click "Edit template" to modify or "Reset to default" to restore.'
+                : 'Default template. Click "Edit template" to customise — your saved version will be used instead of this one.'}
             </div>
           </div>
         )}
@@ -981,7 +940,6 @@ export default function EmailPreviewPage() {
         {/* Edit mode */}
         {mode === 'edit' && (
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-            {/* Editor */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #E5E0D5', padding: '24px 28px' }}>
                 <div style={{ marginBottom: 16 }}>
@@ -1005,30 +963,30 @@ export default function EmailPreviewPage() {
                 </div>
               </div>
 
-              {/* Live preview */}
+              {/* Live preview with demo data */}
               {editSubject && editBody && (
                 <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #E5E0D5', overflow: 'hidden', marginTop: 16 }}>
                   <div style={{ padding: '12px 20px', borderBottom: '1px solid #F0EAE0', background: '#FAFAF8', fontSize: 11, fontWeight: 800, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                    Live preview (placeholder data)
+                    Preview with demo data
                   </div>
                   <div style={{ padding: '16px 20px', borderBottom: '1px solid #F0EAE0' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#9C8060', marginRight: 8 }}>Subject:</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#1A1209' }}>{previewSubstitute(editSubject)}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#1A1209' }}>{demoSubstitute(editSubject)}</span>
                   </div>
                   <div style={{ padding: '16px 20px' }}>
                     <pre style={{ fontFamily: '"Georgia","Times New Roman",serif', fontSize: 13, lineHeight: 1.7, color: '#1A1209', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
-                      <TextWithLinks text={previewSubstitute(editBody)} />
+                      <TextWithLinks text={demoSubstitute(editBody)} />
                     </pre>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Variables reference panel */}
+            {/* Variables reference */}
             <div style={{ width: 220, flexShrink: 0, background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 16, padding: '18px 16px', position: 'sticky', top: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 800, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12 }}>Available variables</div>
               <div style={{ fontSize: 10, color: '#9C8060', marginBottom: 10, lineHeight: 1.5 }}>
-                Click to insert at cursor. Not all variables are present in every email — check the default template.
+                Click to insert at cursor. Check the default template to see which variables apply to this email.
               </div>
               {COMMON_VARS.map((v) => (
                 <button
