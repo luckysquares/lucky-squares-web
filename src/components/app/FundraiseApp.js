@@ -22,7 +22,7 @@ const RESERVE_SECS = 420;
 const WARN_SECS    = 390;
 const MAX_CART     = 10;
 
-const WIZARD_STEPS = ['Who', 'Grid Size', 'Pricing', 'Prizes', 'Campaign', 'Draw Rules', 'Payment', 'Review'];
+const WIZARD_STEPS = ['Who', 'Grid Size', 'Pricing', 'Prizes', 'Campaign', 'Draw Rules', 'Payment', 'Review', 'Connect Bank', 'Launch'];
 
 const EMOJIS = ['🍀', '🌈', '🏆', '⚾', '🐨', '🏉', '⭐', '🎯', '💛', '🌺'];
 
@@ -914,16 +914,13 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [drawRules,         setDrawRules]         = useState(savedDraft?.drawRules ?? { type: 'manual', date: '' });
   const [payment,           setPayment]           = useState(savedDraft?.payment ?? { method: 'inperson', accountName: '', bsb: '', account: '' });
   const [paymentConfirming, setPaymentConfirming] = useState(false);
-  const [showLaunchModal,   setShowLaunchModal]   = useState(false);
   const [couponCode,        setCouponCode]        = useState('');
   const [couponState,       setCouponState]       = useState('idle'); // idle | checking | valid | invalid
   const [couponData,        setCouponData]        = useState(null);   // { type, value }
-  const [bankPhase,         setBankPhase]         = useState(false);
   const [bankDraftId,       setBankDraftId]       = useState(null);
   const [bankSaving,        setBankSaving]        = useState(false);
   const [bankSaveError,     setBankSaveError]     = useState(false);
   const [bankConnectDone,   setBankConnectDone]   = useState(false);
-  const [pendingLaunchData, setPendingLaunchData] = useState(null);
 
   // Auto-populate campaign.org from org details when type is 'org'
   useEffect(() => {
@@ -944,7 +941,24 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
 
   const clearDraft = () => { try { localStorage.removeItem(WIZARD_STORAGE_KEY); } catch {} };
 
-  const PAYMENT_STEP = WIZARD_STEPS.indexOf('Payment');
+  const PAYMENT_STEP = WIZARD_STEPS.indexOf('Payment'); // 6
+  const BANK_STEP    = WIZARD_STEPS.indexOf('Connect Bank'); // 8
+  const LAUNCH_STEP  = WIZARD_STEPS.indexOf('Launch'); // 9
+  const isStripePayment = payment.method === 'stripe';
+
+  // When the user arrives at step 8 (Connect Bank), save the draft so StripeConnectSetup
+  // has a real fundraiser_id to pass to the account-session API.
+  useEffect(() => {
+    if (step !== BANK_STEP || bankDraftId || bankSaving) return;
+    setBankSaving(true);
+    setBankSaveError(false);
+    onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment })
+      .then((id) => {
+        setBankSaving(false);
+        if (id) setBankDraftId(id);
+        else setBankSaveError(true);
+      });
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleImageSelect = async (file) => {
     if (!file) return;
@@ -984,11 +998,6 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     else { setCouponData(null); setCouponState('invalid'); }
   };
 
-  const closeLaunchModal = () => {
-    setShowLaunchModal(false);
-    setCouponCode(''); setCouponState('idle'); setCouponData(null);
-  };
-
   const bankComplete = ['bank', 'bank_inperson'].includes(payment.method)
     ? payment.accountName.trim() && payment.bsb.trim() && payment.account.trim()
     : true;
@@ -1009,6 +1018,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     }
     if (step === 4) return campaign.title.trim() && campaign.contactName.trim() && campaign.contactEmail.trim() && campaign.contactPhone.trim();
     if (step === PAYMENT_STEP) return bankComplete;
+    if (step === BANK_STEP) return bankConnectDone;
     return true;
   };
 
@@ -1563,234 +1573,92 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
         })()}
       </div>
     </div>,
-  ];
 
-  // ── Bank connect interstitial step ──────────────────────────────────────────
-  if (bankPhase) {
-    return (
-      <div className="dot-bg" style={{ minHeight: '100vh' }}>
-        <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5, marginBottom: 4 }}>Almost there</div>
-            <h2 className="section-title" style={{ marginBottom: 8 }}>Connect your bank account</h2>
-            <p className="section-sub">
-              Because your buyers will pay by card, Lucky Squares needs to know where to send the money. Your funds are transferred directly to your bank account once the draw is complete — we never hold them.
-            </p>
-          </div>
-
-          <div className="scratch-card" style={{ padding: 28, marginBottom: 24 }}>
-            <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
-              {[
-                { icon: '🔒', text: 'Your details are secured by Stripe, the same payment infrastructure used by millions of businesses worldwide.' },
-                { icon: '🏦', text: 'Funds land directly in your nominated account within 2 business days of your draw completing.' },
-                { icon: '✅', text: 'You only need to do this once per campaign. Future campaigns can reuse the same account.' },
-              ].map((item) => (
-                <div key={item.icon} style={{ flex: 1, fontSize: 12, color: 'var(--text2)', lineHeight: 1.6, textAlign: 'center' }}>
-                  <div style={{ fontSize: 24, marginBottom: 6 }}>{item.icon}</div>
-                  {item.text}
-                </div>
-              ))}
-            </div>
-
-            {bankSaving && (
-              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
-            )}
-            {bankSaveError && (
-              <div style={{ padding: '20px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, color: '#CC0000', marginBottom: 12 }}>Something went wrong saving your campaign. Please try again.</div>
-                <button className="btn btn-outline btn-sm" onClick={async () => {
-                  if (!pendingLaunchData) return;
-                  setBankSaveError(false);
-                  setBankSaving(true);
-                  const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment });
-                  setBankSaving(false);
-                  if (id) { setBankDraftId(id); setPendingLaunchData((prev) => prev ? { ...prev, existingFundraiserId: id } : prev); } else { setBankSaveError(true); }
-                }}>Try again</button>
-              </div>
-            )}
-            {bankDraftId && (
-              <StripeConnectSetup
-                fundraiserId={bankDraftId}
-                onComplete={() => setBankConnectDone(true)}
-                prefill={fundraiserType === 'org' && orgDetails.name.trim()
-                  ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, orgType: orgDetails.orgType, email: userPrefill?.email, phone: userPrefill?.phone }
-                  : { name: userPrefill?.name, email: userPrefill?.email, phone: userPrefill?.phone }}
-              />
-            )}
-          </div>
-
-          <button
-            className="btn btn-purple btn-lg"
-            style={{ width: '100%' }}
-            disabled={!bankConnectDone}
-            onClick={async () => {
-              // Bank is done — refresh profile to record stripeOnboardingComplete, then show payment modal
-              if (user?.id) {
-                const { stripeAccountId, stripeOnboardingComplete } = await fetchProfile(user.id);
-                setUser((prev) => prev ? { ...prev, stripeAccountId, stripeOnboardingComplete } : prev);
-              }
-              setBankPhase(false);
-              setShowLaunchModal(true);
-            }}
-          >
-            {bankConnectDone ? 'Continue to payment →' : 'Complete bank account setup above to continue'}
-          </button>
-          {!bankConnectDone && (
-            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text2)', marginTop: 12 }}>
-              You must complete the bank account setup before your campaign can go live.
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="dot-bg" style={{ minHeight: '100vh' }}>
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-          <button className="btn btn-outline btn-sm" onClick={() => step > 0 ? setStep((s) => s - 1) : (clearDraft(), onCancel())}>{step === 0 ? '← Dashboard' : '← Back'}</button>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5 }}>Step {step + 1} of {WIZARD_STEPS.length}</div>
-            <div style={{ fontSize: 14, fontWeight: 800 }}>{WIZARD_STEPS[step]}</div>
-          </div>
-          {step > 0 && (
-            <button className="btn btn-outline btn-sm" style={{ fontSize: 12 }} onClick={() => onCancel()}>
-              Save &amp; exit
-            </button>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 32, flexWrap: 'wrap' }}>
-          {WIZARD_STEPS.map((s, i) => (
-            <div key={i} className={`step-dot ${i < step ? 'done' : i === step ? 'active' : 'future'}`} onClick={() => i < step && setStep(i)} style={{ cursor: i < step ? 'pointer' : 'default' }} title={s}>
-              {i < step ? '✓' : i + 1}
-            </div>
-          ))}
-        </div>
-        {paymentConfirming ? (
-          <div>
-            <h2 className="section-title">Double-check your bank details</h2>
-            <p className="section-sub" style={{ marginBottom: 24 }}>Please confirm these are correct. Buyers will use them to pay you.</p>
-            <div className="scratch-card" style={{ padding: 28 }}>
-              {[
-                ['Account name', payment.accountName],
-                ['BSB',          payment.bsb],
-                ['Account #',    payment.account],
-              ].map(([label, value]) => (
-                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 700 }}>{label}</span>
-                  <span style={{ fontSize: 16, fontWeight: 800 }}>{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : stepContent[step]}
-
-        <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-          <button className="btn btn-outline" onClick={() => {
-            if (paymentConfirming) { setPaymentConfirming(false); return; }
-            step > 0 ? setStep((s) => s - 1) : (clearDraft(), onCancel());
-          }}>
-            {paymentConfirming ? '← Edit details' : step === 0 ? 'Cancel' : '← Back'}
-          </button>
-          {paymentConfirming ? (
-            <button className="btn btn-primary btn-lg" onClick={() => { setPaymentConfirming(false); setStep((s) => s + 1); }}>
-              ✓ Yes, details are correct
-            </button>
-          ) : step < WIZARD_STEPS.length - 1 ? (
-            <button className="btn btn-primary" disabled={!canNext()} onClick={() => {
-              if (step === PAYMENT_STEP && ['bank', 'bank_inperson'].includes(payment.method)) { setPaymentConfirming(true); return; }
-              setStep((s) => s + 1);
-            }}>Next →</button>
-          ) : (
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment }, true); }}>
-                Save as draft
-              </button>
-              <button className="btn btn-gold btn-lg" style={{ flexDirection: 'column', gap: 2, lineHeight: 1.2 }} onClick={async () => {
-                if (payment.method === 'stripe') {
-                  if (user?.stripeOnboardingComplete) {
-                    // Already have a verified Stripe account — skip bank setup entirely
-                    setShowLaunchModal(true);
-                    return;
-                  }
-                  // For stripe: bank setup FIRST, then payment modal
-                  const baseFee  = PLATFORM_FEES[gridOpt?.size || 100];
-                  const finalFee = couponState === 'valid' && couponData
-                    ? couponData.type === 'percent' ? Math.max(0, baseFee * (1 - couponData.value / 100)) : Math.max(0, baseFee - couponData.value)
-                    : baseFee;
-                  const launchData = { fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment, finalFee, couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null, existingFundraiserId: null };
-                  setPendingLaunchData(launchData);
-                  setBankPhase(true);
-                  setBankSaving(true);
-                  setBankSaveError(false);
-                  const id = await onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment });
-                  setBankSaving(false);
-                  if (id) { setBankDraftId(id); setPendingLaunchData((prev) => ({ ...prev, existingFundraiserId: id })); }
-                  else { setBankSaveError(true); }
-                } else {
-                  setShowLaunchModal(true);
-                }
-              }}>
-                <span>🚀 Launch fundraiser</span>
-                <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.8 }}>
-                  {couponState === 'valid' && couponData
-                    ? (() => {
-                        const base = PLATFORM_FEES[gridOpt?.size || 100];
-                        const final = couponData.type === 'percent' ? Math.max(0, base * (1 - couponData.value / 100)) : Math.max(0, base - couponData.value);
-                        return final === 0 ? 'Free with coupon' : `$${final.toFixed(2)} with coupon`;
-                      })()
-                    : `Requires payment of $${PLATFORM_FEES[gridOpt?.size || 100]}`}
-                </span>
-              </button>
-            </div>
-          )}
-        </div>
+    // ── Step 8: Connect Bank (stripe only) ────────────────────────────────────
+    <div key="bank">
+      <div style={{ marginBottom: 28 }}>
+        <h2 className="section-title" style={{ marginBottom: 8 }}>Connect your bank account</h2>
+        <p className="section-sub">
+          Because your buyers pay by card, Lucky Squares needs to know where to send the money. Funds are transferred directly to your bank account once the draw is complete.
+        </p>
       </div>
 
-      {/* Launch payment modal */}
-      {showLaunchModal && (() => {
-        const baseFee   = PLATFORM_FEES[gridOpt?.size || 100];
-        const finalFee  = couponState === 'valid' && couponData
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        {[
+          { icon: '🔒', text: 'Your details are secured by Stripe, the same payment infrastructure used by millions of businesses worldwide.' },
+          { icon: '🏦', text: 'Funds land directly in your nominated account within 2 business days of your draw completing.' },
+          { icon: '✅', text: 'You only need to do this once. Future campaigns reuse the same account automatically.' },
+        ].map((item) => (
+          <div key={item.icon} style={{ flex: 1, fontSize: 12, color: 'var(--text2)', lineHeight: 1.6, textAlign: 'center' }}>
+            <div style={{ fontSize: 24, marginBottom: 6 }}>{item.icon}</div>
+            {item.text}
+          </div>
+        ))}
+      </div>
+
+      <div className="scratch-card" style={{ padding: 28 }}>
+        {bankSaving && (
+          <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
+        )}
+        {bankSaveError && (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: '#CC0000', marginBottom: 12 }}>Something went wrong saving your campaign. Please try again.</div>
+            <button className="btn btn-outline btn-sm" onClick={() => {
+              setBankSaveError(false);
+              setBankSaving(true);
+              onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment })
+                .then((id) => {
+                  setBankSaving(false);
+                  if (id) setBankDraftId(id);
+                  else setBankSaveError(true);
+                });
+            }}>Try again</button>
+          </div>
+        )}
+        {bankDraftId && (
+          <StripeConnectSetup
+            key={bankDraftId}
+            fundraiserId={bankDraftId}
+            onComplete={() => setBankConnectDone(true)}
+            prefill={fundraiserType === 'org' && orgDetails.name.trim()
+              ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, orgType: orgDetails.orgType, email: userPrefill?.email, phone: userPrefill?.phone }
+              : { name: userPrefill?.name, email: userPrefill?.email, phone: userPrefill?.phone }}
+          />
+        )}
+        {!bankConnectDone && !bankSaving && !bankSaveError && bankDraftId && (
+          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text2)', marginTop: 16 }}>
+            Complete the bank account setup above to continue to your campaign launch.
+          </p>
+        )}
+      </div>
+    </div>,
+
+    // ── Step 9: Launch ────────────────────────────────────────────────────────
+    <div key="launch">
+      {(() => {
+        const baseFee  = PLATFORM_FEES[gridOpt?.size || 100];
+        const finalFee = couponState === 'valid' && couponData
           ? couponData.type === 'percent' ? Math.max(0, baseFee * (1 - couponData.value / 100)) : Math.max(0, baseFee - couponData.value)
           : baseFee;
-        const isFree    = finalFee === 0;
-        const fmt       = (n) => Number.isInteger(n) ? String(n) : n.toFixed(2);
-        const launchData = {
-          fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment,
-          finalFee,
-          couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null,
-          // Preserve the draft fundraiser ID created during bank setup (stripe path)
-          existingFundraiserId: pendingLaunchData?.existingFundraiserId || null,
-        };
-        const doLaunch  = async () => {
-          if (isFree) {
-            if (couponState === 'valid' && couponCode.trim() && supabaseConfigured) {
-              await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
-            }
-            closeLaunchModal();
-            clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, drawRules, payment, coupon: couponState === 'valid' ? couponCode.trim().toUpperCase() : null }, false);
-          } else {
-            // For both stripe and non-stripe paid launches — stripe already has existingFundraiserId set
-            closeLaunchModal();
-            await onLaunchPay(launchData);
-          }
-        };
+        const isFree   = finalFee === 0;
+        const fmt      = (n) => Number.isInteger(n) ? String(n) : n.toFixed(2);
         return (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
-            <div className="scratch-card" style={{ padding: 36, maxWidth: 440, width: '100%', textAlign: 'center' }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>{isFree ? '🎉' : '🚀'}</div>
-              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
+          <>
+            <div style={{ textAlign: 'center', marginBottom: 28 }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>{isFree ? '🎉' : '🚀'}</div>
+              <h2 className="section-title" style={{ marginBottom: 8 }}>
                 {isFree && isFoundingMember ? 'Your first campaign is on us' : 'Launch your fundraiser'}
               </h2>
-              <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 24, lineHeight: 1.6 }}>
+              <p className="section-sub">
                 {isFree && isFoundingMember
                   ? 'As a founding member, your first campaign launches for free. Apply your coupon code below and go live instantly.'
                   : isFree
                     ? 'Your coupon covers the full launch fee. Apply it below and go live instantly.'
                     : 'A one-off platform fee applies to go live. Once paid, your fundraiser is active and buyers can start purchasing squares immediately.'}
               </p>
+            </div>
 
+            <div className="scratch-card" style={{ padding: 28 }}>
               {/* Fee breakdown */}
               <div style={{ background: 'var(--cream)', borderRadius: 12, padding: '14px 20px', marginBottom: 16, fontSize: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: couponState === 'valid' ? 8 : 0 }}>
@@ -1802,7 +1670,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                       <span style={{ color: 'var(--green)', fontWeight: 700 }}>Coupon {couponCode.toUpperCase()}</span>
                       <span style={{ color: 'var(--green)', fontWeight: 700 }}>
-                        {couponData.type === 'percent' ? `−${couponData.value}%` : `−$${fmt(couponData.value)}`}
+                        {couponData.type === 'percent' ? `-${couponData.value}%` : `-$${fmt(couponData.value)}`}
                       </span>
                     </div>
                     <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
@@ -1835,34 +1703,160 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                       disabled={!couponCode.trim() || couponState === 'checking'}
                       style={{ flexShrink: 0 }}
                     >
-                      {couponState === 'checking' ? '…' : 'Apply'}
+                      {couponState === 'checking' ? '...' : 'Apply'}
                     </button>
                   </div>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#D4F5E9', borderRadius: 10, padding: '10px 14px' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>✓ Coupon applied</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>Coupon applied</span>
                     <button onClick={() => { setCouponCode(''); setCouponState('idle'); setCouponData(null); }} style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--text2)', cursor: 'pointer', fontFamily: 'inherit' }}>Remove</button>
                   </div>
                 )}
                 {couponState === 'invalid' && (
-                  <p style={{ fontSize: 12, color: '#CC0000', marginTop: 6, textAlign: 'left' }}>Invalid or expired coupon code.</p>
+                  <p style={{ fontSize: 12, color: '#CC0000', marginTop: 6 }}>Invalid or expired coupon code.</p>
                 )}
               </div>
 
-
-              <p style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 16, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
                 By launching this campaign you confirm that it complies with all applicable fundraising and lottery laws in {STATE_LABELS[campaign.state || 'SA'] || 'your state'}, including that total prizes do not exceed the permitted threshold. <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>Platform terms</a>
               </p>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button className="btn btn-outline" style={{ flex: 1 }} onClick={closeLaunchModal}>Cancel</button>
-                <button className="btn btn-gold btn-lg" style={{ flex: 2 }} onClick={doLaunch}>
-                  {isFree ? '🚀 Launch free →' : 'Pay & launch →'}
-                </button>
-              </div>
+
+              <button className="btn btn-gold btn-lg" style={{ width: '100%' }} onClick={async () => {
+                const launchData = {
+                  fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment,
+                  finalFee,
+                  couponCode: couponState === 'valid' ? couponCode.trim().toUpperCase() : null,
+                  existingFundraiserId: bankDraftId || null,
+                };
+                if (isFree) {
+                  if (couponState === 'valid' && couponCode.trim() && supabaseConfigured) {
+                    await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
+                  }
+                  clearDraft();
+                  onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment, coupon: launchData.couponCode }, false);
+                } else {
+                  await onLaunchPay(launchData);
+                }
+              }}>
+                {isFree ? '🚀 Launch free' : 'Pay and launch'}
+              </button>
             </div>
-          </div>
+          </>
         );
       })()}
+    </div>,
+  ];
+
+  return (
+    <div className="dot-bg" style={{ minHeight: '100vh' }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+          <button className="btn btn-outline btn-sm" onClick={() => step > 0 ? setStep((s) => s - 1) : (clearDraft(), onCancel())}>{step === 0 ? '← Dashboard' : '← Back'}</button>
+          <div style={{ flex: 1 }}>
+            {(() => {
+              const visibleSteps = WIZARD_STEPS.filter((_, i) => i !== BANK_STEP || isStripePayment);
+              const visibleIdx   = isStripePayment ? step : (step < BANK_STEP ? step : step - 1);
+              return (
+                <>
+                  <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5 }}>Step {visibleIdx + 1} of {visibleSteps.length}</div>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>{WIZARD_STEPS[step]}</div>
+                </>
+              );
+            })()}
+          </div>
+          {step > 0 && (
+            <button className="btn btn-outline btn-sm" style={{ fontSize: 12 }} onClick={() => onCancel()}>
+              Save &amp; exit
+            </button>
+          )}
+        </div>
+        {/* Step dots — hide Connect Bank step for non-stripe users */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 32, flexWrap: 'wrap' }}>
+          {WIZARD_STEPS.map((s, i) => {
+            if (i === BANK_STEP && !isStripePayment) return null;
+            // Remap display number: for non-stripe users, skip the bank step number
+            const displayNum = !isStripePayment && i > BANK_STEP ? i : i + 1;
+            return (
+              <div key={i} className={`step-dot ${i < step ? 'done' : i === step ? 'active' : 'future'}`} onClick={() => i < step && setStep(i)} style={{ cursor: i < step ? 'pointer' : 'default' }} title={s}>
+                {i < step ? '✓' : displayNum}
+              </div>
+            );
+          })}
+        </div>
+        {paymentConfirming ? (
+          <div>
+            <h2 className="section-title">Double-check your bank details</h2>
+            <p className="section-sub" style={{ marginBottom: 24 }}>Please confirm these are correct. Buyers will use them to pay you.</p>
+            <div className="scratch-card" style={{ padding: 28 }}>
+              {[
+                ['Account name', payment.accountName],
+                ['BSB',          payment.bsb],
+                ['Account #',    payment.account],
+              ].map(([label, value]) => (
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 700 }}>{label}</span>
+                  <span style={{ fontSize: 16, fontWeight: 800 }}>{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : stepContent[step]}
+
+        {/* Footer navigation — step 9 (Launch) has no Next button; its action is inline */}
+        {step !== LAUNCH_STEP && (
+          <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <button className="btn btn-outline" onClick={() => {
+              if (paymentConfirming) { setPaymentConfirming(false); return; }
+              if (step === 0) { clearDraft(); onCancel(); return; }
+              // Back from Launch: skip over bank step for non-stripe users
+              if (step === LAUNCH_STEP && !isStripePayment) { setStep(BANK_STEP - 1); return; }
+              setStep((s) => s - 1);
+            }}>
+              {paymentConfirming ? '← Edit details' : step === 0 ? 'Cancel' : '← Back'}
+            </button>
+            {paymentConfirming ? (
+              <button className="btn btn-primary btn-lg" onClick={() => { setPaymentConfirming(false); setStep((s) => s + 1); }}>
+                Confirmed, details are correct
+              </button>
+            ) : step === BANK_STEP - 1 ? (
+              // Review step (7): Next navigates to bank step (stripe) or launch step (others)
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button className="btn btn-outline" onClick={() => { clearDraft(); onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment }, true); }}>
+                  Save as draft
+                </button>
+                <button className="btn btn-primary btn-lg" disabled={!canNext()} onClick={() => {
+                  if (isStripePayment && !user?.stripeOnboardingComplete) {
+                    setStep(BANK_STEP);
+                  } else {
+                    // Already onboarded or non-stripe: skip straight to Launch
+                    setStep(LAUNCH_STEP);
+                  }
+                }}>
+                  Next →
+                </button>
+              </div>
+            ) : (
+              <button className="btn btn-primary" disabled={!canNext()} onClick={async () => {
+                if (step === PAYMENT_STEP && ['bank', 'bank_inperson'].includes(payment.method)) { setPaymentConfirming(true); return; }
+                // Leaving the bank connect step: refresh user profile so stripeOnboardingComplete is up to date
+                if (step === BANK_STEP && user?.id) {
+                  const { stripeAccountId, stripeOnboardingComplete } = await fetchProfile(user.id);
+                  setUser((prev) => prev ? { ...prev, stripeAccountId, stripeOnboardingComplete } : prev);
+                }
+                setStep((s) => s + 1);
+              }}>Next →</button>
+            )}
+          </div>
+        )}
+        {step === LAUNCH_STEP && (
+          <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-start' }}>
+            <button className="btn btn-outline" onClick={() => {
+              // Back from Launch: go to bank step (stripe) or review step (others)
+              setStep(isStripePayment ? BANK_STEP : BANK_STEP - 1);
+            }}>← Back</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
