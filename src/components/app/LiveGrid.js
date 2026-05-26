@@ -166,12 +166,22 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === '1') {
+      // Restore the buyer's square numbers so they appear as "mine" on the grid.
+      // These were saved to localStorage just before the Stripe redirect.
+      try {
+        const pending = JSON.parse(localStorage.getItem(`ls_pending_cart_${fundraiser.id}`) || 'null');
+        if (pending?.nums?.length) {
+          pending.nums.forEach((n) => myNumsRef.current.add(n));
+          if (pending.email) setBuyerEmail(pending.email);
+        }
+        localStorage.removeItem(`ls_pending_cart_${fundraiser.id}`);
+      } catch {}
       setPhase('success');
       // Clean up URL without reload
       const clean = window.location.pathname;
       window.history.replaceState({}, '', clean);
     }
-  }, []);
+  }, [fundraiser.id]);
 
   useEffect(() => {
     if (phase !== 'success') return;
@@ -296,6 +306,10 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           alert(error || 'Could not start payment. Please try again.');
           return;
         }
+        // Persist cart so we can restore "mine" squares when Stripe redirects back
+        try {
+          localStorage.setItem(`ls_pending_cart_${fundraiser.id}`, JSON.stringify({ nums: cart, email: safeEmail }));
+        } catch {}
         window.location.href = url;
       } catch (err) {
         setPayRedirecting(false);
