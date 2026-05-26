@@ -47,6 +47,25 @@ export default function AdminUsers() {
       await getSupabaseClient().rpc('admin_suspend_user', {
         p_user_id: suspendModal.id, p_reason: suspendReason.trim(),
       });
+      // Notify the user their account has been suspended.
+      if (suspendModal.email) {
+        const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        if (supabaseUrl && supabaseAnon) {
+          fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseAnon}` },
+            body: JSON.stringify({
+              type: 'account_suspended',
+              to:   suspendModal.email,
+              data: {
+                first_name: (suspendModal.full_name || 'there').split(' ')[0],
+                reason:     suspendReason.trim(),
+              },
+            }),
+          }).catch(() => {});
+        }
+      }
     }
     setUsers((prev) => prev.map((u) =>
       u.id === suspendModal.id

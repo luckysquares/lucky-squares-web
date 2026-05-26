@@ -2212,7 +2212,17 @@ export default function FundraiseApp() {
         campaign_url: campaignUrl,
       });
       if (supabaseConfigured && user?.id) {
-        getSupabaseClient().rpc('check_referral_reward', { p_user_id: user.id });
+        getSupabaseClient().rpc('check_referral_reward', { p_user_id: user.id })
+          .then(({ data: rewards }) => {
+            if (!rewards?.length) return;
+            const { referrer_email, referrer_name, coupon_code } = rewards[0];
+            if (!referrer_email) return;
+            sendTxEmail('referral_reward', referrer_email, {
+              first_name:    (referrer_name || 'there').split(' ')[0],
+              referred_name: user.name || 'Someone you referred',
+              coupon_code,
+            });
+          });
         loadReferralInfo();
         setShowReferralModal(true);
         // Notify opted-in buyers from previous campaigns (fire-and-forget)

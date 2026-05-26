@@ -174,6 +174,22 @@ export default function OrgSignupPage() {
           setLoading(false);
           return;
         }
+
+        // Fire confirmation to applicant + internal admin alert (fire-and-forget).
+        fetch('/api/org-application-notify', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            first_name:    sanitize(name).split(' ')[0] || 'there',
+            org_name:      sanitize(orgName),
+            abn:           abnDigits,
+            org_type:      sanitize(orgType),
+            contact_name:  sanitize(name),
+            contact_email: sanitize(email),
+            suburb:        sanitize(suburb),
+            state:         sanitize(state),
+          }),
+        }).catch(() => {});
       }
 
       setStep('submitted');
