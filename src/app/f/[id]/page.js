@@ -119,24 +119,28 @@ export default function PublicFundraiserPage({ params }) {
   useEffect(() => {
     if (!supabaseConfigured) { setNotFound(true); setLoading(false); return; }
     const supabase = getSupabaseClient();
+    // Resolve by UUID (existing campaigns) or slug (new human-readable URLs)
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const col = UUID_RE.test(id) ? 'id' : 'slug';
     Promise.all([
-      supabase.from('fundraisers').select('*, profiles!owner_id(is_founding_member, is_beta_tester)').eq('id', id).in('status', ['active', 'drawn']).single(),
-      supabase.from('prizes').select('*').eq('fundraiser_id', id).order('sort_order'),
+      supabase.from('fundraisers').select('*, profiles!owner_id(is_founding_member, is_beta_tester)').eq(col, id).in('status', ['active', 'drawn']).single(),
       supabase.auth.getUser(),
-    ]).then(([{ data, error }, { data: prizes }, { data: { user } }]) => {
-      if (error || !data) { setNotFound(true); } else {
-        setFundraiser({
-          ...dbToFundraiser(data, prizes || []),
-          ownerIsFoundingMember: data.profiles?.is_founding_member ?? false,
-          ownerIsBetaTester:     data.profiles?.is_beta_tester     ?? false,
-          ownerId: data.owner_id,
+    ]).then(([{ data, error }, { data: { user } }]) => {
+      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      // Fetch prizes using the resolved UUID (data.id), not the slug param
+      supabase.from('prizes').select('*').eq('fundraiser_id', data.id).order('sort_order')
+        .then(({ data: prizes }) => {
+          setFundraiser({
+            ...dbToFundraiser(data, prizes || []),
+            ownerIsFoundingMember: data.profiles?.is_founding_member ?? false,
+            ownerIsBetaTester:     data.profiles?.is_beta_tester     ?? false,
+            ownerId: data.owner_id,
+          });
+          if (user?.id && data.owner_id && user.id === data.owner_id) {
+            setIsOrganiser(true);
+          }
+          setLoading(false);
         });
-        // Check if the logged-in user is the campaign organiser
-        if (user?.id && data.owner_id && user.id === data.owner_id) {
-          setIsOrganiser(true);
-        }
-      }
-      setLoading(false);
     });
   }, [id]);
 

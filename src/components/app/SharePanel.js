@@ -8,7 +8,7 @@ export default function SharePanel({ fundraiser, onClose }) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setUrl(`${window.location.origin}/f/${fundraiser.id}`);
+    setUrl(`${window.location.origin}/f/${fundraiser.slug ?? fundraiser.id}`);
   }, [fundraiser.id]);
 
   const copy = async () => {

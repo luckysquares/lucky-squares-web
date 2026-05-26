@@ -10,6 +10,7 @@ import LiveGrid from '@/components/app/LiveGrid';
 import StripeConnectSetup from '@/components/app/StripeConnectSetup';
 import MemberBadge from '@/components/app/MemberBadge';
 import SurveyModal from '@/components/app/SurveyModal';
+import { generateCampaignSlug } from '@/lib/slug';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -2188,6 +2189,7 @@ export default function FundraiseApp() {
           bank_bsb: sanitize(data.payment.bsb) || null, bank_account: sanitize(data.payment.account) || null,
           fundraiser_type: data.fundraiserType || 'individual',
           org_id: orgId,
+          slug: generateCampaignSlug(nf.title),
           // Link user-level Stripe account for free stripe launches (paid path uses handleLaunchPay)
           stripe_account_id: data.payment.method === 'stripe' ? (user?.stripeAccountId || null) : null,
         })
@@ -2203,7 +2205,8 @@ export default function FundraiseApp() {
         return;
       }
       if (saved) {
-        nf.id = saved.id;
+        nf.id   = saved.id;
+        nf.slug = saved.slug;
         const prizeRows = data.prizes
           .filter((p) => p.desc)
           .map((p, i) => ({ fundraiser_id: saved.id, place: p.place, description: sanitize(p.desc), value: sanitize(p.value), donated: p.donated ?? false, sort_order: i }));
@@ -2218,7 +2221,7 @@ export default function FundraiseApp() {
     setPhase('live');
     // Send campaign launched email and check referral reward
     if (!isDraft && user?.email) {
-      const campaignUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/f/${nf.id}`;
+      const campaignUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/f/${nf.slug ?? nf.id}`;
       const firstName = user.name?.split(' ')[0] || 'there';
       sendTxEmail('campaign_launched', user.email, {
         first_name: firstName,
@@ -2404,6 +2407,7 @@ export default function FundraiseApp() {
         bank_account:      sanitize(data.payment.account) || null,
         fundraiser_type:   data.fundraiserType || 'individual',
         org_id:            orgId,
+        slug:              generateCampaignSlug(sanitize(data.campaign.title || 'New Fundraiser')),
         // Link user-level Stripe account (set when payment.method === 'stripe' and skip-bankPhase)
         stripe_account_id: data.payment.method === 'stripe' ? (user?.stripeAccountId || null) : null,
       }).select().single();

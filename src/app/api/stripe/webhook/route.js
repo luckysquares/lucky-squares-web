@@ -55,7 +55,7 @@ export async function POST(req) {
     if (action === 'launch') {
       const { data: existing } = await db
         .from('fundraisers')
-        .select('status, grid_size')
+        .select('status, grid_size, slug')
         .eq('id', fundraiser_id)
         .single();
 
@@ -109,8 +109,8 @@ export async function POST(req) {
         // Notify opted-in buyers from previous campaigns
         const { data: followers } = await db.rpc('get_campaign_notification_followers', { p_fundraiser_id: fundraiser_id });
         if (followers?.length) {
-          const { data: fr } = await db.from('fundraisers').select('title, org').eq('id', fundraiser_id).single();
-          const campaignUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au'}/f/${fundraiser_id}`;
+          const { data: fr } = await db.from('fundraisers').select('title, org, slug').eq('id', fundraiser_id).single();
+          const campaignUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au'}/f/${fr?.slug ?? fundraiser_id}`;
           await Promise.all(followers.map((f) =>
             fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`, {
               method: 'POST',
@@ -225,7 +225,7 @@ export async function POST(req) {
     // ── Confirmation email to buyer ───────────────────────────────────────────
     const { data: fundraiser } = await db
       .from('fundraisers')
-      .select('title, org, draw_type, draw_date, contact_name, contact_email, owner_id, grid_size, price_per_sq')
+      .select('title, org, draw_type, draw_date, contact_name, contact_email, owner_id, grid_size, price_per_sq, slug')
       .eq('id', fundraiser_id)
       .single();
 
@@ -253,7 +253,7 @@ export async function POST(req) {
             square_numbers: squareNums.join(', '),
             amount_paid:    subtotal.toFixed(2),
             draw_type_description: drawDesc,
-            campaign_url:   `${appUrl}/f/${fundraiser_id}`,
+            campaign_url:   `${appUrl}/f/${fundraiser.slug ?? fundraiser_id}`,
           },
         }),
       });
