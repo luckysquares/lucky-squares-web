@@ -574,6 +574,13 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, 
           }
         </div>
 
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20, marginTop: 24 }}>
+          {fundraisers.map((f) => (
+            <FundraiserCard key={f.id} f={f} onView={() => onView(f)} onReport={() => onReport(f)} onConnectBank={() => onConnectBank(f)} />
+          ))}
+          {canCreate && <NewFundraiserCard onClick={onNew} />}
+        </div>
+
         {/* Referral card */}
         {hasAnyCampaign && referralLink && (
           <div style={{ background: 'linear-gradient(135deg, #0D2B1F, #1A4A30)', borderRadius: 16, padding: '20px 24px', marginTop: 24, display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
@@ -594,13 +601,6 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, 
             </div>
           </div>
         )}
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20, marginTop: 24 }}>
-          {fundraisers.map((f) => (
-            <FundraiserCard key={f.id} f={f} onView={() => onView(f)} onReport={() => onReport(f)} onConnectBank={() => onConnectBank(f)} />
-          ))}
-          {canCreate && <NewFundraiserCard onClick={onNew} />}
-        </div>
 
         {/* Team section: visible to org plan admins only */}
         {user?.plan === 'org' && orgInfo?.role !== 'contributor' && (
