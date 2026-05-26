@@ -732,6 +732,22 @@ const COMMON_VARS = [
   'active_campaign_count','abn','org_type','reason','campaign_limit',
 ];
 
+// Render a plain-text string with bare URLs converted to clickable <a> tags
+function TextWithLinks({ text }) {
+  if (!text) return null;
+  const URL_RE = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(URL_RE);
+  return (
+    <>
+      {parts.map((part, i) =>
+        URL_RE.test(part)
+          ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: '#1A7A55', textDecoration: 'underline' }}>{part}</a>
+          : part
+      )}
+    </>
+  );
+}
+
 // Substitute {{var}} in a string using the preview D object
 function previewSubstitute(str) {
   if (!str) return str;
@@ -951,7 +967,7 @@ export default function EmailPreviewPage() {
             </div>
             <div style={{ padding: '28px 28px 20px' }}>
               <pre style={{ fontFamily: '"Georgia","Times New Roman",serif', fontSize: 14, lineHeight: 1.8, color: '#1A1209', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, maxWidth: 640 }}>
-                {previewEmail.text}
+                <TextWithLinks text={previewEmail.text} />
               </pre>
             </div>
             <div style={{ padding: '12px 28px', borderTop: '1px solid #F0EAE0', background: '#FAFAF8', fontSize: 11, color: '#9C8060' }}>
@@ -1001,7 +1017,7 @@ export default function EmailPreviewPage() {
                   </div>
                   <div style={{ padding: '16px 20px' }}>
                     <pre style={{ fontFamily: '"Georgia","Times New Roman",serif', fontSize: 13, lineHeight: 1.7, color: '#1A1209', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
-                      {previewSubstitute(editBody)}
+                      <TextWithLinks text={previewSubstitute(editBody)} />
                     </pre>
                   </div>
                 </div>

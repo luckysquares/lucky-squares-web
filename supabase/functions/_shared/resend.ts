@@ -16,6 +16,13 @@ function toHtml(text: string, unsubscribeUrl?: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
+  // Convert bare URLs to clickable links (runs after HTML escaping so no < > " interference)
+  const linkify = (s: string) =>
+    s.replace(
+      /(https?:\/\/[^\s<>"]+)/g,
+      '<a href="$1" style="color:#1A7A55;text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>',
+    );
+
   const body = escaped
     // Bold **text**
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -29,11 +36,11 @@ function toHtml(text: string, unsubscribeUrl?: string): string {
       // Numbered or bulleted lists
       if (/^(\d+\.|[-•])/.test(lines)) {
         const items = lines.split('\n').map((l) =>
-          `<li style="margin-bottom:6px">${l.replace(/^(\d+\.|[-•])\s*/, '')}</li>`
+          `<li style="margin-bottom:6px">${linkify(l.replace(/^(\d+\.|[-•])\s*/, ''))}</li>`
         ).join('');
         return `<ul style="padding-left:20px;margin:0 0 16px">${items}</ul>`;
       }
-      return `<p style="margin:0 0 16px;line-height:1.7">${lines.replace(/\n/g, '<br>')}</p>`;
+      return `<p style="margin:0 0 16px;line-height:1.7">${linkify(lines.replace(/\n/g, '<br>'))}</p>`;
     })
     .join('');
 
