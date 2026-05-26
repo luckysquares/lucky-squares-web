@@ -766,6 +766,7 @@ export default function EmailPreviewPage() {
     setDbTemplate(null);
     try {
       const res = await adminFetch(`/api/admin/emails/templates/${key}`);
+      if (!res.ok) { setDbTemplate(null); return; }
       const data = await res.json();
       setDbTemplate(data || null);
       if (data) {
