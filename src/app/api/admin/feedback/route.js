@@ -1,26 +1,4 @@
-import { getAdminClient } from '@/lib/supabase/server';
-
+// Replaced by admin_get_survey_responses() RPC — admin/feedback/page.js calls that directly.
 export async function GET() {
-  const db = getAdminClient();
-  const { data, error } = await db
-    .from('survey_responses')
-    .select(`
-      id,
-      created_at,
-      q1_key,
-      q1_answer,
-      q2_key,
-      q2_answer,
-      fundraiser_id,
-      fundraisers ( title, org ),
-      owner_id,
-      profiles ( full_name )
-    `)
-    .order('created_at', { ascending: false })
-    .limit(500);
-
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-  return Response.json({ data });
+  return Response.json({ error: 'Use the admin_get_survey_responses RPC instead.' }, { status: 410 });
 }

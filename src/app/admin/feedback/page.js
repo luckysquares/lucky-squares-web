@@ -1,20 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { getQuestion } from '@/lib/surveyQuestions';
 
 function npsLabel(score) {
   const n = Number(score);
-  if (n >= 9) return { label: 'Promoter', color: '#00A96E' };
-  if (n >= 7) return { label: 'Passive',  color: '#F59E0B' };
+  if (n >= 9) return { label: 'Promoter',   color: '#00A96E' };
+  if (n >= 7) return { label: 'Passive',    color: '#F59E0B' };
   return              { label: 'Detractor', color: '#EF4444' };
 }
 
 function AnswerCell({ qKey, answer }) {
   const q = getQuestion(qKey);
-  if (!q) return <td style={tdStyle}>{answer}</td>;
 
-  if (q.type === 'nps') {
+  if (q?.type === 'nps') {
     const { label, color } = npsLabel(answer);
     return (
       <td style={tdStyle}>
@@ -23,8 +23,9 @@ function AnswerCell({ qKey, answer }) {
       </td>
     );
   }
-  if (q.type === 'rating5') {
-    const stars = '★'.repeat(Number(answer)) + '☆'.repeat(5 - Number(answer));
+  if (q?.type === 'rating5') {
+    const n = Number(answer);
+    const stars = '★'.repeat(n) + '☆'.repeat(5 - n);
     return <td style={tdStyle}><span style={{ color: '#F59E0B', letterSpacing: 2 }}>{stars}</span></td>;
   }
   return <td style={tdStyle}>{answer}</td>;
@@ -57,26 +58,29 @@ export default function AdminFeedbackPage() {
   const [error,   setError]   = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/feedback')
-      .then((r) => r.json())
+    if (!supabaseConfigured) { setLoading(false); return; }
+    getSupabaseClient()
+      .rpc('admin_get_survey_responses')
       .then(({ data, error: e }) => {
-        if (e) { setError(e); } else { setRows(data ?? []); }
+        if (e) { setError(e.message); } else { setRows(data ?? []); }
         setLoading(false);
       });
   }, []);
 
-  // Compute NPS summary
-  const npsRows = rows.flatMap((r) => {
+  // NPS summary across all responses
+  const npsAnswers = rows.flatMap((r) => {
     const answers = [];
     if (getQuestion(r.q1_key)?.type === 'nps') answers.push(Number(r.q1_answer));
     if (getQuestion(r.q2_key)?.type === 'nps') answers.push(Number(r.q2_answer));
     return answers;
   });
-  const promoters  = npsRows.filter((n) => n >= 9).length;
-  const detractors = npsRows.filter((n) => n <= 6).length;
-  const npsScore   = npsRows.length
-    ? Math.round(((promoters - detractors) / npsRows.length) * 100)
+  const promoters  = npsAnswers.filter((n) => n >= 9).length;
+  const detractors = npsAnswers.filter((n) => n <= 6).length;
+  const npsScore   = npsAnswers.length
+    ? Math.round(((promoters - detractors) / npsAnswers.length) * 100)
     : null;
+
+  const fmtDate = (d) => new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
     <div>
@@ -85,7 +89,6 @@ export default function AdminFeedbackPage() {
         Post-draw survey responses — 2 questions selected at random per draw
       </p>
 
-      {/* Summary row */}
       {!loading && rows.length > 0 && (
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 36 }}>
           <SummaryCard icon="💬" label="Total responses" value={rows.length} />
@@ -93,16 +96,12 @@ export default function AdminFeedbackPage() {
             <SummaryCard
               icon="📊"
               label="NPS score"
-              value={npsScore > 0 ? `+${npsScore}` : npsScore}
-              sub={`from ${npsRows.length} NPS ${npsRows.length === 1 ? 'answer' : 'answers'}`}
+              value={npsScore > 0 ? `+${npsScore}` : String(npsScore)}
+              sub={`from ${npsAnswers.length} NPS ${npsAnswers.length === 1 ? 'answer' : 'answers'}`}
             />
           )}
-          {npsScore !== null && (
-            <SummaryCard icon="🟢" label="Promoters" value={promoters} sub="Score 9-10" />
-          )}
-          {npsScore !== null && (
-            <SummaryCard icon="🔴" label="Detractors" value={detractors} sub="Score 0-6" />
-          )}
+          {npsScore !== null && <SummaryCard icon="🟢" label="Promoters"  value={promoters}  sub="Score 9-10" />}
+          {npsScore !== null && <SummaryCard icon="🔴" label="Detractors" value={detractors} sub="Score 0-6"  />}
         </div>
       )}
 
@@ -112,7 +111,9 @@ export default function AdminFeedbackPage() {
       {!loading && rows.length === 0 && !error && (
         <div className="scratch-card" style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>💬</div>
-          <p style={{ fontSize: 15, color: 'var(--text2)' }}>No survey responses yet. They appear after organisers complete a draw.</p>
+          <p style={{ fontSize: 15, color: 'var(--text2)' }}>
+            No survey responses yet. They appear here after organisers complete a draw.
+          </p>
         </div>
       )}
 
@@ -134,13 +135,13 @@ export default function AdminFeedbackPage() {
               {rows.map((r) => {
                 const q1 = getQuestion(r.q1_key);
                 const q2 = getQuestion(r.q2_key);
-                const date = new Date(r.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-                const name = r.profiles?.full_name || 'Unknown';
-                const campaign = r.fundraisers ? `${r.fundraisers.title}${r.fundraisers.org ? ` (${r.fundraisers.org})` : ''}` : '—';
+                const campaign = r.fundraiser_title
+                  ? `${r.fundraiser_title}${r.fundraiser_org ? ` (${r.fundraiser_org})` : ''}`
+                  : '—';
                 return (
-                  <tr key={r.id} style={{ transition: 'background .1s' }}>
-                    <td style={{ ...tdStyle, whiteSpace: 'nowrap', color: 'var(--text2)', fontSize: 12 }}>{date}</td>
-                    <td style={{ ...tdStyle, fontWeight: 600 }}>{name}</td>
+                  <tr key={r.id}>
+                    <td style={{ ...tdStyle, whiteSpace: 'nowrap', color: 'var(--text2)', fontSize: 12 }}>{fmtDate(r.created_at)}</td>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{r.owner_name || '—'}</td>
                     <td style={{ ...tdStyle, maxWidth: 180 }}>{campaign}</td>
                     <td style={{ ...tdStyle, maxWidth: 220, color: 'var(--text2)', fontSize: 12 }}>{q1?.text ?? r.q1_key}</td>
                     <AnswerCell qKey={r.q1_key} answer={r.q1_answer} />
