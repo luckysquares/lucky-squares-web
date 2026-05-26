@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     return new Response('fundraiser_id required', { status: 400 });
   }
 
-  // Fetch campaign details
+  // Fetch campaign details (including idempotency flag).
   const { data: f, error } = await supabase
     .from('fundraisers')
     .select(`
@@ -43,13 +43,25 @@ Deno.serve(async (req) => {
       payment_method, grid_size, price_per_sq,
       bank_account_name, bank_bsb, bank_account,
       stripe_account_id,
-      winner_square_num, winner_square_nums
+      winner_square_num, winner_square_nums,
+      notifications_sent_at
     `)
     .eq('id', fundraiserId)
     .single();
 
   if (error || !f) {
     return new Response('Campaign not found', { status: 404 });
+  }
+
+  // Idempotency guard: if notifications were already sent, return immediately.
+  // This prevents anyone with a public fundraiser_id from triggering repeated
+  // emails to all buyers by calling this endpoint multiple times.
+  if (f.notifications_sent_at) {
+    console.log(`[draw-notification] Notifications already sent for ${fundraiserId} at ${f.notifications_sent_at} — skipping.`);
+    return new Response(
+      JSON.stringify({ ok: true, skipped: true, reason: 'already_sent' }),
+      { status: 200 },
+    );
   }
 
   // Fetch sold squares
@@ -387,6 +399,12 @@ Deno.serve(async (req) => {
       await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
     }
   }
+
+  // Stamp the idempotency flag so repeat calls are no-ops.
+  await supabase
+    .from('fundraisers')
+    .update({ notifications_sent_at: new Date().toISOString() })
+    .eq('id', fundraiserId);
 
   return new Response(
     JSON.stringify({ ok: true, admin: true, organiser: !!f.contact_email, buyers: uniqueBuyers.length, transferResult }),
