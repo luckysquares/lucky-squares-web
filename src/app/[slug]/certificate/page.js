@@ -36,7 +36,7 @@ export default async function CertificatePage({ params }) {
 
   const { data: fundraiser, error: frErr } = await db
     .from('fundraisers')
-    .select('id, title, org, status, grid_size, price_per_sq, launched_at, draw_date, contact_name, payment_method, prize_reserve_cents')
+    .select('id, title, org, status, grid_size, price_per_sq, launched_at, draw_date, contact_name, payment_method, prize_reserve_cents, winner_square_nums')
     .eq(col, slug)
     .single();
 
@@ -58,11 +58,28 @@ export default async function CertificatePage({ params }) {
     .eq('fundraiser_id', fundraiserId)
     .order('sort_order', { ascending: true });
 
+  // Fetch buyer names for winning squares.
+  // winner_square_nums is an int[] where index 0 = 1st place, index 1 = 2nd place, etc.
+  // The buyer name lives on the square itself — prize_claims only exists for Stripe claimants.
+  const winnerNums = fundraiser.winner_square_nums ?? [];
+  let winnerByIndex = {}; // index (0-based) → buyer_name
+  if (winnerNums.length > 0) {
+    const { data: winningSqs } = await db
+      .from('squares')
+      .select('number, buyer_name')
+      .eq('fundraiser_id', fundraiserId)
+      .in('number', winnerNums);
+    for (const sq of winningSqs ?? []) {
+      const idx = winnerNums.indexOf(sq.number);
+      if (idx !== -1) winnerByIndex[idx] = sq.buyer_name;
+    }
+  }
+
+  // prize_claims may supplement with claim status (Stripe campaigns only)
   const { data: claims } = await db
     .from('prize_claims')
-    .select('place, buyer_name, prize_description, status')
+    .select('place, buyer_name, status')
     .eq('fundraiser_id', fundraiserId);
-
   const claimByPlace = {};
   for (const c of claims ?? []) claimByPlace[c.place] = c;
 
@@ -189,16 +206,18 @@ export default async function CertificatePage({ params }) {
                 </thead>
                 <tbody>
                   {activePrizes.map((p, i) => {
-                    const claim = claimByPlace[p.place];
+                    // Primary: buyer name from the winning square (always available after draw)
+                    // Supplement: prize_claims for Stripe campaigns that have completed claiming
+                    const winnerName = winnerByIndex[i] ?? claimByPlace[p.place]?.buyer_name ?? null;
                     const valueStr = p.donated ? ' (donated prize)' : p.value ? ` — ${p.value}` : '';
                     return (
                       <tr key={i}>
                         <td><span className="badge">{p.place}</span></td>
                         <td style={{ color: '#4A3728' }}>{p.description}{valueStr}</td>
                         <td>
-                          {claim
-                            ? <strong style={{ color: '#1A1209' }}>{claim.buyer_name}</strong>
-                            : <span style={{ color: '#9C8060', fontStyle: 'italic' }}>Pending claim</span>
+                          {winnerName
+                            ? <strong style={{ color: '#1A1209' }}>{winnerName}</strong>
+                            : <span style={{ color: '#9C8060', fontStyle: 'italic' }}>Not recorded</span>
                           }
                         </td>
                       </tr>
