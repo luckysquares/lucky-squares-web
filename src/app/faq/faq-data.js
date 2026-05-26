@@ -48,11 +48,11 @@ export const FAQS = [
       },
       {
         q: 'How does the draw work?',
-        a: 'When you are ready to draw, click the "Run draw" button on your fundraiser page. The platform randomly selects one of the sold squares as the winner. The result is recorded instantly and cannot be changed. All participants viewing the page at the time of the draw will see the winning square highlighted live.',
+        a: 'When you are ready to draw, click the "Run draw" button on your fundraiser page. The platform randomly selects one or more winning squares (one per prize). The result is recorded instantly and cannot be changed. All participants viewing the page at the time of the draw will see the winning squares highlighted live.',
       },
       {
         q: 'When do I receive the funds raised?',
-        a: 'This depends on your payment method. Bank transfer: buyers pay directly into your nominated BSB and account number throughout the campaign. You have the funds as they arrive. In person: you collect payment directly from participants. Online card via Stripe: funds transfer to your connected bank account progressively as each square is sold. A portion is held back on the platform to cover the prize pool. When the draw is complete, the full prize reserve is also transferred to your account and you pay the winners directly. There is no waiting until after the draw for the bulk of your funds.',
+        a: 'This depends on your payment method. Bank transfer: buyers pay directly into your nominated BSB and account number throughout the campaign. You have the funds as they arrive. In person: you collect payment directly from participants. Online card via Stripe: funds are held securely on the platform and released to your connected bank account within two business days of completing your draw.',
       },
       {
         q: 'What happens if not all squares sell before my draw date?',
@@ -210,7 +210,7 @@ export const FAQS = [
       },
       {
         q: 'The Draw',
-        a: "The moment of truth. When the Organiser is ready, they click Run Draw and the platform randomly selects one of the sold squares as the winner. The result is recorded instantly, cannot be changed, and is shown live on the grid for everyone watching.",
+        a: "The moment of truth. When the Organiser is ready, they click Run Draw and the platform randomly selects one or more winning squares (one per prize). The result is recorded instantly, cannot be changed, and is shown live on the grid for everyone watching.",
       },
       {
         q: 'Club Mode',

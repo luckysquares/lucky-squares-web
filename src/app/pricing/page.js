@@ -58,6 +58,7 @@ export default function PricingPage() {
                 <li>Live draw feature</li>
                 <li>Notify buyers of results</li>
               </ul>
+              <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 10, marginBottom: 0 }}>Up to 5 live campaigns simultaneously.</p>
               <Link href="/fundraise?register=1" className="btn btn-purple" style={{ width: '100%', justifyContent: 'center' }}>
                 Start your fundraiser →
               </Link>
@@ -72,6 +73,7 @@ export default function PricingPage() {
               <p className="pricing-desc">Run unlimited fundraising campaigns per year for your school, club, or charity using the Lucky Squares platform.</p>
               <ul className="pricing-features">
                 <li>Unlimited campaigns per year</li>
+                <li>Up to 10 live simultaneously</li>
                 <li>Multi-user access</li>
                 <li>Organisation branding</li>
                 <li>Priority support</li>
@@ -108,7 +110,7 @@ export default function PricingPage() {
               },
               {
                 q: 'When do funds arrive in my account?',
-                a: 'We will send you the balance of your funds (money received from square sales, minus prize money paid out) within 2 business days of you drawing your winners.',
+                a: 'This depends on your payment method. Bank transfer and in person: you receive funds as they come in throughout the campaign. Online card via Stripe: funds are held securely on the platform and released to your connected bank account within two business days of completing your draw.',
               },
               {
                 q: 'Do I need a permit to run Lucky Squares?',
