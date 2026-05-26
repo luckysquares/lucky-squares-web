@@ -49,6 +49,30 @@ function useVisitorName() {
   return name;
 }
 
+// Extract blog slug when on a blog article page (/blog/[slug])
+function useBlogSlug() {
+  const pathname = usePathname();
+  const match = pathname?.match(/^\/blog\/([^/]+)/);
+  return match ? match[1] : null;
+}
+
+// Get the organiser's auth token when on /fundraise pages (so Mariposa can see their campaigns)
+function useOrganiserToken() {
+  const pathname = usePathname();
+  const [token, setToken] = useState(null);
+  const isOrganiserPage = pathname?.startsWith('/fundraise');
+
+  useEffect(() => {
+    if (!isOrganiserPage || !supabaseConfigured) { setToken(null); return; }
+    getSupabaseClient().auth.getSession()
+      .then(({ data: { session } }) => {
+        setToken(session?.access_token ?? null);
+      });
+  }, [isOrganiserPage]);
+
+  return token;
+}
+
 
 const GREETING = `G'day! I'm Mariposa, a baseball-loving jackrabbit and your Lucky Squares guide. 🍀⚾
 
@@ -57,8 +81,10 @@ Whether you're setting up your first fundraiser, figuring out how squares work, 
 What can I help you with today?`;
 
 export default function MariposaChatWidget() {
-  const fundraiserId = useFundraiserId();
-  const visitorName  = useVisitorName();
+  const fundraiserId   = useFundraiserId();
+  const visitorName    = useVisitorName();
+  const blogSlug       = useBlogSlug();
+  const organiserToken = useOrganiserToken();
   const [open,     setOpen]     = useState(false);
   const [messages, setMessages] = useState([{ role: 'assistant', content: GREETING }]);
   const [input,    setInput]    = useState('');
@@ -91,6 +117,8 @@ export default function MariposaChatWidget() {
           messages:      next.filter((m) => m.role !== 'system'),
           fundraiser_id: fundraiserId,
           visitor_name:  visitorName,
+          blog_slug:     blogSlug,
+          auth_token:    organiserToken,
         }),
       });
       const data = await res.json();

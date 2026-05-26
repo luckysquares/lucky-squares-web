@@ -256,12 +256,14 @@ export async function POST(request) {
   const existingSid = request.cookies.get(SESSION_COOKIE)?.value;
   const sessionId   = existingSid ?? randomUUID();
 
-  let messages, fundraiserId, visitorName;
+  let messages, fundraiserId, visitorName, blogSlug, authToken;
   try {
     const body = await request.json();
     messages      = body.messages      ?? [];
     fundraiserId  = body.fundraiser_id ?? null;
     visitorName   = typeof body.visitor_name === 'string' ? body.visitor_name.slice(0, 50).trim() : null;
+    blogSlug      = typeof body.blog_slug   === 'string' ? body.blog_slug.slice(0, 200).trim()    : null;
+    authToken     = typeof body.auth_token  === 'string' ? body.auth_token.trim()                 : null;
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
@@ -306,11 +308,75 @@ export async function POST(request) {
     }
   }
 
-  // Build system prompt: base + optional visitor name + optional campaign context
+  // Fetch blog article context if the visitor is reading a blog post
+  let blogContext = '';
+  if (blogSlug) {
+    const { data: post } = await db
+      .from('blog_posts')
+      .select('title, excerpt, category')
+      .eq('slug', blogSlug)
+      .eq('status', 'published')
+      .maybeSingle();
+    if (post) {
+      blogContext = `\n\n## Blog article the visitor is currently reading\n`
+        + `Title: ${post.title}\n`
+        + (post.category ? `Category: ${post.category}\n` : '')
+        + (post.excerpt ? `Summary: ${post.excerpt}\n` : '')
+        + `\nThe visitor is reading this article. If they ask questions connected to its topic, answer with that in mind. `
+        + `You can suggest other helpful reading at https://luckysquares.com.au/blog`;
+    }
+  }
+
+  // Fetch organiser's own campaigns when they are on the /fundraise dashboard
+  let organiserContext = '';
+  if (authToken && !fundraiserId) {
+    const { data: { user } } = await db.auth.getUser(authToken);
+    if (user?.id) {
+      const { data: campaigns } = await db
+        .from('fundraisers')
+        .select('id, title, status, grid_size, price_per_sq, draw_type, draw_date')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(8);
+
+      if (campaigns?.length) {
+        // Fetch sold square counts for each campaign
+        const ids = campaigns.map((c) => c.id);
+        const { data: squares } = await db
+          .from('squares')
+          .select('fundraiser_id')
+          .in('fundraiser_id', ids)
+          .eq('paid', true);
+
+        const soldMap = {};
+        for (const s of squares ?? []) {
+          soldMap[s.fundraiser_id] = (soldMap[s.fundraiser_id] ?? 0) + 1;
+        }
+
+        const lines = campaigns.map((c) => {
+          const sold = soldMap[c.id] ?? 0;
+          const drawDate = c.draw_type === 'auto' && c.draw_date
+            ? new Date(c.draw_date).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+            : 'Date to be set';
+          return `- "${c.title}": ${c.status}, ${sold}/${c.grid_size} squares sold at $${parseFloat(c.price_per_sq).toFixed(2)} each, draw ${drawDate}`;
+        });
+
+        organiserContext = `\n\n## Organiser dashboard context\n`
+          + `The person you are talking with is a logged-in campaign organiser. Their campaigns:\n`
+          + lines.join('\n')
+          + `\n\nUse this context if they ask how their campaigns are going, about sales progress, or what to do next. `
+          + `Address them as an organiser running their own campaigns, not as a general visitor.`;
+      }
+    }
+  }
+
+  // Build system prompt: base + optional visitor name + optional page context
   const systemPrompt = [
     SYSTEM_PROMPT,
     visitorName ? `- The person you are talking with appears to be named ${visitorName}. Use their first name naturally and warmly once early in your reply if it fits. Do not repeat it in every message.` : '',
     campaignContext,
+    blogContext,
+    organiserContext,
   ].filter(Boolean).join('\n\n');
 
   try {
