@@ -979,8 +979,13 @@ textarea { font-family: inherit; }
   /* Scratch card: disable lift on touch to avoid sticky hover states */
   .scratch-card:hover { transform: none; }
 
-  /* Cart bar: stack vertically on small screens */
-  .cart-bar { flex-direction: column; gap: 10px; padding: 14px 16px 20px; text-align: center; }
+  /* Cart bar: sticky at bottom of viewport on mobile */
+  .cart-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    border-radius: 16px 16px 0 0;
+    flex-direction: column; gap: 10px; padding: 14px 16px 28px; text-align: center;
+    box-shadow: 0 -4px 24px rgba(0,0,0,.3);
+  }
 }
 
 .beta-campaign-card { transition: box-shadow .15s; cursor: pointer; }

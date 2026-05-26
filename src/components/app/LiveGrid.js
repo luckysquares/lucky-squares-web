@@ -113,9 +113,10 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const drawTriggeredRef = useRef(false);
   const [tick,        setTick]        = useState(0);
   const [optOutStatus, setOptOutStatus] = useState('idle'); // idle | checking | needs_reconfirm | confirmed | dismissed
-  const timerRef  = useRef(null);
-  const prevLen   = useRef(0);
-  const myNumsRef = useRef(new Set());
+  const timerRef     = useRef(null);
+  const prevLen      = useRef(0);
+  const myNumsRef    = useRef(new Set());
+  const lastTapRef   = useRef({}); // debounce map: squareId → timestamp, prevents ghost double-taps on mobile
 
   // Hoisted early so effects below can reference them
   const isOwner = !!onBack;
@@ -233,6 +234,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   };
 
   const toggleSquare = useCallback(async (sq) => {
+    // Debounce: ignore a second tap on the same square within 600ms (mobile ghost-tap prevention)
+    const now = Date.now();
+    if (lastTapRef.current[sq.id] && now - lastTapRef.current[sq.id] < 600) return;
+    lastTapRef.current[sq.id] = now;
+
     if (fundraiser.status === 'draft' || fundraiser.status === 'drawn' || drawnResult !== null) return;
     if (sq.status === 'reserved') { setReservedToast(true); setTimeout(() => setReservedToast(false), 3000); return; }
     if (sq.status === 'taken' || sq.status === 'mine') return;
