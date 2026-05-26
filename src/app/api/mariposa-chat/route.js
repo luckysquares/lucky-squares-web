@@ -273,10 +273,45 @@ export async function POST(request) {
   // The last message in the array is the user's most recent input
   const userMessage = messages[messages.length - 1]?.content ?? '';
 
-  // Append visitor name hint to system prompt when available
-  const systemPrompt = visitorName
-    ? `${SYSTEM_PROMPT}\n\n- The person you are talking with appears to be named ${visitorName}. Use their first name naturally and warmly once early in your reply if it fits. Do not repeat it in every message.`
-    : SYSTEM_PROMPT;
+  // Fetch campaign-specific context if the visitor is on a campaign page
+  const db = getSupabase();
+  let campaignContext = '';
+  if (fundraiserId) {
+    const [{ data: f }, { data: prizes }] = await Promise.all([
+      db.from('fundraisers')
+        .select('title, org, grid_size, price_per_sq, draw_type, draw_date, description')
+        .eq('id', fundraiserId)
+        .single(),
+      db.from('prizes')
+        .select('place, description, value, donated')
+        .eq('fundraiser_id', fundraiserId)
+        .order('sort_order'),
+    ]);
+    if (f) {
+      const drawInfo = f.draw_type === 'auto' && f.draw_date
+        ? new Date(f.draw_date).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+        : 'Date to be announced by the organiser';
+      const prizeInfo = prizes?.length
+        ? prizes.map((p) => `${p.place}: ${p.description}${p.value ? ` (valued at $${p.value})` : ''}${p.donated ? ' (donated)' : ''}`).join('; ')
+        : 'Not yet listed';
+      campaignContext = `\n\n## Campaign the visitor is currently viewing\n`
+        + `Title: ${f.title}\n`
+        + `Organisation: ${f.org}\n`
+        + `Grid: ${f.grid_size} squares at $${parseFloat(f.price_per_sq).toFixed(2)} per square\n`
+        + `Draw: ${drawInfo}\n`
+        + (f.description ? `Description: ${f.description}\n` : '')
+        + `Prizes: ${prizeInfo}\n\n`
+        + `Use these details to answer questions about this specific campaign. `
+        + `If a visitor asks about prizes, price, or the draw, answer from this context rather than giving generic advice.`;
+    }
+  }
+
+  // Build system prompt: base + optional visitor name + optional campaign context
+  const systemPrompt = [
+    SYSTEM_PROMPT,
+    visitorName ? `- The person you are talking with appears to be named ${visitorName}. Use their first name naturally and warmly once early in your reply if it fits. Do not repeat it in every message.` : '',
+    campaignContext,
+  ].filter(Boolean).join('\n\n');
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -304,7 +339,6 @@ export async function POST(request) {
     const reply = data.content?.[0]?.text ?? "Sorry, I couldn't catch that one! Try again?";
 
     // ── Log both sides of the exchange (fire-and-forget) ─────────────────────
-    const db = getSupabase();
     db.from('mariposa_chats').insert([
       { session_id: sessionId, fundraiser_id: fundraiserId, role: 'user',      content: userMessage },
       { session_id: sessionId, fundraiser_id: fundraiserId, role: 'assistant', content: reply       },
