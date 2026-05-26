@@ -2188,7 +2188,17 @@ export default function FundraiseApp() {
           stripe_account_id: data.payment.method === 'stripe' ? (user?.stripeAccountId || null) : null,
         })
         .select().single();
-      if (!error && saved) {
+      if (error) {
+        console.error('handleWizardComplete insert error:', error);
+        if (error.message?.includes('CAMPAIGN_LIMIT_REACHED')) {
+          const planLabel = user?.plan === 'org' ? 'Organisation' : user?.plan === 'casual' ? 'Casual' : 'Trial';
+          const limit     = PLAN_LIMITS[user?.plan ?? 'trial'];
+          alert(`You have reached the ${planLabel} plan limit of ${limit} active campaigns. Please complete or cancel an existing campaign before launching a new one.`);
+          setPhase('dashboard');
+        }
+        return;
+      }
+      if (saved) {
         nf.id = saved.id;
         const prizeRows = data.prizes
           .filter((p) => p.desc)

@@ -71,11 +71,24 @@ export async function POST(req) {
           .filter((p) => !p.donated)
           .reduce((sum, p) => sum + prizeValueToCents(p.value), 0);
 
-        await db.from('fundraisers').update({
+        const { error: activateError } = await db.from('fundraisers').update({
           status:               'active',
           launched_at:          new Date().toISOString(),
           prize_reserve_cents:  prizeReserveCents,
         }).eq('id', fundraiser_id);
+
+        if (activateError) {
+          // Trigger blocked activation (most likely CAMPAIGN_LIMIT_REACHED).
+          // Auto-refund the launch fee so the organiser is not charged.
+          console.error('[webhook] Campaign activation blocked by DB trigger:', activateError.message, 'fundraiser:', fundraiser_id);
+          try {
+            await stripe.refunds.create({ payment_intent: session.payment_intent });
+            console.log('[webhook] Launch fee auto-refunded for fundraiser:', fundraiser_id);
+          } catch (refundErr) {
+            console.error('[webhook] Auto-refund failed:', refundErr.message);
+          }
+          return new Response('ok', { status: 200 });
+        }
 
         // Create one row per square in the squares table so buyers can reserve them.
         // Uses upsert + ignoreDuplicates for idempotency (safe if webhook fires twice).
