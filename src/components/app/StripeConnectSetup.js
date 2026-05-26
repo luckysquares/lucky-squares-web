@@ -117,7 +117,8 @@ export default function StripeConnectSetup({ fundraiserId, onComplete, prefill =
           Setup error: {errMsg}
         </div>
       )}
-      <div ref={containerRef} />
+      {/* Hide Stripe's own success screen once we show ours — avoids duplicate "Account onboarded" */}
+      <div ref={containerRef} style={{ display: status === 'done' ? 'none' : undefined }} />
     </div>
   );
 }
