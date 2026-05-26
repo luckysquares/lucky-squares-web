@@ -22,7 +22,26 @@
     "svix": "^1.94.0"
   },
   "devDependencies": {
+    "critters": "^0.0.23",
     "eslint": "^9",
     "eslint-config-next": "16.2.6"
+  },
+  "browserslist": {
+    "production": [
+      "chrome >= 93",
+      "safari >= 15.4",
+      "firefox >= 92",
+      "edge >= 93",
+      "ios_saf >= 15.4",
+      "samsung >= 17",
+      "not dead",
+      "not ie 11",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

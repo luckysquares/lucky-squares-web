@@ -9,6 +9,16 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+    // Serve modern formats (AVIF/WebP) and limit the device-size ladder
+    // so Next.js doesn't generate unnecessarily large variants.
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [390, 640, 828, 1080, 1200, 1920],
+    imageSizes:  [32, 64, 128, 176, 256],
+  },
+  experimental: {
+    // Inline critical CSS to eliminate the render-blocking CSS chain that
+    // Lighthouse flags as adding ~500 ms to the critical path on mobile.
+    optimizeCss: true,
   },
   async headers() {
     return [

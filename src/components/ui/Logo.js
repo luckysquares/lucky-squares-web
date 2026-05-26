@@ -13,9 +13,10 @@ export default function Logo({ size = 44, dark = false, priority = false }) {
     <Image
       src="/lucky-squares-logo.png"
       alt="Lucky Squares Australia"
-      width={1600}
-      height={800}
+      width={400}
+      height={200}
       priority={priority}
+      sizes={`${Math.round(size * 2)}px`}
       style={{ width: 'auto', height: size, display: 'block', objectFit: 'contain' }}
     />
   );
