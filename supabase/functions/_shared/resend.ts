@@ -1,4 +1,4 @@
-export const FROM_EMAIL    = 'noreply@luckysquares.com.au';
+export const FROM_EMAIL    = 'Lucky Squares <noreply@luckysquares.com.au>';
 export const SUPPORT_EMAIL = 'support@luckysquares.com.au';
 export const ADMIN_EMAIL   = 'jwstott@me.com';
 
@@ -104,5 +104,8 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
   if (!res.ok) {
     const err = await res.text();
     console.error(`[email] Resend error (${res.status}): ${err}`);
+  } else {
+    const result = await res.json();
+    console.log(`[email] Sent — id: ${result?.id} to: ${payload.to} subject: ${payload.subject}`);
   }
 }

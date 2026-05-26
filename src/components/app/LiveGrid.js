@@ -417,11 +417,15 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
 
     // Fire-and-forget: emails to organiser + all buyers, Stripe prize-reserve
     // transfer. Silent fail — draw result is already saved in the DB.
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (supabaseUrl) {
+    const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (supabaseUrl && supabaseAnon) {
       fetch(`${supabaseUrl}/functions/v1/draw-notification`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${supabaseAnon}`,
+        },
         body: JSON.stringify({ fundraiser_id: fundraiser.id }),
       }).catch(() => {});
     }
