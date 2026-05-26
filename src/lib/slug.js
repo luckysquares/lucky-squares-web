@@ -1,10 +1,6 @@
 /**
- * Generate a human-readable URL slug for a campaign.
- *
- * Format: {title-kebab}-{year}-{4-char-random}
- * e.g.  sunbury-primary-pandc-2025-k4m2
- *
- * The 4-char random suffix guarantees uniqueness without a DB round-trip.
+ * Generate the base slug for a campaign: title-kebab-year
+ * e.g. "Sunbury Primary P&C Fundraiser 2025" → "sunbury-primary-pc-fundraiser-2025"
  */
 export function generateCampaignSlug(title) {
   const base = (title || '')
@@ -13,10 +9,31 @@ export function generateCampaignSlug(title) {
     .trim()
     .replace(/\s+/g, '-')        // spaces to hyphens
     .replace(/-+/g, '-')         // collapse double-hyphens
-    .slice(0, 48);               // keep it reasonable
+    .slice(0, 50);
 
-  const year   = new Date().getFullYear();
-  const suffix = Math.random().toString(36).slice(2, 6); // 4-char a-z0-9
+  const year = new Date().getFullYear();
+  return base ? `${base}-${year}` : `campaign-${year}`;
+}
 
-  return base ? `${base}-${year}-${suffix}` : `campaign-${year}-${suffix}`;
+// Collision suffixes: first attempt is clean, then -b, -c, -d …
+const SUFFIXES = ['', '-b', '-c', '-d', '-e', '-f', '-g', '-h', '-i', '-j'];
+
+/**
+ * Return a slug that doesn't already exist in the fundraisers table.
+ * Checks each candidate in order and returns the first free one.
+ * Extremely unlikely to exhaust all suffixes in practice.
+ */
+export async function resolveUniqueSlug(title, supabase) {
+  const base = generateCampaignSlug(title);
+  for (const suffix of SUFFIXES) {
+    const candidate = base + suffix;
+    const { data } = await supabase
+      .from('fundraisers')
+      .select('id')
+      .eq('slug', candidate)
+      .maybeSingle();
+    if (!data) return candidate;
+  }
+  // Absolute fallback — should never be reached
+  return `${base}-${Date.now()}`;
 }

@@ -10,7 +10,7 @@ import LiveGrid from '@/components/app/LiveGrid';
 import StripeConnectSetup from '@/components/app/StripeConnectSetup';
 import MemberBadge from '@/components/app/MemberBadge';
 import SurveyModal from '@/components/app/SurveyModal';
-import { generateCampaignSlug } from '@/lib/slug';
+import { resolveUniqueSlug } from '@/lib/slug';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -2189,7 +2189,7 @@ export default function FundraiseApp() {
           bank_bsb: sanitize(data.payment.bsb) || null, bank_account: sanitize(data.payment.account) || null,
           fundraiser_type: data.fundraiserType || 'individual',
           org_id: orgId,
-          slug: generateCampaignSlug(nf.title),
+          slug: await resolveUniqueSlug(nf.title, getSupabaseClient()),
           // Link user-level Stripe account for free stripe launches (paid path uses handleLaunchPay)
           stripe_account_id: data.payment.method === 'stripe' ? (user?.stripeAccountId || null) : null,
         })
@@ -2407,7 +2407,7 @@ export default function FundraiseApp() {
         bank_account:      sanitize(data.payment.account) || null,
         fundraiser_type:   data.fundraiserType || 'individual',
         org_id:            orgId,
-        slug:              generateCampaignSlug(sanitize(data.campaign.title || 'New Fundraiser')),
+        slug:              await resolveUniqueSlug(sanitize(data.campaign.title || 'New Fundraiser'), db),
         // Link user-level Stripe account (set when payment.method === 'stripe' and skip-bankPhase)
         stripe_account_id: data.payment.method === 'stripe' ? (user?.stripeAccountId || null) : null,
       }).select().single();
