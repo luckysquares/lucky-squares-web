@@ -882,7 +882,7 @@ function CampaignReport({ fundraiser, onBack }) {
 
 const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
 
-function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false, userPrefill = null }) {
+function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false, userPrefill = null, stripeOnboardingComplete = false, onBankConnectDone = null }) {
   const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
 
   const [step,            setStep]            = useState(savedDraft?.step ?? 0);
@@ -1825,7 +1825,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                   Save as draft
                 </button>
                 <button className="btn btn-primary btn-lg" disabled={!canNext()} onClick={() => {
-                  if (isStripePayment && !user?.stripeOnboardingComplete) {
+                  if (isStripePayment && !stripeOnboardingComplete) {
                     setStep(BANK_STEP);
                   } else {
                     // Already onboarded or non-stripe: skip straight to Launch
@@ -1839,9 +1839,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
               <button className="btn btn-primary" disabled={!canNext()} onClick={async () => {
                 if (step === PAYMENT_STEP && ['bank', 'bank_inperson'].includes(payment.method)) { setPaymentConfirming(true); return; }
                 // Leaving the bank connect step: refresh user profile so stripeOnboardingComplete is up to date
-                if (step === BANK_STEP && user?.id) {
-                  const { stripeAccountId, stripeOnboardingComplete } = await fetchProfile(user.id);
-                  setUser((prev) => prev ? { ...prev, stripeAccountId, stripeOnboardingComplete } : prev);
+                if (step === BANK_STEP) {
+                  await onBankConnectDone?.();
                 }
                 setStep((s) => s + 1);
               }}>Next →</button>
@@ -2430,7 +2429,7 @@ export default function FundraiseApp() {
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false} onBankConnectDone={async () => { if (user?.id) { const p = await fetchProfile(user.id); setUser((prev) => prev ? { ...prev, stripeAccountId: p.stripeAccountId, stripeOnboardingComplete: p.stripeOnboardingComplete } : prev); } }} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Referral prompt modal */}
