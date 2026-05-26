@@ -194,6 +194,15 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
       .catch(() => setOptOutStatus('idle'));
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Dismiss the square info popover when the user scrolls — it's position: fixed
+  // so it stays put while the grid moves, which looks broken.
+  useEffect(() => {
+    if (!hoveredSq) return;
+    const dismiss = () => { setHoveredSq(null); setHoveredRect(null); };
+    window.addEventListener('scroll', dismiss, { passive: true, once: true });
+    return () => window.removeEventListener('scroll', dismiss);
+  }, [hoveredSq]);
+
   useEffect(() => {
     clearInterval(timerRef.current);
     if (cart.length === 0 || timerPaused) return;
@@ -1052,20 +1061,26 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                     const dy = Math.abs(t.clientY - touchStartPos.current.y);
                     if (dx > 8 || dy > 8) return; // scroll/swipe — not a tap
                     lastTouchTime.current = Date.now();
+                    // On drawn grid or sponsored squares: tap toggles the info popover.
+                    if ((isDrawn && isSold) || isSponsored) {
+                      if (hoveredSq?.id === sq.id) {
+                        setHoveredSq(null); setHoveredRect(null);
+                      } else if (sq.owner || isSponsored) {
+                        setHoveredSq(sq); setHoveredRect(e.currentTarget.getBoundingClientRect());
+                      }
+                      return;
+                    }
                     toggleSquare(sq);
                   }}
                   onClick={() => {
                     if (Date.now() - lastTouchTime.current < 500) return; // already handled by touch
                     toggleSquare(sq);
                   }}
-                  onMouseEnter={isSold && sq.owner && !isSponsored ? (e) => { setHoveredSq(sq); setHoveredRect(e.currentTarget.getBoundingClientRect()); } : undefined}
-                  onMouseLeave={isSold && !isSponsored ? () => { setHoveredSq(null); setHoveredRect(null); } : undefined}
+                  onMouseEnter={(isSold && sq.owner) || isSponsored ? (e) => { setHoveredSq(sq); setHoveredRect(e.currentTarget.getBoundingClientRect()); } : undefined}
+                  onMouseLeave={(isSold && sq.owner) || isSponsored ? () => { setHoveredSq(null); setHoveredRect(null); } : undefined}
                 >
                   {isSponsored ? (
-                    <>
-                      <span className="sq-num">{sq.id}</span>
-                      <span className="sq-tooltip">A gift from us 🍀 We bought this square as our way of saying we love your cause</span>
-                    </>
+                    <span className="sq-num">{sq.id}</span>
                   ) : isWinner ? (
                     <>
                       <span style={{ fontSize: 11, lineHeight: 1 }}>{['🥇','🥈','🥉'][winnerIdx] ?? '🏅'}</span>
@@ -1303,17 +1318,45 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
       </div>
 
       {hoveredSq && hoveredRect && (() => {
-        const size = hoveredRect.width * 2;
-        const left = hoveredRect.left + hoveredRect.width / 2 - size / 2;
-        const top  = hoveredRect.top  + hoveredRect.height / 2 - size / 2;
-        const bg   = hoveredSq.status === 'mine' ? '#D4F5E9' : '#F0EDE5';
-        const bc   = hoveredSq.status === 'mine' ? 'var(--green)' : '#DDD5C0';
-        const col  = hoveredSq.status === 'mine' ? '#007A5C' : 'var(--muted)';
+        const size    = hoveredRect.width * 2;
+        const rawLeft = hoveredRect.left + hoveredRect.width / 2 - size / 2;
+        const rawTop  = hoveredRect.top  + hoveredRect.height / 2 - size / 2;
+        // Clamp to viewport so the popover never overflows any edge.
+        const pad  = 8;
+        const vpW  = typeof window !== 'undefined' ? window.innerWidth  : 600;
+        const vpH  = typeof window !== 'undefined' ? window.innerHeight : 800;
+        const left = Math.max(pad, Math.min(rawLeft, vpW - size - pad));
+        const top  = Math.max(pad, Math.min(rawTop,  vpH - size - pad));
+
+        const isHovWinner   = winnerNums.includes(hoveredSq.id);
+        const isHovSponsored = hoveredSq.isSponsored;
+
+        const bg  = isHovSponsored ? '#1A3C2E'
+                  : isHovWinner || hoveredSq.status === 'mine' ? '#D4F5E9'
+                  : '#F0EDE5';
+        const bc  = isHovSponsored ? '#2D6A4F'
+                  : isHovWinner || hoveredSq.status === 'mine' ? 'var(--green)'
+                  : '#DDD5C0';
+        const col = isHovSponsored ? '#fff'
+                  : isHovWinner || hoveredSq.status === 'mine' ? '#007A5C'
+                  : 'var(--muted)';
         return (
           <div style={{ position: 'fixed', left, top, width: size, height: size, zIndex: 9999, pointerEvents: 'none', background: bg, border: `2px solid ${bc}`, borderRadius: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, boxShadow: '0 6px 24px rgba(0,0,0,.18)' }}>
-            <span style={{ fontSize: 20, fontWeight: 900, color: col, fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{hoveredSq.id}</span>
-            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.2, textTransform: 'uppercase', color: col, opacity: .6, lineHeight: 1 }}>SOLD</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: col, lineHeight: 1 }}>{abbrevName(hoveredSq.owner)}</span>
+            {isHovSponsored ? (
+              <>
+                <span style={{ fontSize: 16, lineHeight: 1 }}>🍀</span>
+                <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase', color: '#9FD4B8', lineHeight: 1 }}>GIFT</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1 }}>Lucky Squares</span>
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize: 20, fontWeight: 900, color: col, fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{hoveredSq.id}</span>
+                <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: 1.2, textTransform: 'uppercase', color: col, opacity: isHovWinner ? 1 : .6, lineHeight: 1 }}>
+                  {isHovWinner ? '🏆 WINNER' : 'SOLD'}
+                </span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: col, lineHeight: 1 }}>{abbrevName(hoveredSq.owner)}</span>
+              </>
+            )}
           </div>
         );
       })()}
