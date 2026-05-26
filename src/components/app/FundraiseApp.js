@@ -9,6 +9,7 @@ import { containsProfanity } from '@/lib/profanity';
 import LiveGrid from '@/components/app/LiveGrid';
 import StripeConnectSetup from '@/components/app/StripeConnectSetup';
 import MemberBadge from '@/components/app/MemberBadge';
+import SurveyModal from '@/components/app/SurveyModal';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -1915,6 +1916,7 @@ export default function FundraiseApp() {
   const [suspension,        setSuspension]        = useState(null); // null | { suspended: true, reason }
   const [orgInfo,           setOrgInfo]           = useState(null); // null | { role, org_user_id, org_name }
   const [bankConnectId,     setBankConnectId]     = useState(null);
+  const [surveyFundraiserId, setSurveyFundraiserId] = useState(null);
 
   // Call the transactional-email Edge Function (fire-and-forget)
   const sendTxEmail = useCallback((type, to, data) => {
@@ -2099,6 +2101,8 @@ export default function FundraiseApp() {
   const handleDrawComplete = useCallback(async (fundraiserId) => {
     setFundraisers((prev) => prev.map((f) => f.id === fundraiserId ? { ...f, status: 'drawn' } : f));
     setActiveFundraiser((prev) => prev?.id === fundraiserId ? { ...prev, status: 'drawn' } : prev);
+    // Show post-draw survey after a short delay so the draw result settles first
+    setTimeout(() => setSurveyFundraiserId(fundraiserId), 2000);
     // Re-fetch profile so Foundation Member badge appears immediately after a successful draw
     if (user?.id) {
       const prevWasFoundingMember = user.isFoundingMember;
@@ -2468,6 +2472,15 @@ export default function FundraiseApp() {
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
       {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false} onBankConnectDone={async () => { if (user?.id) { const p = await fetchProfile(user.id); setUser((prev) => prev ? { ...prev, stripeAccountId: p.stripeAccountId, stripeOnboardingComplete: p.stripeOnboardingComplete } : prev); } }} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
+
+      {/* Post-draw survey modal */}
+      {surveyFundraiserId && (
+        <SurveyModal
+          fundraiserId={surveyFundraiserId}
+          ownerId={user?.id}
+          onDismiss={() => setSurveyFundraiserId(null)}
+        />
+      )}
 
       {/* Referral prompt modal */}
       {showReferralModal && referralInfo?.referral_code && (
