@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Squares Beta Test Checklist</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    color: #1A1209;
+    background: #F5F3EE;
+    padding: 24px 20px 60px;
+    line-height: 1.5;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1.5px solid #E5E0D5;
+    border-radius: 12px;
+    padding: 36px 44px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    border-bottom: 2px solid #E5E0D5;
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+  }
+  .header-logo { font-size: 28px; display: block; margin-bottom: 4px; }
+  .header-brand { font-size: 17px; font-weight: 900; letter-spacing: -0.5px; color: #1A1209; }
+  .header-sub { font-size: 9px; font-weight: 700; color: #9C8060; letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+  .header-title { font-size: 22px; font-weight: 900; color: #7C3AED; margin: 14px 0 4px; letter-spacing: -0.5px; }
+  .header-desc { font-size: 11px; color: #6B7280; }
+
+  /* Setup box */
+  .setup {
+    background: #FEF3C7;
+    border: 1.5px solid #FDE68A;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 22px;
+    font-size: 10.5px;
+    color: #78350F;
+    line-height: 1.6;
+  }
+  .setup strong { font-weight: 800; display: block; margin-bottom: 4px; font-size: 11px; }
+  .setup code {
+    font-family: monospace;
+    background: rgba(0,0,0,.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10.5px;
+  }
+
+  /* Section */
+  .section { margin-bottom: 20px; break-inside: avoid; }
+  .section-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: #7C3AED;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 5px 10px;
+    background: #F5F0FF;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    border-left: 3px solid #7C3AED;
+  }
+
+  /* Items */
+  .items { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .items.single { grid-template-columns: 1fr; }
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    color: #1A1209;
+    line-height: 1.4;
+  }
+  .item:hover { background: #F5F3EE; }
+  .checkbox {
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid #9C8060;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    background: #fff;
+  }
+  .item-note {
+    font-size: 9.5px;
+    color: #9C8060;
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* Sub-labels within a section */
+  .sub-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: #9C8060;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    grid-column: 1 / -1;
+    padding: 6px 6px 2px;
+    border-bottom: 1px solid #F0EAE0;
+    margin-bottom: 2px;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 28px;
+    padding-top: 14px;
+    border-top: 1px solid #E5E0D5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9.5px;
+    color: #9C8060;
+  }
+  .footer-brand { font-weight: 700; color: #7C3AED; }
+
+  /* Print button */
+  .print-btn {
+    display: block;
+    margin: 24px auto 0;
+    max-width: 780px;
+    background: #7C3AED;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 24px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+  }
+  .print-btn:hover { background: #6D28D9; }
+
+  /* Print */
+  @page { size: A4 portrait; margin: 10mm; }
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: #F5F3EE; padding: 0; font-size: 9.5px; }
+    .page { border-radius: 6px; padding: 22px 28px; max-width: 100%; border: 1px solid #E5E0D5; }
+    .header { padding-bottom: 12px; margin-bottom: 16px; }
+    .header-logo { font-size: 22px; }
+    .header-brand { font-size: 14px; }
+    .header-title { font-size: 18px; margin: 10px 0 3px; }
+    .setup { padding: 9px 12px; margin-bottom: 14px; font-size: 9px; }
+    .section { margin-bottom: 13px; }
+    .section-title { font-size: 8.5px; padding: 3px 8px; margin-bottom: 5px; }
+    .item { font-size: 9px; padding: 2px 4px; gap: 5px; }
+    .checkbox { width: 11px; height: 11px; }
+    .sub-label { font-size: 8px; padding: 4px 4px 2px; }
+    .item-note { font-size: 8.5px; }
+    .footer { margin-top: 16px; padding-top: 10px; font-size: 8.5px; }
+    .print-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <span class="header-logo">🍀</span>
+    <div class="header-brand">Lucky Squares</div>
+    <div class="header-sub">Australia</div>
+    <div class="header-title">Beta Test Checklist</div>
+    <div class="header-desc">Full site walkthrough before inviting beta testers</div>
+  </div>
+
+  <!-- Setup -->
+  <div class="setup">
+    <strong>Before you start</strong>
+    Use <code>/betatest</code> to get Stripe test card details &nbsp;|&nbsp;
+    Test card: <code>4242 4242 4242 4242</code> — any future expiry, any CVC &nbsp;|&nbsp;
+    Have two browser profiles ready: one admin, one fresh buyer &nbsp;|&nbsp;
+    Have a real email address handy to check transactional emails
+  </div>
+
+  <!-- 1. Marketing pages -->
+  <div class="section">
+    <div class="section-title">1. Marketing pages (logged out)</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>Home page (/) — all sections render, CTAs work</div>
+      <div class="item"><div class="checkbox"></div>How it works (/how-it-works)</div>
+      <div class="item"><div class="checkbox"></div>Pricing (/pricing) — fee shows as 1.7% + 30c</div>
+      <div class="item"><div class="checkbox"></div>FAQ (/faq)</div>
+      <div class="item"><div class="checkbox"></div>Blog index (/blog) — posts listed</div>
+      <div class="item"><div class="checkbox"></div>Blog post (/blog/[slug]) — individual post loads</div>
+      <div class="item"><div class="checkbox"></div>Fair play (/fair-play)</div>
+      <div class="item"><div class="checkbox"></div>Raffle compliance (/raffle-compliance)</div>
+      <div class="item"><div class="checkbox"></div>Contact (/contact) — form submits</div>
+      <div class="item"><div class="checkbox"></div>Privacy, Terms, Participant terms</div>
+      <div class="item"><div class="checkbox"></div>Footer links — no 404s</div>
+      <div class="item"><div class="checkbox"></div>Nav links all work</div>
+    </div>
+  </div>
+
+  <!-- 2. Auth -->
+  <div class="section">
+    <div class="section-title">2. Authentication</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>Sign up with email — confirmation email arrives</div>
+      <div class="item"><div class="checkbox"></div>Log in with email and password</div>
+      <div class="item"><div class="checkbox"></div>Forgot password — reset email arrives, password updates</div>
+      <div class="item"><div class="checkbox"></div>Log out</div>
+      <div class="item"><div class="checkbox"></div>Protected routes redirect when logged out (/app, /fundraise)</div>
+      <div class="item"><div class="checkbox"></div>Logged-in routes redirect when already authed (/login)</div>
+    </div>
+  </div>
+
+  <!-- 3. Campaign creation -->
+  <div class="section">
+    <div class="section-title">3. Organiser: campaign creation</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>/fundraise loads for logged-in user</div>
+      <div class="item"><div class="checkbox"></div>Create campaign — fill all fields (title, org, grid, price, draw type, date)</div>
+      <div class="item"><div class="checkbox"></div>Add prizes — at least one cash, one donated</div>
+      <div class="item"><div class="checkbox"></div>Save as draft — appears in dashboard</div>
+      <div class="item"><div class="checkbox"></div>Edit draft — fields update correctly</div>
+      <div class="item"><div class="checkbox"></div>Launch campaign — Stripe checkout opens for platform fee</div>
+      <div class="item"><div class="checkbox"></div>Pay platform fee with test card</div>
+      <div class="item"><div class="checkbox"></div>Campaign status changes to active after payment</div>
+      <div class="item"><div class="checkbox"></div>Campaign page /f/[id] publicly accessible after launch</div>
+      <div class="item"><div class="checkbox"></div>Campaign launch notification email sent (if followers)</div>
+    </div>
+  </div>
+
+  <!-- 4. Buyer experience -->
+  <div class="section">
+    <div class="section-title">4. Buyer: purchasing squares</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>Grid loads and displays correctly</div>
+      <div class="item"><div class="checkbox"></div>Available squares are selectable</div>
+      <div class="item"><div class="checkbox"></div>Multiple square selection works</div>
+      <div class="item"><div class="checkbox"></div>Buyer details form (name, email, phone)</div>
+      <div class="item"><div class="checkbox"></div>Square price and transaction fee calculated correctly</div>
+      <div class="item"><div class="checkbox"></div>Stripe checkout opens and completes</div>
+      <div class="item"><div class="checkbox"></div>Buyer confirmation email arrives with square numbers</div>
+      <div class="item"><div class="checkbox"></div>Purchased squares show as sold on grid</div>
+      <div class="item"><div class="checkbox"></div>First-sale notification arrives at organiser email</div>
+      <div class="item"><div class="checkbox"></div>Buying an already-sold square is blocked</div>
+    </div>
+  </div>
+
+  <!-- 5. Draw -->
+  <div class="section">
+    <div class="section-title">5. Organiser: running the draw</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>Dashboard shows sold count and revenue correctly</div>
+      <div class="item"><div class="checkbox"></div>Draw cannot be run on a non-active campaign</div>
+      <div class="item"><div class="checkbox"></div>Run draw — winners assigned to prizes</div>
+      <div class="item"><div class="checkbox"></div>Winner notification emails arrive at buyer addresses</div>
+      <div class="item"><div class="checkbox"></div>Campaign status changes to drawn</div>
+      <div class="item"><div class="checkbox"></div>Certificate (/f/[id]/certificate) loads as standalone — no site nav or footer</div>
+      <div class="item"><div class="checkbox"></div>Certificate shows correct details, winners, financial summary</div>
+      <div class="item"><div class="checkbox"></div>Print to PDF — full colour, single A4 page, no second page</div>
+      <div class="item"><div class="checkbox"></div>Poster page (/f/[id]/poster) loads</div>
+      <div class="item"><div class="checkbox"></div>Claim prize page (/claim-prize/[token]) loads and records claim</div>
+    </div>
+  </div>
+
+  <!-- 6. Org portal -->
+  <div class="section">
+    <div class="section-title">6. Organisation portal</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>/org-signup — submit an application</div>
+      <div class="item"><div class="checkbox"></div>Admin sees application as pending in /admin/organisations</div>
+      <div class="item"><div class="checkbox"></div>Admin approves — approval email arrives with portal link</div>
+      <div class="item"><div class="checkbox"></div>Admin rejects — rejection email arrives</div>
+      <div class="item"><div class="checkbox"></div>Approved user can access /org/dashboard</div>
+      <div class="item"><div class="checkbox"></div>Org dashboard — stats and recent campaigns visible</div>
+      <div class="item"><div class="checkbox"></div>/org/campaigns — list with filters works</div>
+      <div class="item"><div class="checkbox"></div>/org/members — invite member by email, invite email arrives</div>
+      <div class="item"><div class="checkbox"></div>Member accepts invite (/invite/[token]) and gains access</div>
+      <div class="item"><div class="checkbox"></div>Revoke member — access removed</div>
+      <div class="item"><div class="checkbox"></div>/org/reporting — fill rate and totals correct</div>
+      <div class="item"><div class="checkbox"></div>/org/settings — save org profile (name, ABN, address)</div>
+      <div class="item"><div class="checkbox"></div>Non-org user cannot access /org (blocked)</div>
+    </div>
+  </div>
+
+  <!-- 7. Admin portal -->
+  <div class="section">
+    <div class="section-title">7. Admin portal</div>
+    <div class="items">
+      <div class="sub-label">Core</div>
+      <div class="item"><div class="checkbox"></div>/admin/dashboard — summary stats load</div>
+      <div class="item"><div class="checkbox"></div>/admin/campaigns — list, filters, status updates</div>
+      <div class="item"><div class="checkbox"></div>/admin/users — list loads, search works</div>
+      <div class="item"><div class="checkbox"></div>/admin/reporting — revenue figures visible</div>
+      <div class="item"><div class="checkbox"></div>Non-admin user blocked from /admin</div>
+      <div class="item"><div class="checkbox"></div>/admin/coupons — create and deactivate a coupon</div>
+      <div class="sub-label">Support</div>
+      <div class="item"><div class="checkbox"></div>Ticket list loads, select opens conversation thread</div>
+      <div class="item"><div class="checkbox"></div>Reply to customer — thread updates</div>
+      <div class="item"><div class="checkbox"></div>Internal note — marked differently, not sent to customer</div>
+      <div class="item"><div class="checkbox"></div>Change status, priority, category</div>
+      <div class="item"><div class="checkbox"></div>Close ticket</div>
+      <div class="item"><div class="checkbox"></div>Merge ticket</div>
+      <div class="item"><div class="checkbox"></div>Canned responses tab — Load default responses seeds all 25</div>
+      <div class="item"><div class="checkbox"></div>Canned dropdown — search works, inserts with customer name</div>
+      <div class="item"><div class="checkbox"></div>Metrics tab shows numbers</div>
+      <div class="sub-label">Error logs</div>
+      <div class="item"><div class="checkbox"></div>/admin/errors — log list loads, summary chips show counts</div>
+      <div class="item"><div class="checkbox"></div>Search, level filter, source filter, date range all work</div>
+      <div class="item"><div class="checkbox"></div>Expand row — stack trace and metadata visible</div>
+      <div class="item"><div class="checkbox"></div>Mark as resolved / reopen</div>
+      <div class="sub-label">Other admin sections</div>
+      <div class="item"><div class="checkbox"></div>/admin/waitlist — entries visible</div>
+      <div class="item"><div class="checkbox"></div>/admin/invites</div>
+      <div class="item"><div class="checkbox"></div>/admin/emails — email log loads</div>
+      <div class="item"><div class="checkbox"></div>/admin/blog — create and edit a blog post</div>
+    </div>
+  </div>
+
+  <!-- 8. Transactional emails -->
+  <div class="section">
+    <div class="section-title">8. Transactional emails — confirm all arrive and are correctly formatted</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>Buyer purchase confirmation</div>
+      <div class="item"><div class="checkbox"></div>Organiser first-sale notification</div>
+      <div class="item"><div class="checkbox"></div>Winner notification</div>
+      <div class="item"><div class="checkbox"></div>Campaign launch notification (to followers)</div>
+      <div class="item"><div class="checkbox"></div>Support ticket reply to customer</div>
+      <div class="item"><div class="checkbox"></div>Ticket close / satisfaction survey</div>
+      <div class="item"><div class="checkbox"></div>Org application approved (with portal link)</div>
+      <div class="item"><div class="checkbox"></div>Org application rejected</div>
+      <div class="item"><div class="checkbox"></div>Password reset</div>
+    </div>
+  </div>
+
+  <!-- 9. Edge cases -->
+  <div class="section">
+    <div class="section-title">9. Edge cases and error handling</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>Non-existent campaign /f/fake-id — 404 shown</div>
+      <div class="item"><div class="checkbox"></div>Certificate for non-drawn campaign — 404 shown</div>
+      <div class="item"><div class="checkbox"></div>Double-purchase guard — refund fires if square already sold</div>
+      <div class="item"><div class="checkbox"></div>Contact form — submits without 500 error</div>
+      <div class="item"><div class="checkbox"></div>Unsubscribe link (/unsubscribe) works</div>
+    </div>
+  </div>
+
+  <!-- 10. Mobile -->
+  <div class="section">
+    <div class="section-title">10. Mobile (phone or browser DevTools)</div>
+    <div class="items">
+      <div class="item"><div class="checkbox"></div>Home page renders correctly</div>
+      <div class="item"><div class="checkbox"></div>Campaign grid — squares selectable on touch</div>
+      <div class="item"><div class="checkbox"></div>Checkout flow completes on mobile</div>
+      <div class="item"><div class="checkbox"></div>Organiser dashboard usable on mobile</div>
+      <div class="item"><div class="checkbox"></div>Admin portal — basic usability on mobile</div>
+    </div>
+  </div>
+
+  <!-- 11. Pre-launch reminders -->
+  <div class="section">
+    <div class="section-title">11. Leave these until after beta — pre-launch checklist</div>
+    <div class="items single">
+      <div class="item"><div class="checkbox"></div>Remove /betatest page before public launch</div>
+      <div class="item"><div class="checkbox"></div>Switch Stripe from test mode to live mode</div>
+      <div class="item"><div class="checkbox"></div>Confirm NEXT_PUBLIC_SITE_PHASE is set correctly for launch</div>
+      <div class="item"><div class="checkbox"></div>Review and update beta-locked routes (BETA_LOCKED in middleware)</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>
+      <span class="footer-brand">Lucky Squares Australia</span><br>
+      Beta test checklist — generated 24 May 2026
+    </div>
+    <div style="text-align:right">
+      luckysquares.com.au
+    </div>
+  </div>
+
+</div>
+
+<button class="print-btn" onclick="window.print()">Save as PDF / Print</button>
+
+</body>
+</html>

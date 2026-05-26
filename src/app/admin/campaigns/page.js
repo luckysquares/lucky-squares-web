@@ -310,7 +310,7 @@ export default function AdminCampaigns() {
                         <button className="btn btn-outline btn-sm" onClick={() => openBuyModal(c)}>🍀 Gift square</button>
                       )}
                       {c.status === 'drawn' && (
-                        <a href={`/f/${c.id}/certificate`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm" style={{ textDecoration: 'none' }}>📜 Certificate</a>
+                        <a href={`/${c.slug ?? c.id}/certificate`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm" style={{ textDecoration: 'none' }}>📜 Certificate</a>
                       )}
                       <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...c })}>Edit</button>
                       {c.status === 'active' && (

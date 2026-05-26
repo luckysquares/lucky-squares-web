@@ -4,6 +4,8 @@ import PrintButton from './PrintButton';
 
 export const dynamic = 'force-dynamic';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function fmtAud(cents) {
   return (cents / 100).toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
 }
@@ -28,35 +30,38 @@ export async function generateMetadata() {
 }
 
 export default async function CertificatePage({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
   const db = getAdminClient();
+  const col = UUID_RE.test(slug) ? 'id' : 'slug';
 
   const { data: fundraiser, error: frErr } = await db
     .from('fundraisers')
     .select('id, title, org, status, grid_size, price_per_sq, launched_at, draw_date, contact_name, payment_method, prize_reserve_cents')
-    .eq('id', id)
+    .eq(col, slug)
     .single();
 
   if (frErr || !fundraiser || fundraiser.status !== 'drawn') {
     notFound();
   }
 
+  const fundraiserId = fundraiser.id;
+
   const { count: soldCount } = await db
     .from('squares')
     .select('id', { count: 'exact', head: true })
-    .eq('fundraiser_id', id)
+    .eq('fundraiser_id', fundraiserId)
     .eq('paid', true);
 
   const { data: prizes } = await db
     .from('prizes')
     .select('place, description, value, donated, sort_order')
-    .eq('fundraiser_id', id)
+    .eq('fundraiser_id', fundraiserId)
     .order('sort_order', { ascending: true });
 
   const { data: claims } = await db
     .from('prize_claims')
     .select('place, buyer_name, prize_description, status')
-    .eq('fundraiser_id', id);
+    .eq('fundraiser_id', fundraiserId);
 
   const claimByPlace = {};
   for (const c of claims ?? []) claimByPlace[c.place] = c;
@@ -67,7 +72,7 @@ export default async function CertificatePage({ params }) {
   const soldFraction = fundraiser.grid_size > 0
     ? Math.round(((soldCount || 0) / fundraiser.grid_size) * 100)
     : 0;
-  const certId       = `CERT-${id.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
+  const certId       = `CERT-${fundraiserId.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
   const issuedAt     = new Date().toISOString();
   const activePrizes = (prizes ?? []).filter((p) => p.description);
 
@@ -103,15 +108,9 @@ export default async function CertificatePage({ params }) {
     /* ── Print: single A4 page, full colour ───────────────────────── */
     @page{size:A4 portrait;margin:12mm}
     @media print{
-      /* Preserve all background colours and images exactly as on screen */
       *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-      /* Hide everything except the certificate — catches any injected
-         widgets, analytics, or layout chrome that could overflow */
       body>*{display:none!important}
       body>.cert-page{display:block!important}
-      /* Let the content be its natural height — no forced min-height that
-         could overflow Safari's reduced content area when headers/footers
-         are enabled. page-break-inside:avoid keeps the cert in one piece. */
       html,body{min-height:0!important;overflow:visible!important}
       .cert-page{background:#F5F3EE;padding:0;min-height:0}
       .cert{box-shadow:none;border-radius:8px;padding:28px 38px;max-width:100%;margin:0;page-break-inside:avoid;break-inside:avoid}

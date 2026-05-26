@@ -11,6 +11,7 @@ import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 function dbToFundraiser(row, prizes = []) {
   return {
     id:              row.id,
+    slug:            row.slug,
     title:           row.title,
     org:             row.org,
     description:     row.description || '',
@@ -96,7 +97,7 @@ function HamburgerMenu() {
 const CLUB_MODE_PAYMENT_METHODS = ['inperson', 'bank', 'bank_inperson'];
 
 export default function PublicFundraiserPage({ params }) {
-  const { id } = use(params);
+  const { slug } = use(params);
   const [fundraiser,   setFundraiser]   = useState(null);
   const [loading,      setLoading]      = useState(true);
   const [notFound,     setNotFound]     = useState(false);
@@ -105,13 +106,13 @@ export default function PublicFundraiserPage({ params }) {
 
   // Initialise Club Mode from localStorage after mount
   useEffect(() => {
-    try { setClubMode(localStorage.getItem(`ls_clubmode_${id}`) === '1'); } catch {}
-  }, [id]);
+    try { setClubMode(localStorage.getItem(`ls_clubmode_${slug}`) === '1'); } catch {}
+  }, [slug]);
 
   const toggleClubMode = () => {
     setClubMode((prev) => {
       const next = !prev;
-      try { localStorage.setItem(`ls_clubmode_${id}`, next ? '1' : '0'); } catch {}
+      try { localStorage.setItem(`ls_clubmode_${slug}`, next ? '1' : '0'); } catch {}
       return next;
     });
   };
@@ -121,9 +122,9 @@ export default function PublicFundraiserPage({ params }) {
     const supabase = getSupabaseClient();
     // Resolve by UUID (existing campaigns) or slug (new human-readable URLs)
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const col = UUID_RE.test(id) ? 'id' : 'slug';
+    const col = UUID_RE.test(slug) ? 'id' : 'slug';
     Promise.all([
-      supabase.from('fundraisers').select('*, profiles!owner_id(is_founding_member, is_beta_tester)').eq(col, id).in('status', ['active', 'drawn']).single(),
+      supabase.from('fundraisers').select('*, profiles!owner_id(is_founding_member, is_beta_tester)').eq(col, slug).in('status', ['active', 'drawn']).single(),
       supabase.auth.getUser(),
     ]).then(([{ data, error }, { data: { user } }]) => {
       if (error || !data) { setNotFound(true); setLoading(false); return; }
@@ -142,7 +143,7 @@ export default function PublicFundraiserPage({ params }) {
           setLoading(false);
         });
     });
-  }, [id]);
+  }, [slug]);
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)' }}>

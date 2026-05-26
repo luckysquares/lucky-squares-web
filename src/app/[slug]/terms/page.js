@@ -15,23 +15,32 @@ const PAYMENT_LABELS = {
   inperson: 'in-person payment',
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function generateMetadata({ params }) {
-  const { id } = await params;
-  const { data } = await supabase().from('fundraisers').select('title, org').eq('id', id).single();
+  const { slug } = await params;
+  const col = UUID_RE.test(slug) ? 'id' : 'slug';
+  const { data } = await supabase().from('fundraisers').select('title, org').eq(col, slug).single();
   return { title: data ? `Terms — ${data.title}` : 'Campaign Terms' };
 }
 
 export default async function CampaignTermsPage({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
   const db = supabase();
-  const [{ data: f }, { data: prizes }] = await Promise.all([
-    db.from('fundraisers').select('id, title, org, state, grid_size, price_per_sq, draw_type, draw_date, payment_method, contact_name, contact_email').eq('id', id).single(),
-    db.from('prizes').select('place, description, value, donated').eq('fundraiser_id', id).order('sort_order'),
-  ]);
+  const col = UUID_RE.test(slug) ? 'id' : 'slug';
+
+  const { data: f } = await db
+    .from('fundraisers')
+    .select('id, slug, title, org, state, grid_size, price_per_sq, draw_type, draw_date, payment_method, contact_name, contact_email')
+    .eq(col, slug)
+    .single();
+
+  const prizes = f
+    ? (await db.from('prizes').select('place, description, value, donated').eq('fundraiser_id', f.id).order('sort_order')).data
+    : null;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au';
-  const campaignUrl = `${appUrl}/f/${id}`;
+  const campaignUrl = f ? `${appUrl}/${f.slug ?? f.id}` : appUrl;
 
   if (!f) {
     return (

@@ -221,7 +221,7 @@ export default async function BetaTestPage() {
           <p style={{ fontSize: 14, color: 'var(--text2)', textAlign: 'center', marginBottom: 28 }}>These are loaded with dummy data. Use the test card and go for it. Each opens in a new tab so you can easily find your way back here.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {DEMO_CAMPAIGNS.map((c) => (
-              <a key={c.id} href={`/f/${c.id}`} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }} className="beta-campaign-link">
+              <a key={c.id} href={`/${c.slug ?? c.id}`} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }} className="beta-campaign-link">
                 <div className="scratch-card beta-campaign-card" style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{ fontSize: 28, flexShrink: 0 }}>{c.emoji}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -253,7 +253,7 @@ export default async function BetaTestPage() {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
             {DEMO_CAMPAIGNS.map((c) => {
-              const url = `${baseUrl}/f/${c.id}`;
+              const url = `${baseUrl}/${c.slug ?? c.id}`;
               const qr = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}&bgcolor=FAFAF7&color=2D2A26&margin=8`;
               return (
                 <div key={c.id} className="scratch-card" style={{ padding: '20px 16px', textAlign: 'center' }}>

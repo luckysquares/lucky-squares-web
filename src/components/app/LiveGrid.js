@@ -790,7 +790,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
         </button>
         <p style={{ fontSize: 11, color: 'var(--text2)', textAlign: 'center', marginTop: 10, lineHeight: 1.6 }}>
           By {fundraiser.payment?.method === 'stripe' ? 'completing payment' : 'confirming'} you agree to the{' '}
-          <a href={`/f/${fundraiser.id}/terms`} target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>terms of this campaign</a>
+          <a href={`/${fundraiser.slug ?? fundraiser.id}/terms`} target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>terms of this campaign</a>
           {' '}and the{' '}
           <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>Lucky Squares terms of service</a>.
         </p>
@@ -1180,7 +1180,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                     </div>
                   </div>
                 </div>
-                <button className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', borderColor: '#C4B5F4', color: '#7C3AED' }} onClick={() => window.open(`/f/${fundraiser.id}/poster`, '_blank')}>
+                <button className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', borderColor: '#C4B5F4', color: '#7C3AED' }} onClick={() => window.open(`/${fundraiser.slug ?? fundraiser.id}/poster`, '_blank')}>
                   🖨 Create poster
                 </button>
               </div>

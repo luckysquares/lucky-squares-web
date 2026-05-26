@@ -15,10 +15,14 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
+  // ── Redirect legacy /f/[slug-or-uuid] links to root-level slug route ───────
+  if (pathname.startsWith('/f/')) {
+    return NextResponse.redirect(new URL(pathname.slice(2), request.url), 301);
+  }
+
   // ── Beta gate: lock campaign/registration routes on production ───────────
   if (process.env.NEXT_PUBLIC_SITE_PHASE === 'beta') {
-    const locked = BETA_LOCKED.some((p) => pathname.startsWith(p))
-      || /^\/f\/[^/]+/.test(pathname); // campaign pages /f/[id]
+    const locked = BETA_LOCKED.some((p) => pathname.startsWith(p));
     if (locked) {
       return NextResponse.redirect(new URL('/coming-soon', request.url));
     }

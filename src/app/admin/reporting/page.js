@@ -1581,7 +1581,7 @@ function FinancialsTab() {
                 <td style={{ padding: '10px 12px', color: '#2563EB', fontWeight: 700 }}>{aud(c.transferCents)}</td>
                 <td style={{ padding: '10px 12px' }}>
                   {c.status === 'drawn'
-                    ? <a href={`/f/${c.id}/certificate`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap' }}>View certificate →</a>
+                    ? <a href={`/${c.slug ?? c.id}/certificate`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap' }}>View certificate →</a>
                     : <span style={{ color: '#D1C5B5', fontSize: 11 }}>After draw</span>
                   }
                 </td>

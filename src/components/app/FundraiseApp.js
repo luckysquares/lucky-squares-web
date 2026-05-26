@@ -713,7 +713,7 @@ function FundraiserCard({ f, onView, onReport, onConnectBank }) {
         <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={onReport}>View campaign report</button>
         {f.status === 'drawn' && (
           <a
-            href={`/f/${f.id}/certificate`}
+            href={`/${f.slug ?? f.id}/certificate`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-outline btn-sm"
@@ -2221,7 +2221,7 @@ export default function FundraiseApp() {
     setPhase('live');
     // Send campaign launched email and check referral reward
     if (!isDraft && user?.email) {
-      const campaignUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/f/${nf.slug ?? nf.id}`;
+      const campaignUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/${nf.slug ?? nf.id}`;
       const firstName = user.name?.split(' ')[0] || 'there';
       sendTxEmail('campaign_launched', user.email, {
         first_name: firstName,

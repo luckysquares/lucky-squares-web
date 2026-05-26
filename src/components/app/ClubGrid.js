@@ -170,8 +170,8 @@ export default function ClubGrid({ fundraiser, onToggle }) {
   const gridClass  = fundraiser.grid === 25 ? 'grid-25' : 'grid-100';
   const gridMax    = fundraiser.grid === 25 ? 330 : 640;
   const campaignUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/f/${fundraiser.id}`
-    : `https://luckysquares.com.au/f/${fundraiser.id}`;
+    ? `${window.location.origin}/${fundraiser.slug ?? fundraiser.id}`
+    : `https://luckysquares.com.au/${fundraiser.slug ?? fundraiser.id}`;
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(campaignUrl)}&bgcolor=FAFAF7&color=2D2A26&margin=12`;
 
   // ── Loading ─────────────────────────────────────────────────────────────────

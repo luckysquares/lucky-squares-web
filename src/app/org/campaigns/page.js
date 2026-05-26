@@ -63,7 +63,7 @@ export default function OrgCampaigns() {
                     <span style={{ fontSize: 24, flexShrink: 0 }}>{c.emoji || '🍀'}</span>
                     <div style={{ flex: 1, minWidth: 200 }}>
                       <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>
-                        <Link href={`/f/${c.id}`} style={{ color: 'var(--text)', textDecoration: 'none' }}>{c.title}</Link>
+                        <Link href={`/${c.slug ?? c.id}`} style={{ color: 'var(--text)', textDecoration: 'none' }}>{c.title}</Link>
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--text2)' }}>
                         {c.owner_name} · Launched {fmtDate(c.launched_at)}
@@ -88,9 +88,9 @@ export default function OrgCampaigns() {
                         {c.status}
                       </span>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <Link href={`/f/${c.id}`} className="btn btn-outline btn-sm">View</Link>
+                        <Link href={`/${c.slug ?? c.id}`} className="btn btn-outline btn-sm">View</Link>
                         {c.status === 'drawn' && (
-                          <Link href={`/f/${c.id}/certificate`} className="btn btn-outline btn-sm">📜 Certificate</Link>
+                          <Link href={`/${c.slug ?? c.id}/certificate`} className="btn btn-outline btn-sm">📜 Certificate</Link>
                         )}
                       </div>
                     </div>

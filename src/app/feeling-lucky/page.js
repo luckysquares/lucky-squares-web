@@ -241,7 +241,7 @@ export default function FeelingLuckyPage() {
 
                   {/* CTA */}
                   {selected.available > 0 ? (
-                    <Link href={`/f/${selected.id}`} className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }}>
+                    <Link href={`/${selected.slug ?? selected.id}`} className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }}>
                       Support this fundraiser →
                     </Link>
                   ) : (

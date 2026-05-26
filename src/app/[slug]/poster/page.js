@@ -6,10 +6,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
 const HOME_URL = 'https://luckysquares.com.au';
+const UUID_RE  = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function dbToFundraiser(row, prizes = []) {
   return {
     id:          row.id,
+    slug:        row.slug,
     title:       row.title,
     org:         row.org,
     description: row.description || '',
@@ -27,7 +29,7 @@ const PLACE_LABELS = ['1st', '2nd', '3rd', '4th', '5th'];
 const PLACE_EMOJIS = ['🥇', '🥈', '🥉', '🎖️', '🎖️'];
 
 export default function PosterPage({ params }) {
-  const { id }      = use(params);
+  const { slug }   = use(params);
   const [f,  setF]  = useState(null);
   const [loading, setLoading] = useState(true);
   const [origin,  setOrigin]  = useState('https://luckysquares.com.au');
@@ -37,16 +39,19 @@ export default function PosterPage({ params }) {
   useEffect(() => {
     if (!supabaseConfigured) { setLoading(false); return; }
     const supabase = getSupabaseClient();
-    Promise.all([
-      supabase.from('fundraisers').select('*').eq('id', id).single(),
-      supabase.from('prizes').select('*').eq('fundraiser_id', id).order('sort_order'),
-    ]).then(([{ data }, { data: prizes }]) => {
-      if (data) setF(dbToFundraiser(data, prizes || []));
-      setLoading(false);
-    });
-  }, [id]);
+    const col = UUID_RE.test(slug) ? 'id' : 'slug';
+    supabase.from('fundraisers').select('*').eq(col, slug).single()
+      .then(({ data }) => {
+        if (!data) { setLoading(false); return; }
+        supabase.from('prizes').select('*').eq('fundraiser_id', data.id).order('sort_order')
+          .then(({ data: prizes }) => {
+            setF(dbToFundraiser(data, prizes || []));
+            setLoading(false);
+          });
+      });
+  }, [slug]);
 
-  const fundraiserUrl = `${origin}/f/${id}`;
+  const fundraiserUrl = f ? `${origin}/${f.slug ?? f.id}` : origin;
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F5F3EE', fontFamily: 'sans-serif', fontSize: 14, color: '#6B7280' }}>

@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
-// Extract fundraiser ID from /f/[id] paths
+// Extract fundraiser UUID from campaign paths (supports both old /f/[uuid] and new /[slug] routes)
 function useFundraiserId() {
   const pathname = usePathname();
-  const match = pathname?.match(/^\/f\/([0-9a-f-]{36})/i);
+  // Match a UUID anywhere in the path (covers /f/uuid and direct /uuid routes)
+  const match = pathname?.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
   return match ? match[1] : null;
 }
 

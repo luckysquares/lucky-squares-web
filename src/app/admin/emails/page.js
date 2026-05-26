@@ -673,7 +673,7 @@ const DEMO = {
   org_name: 'Sunbury Primary School P&C',
   amount_raised: '1250.00', grid_size: 100, sold_count: 73,
   price_per_sq: '10', max_raise: '1000.00',
-  campaign_url: 'https://luckysquares.com.au/f/sunbury-primary-2025',
+  campaign_url: 'https://luckysquares.com.au/sunbury-primary-2025',
   square_number: 42, square_numbers: '42, 67', amount_paid: '20.00',
   coupon_code: 'THANKS-XK9Q', referred_name: 'Sunbury Netball Club',
   reason: 'Suspected fraudulent activity on your account.',

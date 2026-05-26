@@ -80,7 +80,7 @@ export default function OrgDashboard() {
                 <span style={{ fontSize: 24 }}>{c.emoji || '🍀'}</span>
                 <div style={{ flex: 1, minWidth: 180 }}>
                   <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>
-                    <Link href={`/f/${c.id}`} style={{ color: 'var(--text)', textDecoration: 'none' }}>{c.title}</Link>
+                    <Link href={`/${c.slug ?? c.id}`} style={{ color: 'var(--text)', textDecoration: 'none' }}>{c.title}</Link>
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text2)' }}>
                     {c.owner_name} · Launched {fmtDate(c.launched_at)}
