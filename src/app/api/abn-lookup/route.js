@@ -52,7 +52,7 @@ export async function GET(req) {
   }
 
   try {
-    const url = `https://abr.business.gov.au/abrxmlsearch/AbrXmlSearch.asmx/SearchByABN` +
+    const url = `https://abr.business.gov.au/abrxmlsearch/AbrXmlSearch.asmx/ABRSearchByABN` +
       `?authenticationGuid=${guid}&includeHistoricalDetails=N&searchString=${abn}`;
 
     const res = await fetch(url, { next: { revalidate: 300 } }); // cache 5 min
