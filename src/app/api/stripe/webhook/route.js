@@ -124,6 +124,97 @@ export async function POST(req) {
       return new Response('ok', { status: 200 });
     }
 
+    // ── 50/50 raffle ticket purchase ─────────────────────────────────────────
+    if (action === 'fifty_fifty') {
+      const { campaign_id, buyer_name, buyer_email, buyer_phone, quantity } = session.metadata;
+
+      if (!campaign_id || !quantity) {
+        return new Response('Missing fifty_fifty metadata', { status: 400 });
+      }
+
+      const qty = parseInt(quantity, 10);
+
+      // Fetch campaign to get ticket price
+      const { data: campaign } = await db
+        .from('fifty_fifty_campaigns')
+        .select('ticket_price, stripe_account_id')
+        .eq('id', campaign_id)
+        .single();
+
+      if (!campaign) {
+        console.error('[webhook] fifty_fifty campaign not found:', campaign_id);
+        return new Response('ok', { status: 200 });
+      }
+
+      const amountPaid = parseFloat(campaign.ticket_price) * qty;
+
+      const { data: ticketResult, error: ticketError } = await db.rpc('reserve_fifty_fifty_tickets', {
+        p_campaign_id:              campaign_id,
+        p_quantity:                 qty,
+        p_buyer_name:               buyer_name,
+        p_buyer_email:              buyer_email,
+        p_buyer_phone:              buyer_phone || '',
+        p_amount_paid:              amountPaid,
+        p_payment_method:           'stripe',
+        p_stripe_payment_intent_id: session.payment_intent,
+      });
+
+      if (ticketError || ticketResult?.error) {
+        const msg = ticketResult?.error || ticketError?.message;
+        console.error('[webhook] reserve_fifty_fifty_tickets error:', msg);
+        // Auto-refund if ticket reservation failed
+        try {
+          await stripe.refunds.create({ payment_intent: session.payment_intent });
+        } catch (refundErr) {
+          console.error('[webhook] fifty_fifty auto-refund failed:', refundErr.message);
+        }
+        return new Response('ok', { status: 200 });
+      }
+
+      // Mark ticket as paid
+      if (ticketResult?.ticket_id) {
+        await db
+          .from('fifty_fifty_tickets')
+          .update({ payment_status: 'paid' })
+          .eq('id', ticketResult.ticket_id);
+      }
+
+      // Send confirmation email to buyer
+      const ticketNumbers = (ticketResult?.ticket_numbers || [])
+        .map((n) => `#${String(n).padStart(3, '0')}`)
+        .join(', ');
+
+      // Fetch updated campaign jackpot for confirmation email
+      const { data: campaignData } = await db.rpc('get_fifty_fifty_campaign', { p_campaign_id: campaign_id });
+      const jackpot = campaignData?.jackpot ? `$${parseFloat(campaignData.jackpot).toFixed(2)}` : '$0.00';
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au';
+
+      await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({
+          type: 'fifty_fifty_ticket_confirmation',
+          to: buyer_email,
+          data: {
+            buyer_name,
+            campaign_title:      campaignData?.title || 'Raffle',
+            org_name:            '',
+            ticket_numbers:      ticketNumbers,
+            quantity:            qty,
+            amount_paid:         amountPaid.toFixed(2),
+            jackpot_at_purchase: jackpot,
+            campaign_url:        `${appUrl}/raffle/${campaign_id}`,
+          },
+        }),
+      }).catch(() => {});
+
+      return new Response('ok', { status: 200 });
+    }
+
     // ── Buyer square purchase ─────────────────────────────────────────────────
     if (!square_numbers) {
       return new Response('Missing square_numbers', { status: 400 });

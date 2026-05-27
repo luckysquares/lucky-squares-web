@@ -503,7 +503,7 @@ function OrgTeamSection({ sendTxEmail }) {
   );
 }
 
-function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, onDuplicate, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail }) {
+function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onReport, onConnectBank, onDuplicate, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail, onNewFiftyFifty, onViewFiftyFifty }) {
   const [copied, setCopied] = useState(false);
   const referralLink = referralInfo?.referral_code
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/app?ref=${referralInfo.referral_code}`
@@ -550,32 +550,22 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, 
           <div>
             <h1 className="section-title">G&apos;day, {user?.name?.split(' ')[0] || 'there'}! 👋</h1>
             <p className="section-sub">
-              {fundraisers.length === 0
-                ? "You don't have any active fundraising campaigns yet. Click New fundraiser below to get started."
+              {fundraisers.length === 0 && (!fiftyFiftyCampaigns || fiftyFiftyCampaigns.length === 0)
+                ? "You don't have any active fundraising campaigns yet. Use the cards below to get started."
                 : 'Here are your fundraising campaigns'}
             </p>
           </div>
-          {canCreate
-            ? <button className="btn btn-gold" onClick={onNew}>＋ New fundraiser</button>
-            : (
-              <div style={{ textAlign: 'right' }}>
-                <button className="btn btn-outline" disabled style={{ opacity: .5, cursor: 'not-allowed' }}>＋ New fundraiser</button>
-                {!suspension?.suspended && (
-                  <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 6 }}>
-                    {PLAN_LABELS[user?.plan ?? 'trial']} plan limit of {planLimit} reached.{' '}
-                    <Link href="/pricing" style={{ color: 'var(--green)', fontWeight: 700 }}>Upgrade</Link>
-                  </p>
-                )}
-              </div>
-            )
-          }
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20, marginTop: 24 }}>
           {fundraisers.map((f) => (
             <FundraiserCard key={f.id} f={f} onView={() => onView(f)} onReport={() => onReport(f)} onConnectBank={() => onConnectBank(f)} onDuplicate={() => onDuplicate(f)} />
           ))}
+          {(fiftyFiftyCampaigns ?? []).map((ff) => (
+            <FiftyFiftyCard key={ff.id} ff={ff} onView={() => onViewFiftyFifty(ff)} />
+          ))}
           {canCreate && <NewFundraiserCard onClick={onNew} />}
+          {canCreate && <NewFiftyFiftyCard onClick={onNewFiftyFifty} />}
         </div>
 
         {/* Referral card */}
@@ -599,20 +589,6 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, 
           </div>
         )}
 
-        {/* 50/50 Raffles section */}
-        <div style={{ marginTop: 40 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 800 }}>50/50 Raffles</h2>
-            <span className="tag" style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11 }}>Coming soon</span>
-          </div>
-          <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>
-            Run a 50/50 raffle: sell tickets, the winner takes half the pot, your organisation keeps the other half.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20 }}>
-            <FiftyFiftyComingSoonCard />
-          </div>
-        </div>
-
         {/* Team section: visible to org plan admins only */}
         {user?.plan === 'org' && orgInfo?.role !== 'contributor' && (
           <OrgTeamSection sendTxEmail={sendTxEmail} />
@@ -627,30 +603,55 @@ const PLATFORM_FEES = { 25: 19, 50: 19, 100: 19 };
 const PLAN_LIMITS  = { trial: 3, casual: 5, org: 10 };
 const PLAN_LABELS  = { trial: 'Trial', casual: 'Casual', org: 'Organisation' };
 
-function FiftyFiftyComingSoonCard() {
+function FiftyFiftyCard({ ff, onView }) {
+  const fmt = (n) => Number(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return (
-    <div
-      title="50/50 raffles are coming soon"
-      style={{
-        padding: 24,
-        border: '2px dashed #D1D5DB',
-        borderRadius: 'var(--radius)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 180,
-        background: '#FAFAF9',
-        textAlign: 'center',
-        gap: 10,
-        opacity: 0.55,
-        cursor: 'not-allowed',
-        userSelect: 'none',
-      }}
-    >
-      <div style={{ fontSize: 38 }}>🎟️</div>
-      <div style={{ fontWeight: 800, color: 'var(--text2)', fontSize: 15 }}>New 50/50 Raffle</div>
-      <div style={{ fontSize: 13, color: 'var(--muted)' }}>Coming soon</div>
+    <div>
+      <div className="scratch-card" style={{ padding: 24, borderLeft: '4px solid #F59E0B' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 40 }}>{ff.emoji || '🎟️'}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <span className={`tag ${ff.status === 'active' ? 'tag-green' : ff.status === 'drawn' ? 'tag-drawn' : 'tag-muted'}`}>
+              {ff.status === 'active' ? '● Live' : ff.status === 'drawn' ? '🏆 Drawn' : 'Draft'}
+            </span>
+            <span className="tag" style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11 }}>🎟️ 50/50 Raffle</span>
+          </div>
+        </div>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{ff.title}</div>
+        <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>
+          {ff.tickets_sold} tickets sold
+        </div>
+        <div style={{ display: 'flex', gap: 20, marginBottom: 4, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text2)', marginBottom: 2 }}>Live jackpot</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: '#92400E' }}>${fmt(ff.jackpot ?? 0)}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text2)', marginBottom: 2 }}>Ticket price</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)' }}>${fmt(ff.ticket_price)}</div>
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+        <button className="btn btn-primary btn-sm" style={{ width: '100%' }} onClick={onView}>Manage raffle →</button>
+        {ff.status === 'drawn' && (
+          <button className="btn btn-outline btn-sm" style={{ width: '100%' }} disabled>
+            🔁 Duplicate (coming soon)
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NewFiftyFiftyCard({ onClick }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div className="card" onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      style={{ padding: 24, cursor: 'pointer', border: `2px dashed ${hovered ? '#F59E0B' : '#FCD34D'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, background: hovered ? '#FFFBEB' : 'transparent', textAlign: 'center', gap: 12, transition: 'border-color .2s, background .2s' }}>
+      <div style={{ fontSize: 40, transition: 'transform .2s', transform: hovered ? 'scale(1.1)' : 'scale(1)' }}>🎟️</div>
+      <div style={{ fontWeight: 800, color: 'var(--text2)' }}>New 50/50 Raffle</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)' }}>Sell tickets, winner takes half the pot</div>
     </div>
   );
 }
@@ -764,8 +765,8 @@ function NewFundraiserCard({ onClick }) {
     <div className="card" onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{ padding: 24, cursor: 'pointer', border: `2px dashed ${hovered ? 'var(--green)' : '#D4C9AE'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, background: hovered ? '#F0FDF8' : 'transparent', textAlign: 'center', gap: 12, transition: 'border-color .2s, background .2s' }}>
       <div style={{ fontSize: 40, color: hovered ? 'var(--green)' : 'var(--muted)', transition: 'color .2s' }}>＋</div>
-      <div style={{ fontWeight: 800, color: 'var(--text2)' }}>New fundraiser</div>
-      <div style={{ fontSize: 13, color: 'var(--muted)' }}>Set up in under 5 minutes</div>
+      <div style={{ fontWeight: 800, color: 'var(--text2)' }}>New Lucky Squares Fundraiser</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)' }}>Set up a grid-based fundraiser</div>
     </div>
   );
 }
@@ -1956,6 +1957,622 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     </div>
   );
 }
+// ─── FiftyFiftyWizard ─────────────────────────────────────────────────────────
+
+const FF_EMOJIS = ['🎟️', '🍀', '🏆', '🎉', '⭐', '💛', '🌈', '🎯', '🏉', '🐨'];
+const FF_TICKET_PRESETS = [1, 2, 5, 10, 20];
+
+function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete }) {
+  const [step,           setStep]           = useState(0);
+  const [emoji,          setEmoji]          = useState('🎟️');
+  const [title,          setTitle]          = useState('');
+  const [description,    setDescription]    = useState('');
+  const [lotteryLicence, setLotteryLicence] = useState('');
+  const [ticketPrice,    setTicketPrice]    = useState('');
+  const [customPrice,    setCustomPrice]    = useState('');
+  const [paymentMethod,  setPaymentMethod]  = useState('stripe');
+  const [bankDetails,    setBankDetails]    = useState({ accountName: '', bsb: '', account: '' });
+  const [stripeReady,    setStripeReady]    = useState(false);
+  const [saving,         setSaving]         = useState(false);
+  const [saveError,      setSaveError]      = useState('');
+
+  const selectedPrice = ticketPrice === 'custom' ? parseFloat(customPrice) || 0 : parseFloat(ticketPrice) || 0;
+
+  // (No pre-save needed: StripeConnectSetup works with null fundraiserId for user-level onboarding.
+  // The campaign is saved on launch.)
+
+  const saveCampaign = async () => {
+    try {
+      const { data: { session } } = await getSupabaseClient().auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch('/api/fifty-fifty/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          title:          sanitize(title),
+          emoji,
+          description:    sanitize(description),
+          ticket_price:   selectedPrice,
+          payment_method: paymentMethod,
+          lottery_licence: sanitize(lotteryLicence) || null,
+          stripe_account_id: paymentMethod === 'stripe' ? (user?.stripeAccountId || null) : null,
+          bank_account_name: paymentMethod !== 'stripe' ? sanitize(bankDetails.accountName) || null : null,
+          bank_bsb:          paymentMethod !== 'stripe' ? sanitize(bankDetails.bsb) || null : null,
+          bank_account:      paymentMethod !== 'stripe' ? sanitize(bankDetails.account) || null : null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.campaign?.id) return null;
+      return json.campaign.id;
+    } catch (e) {
+      console.error('FiftyFiftyWizard saveCampaign:', e);
+      return null;
+    }
+  };
+
+  const canNext = () => {
+    if (step === 0) return title.trim().length > 0;
+    if (step === 1) return selectedPrice > 0;
+    if (step === 2) {
+      if (paymentMethod === 'stripe') return stripeReady || stripeOnboardingComplete;
+      return bankDetails.accountName.trim() && bankDetails.bsb.trim() && bankDetails.account.trim();
+    }
+    return true;
+  };
+
+  const handleLaunch = async () => {
+    setSaving(true);
+    setSaveError('');
+    const campaignId = await saveCampaign();
+    if (!campaignId) {
+      setSaveError('Something went wrong. Please try again.');
+      setSaving(false);
+      return;
+    }
+    setSaving(false);
+    onComplete(campaignId);
+  };
+
+  const steps = ['Details', 'Ticket price', 'Payment'];
+
+  return (
+    <div className="dot-bg" style={{ minHeight: '100vh' }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+          <button className="btn btn-outline btn-sm" onClick={() => step > 0 ? setStep((s) => s - 1) : onCancel()}>
+            {step === 0 ? '← Dashboard' : '← Back'}
+          </button>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Step {step + 1} of {steps.length}</div>
+            <div style={{ fontSize: 14, fontWeight: 800 }}>{steps[step]}</div>
+          </div>
+        </div>
+
+        {/* Step dots */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 32 }}>
+          {steps.map((s, i) => (
+            <div key={i} className={`step-dot ${i < step ? 'done' : i === step ? 'active' : 'future'}`}
+              onClick={() => i < step && setStep(i)}
+              style={{ cursor: i < step ? 'pointer' : 'default' }}
+              title={s}>
+              {i < step ? '✓' : i + 1}
+            </div>
+          ))}
+        </div>
+
+        {/* Step 0: Details */}
+        {step === 0 && (
+          <div>
+            <h2 className="section-title">New 50/50 Raffle</h2>
+            <p className="section-sub" style={{ marginBottom: 24 }}>Tell people what they are entering</p>
+            <div className="scratch-card" style={{ padding: 28 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div className="form-group">
+                  <label className="form-label">Raffle emoji</label>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {FF_EMOJIS.map((em) => (
+                      <button key={em} onClick={() => setEmoji(em)}
+                        style={{ width: 44, height: 44, borderRadius: 10, border: `2px solid ${emoji === em ? '#F59E0B' : 'var(--border)'}`, background: emoji === em ? '#FEF3C7' : 'transparent', fontSize: 22, cursor: 'pointer', transition: 'all .15s' }}>
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Raffle title <span style={{ color: '#CC0000' }}>*</span></label>
+                  <input className="form-input" placeholder="e.g. Footy Club 50/50 Raffle" maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea className="form-input" rows={3} placeholder="What is this raffle supporting? Any important details for buyers." maxLength={500} value={description} onChange={(e) => setDescription(e.target.value)} style={{ resize: 'vertical' }} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Lottery/Raffle licence number (if applicable)</label>
+                  <input className="form-input" placeholder="e.g. LSA-12345" maxLength={60} value={lotteryLicence} onChange={(e) => setLotteryLicence(e.target.value)} />
+                  <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 6, lineHeight: 1.5 }}>
+                    Required if your total prize pool will exceed your state's threshold. Leave blank if not required.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 1: Ticket price */}
+        {step === 1 && (
+          <div>
+            <h2 className="section-title">Ticket price</h2>
+            <p className="section-sub" style={{ marginBottom: 24 }}>How much per ticket?</p>
+
+            <div className="scratch-card" style={{ padding: 24, marginBottom: 20, background: '#FFFBEB', border: '1.5px solid #FCD34D' }}>
+              <div style={{ fontSize: 13, color: '#92400E', lineHeight: 1.6 }}>
+                Jackpot grows as tickets sell. The winner receives 50% of total ticket sales. Your organisation keeps the other 50%.
+              </div>
+            </div>
+
+            <div className="scratch-card" style={{ padding: 28 }}>
+              <label className="form-label" style={{ marginBottom: 12, display: 'block' }}>Select a price per ticket</label>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+                {FF_TICKET_PRESETS.map((p) => (
+                  <button key={p}
+                    onClick={() => { setTicketPrice(String(p)); setCustomPrice(''); }}
+                    style={{ padding: '10px 20px', borderRadius: 10, border: `2px solid ${ticketPrice === String(p) ? '#F59E0B' : 'var(--border)'}`, background: ticketPrice === String(p) ? '#FEF3C7' : 'transparent', fontWeight: 800, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+                    ${p}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setTicketPrice('custom')}
+                  style={{ padding: '10px 20px', borderRadius: 10, border: `2px solid ${ticketPrice === 'custom' ? '#F59E0B' : 'var(--border)'}`, background: ticketPrice === 'custom' ? '#FEF3C7' : 'transparent', fontWeight: 800, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+                  Custom
+                </button>
+              </div>
+              {ticketPrice === 'custom' && (
+                <div className="form-group">
+                  <label className="form-label">Custom price (AUD)</label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 18, fontWeight: 800, color: 'var(--text2)' }}>$</span>
+                    <input
+                      className="form-input"
+                      type="number"
+                      min="0.50"
+                      step="0.50"
+                      placeholder="0.00"
+                      value={customPrice}
+                      onChange={(e) => setCustomPrice(e.target.value)}
+                      style={{ paddingLeft: 36, fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-serif)' }}
+                    />
+                  </div>
+                </div>
+              )}
+              {selectedPrice > 0 && (
+                <div style={{ marginTop: 16, padding: '14px 20px', background: 'var(--cream)', borderRadius: 12, fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
+                  At <strong>${selectedPrice.toFixed(2)}</strong> per ticket, every 10 tickets sold adds <strong>${(selectedPrice * 10 * 0.5).toFixed(2)}</strong> to the jackpot and <strong>${(selectedPrice * 10 * 0.5).toFixed(2)}</strong> to your organisation.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Payment */}
+        {step === 2 && (
+          <div>
+            <h2 className="section-title">Payment setup</h2>
+            <p className="section-sub" style={{ marginBottom: 24 }}>How will buyers pay for their tickets?</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+              {[
+                { method: 'stripe', icon: '💳', title: 'Online card payment', desc: 'Buyers pay securely by card. A 1.7% + 30c processing fee is added to the buyer total. Funds held on platform until the draw.' },
+                { method: 'bank',   icon: '🏦', title: 'Bank transfer',       desc: 'Buyers pay via BSB/account number. Free with no transaction fees.' },
+              ].map((opt) => (
+                <div key={opt.method} className="scratch-card"
+                  style={{ padding: '20px 24px', cursor: 'pointer', borderColor: paymentMethod === opt.method ? 'var(--purple)' : undefined, borderWidth: paymentMethod === opt.method ? 2 : 1.5 }}
+                  onClick={() => { setPaymentMethod(opt.method); }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <span style={{ fontSize: 28 }}>{opt.icon}</span>
+                    <div>
+                      <div style={{ fontWeight: 800 }}>{opt.title}</div>
+                      <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{opt.desc}</div>
+                    </div>
+                    {paymentMethod === opt.method && <div style={{ marginLeft: 'auto', fontSize: 20, color: 'var(--purple)' }}>✓</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {paymentMethod === 'stripe' && (
+              <div className="scratch-card" style={{ padding: 28 }}>
+                {!stripeOnboardingComplete && (
+                  <StripeConnectSetup
+                    key="ff-stripe-setup"
+                    fundraiserId={null}
+                    onComplete={() => setStripeReady(true)}
+                    prefill={user ? { name: user.name, email: user.email, phone: user.phone || '' } : null}
+                  />
+                )}
+                {stripeOnboardingComplete && (
+                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <div style={{ fontSize: 22, marginBottom: 8 }}>✅</div>
+                    <div style={{ fontWeight: 700, fontSize: 15 }}>Bank account already connected</div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>Your existing Stripe account will be used for this raffle.</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {paymentMethod === 'bank' && (
+              <div className="scratch-card" style={{ padding: 28 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div className="form-group">
+                    <label className="form-label">Account name</label>
+                    <input className="form-input" placeholder="e.g. Sunbury Footy Club" maxLength={100} value={bankDetails.accountName} onChange={(e) => setBankDetails((b) => ({ ...b, accountName: e.target.value }))} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <div className="form-group" style={{ width: 140 }}>
+                      <label className="form-label">BSB</label>
+                      <input className="form-input" placeholder="000-000" maxLength={7} value={bankDetails.bsb} onChange={(e) => setBankDetails((b) => ({ ...b, bsb: e.target.value }))} />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label className="form-label">Account number</label>
+                      <input className="form-input" placeholder="12345678" maxLength={10} value={bankDetails.account} onChange={(e) => setBankDetails((b) => ({ ...b, account: e.target.value }))} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Footer nav */}
+        <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" onClick={() => step === 0 ? onCancel() : setStep((s) => s - 1)}>
+            {step === 0 ? 'Cancel' : '← Back'}
+          </button>
+          {step < steps.length - 1 ? (
+            <button className="btn btn-primary" disabled={!canNext()} onClick={() => setStep((s) => s + 1)}>Next →</button>
+          ) : (
+            <button
+              className="btn btn-gold btn-lg"
+              disabled={!canNext() || saving}
+              onClick={handleLaunch}>
+              {saving ? 'Launching…' : '🚀 Launch raffle'}
+            </button>
+          )}
+        </div>
+        {saveError && step === steps.length - 1 && (
+          <p style={{ marginTop: 12, fontSize: 13, color: '#CC0000', textAlign: 'center' }}>{saveError}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── FiftyFiftyManage ─────────────────────────────────────────────────────────
+
+function FiftyFiftyManage({ ff: initialFf, onBack, sendTxEmail }) {
+  const [ff,           setFf]           = useState(initialFf);
+  const [tickets,      setTickets]      = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [copiedLink,   setCopiedLink]   = useState(false);
+  const [showDrawModal,setShowDrawModal] = useState(false);
+  const [drawing,      setDrawing]      = useState(false);
+  const [drawError,    setDrawError]    = useState('');
+  const [drawResult,   setDrawResult]   = useState(null); // { winnerTicket, buyerName, buyerEmail }
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au';
+  const publicUrl = `${appUrl}/raffle/${ff.id}`;
+
+  const fmt = (n) => Number(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const loadTickets = async () => {
+    if (!supabaseConfigured) { setLoading(false); return; }
+    const { data } = await getSupabaseClient()
+      .from('fifty_fifty_tickets')
+      .select('*')
+      .eq('campaign_id', ff.id)
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: true });
+    setTickets(data || []);
+    setLoading(false);
+  };
+
+  const refreshCampaign = async () => {
+    if (!supabaseConfigured) return;
+    const { data } = await getSupabaseClient().rpc('get_my_fifty_fifty_campaigns');
+    if (Array.isArray(data)) {
+      const updated = data.find((c) => c.id === ff.id);
+      if (updated) setFf(updated);
+    }
+  };
+
+  useEffect(() => { loadTickets(); refreshCampaign(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Build all sold ticket numbers from ticket rows
+  const allSoldNumbers = tickets.flatMap((t) => t.ticket_numbers || []);
+  const totalRaised = (ff.tickets_sold || 0) * parseFloat(ff.ticket_price || 0);
+  const jackpot = totalRaised * 0.5;
+
+  // Winner ticket info
+  const winnerTicket = ff.winner_ticket_num;
+  const winnerRow = winnerTicket ? tickets.find((t) => (t.ticket_numbers || []).includes(winnerTicket)) : null;
+
+  const handleRunDraw = async () => {
+    if (allSoldNumbers.length === 0) return;
+    setDrawing(true);
+    setDrawError('');
+    const winnerNum = allSoldNumbers[Math.floor(Math.random() * allSoldNumbers.length)];
+    const { data, error } = await getSupabaseClient().rpc('record_fifty_fifty_draw', {
+      p_campaign_id:   ff.id,
+      p_winner_ticket: winnerNum,
+    });
+    if (error || data?.error) {
+      setDrawError(data?.error || error?.message || 'Something went wrong. Please try again.');
+      setDrawing(false);
+      return;
+    }
+    const winRow = tickets.find((t) => (t.ticket_numbers || []).includes(winnerNum));
+    setDrawResult({ winnerTicket: winnerNum, buyerName: winRow?.buyer_name || 'Unknown', buyerEmail: winRow?.buyer_email || null });
+    setShowDrawModal(false);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 5000);
+    await refreshCampaign();
+    await loadTickets();
+    setDrawing(false);
+    // Send winner notification email
+    if (winRow?.buyer_email && supabaseConfigured) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (supabaseUrl) {
+        fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'fifty_fifty_draw_winner',
+            to: winRow.buyer_email,
+            data: {
+              buyer_name:     winRow.buyer_name,
+              campaign_title: ff.title,
+              org_name:       '',
+              winning_ticket: winnerNum,
+              prize_amount:   fmt(jackpot),
+              contact_email:  '',
+            },
+          }),
+        }).catch(() => {});
+        // Send no-win emails to all other buyers
+        const otherEmails = new Set();
+        tickets.forEach((t) => {
+          if (t.buyer_email && t.buyer_email !== winRow.buyer_email) otherEmails.add(t.buyer_email);
+        });
+        otherEmails.forEach((email) => {
+          const tRow = tickets.find((t) => t.buyer_email === email);
+          fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'fifty_fifty_draw_no_win',
+              to: email,
+              data: {
+                buyer_name:     tRow?.buyer_name || 'Supporter',
+                campaign_title: ff.title,
+                org_name:       '',
+                winning_ticket: winnerNum,
+                total_raised:   fmt(totalRaised),
+              },
+            }),
+          }).catch(() => {});
+        });
+      }
+    }
+  };
+
+  return (
+    <div className="dot-bg" style={{ flex: 1 }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
+        {showConfetti && <Confetti />}
+
+        {/* Back button and header */}
+        <button className="btn btn-outline btn-sm" style={{ marginBottom: 24 }} onClick={onBack}>← Dashboard</button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 48 }}>{ff.emoji || '🎟️'}</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, margin: 0 }}>{ff.title}</h1>
+              <span className="tag" style={{ background: '#FEF3C7', color: '#92400E', fontSize: 12 }}>🎟️ 50/50 Raffle</span>
+              <span className={`tag ${ff.status === 'active' ? 'tag-green' : ff.status === 'drawn' ? 'tag-drawn' : 'tag-muted'}`}>
+                {ff.status === 'active' ? '● Live' : ff.status === 'drawn' ? '🏆 Drawn' : 'Draft'}
+              </span>
+            </div>
+            {ff.description && <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--text2)' }}>{ff.description}</p>}
+          </div>
+        </div>
+
+        {/* Draw result hero */}
+        {(ff.status === 'drawn' || drawResult) && (
+          <div className="scratch-card" style={{ padding: 28, marginBottom: 24, background: 'linear-gradient(135deg,#FFFBEB,#FEF3C7)', border: '2px solid #F59E0B' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 48, marginBottom: 8 }}>🏆</div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 900, marginBottom: 4, color: '#92400E' }}>
+                Winning Ticket #{drawResult?.winnerTicket ?? winnerTicket}
+              </div>
+              {(drawResult?.buyerName || winnerRow?.buyer_name) && (
+                <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
+                  {drawResult?.buyerName || winnerRow?.buyer_name}
+                </div>
+              )}
+              {(drawResult?.buyerEmail || winnerRow?.buyer_email) && (
+                <a href={`mailto:${drawResult?.buyerEmail || winnerRow?.buyer_email}`}
+                  style={{ fontSize: 14, color: 'var(--purple)', fontWeight: 600, textDecoration: 'none' }}>
+                  {drawResult?.buyerEmail || winnerRow?.buyer_email}
+                </a>
+              )}
+              {winnerRow?.buyer_phone && (
+                <div style={{ marginTop: 4 }}>
+                  <a href={`tel:${winnerRow.buyer_phone}`} style={{ fontSize: 14, color: 'var(--purple)', fontWeight: 600, textDecoration: 'none' }}>{winnerRow.buyer_phone}</a>
+                </div>
+              )}
+              <div style={{ marginTop: 16, fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, color: '#92400E' }}>
+                Prize: ${fmt(jackpot || (ff.jackpot ?? 0))}
+              </div>
+              {(drawResult?.buyerEmail || winnerRow?.buyer_email) && (
+                <button
+                  className="btn btn-sm"
+                  style={{ marginTop: 16, background: '#F59E0B', color: '#fff', border: 'none' }}
+                  onClick={() => {
+                    const email = drawResult?.buyerEmail || winnerRow?.buyer_email;
+                    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+                    if (!supabaseUrl || !email) return;
+                    fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        type: 'fifty_fifty_draw_winner',
+                        to: email,
+                        data: {
+                          buyer_name:     drawResult?.buyerName || winnerRow?.buyer_name,
+                          campaign_title: ff.title,
+                          org_name:       '',
+                          winning_ticket: drawResult?.winnerTicket ?? winnerTicket,
+                          prize_amount:   fmt(jackpot || (ff.jackpot ?? 0)),
+                          contact_email:  '',
+                        },
+                      }),
+                    }).catch(() => {});
+                    alert('Winner notification sent!');
+                  }}>
+                  Send winner notification
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 16, marginBottom: 24 }}>
+          {[
+            { label: 'Tickets sold',   value: String(ff.tickets_sold ?? 0) },
+            { label: 'Current jackpot (50%)', value: `$${fmt(ff.jackpot ?? 0)}`,   highlight: true },
+            { label: 'Total raised',   value: `$${fmt(totalRaised)}` },
+            { label: 'Ticket price',   value: `$${fmt(ff.ticket_price)}` },
+          ].map(({ label, value, highlight }) => (
+            <div key={label} className="scratch-card" style={{ padding: '20px 24px', borderColor: highlight ? '#F59E0B' : undefined, background: highlight ? '#FFFBEB' : undefined }}>
+              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text2)', marginBottom: 8 }}>{label}</div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 900, color: highlight ? '#92400E' : 'var(--text)' }}>{value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Campaign link */}
+        <div className="scratch-card" style={{ padding: 24, marginBottom: 24 }}>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 8 }}>Public buy page</div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input readOnly value={publicUrl}
+              style={{ flex: 1, fontSize: 13, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--cream)', fontFamily: 'monospace', color: 'var(--text)' }}
+              onClick={(e) => e.target.select()} />
+            <button className="btn btn-primary btn-sm" style={{ flexShrink: 0 }} onClick={() => {
+              navigator.clipboard.writeText(publicUrl);
+              setCopiedLink(true);
+              setTimeout(() => setCopiedLink(false), 2000);
+            }}>
+              {copiedLink ? '✓ Copied' : 'Copy link'}
+            </button>
+          </div>
+        </div>
+
+        {/* Draw section */}
+        {ff.status === 'active' && !drawResult && (
+          <div className="scratch-card" style={{ padding: 28, marginBottom: 24, border: '2px solid #F59E0B', background: '#FFFBEB' }}>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Run the Draw</div>
+            <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 16, lineHeight: 1.6 }}>
+              Once you run the draw, a winning ticket is randomly selected from all paid tickets. This action is irreversible.
+              {allSoldNumbers.length === 0 && <strong style={{ color: '#CC0000' }}> No tickets have been sold yet.</strong>}
+            </p>
+            <button
+              className="btn btn-lg"
+              style={{ background: '#F59E0B', color: '#fff', border: 'none' }}
+              disabled={allSoldNumbers.length === 0}
+              onClick={() => setShowDrawModal(true)}>
+              🎲 Run the draw
+            </button>
+          </div>
+        )}
+
+        {/* Tickets list */}
+        <div className="scratch-card" style={{ padding: 28 }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, marginBottom: 20 }}>Ticket purchases</h2>
+          {loading && <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text2)' }}>Loading…</div>}
+          {!loading && tickets.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text2)' }}>No tickets sold yet. Share your buy page link to get started!</div>
+          )}
+          {!loading && tickets.length > 0 && (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                    {['Buyer', 'Tickets', 'Amount paid', 'Date'].map((h) => (
+                      <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 800, color: 'var(--text2)', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {tickets.map((t) => (
+                    <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '12px 12px' }}>
+                        <div style={{ fontWeight: 700 }}>{t.buyer_name}</div>
+                        {t.buyer_email && <div style={{ color: 'var(--text2)', fontSize: 12 }}>{t.buyer_email}</div>}
+                        {t.buyer_phone && <div style={{ color: 'var(--text2)', fontSize: 12 }}>{t.buyer_phone}</div>}
+                      </td>
+                      <td style={{ padding: '12px 12px' }}>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                          {(t.ticket_numbers || []).map((n) => (
+                            <span key={n} className="num-pill" style={{ fontSize: 11, background: n === winnerTicket ? '#F59E0B' : undefined, color: n === winnerTicket ? '#fff' : undefined }}>#{n}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td style={{ padding: '12px 12px', fontWeight: 700 }}>${fmt(t.amount_paid)}</td>
+                      <td style={{ padding: '12px 12px', color: 'var(--text2)' }}>{new Date(t.created_at).toLocaleDateString('en-AU')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Draw confirmation modal */}
+        {showDrawModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: 24 }}>
+            <div className="scratch-card" style={{ padding: 36, maxWidth: 440, width: '100%', textAlign: 'center' }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🎲</div>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Ready to run the draw?</h2>
+              <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 8, lineHeight: 1.6 }}>
+                <strong>{ff.tickets_sold}</strong> tickets sold across <strong>{tickets.length}</strong> purchase{tickets.length !== 1 ? 's' : ''}.
+              </p>
+              <p style={{ fontSize: 13, color: '#CC0000', marginBottom: 24, lineHeight: 1.5 }}>
+                This action is irreversible. A winning ticket will be randomly selected and the raffle will be marked as drawn.
+              </p>
+              {drawError && <p style={{ fontSize: 13, color: '#CC0000', marginBottom: 12 }}>{drawError}</p>}
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button className="btn btn-outline" onClick={() => setShowDrawModal(false)} disabled={drawing}>Cancel</button>
+                <button
+                  className="btn btn-lg"
+                  style={{ background: '#F59E0B', color: '#fff', border: 'none' }}
+                  onClick={handleRunDraw}
+                  disabled={drawing}>
+                  {drawing ? 'Drawing…' : 'Yes, run the draw'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── BankConnectScreen ────────────────────────────────────────────────────────
 
 function BankConnectScreen({ fundraiserId, onDone, user = null }) {
@@ -1995,20 +2612,23 @@ function BankConnectScreen({ fundraiserId, onDone, user = null }) {
 // ─── FundraiseApp (root) ──────────────────────────────────────────────────────
 
 export default function FundraiseApp() {
-  const [phase,            setPhase]            = useState('loading');
-  const [user,             setUser]             = useState(null);
-  const [pendingEmail,     setPendingEmail]     = useState('');
-  const [fundraisers,      setFundraisers]      = useState([]);
-  const [activeFundraiser, setActiveFundraiser] = useState(null);
-  const [wizardPrefill,   setWizardPrefill]   = useState(null);
-  const [authLoading,      setAuthLoading]      = useState(false);
-  const [authError,        setAuthError]        = useState('');
-  const [referralInfo,      setReferralInfo]      = useState(null);
-  const [showReferralModal, setShowReferralModal] = useState(false);
-  const [suspension,        setSuspension]        = useState(null); // null | { suspended: true, reason }
-  const [orgInfo,           setOrgInfo]           = useState(null); // null | { role, org_user_id, org_name }
-  const [bankConnectId,     setBankConnectId]     = useState(null);
-  const [surveyFundraiserId, setSurveyFundraiserId] = useState(null);
+  const [phase,              setPhase]              = useState('loading');
+  const [user,               setUser]               = useState(null);
+  const [pendingEmail,       setPendingEmail]       = useState('');
+  const [fundraisers,        setFundraisers]        = useState([]);
+  const [fiftyFiftyCampaigns, setFiftyFiftyCampaigns] = useState([]);
+  const [activeFundraiser,   setActiveFundraiser]   = useState(null);
+  const [wizardPrefill,     setWizardPrefill]     = useState(null);
+  const [authLoading,        setAuthLoading]        = useState(false);
+  const [authError,          setAuthError]          = useState('');
+  const [referralInfo,        setReferralInfo]        = useState(null);
+  const [showReferralModal,   setShowReferralModal]   = useState(false);
+  const [suspension,          setSuspension]          = useState(null); // null | { suspended: true, reason }
+  const [orgInfo,             setOrgInfo]             = useState(null); // null | { role, org_user_id, org_name }
+  const [bankConnectId,       setBankConnectId]       = useState(null);
+  const [surveyFundraiserId,  setSurveyFundraiserId]  = useState(null);
+  const [showFiftyFiftyWizard, setShowFiftyFiftyWizard] = useState(false);
+  const [viewingFiftyFifty,   setViewingFiftyFifty]   = useState(null);
 
   // Call the transactional-email Edge Function (fire-and-forget)
   const sendTxEmail = useCallback((type, to, data) => {
@@ -2046,6 +2666,12 @@ export default function FundraiseApp() {
     setFundraisers(rows.map((r) => dbToFundraiser(r, Number(statsMap[r.id]?.sold_count ?? 0), prizesMap[r.id] || [])));
   }, []);
 
+  const loadFiftyFiftyCampaigns = useCallback(async () => {
+    if (!supabaseConfigured) return;
+    const { data } = await getSupabaseClient().rpc('get_my_fifty_fifty_campaigns');
+    setFiftyFiftyCampaigns(Array.isArray(data) ? data : []);
+  }, []);
+
   // Scroll to top on every phase change
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [phase]);
 
@@ -2072,6 +2698,7 @@ export default function FundraiseApp() {
         setOrgInfo(oi);
         const fundraiserOwnerId = oi?.role === 'contributor' ? oi.org_user_id : u.id;
         loadFundraisers(fundraiserOwnerId);
+        loadFiftyFiftyCampaigns();
         loadReferralInfo();
         // Check suspension status
         supabase.rpc('get_my_suspension_status').then(({ data: s }) => {
@@ -2615,13 +3242,65 @@ export default function FundraiseApp() {
     </div>
   );
 
+  const handleHome = () => {
+    setShowFiftyFiftyWizard(false);
+    setViewingFiftyFifty(null);
+    setPhase('dashboard');
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      {showHeader && <AppHeader user={user} onLogout={handleLogout} onHome={() => setPhase('dashboard')} />}
+      {showHeader && <AppHeader user={user} onLogout={handleLogout} onHome={handleHome} />}
       {phase === 'login'     && <LoginScreen    onLogin={handleLogin}        onRegister={() => { setAuthError(''); setPhase('register'); }} loading={authLoading} error={authError} />}
       {phase === 'register'  && <RegisterScreen onRegister={handleRegister}  onBack={() => { setAuthError(''); setPhase('login'); }} loading={authLoading} error={authError} />}
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onResend={async () => { if (supabaseConfigured) await getSupabaseClient().auth.resend({ type: 'signup', email: pendingEmail }); }} />}
-      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} onDuplicate={handleDuplicate} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
+      {phase === 'dashboard' && user && !showFiftyFiftyWizard && !viewingFiftyFifty && (
+        <Dashboard
+          user={user}
+          fundraisers={fundraisers}
+          fiftyFiftyCampaigns={fiftyFiftyCampaigns}
+          onNew={handleNewFundraiser}
+          onView={handleViewGrid}
+          onReport={handleViewReport}
+          onConnectBank={handleConnectBank}
+          onDuplicate={handleDuplicate}
+          canCreate={canCreate}
+          planLimit={planLimit}
+          referralInfo={referralInfo}
+          suspension={suspension}
+          orgInfo={orgInfo}
+          sendTxEmail={sendTxEmail}
+          onNewFiftyFifty={() => setShowFiftyFiftyWizard(true)}
+          onViewFiftyFifty={(ff) => setViewingFiftyFifty(ff)}
+        />
+      )}
+      {phase === 'dashboard' && user && showFiftyFiftyWizard && (
+        <FiftyFiftyWizard
+          user={user}
+          stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false}
+          onCancel={() => setShowFiftyFiftyWizard(false)}
+          onComplete={async (campaignId) => {
+            setShowFiftyFiftyWizard(false);
+            await loadFiftyFiftyCampaigns();
+            // Open the new campaign in manage view
+            const { data } = await getSupabaseClient().rpc('get_my_fifty_fifty_campaigns');
+            const campaigns = Array.isArray(data) ? data : [];
+            setFiftyFiftyCampaigns(campaigns);
+            const newCampaign = campaigns.find((c) => c.id === campaignId);
+            if (newCampaign) setViewingFiftyFifty(newCampaign);
+          }}
+        />
+      )}
+      {phase === 'dashboard' && user && viewingFiftyFifty && (
+        <FiftyFiftyManage
+          ff={viewingFiftyFifty}
+          sendTxEmail={sendTxEmail}
+          onBack={async () => {
+            setViewingFiftyFifty(null);
+            await loadFiftyFiftyCampaigns();
+          }}
+        />
+      )}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
       {phase === 'wizard'    && <SetupWizard    onComplete={(data) => { setWizardPrefill(null); handleWizardComplete(data); }} onCancel={() => { setWizardPrefill(null); setPhase('dashboard'); }} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false} onBankConnectDone={async () => { if (user?.id) { const p = await fetchProfile(user.id); setUser((prev) => prev ? { ...prev, stripeAccountId: p.stripeAccountId, stripeOnboardingComplete: p.stripeOnboardingComplete } : prev); } }} campaignPrefill={wizardPrefill} />}

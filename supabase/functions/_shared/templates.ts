@@ -1016,3 +1016,84 @@ Thank you for being here early. It means a lot to us.
 ${SIG}`,
   };
 }
+
+// ── 50/50 Raffle emails ───────────────────────────────────────────────────────
+
+export function emailFiftyFiftyTicketConfirmation(d: {
+  buyer_name: string;
+  campaign_title: string;
+  org_name: string;
+  ticket_numbers: string;
+  quantity: number;
+  amount_paid: string;
+  jackpot_at_purchase: string;
+  campaign_url: string;
+}) {
+  return {
+    subject: `Your 50/50 raffle tickets: ${d.campaign_title}`,
+    text: `Hi ${firstName(d.buyer_name)},
+
+You're in the draw! Here are your ticket details for ${d.campaign_title}.
+
+Your tickets: ${d.ticket_numbers}
+Number of tickets: ${d.quantity}
+Amount paid: ${amt(d.amount_paid)}
+Jackpot at time of purchase: ${d.jackpot_at_purchase}
+
+The jackpot keeps growing as more tickets are sold. The winner takes home 50% of total ticket sales.
+
+View the live jackpot:
+${d.campaign_url}
+
+Good luck!
+
+${SIG}`,
+  };
+}
+
+export function emailFiftyFiftyDrawWinner(d: {
+  buyer_name: string;
+  campaign_title: string;
+  org_name: string;
+  winning_ticket: number;
+  prize_amount: string;
+  contact_email: string;
+}) {
+  return {
+    subject: `Congratulations! You won the ${d.campaign_title} raffle!`,
+    text: `Hi ${firstName(d.buyer_name)},
+
+You're a winner! Ticket #${String(d.winning_ticket).padStart(3, '0')} was drawn in the ${d.campaign_title} 50/50 raffle.
+
+Your prize: ${amt(d.prize_amount)} (50% of total ticket sales)
+
+The organiser will be in touch shortly to arrange your prize.${d.contact_email ? ` If you have any questions, contact them at ${d.contact_email}.` : ''}
+
+Congratulations!
+
+${SIG}`,
+  };
+}
+
+export function emailFiftyFiftyDrawNoWin(d: {
+  buyer_name: string;
+  campaign_title: string;
+  org_name: string;
+  winning_ticket: number;
+  total_raised: string;
+}) {
+  return {
+    subject: `The ${d.campaign_title} raffle has been drawn`,
+    text: `Hi ${firstName(d.buyer_name)},
+
+The ${d.campaign_title} 50/50 raffle draw has taken place.
+
+Winning ticket: #${String(d.winning_ticket).padStart(3, '0')}
+
+Unfortunately your ticket wasn't the lucky one this time, but your support helped raise ${amt(d.total_raised)} in total for this cause.
+
+Thank you for taking part. Better luck next time!
+
+${SIG}`,
+  };
+}

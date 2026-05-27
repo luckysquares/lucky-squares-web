@@ -40,6 +40,10 @@ const TRANSACTIONAL_TYPES = new Set([
   // Prize claim flow
   'organizer_prize_claim',
   'winner_claim_confirmation',
+  // 50/50 raffle
+  'fifty_fifty_ticket_confirmation',
+  'fifty_fifty_draw_winner',
+  'fifty_fifty_draw_no_win',
 ]);
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -184,6 +188,10 @@ async function buildTemplate(type: string, d: any): Promise<{ subject: string; t
     // Prize claim flow
     case 'organizer_prize_claim':         return T.emailOrganizerPrizeClaim(d);
     case 'winner_claim_confirmation':     return T.emailWinnerClaimConfirmation(d);
+    // 50/50 raffle
+    case 'fifty_fifty_ticket_confirmation': return T.emailFiftyFiftyTicketConfirmation(d);
+    case 'fifty_fifty_draw_winner':         return T.emailFiftyFiftyDrawWinner(d);
+    case 'fifty_fifty_draw_no_win':         return T.emailFiftyFiftyDrawNoWin(d);
     // Welcome sequence
     case 'welcome_day1':                  return T.emailWelcomeDay1(d);
     case 'welcome_day3_no_campaign':      return T.emailWelcomeDay3NoCampaign(d);
