@@ -132,6 +132,16 @@ export default function AdminOrganisations() {
                           Revoke
                         </button>
                       )}
+                      {isRejected && (
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: '#16A34A', color: '#fff', border: 'none' }}
+                          disabled={!!busy}
+                          onClick={() => { if (window.confirm(`Re-approve ${o.org_name}?`)) handleAction(o.id, 'approve'); }}
+                        >
+                          {busy === 'approve' ? 'Approving…' : 'Re-approve'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
