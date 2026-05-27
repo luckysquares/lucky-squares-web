@@ -88,7 +88,11 @@ export default function OrgSignupPage() {
     try {
       const res  = await fetch(`/api/abn-lookup?abn=${abnDigits}`);
       const data = await res.json();
-      if (data.found) {
+      if (!res.ok) {
+        // ABR API unavailable or misconfigured — don't show "not found", leave as null
+        // (shows "ABN format valid" which is accurate — checksum passed)
+        console.warn('[abn-lookup] API error:', data?.error ?? res.status);
+      } else if (data.found) {
         setAbnLookup(data);
         // Auto-fill org name if empty
         if (!orgName.trim() && data.name) setOrgName(data.name);
@@ -96,7 +100,7 @@ export default function OrgSignupPage() {
         setAbnLookup({ found: false });
       }
     } catch {
-      // silently skip if lookup fails — don't block the form
+      // Network failure — silently skip, don't block the form
     }
 
     // Check if ABN already registered in our DB
@@ -330,7 +334,7 @@ export default function OrgSignupPage() {
                     {abnValid && !abnChecking && !abnExists && abnLookup?.found && abnLookup.active && (
                       <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>
                         ✓ {abnLookup.name || 'ABN verified'}
-                        {abnLookup.entityType ? ` — ${abnLookup.entityType}` : ''}
+                        {abnLookup.entityType ? ` (${abnLookup.entityType})` : ''}
                       </span>
                     )}
                     {abnValid && !abnChecking && !abnExists && !abnLookup && (
