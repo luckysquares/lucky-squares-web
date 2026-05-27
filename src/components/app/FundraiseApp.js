@@ -599,6 +599,20 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, 
           </div>
         )}
 
+        {/* 50/50 Raffles section */}
+        <div style={{ marginTop: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 800 }}>50/50 Raffles</h2>
+            <span className="tag" style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11 }}>Coming soon</span>
+          </div>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>
+            Run a 50/50 raffle: sell tickets, the winner takes half the pot, your organisation keeps the other half.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20 }}>
+            <FiftyFiftyComingSoonCard />
+          </div>
+        </div>
+
         {/* Team section: visible to org plan admins only */}
         {user?.plan === 'org' && orgInfo?.role !== 'contributor' && (
           <OrgTeamSection sendTxEmail={sendTxEmail} />
@@ -612,6 +626,34 @@ const PLATFORM_FEES = { 25: 19, 50: 19, 100: 19 };
 
 const PLAN_LIMITS  = { trial: 3, casual: 5, org: 10 };
 const PLAN_LABELS  = { trial: 'Trial', casual: 'Casual', org: 'Organisation' };
+
+function FiftyFiftyComingSoonCard() {
+  return (
+    <div
+      title="50/50 raffles are coming soon"
+      style={{
+        padding: 24,
+        border: '2px dashed #D1D5DB',
+        borderRadius: 'var(--radius)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 180,
+        background: '#FAFAF9',
+        textAlign: 'center',
+        gap: 10,
+        opacity: 0.55,
+        cursor: 'not-allowed',
+        userSelect: 'none',
+      }}
+    >
+      <div style={{ fontSize: 38 }}>🎟️</div>
+      <div style={{ fontWeight: 800, color: 'var(--text2)', fontSize: 15 }}>New 50/50 Raffle</div>
+      <div style={{ fontSize: 13, color: 'var(--muted)' }}>Coming soon</div>
+    </div>
+  );
+}
 
 function FundraiserCard({ f, onView, onReport, onConnectBank, onDuplicate }) {
   const [hovered, setHovered] = useState(false);
