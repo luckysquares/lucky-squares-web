@@ -36,7 +36,7 @@ export default async function CertificatePage({ params }) {
 
   const { data: fundraiser, error: frErr } = await db
     .from('fundraisers')
-    .select('id, title, org, status, grid_size, price_per_sq, launched_at, draw_date, contact_name, payment_method, prize_reserve_cents, winner_square_nums')
+    .select('id, title, org, status, grid_size, price_per_sq, launched_at, draw_date, drawn_at, contact_name, payment_method, prize_reserve_cents, winner_square_nums')
     .eq(col, slug)
     .single();
 
@@ -46,11 +46,13 @@ export default async function CertificatePage({ params }) {
 
   const fundraiserId = fundraiser.id;
 
+  // Count status='sold' — not paid=true — because in-person/bank-transfer sales
+  // set status='sold' with paid=false (only Stripe sets paid=true).
   const { count: soldCount } = await db
     .from('squares')
     .select('id', { count: 'exact', head: true })
     .eq('fundraiser_id', fundraiserId)
-    .eq('paid', true);
+    .eq('status', 'sold');
 
   const { data: prizes } = await db
     .from('prizes')
@@ -164,8 +166,8 @@ export default async function CertificatePage({ params }) {
               <span className="kv-v">{fundraiser.contact_name}</span>
               <span className="kv-k">Launched</span>
               <span className="kv-v">{fmtDate(fundraiser.launched_at)}</span>
-              <span className="kv-k">Draw date</span>
-              <span className="kv-v">{fmtDate(fundraiser.draw_date)}</span>
+              <span className="kv-k">{fundraiser.drawn_at ? 'Drawn' : 'Draw date'}</span>
+              <span className="kv-v">{fmtDate(fundraiser.drawn_at ?? fundraiser.draw_date)}</span>
               <span className="kv-k">Grid</span>
               <span className="kv-v">{fundraiser.grid_size} squares at {fmtAud(priceCents)} per square</span>
               <span className="kv-k">Squares sold</span>
@@ -209,7 +211,7 @@ export default async function CertificatePage({ params }) {
                     // Primary: buyer name from the winning square (always available after draw)
                     // Supplement: prize_claims for Stripe campaigns that have completed claiming
                     const winnerName = winnerByIndex[i] ?? claimByPlace[p.place]?.buyer_name ?? null;
-                    const valueStr = p.donated ? ' (donated prize)' : p.value ? ` — ${p.value}` : '';
+                    const valueStr = p.donated ? ' (donated prize)' : p.value ? ` ($${p.value})` : '';
                     return (
                       <tr key={i}>
                         <td><span className="badge">{p.place}</span></td>

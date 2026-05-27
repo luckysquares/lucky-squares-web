@@ -342,11 +342,12 @@ export async function POST(request) {
       if (campaigns?.length) {
         // Fetch sold square counts for each campaign
         const ids = campaigns.map((c) => c.id);
+        // Use status='sold' not paid=true — in-person/bank sales set status='sold' with paid=false
         const { data: squares } = await db
           .from('squares')
           .select('fundraiser_id')
           .in('fundraiser_id', ids)
-          .eq('paid', true);
+          .eq('status', 'sold');
 
         const soldMap = {};
         for (const s of squares ?? []) {
