@@ -335,19 +335,14 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
 
 // ─── VerifyScreen ─────────────────────────────────────────────────────────────
 
-function VerifyScreen({ email, onVerify, loading, error }) {
-  const [digits, setDigits] = useState(['', '', '', '', '', '']);
-  const inputRefs = useRef([]);
+function VerifyScreen({ email, onResend }) {
+  const [resent, setResent] = useState(false);
 
-  const handleDigit = useCallback((i, val) => {
-    if (!/^\d?$/.test(val)) return;
-    setDigits((prev) => { const next = [...prev]; next[i] = val; return next; });
-    if (val && i < 5) inputRefs.current[i + 1]?.focus();
-  }, []);
-
-  const handleKey = useCallback((i, e) => {
-    if (e.key === 'Backspace' && !digits[i] && i > 0) inputRefs.current[i - 1]?.focus();
-  }, [digits]);
+  const handleResend = async () => {
+    await onResend();
+    setResent(true);
+    setTimeout(() => setResent(false), 5000);
+  };
 
   return (
     <div className="dot-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
@@ -355,21 +350,17 @@ function VerifyScreen({ email, onVerify, loading, error }) {
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ fontSize: 64 }}>📬</div>
           <h1 className="section-title" style={{ marginTop: 16 }}>Check your email</h1>
-          <p className="section-sub">We sent a 6-digit code to<br /><strong>{email || 'your email'}</strong></p>
+          <p className="section-sub">We sent a verification link to<br /><strong>{email || 'your email'}</strong></p>
         </div>
         <div className="scratch-card" style={{ padding: 32, textAlign: 'center' }}>
-          <div className="verify-digits">
-            {digits.map((d, i) => (
-              <input key={i} ref={(el) => { inputRefs.current[i] = el; }} className="verify-digit" maxLength={1} value={d}
-                onChange={(e) => handleDigit(i, e.target.value)} onKeyDown={(e) => handleKey(i, e)} />
-            ))}
-          </div>
-          {error && <div style={{ margin: '12px 0', padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
-          <button className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: 8 }} disabled={loading} onClick={() => onVerify(digits.join(''))}>
-            {loading ? 'Verifying…' : 'Verify & continue ✓'}
-          </button>
-          <button style={{ marginTop: 16, background: 'none', border: 'none', color: 'var(--text2)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-            Didn&apos;t get it? Resend code
+          <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, margin: '0 0 24px' }}>
+            Click the link in the email to confirm your account and continue. Check your spam folder if it doesn&apos;t arrive within a minute.
+          </p>
+          <button
+            style={{ background: 'none', border: 'none', color: resent ? 'var(--green)' : 'var(--text2)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textDecoration: resent ? 'none' : 'underline' }}
+            onClick={handleResend}
+          >
+            {resent ? '✓ Email resent' : 'Didn\'t get it? Resend email'}
           </button>
         </div>
       </div>
@@ -1968,6 +1959,14 @@ export default function FundraiseApp() {
         const supabase = getSupabaseClient();
         const { plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete, fullName } = await fetchProfile(u.id);
         setUser({ id: u.id, name: u.user_metadata?.full_name || fullName || '', email: u.email, org: u.user_metadata?.organisation || '', phone: u.user_metadata?.phone || '', plan, isFoundingMember, isBetaTester, stripeAccountId, stripeOnboardingComplete });
+        // Send welcome emails if this is a new signup returning after email verification
+        const newSignup = (() => { try { return JSON.parse(localStorage.getItem('ls_new_signup') || 'null'); } catch { return null; } })();
+        if (newSignup?.email === u.email) {
+          const firstName = newSignup.name?.split(' ')[0] || u.user_metadata?.full_name?.split(' ')[0] || 'there';
+          sendTxEmail('organizer_welcome', u.email, { first_name: firstName });
+          sendTxEmail('welcome_day1', u.email, { first_name: firstName });
+          localStorage.removeItem('ls_new_signup');
+        }
         // Load org role (contributor or admin)
         const { data: oi } = await supabase.rpc('get_my_org_info');
         setOrgInfo(oi);
@@ -2037,7 +2036,8 @@ export default function FundraiseApp() {
     setAuthError('');
     if (!supabaseConfigured) { setPendingEmail(email); setPhase('verify'); return; }
     setAuthLoading(true);
-    const { data, error } = await getSupabaseClient().auth.signUp({ email, password, options: { data: { full_name: name, organisation: org, phone } } });
+    const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/fundraise` : 'https://luckysquares.com.au/fundraise';
+    const { data, error } = await getSupabaseClient().auth.signUp({ email, password, options: { data: { full_name: name, organisation: org, phone }, emailRedirectTo: redirectTo } });
     setAuthLoading(false);
     if (error) { setAuthError(error.message); return; }
     // If email confirmation is disabled, user is auto-confirmed with a session
@@ -2057,6 +2057,11 @@ export default function FundraiseApp() {
       sendTxEmail('welcome_day1', email, { first_name: firstName });
       setPhase('dashboard');
       return;
+    }
+    // Email confirmation required — store new-signup metadata so welcome emails
+    // fire when the user returns after clicking the verification link
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ls_new_signup', JSON.stringify({ email, name: name || '' }));
     }
     setPendingEmail(email);
     setPhase('verify');
@@ -2470,7 +2475,7 @@ export default function FundraiseApp() {
       {showHeader && <AppHeader user={user} onLogout={handleLogout} onHome={() => setPhase('dashboard')} />}
       {phase === 'login'     && <LoginScreen    onLogin={handleLogin}        onRegister={() => { setAuthError(''); setPhase('register'); }} loading={authLoading} error={authError} />}
       {phase === 'register'  && <RegisterScreen onRegister={handleRegister}  onBack={() => { setAuthError(''); setPhase('login'); }} loading={authLoading} error={authError} />}
-      {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onVerify={handleVerify} loading={authLoading} error={authError} />}
+      {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onResend={async () => { if (supabaseConfigured) await getSupabaseClient().auth.resend({ type: 'signup', email: pendingEmail }); }} />}
       {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
