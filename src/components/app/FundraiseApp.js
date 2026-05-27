@@ -1962,18 +1962,20 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
 const FF_EMOJIS = ['🎟️', '🍀', '🏆', '🎉', '⭐', '💛', '🌈', '🎯', '🏉', '🐨'];
 const FF_TICKET_PRESETS = [1, 2, 5, 10, 20];
 
-// Approximate thresholds for when a lottery/raffle licence is required.
-// Based on total ticket sales (gross proceeds). Figures are indicative only —
-// organisers should verify with the relevant authority before running their raffle.
+// Maximum prize pool before a lottery/raffle licence is required.
+// In a 50/50 raffle the prize pool = 50% of total ticket sales, so the
+// equivalent ticket sales limit = threshold × 2.
+// Figures are indicative only — organisers should verify with the relevant
+// authority before running their raffle.
 const STATE_THRESHOLDS = {
-  NSW: { label: 'New South Wales',             threshold: 30000,  note: 'Community gaming — no permit needed for prizes under $30,000 in value. Larger Art Unions require a permit from Liquor & Gaming NSW.' },
-  VIC: { label: 'Victoria',                    threshold: 5000,   note: 'No permit needed for total ticket sales under $5,000. Above that, a Trade Promotion or Community/Charitable Lottery permit is required from the VCGLR.' },
-  QLD: { label: 'Queensland',                  threshold: 100000, note: 'Incorporated associations may conduct raffles with gross proceeds up to $100,000 without a permit. Above that, a licence is required from the OLGR.' },
-  SA:  { label: 'South Australia',             threshold: 5000,   note: 'No licence needed if total ticket sales are under $5,000. Amounts above this require a permit from Consumer and Business Services SA.' },
-  WA:  { label: 'Western Australia',           threshold: 10000,  note: 'No licence required for total ticket sales under $10,000 by an approved association. Above that, contact the Department of Local Government.' },
-  TAS: { label: 'Tasmania',                    threshold: 5000,   note: 'No permit needed for total ticket sales under $5,000. Above this threshold, contact the Tasmanian Liquor and Gaming Commission.' },
-  ACT: { label: 'Australian Capital Territory',threshold: 25000,  note: 'No permit needed for a single raffle with total ticket sales under $25,000. Above this, a licence is required from the ACT Gambling and Racing Commission.' },
-  NT:  { label: 'Northern Territory',          threshold: 5000,   note: 'No permit needed for total ticket sales under $5,000. Contact the NT Racing Commission for amounts above this threshold.' },
+  NSW: { label: 'New South Wales',             threshold: 30000,  note: 'No permit needed for a prize pool under $30,000. Above that, an Art Union permit is required from Liquor & Gaming NSW.' },
+  VIC: { label: 'Victoria',                    threshold: 5000,   note: 'No permit needed for a prize pool under $5,000. Above that, a Community/Charitable Lottery permit is required from the VCGLR.' },
+  QLD: { label: 'Queensland',                  threshold: 100000, note: 'Incorporated associations may run raffles with a prize pool up to $100,000 without a permit. Above that, a licence is required from the OLGR.' },
+  SA:  { label: 'South Australia',             threshold: 5000,   note: 'No licence needed for a prize pool under $5,000. Above this, a permit is required from Consumer and Business Services SA.' },
+  WA:  { label: 'Western Australia',           threshold: 10000,  note: 'No licence required for a prize pool under $10,000 by an approved association. Above that, contact the Department of Local Government.' },
+  TAS: { label: 'Tasmania',                    threshold: 5000,   note: 'No permit needed for a prize pool under $5,000. Above this threshold, contact the Tasmanian Liquor and Gaming Commission.' },
+  ACT: { label: 'Australian Capital Territory',threshold: 25000,  note: 'No permit needed for a prize pool under $25,000. Above this, a licence is required from the ACT Gambling and Racing Commission.' },
+  NT:  { label: 'Northern Territory',          threshold: 5000,   note: 'No permit needed for a prize pool under $5,000. Contact the NT Racing Commission for amounts above this threshold.' },
 };
 
 function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete }) {
@@ -2133,19 +2135,20 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
               {/* Threshold callout */}
               {state && (() => {
                 const info = STATE_THRESHOLDS[state];
-                const thresholdTickets = selectedPrice > 0 ? Math.floor(info.threshold / selectedPrice) : null;
+                // Prize pool = tickets × price × 0.5, so max tickets = threshold × 2 / price
+                const thresholdTickets = selectedPrice > 0 ? Math.floor((info.threshold * 2) / selectedPrice) : null;
                 const needsLicence = selectedPrice > 0 && thresholdTickets !== null;
                 return (
                   <div style={{ marginTop: 16, padding: '16px 20px', background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 12 }}>
                     <div style={{ fontWeight: 800, fontSize: 14, color: '#92400E', marginBottom: 6 }}>
-                      {info.label} — licence threshold: ${info.threshold.toLocaleString()} in ticket sales
+                      {info.label} — maximum prize pool without a licence: ${info.threshold.toLocaleString()}
                     </div>
                     <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6, marginBottom: needsLicence ? 8 : 0 }}>
                       {info.note}
                     </div>
                     {needsLicence && (
                       <div style={{ fontSize: 13, color: '#92400E', fontWeight: 700, marginTop: 4 }}>
-                        At ${selectedPrice.toFixed(2)}/ticket, you will need a licence after approximately {thresholdTickets.toLocaleString()} tickets sold.
+                        At ${selectedPrice.toFixed(2)}/ticket, the prize pool reaches ${info.threshold.toLocaleString()} after approximately {thresholdTickets.toLocaleString()} tickets sold (${(thresholdTickets * selectedPrice).toLocaleString()} in total sales).
                       </div>
                     )}
                     {!selectedPrice && (
@@ -2209,8 +2212,8 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
               <input className="form-input" placeholder="e.g. LSA-12345" maxLength={60} value={lotteryLicence} onChange={(e) => setLotteryLicence(e.target.value)} style={{ marginTop: 8 }} />
               <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8, lineHeight: 1.6 }}>
                 {state && STATE_THRESHOLDS[state]
-                  ? `If your total ticket sales will exceed $${STATE_THRESHOLDS[state].threshold.toLocaleString()} in ${STATE_THRESHOLDS[state].label}, enter your licence number here. Leave blank if not required.`
-                  : 'If your total ticket sales will exceed your state\'s threshold, enter your licence number here. Leave blank if not required.'}
+                  ? `If your prize pool will exceed $${STATE_THRESHOLDS[state].threshold.toLocaleString()} in ${STATE_THRESHOLDS[state].label}, enter your licence number here. Leave blank if not required.`
+                  : 'If your prize pool will exceed your state\'s threshold, enter your licence number here. Leave blank if not required.'}
               </p>
             </div>
           </div>
