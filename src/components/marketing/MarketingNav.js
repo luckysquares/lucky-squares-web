@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 
-const NAV_LINKS = [
+const DEFAULT_NAV_LINKS = [
   { href: '/how-it-works', label: 'How it works' },
   { href: '/pricing',      label: 'Pricing' },
   { href: '/feeling-lucky', label: '🍀 Feeling Lucky?' },
 ];
 
-export default function MarketingNav() {
+export default function MarketingNav({ links } = {}) {
+  const NAV_LINKS = links ?? DEFAULT_NAV_LINKS;
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
