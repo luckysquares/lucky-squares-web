@@ -105,6 +105,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [showExtendDate,     setShowExtendDate]     = useState(false);
   const [newDrawDate,        setNewDrawDate]        = useState(fundraiser.drawDate || '');
   const [savingDate,         setSavingDate]         = useState(false);
+  const [winnerDetails,      setWinnerDetails]      = useState([]); // persisted winner contact details for drawn campaigns
   const [showLaunchModal,       setShowLaunchModal]       = useState(false);
   const [showUnpaidModal,       setShowUnpaidModal]        = useState(false);
   const [showBreakEvenModal,    setShowBreakEvenModal]     = useState(false);
@@ -148,6 +149,26 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
 
     return () => { supabase.removeChannel(channel); };
   }, [fundraiser.id, fundraiser.grid]);
+
+  // Fetch winner contact details for drawn campaigns so the organiser
+  // can see them even after navigating away from the live draw screen.
+  useEffect(() => {
+    const winNums = fundraiser.winnerSquareNums ?? (fundraiser.winnerSquareNum != null ? [fundraiser.winnerSquareNum] : []);
+    if (!isOwner || fundraiser.status !== 'drawn' || winNums.length === 0 || !supabaseConfigured) return;
+    getSupabaseClient()
+      .from('squares')
+      .select('number, buyer_name, buyer_email, buyer_phone')
+      .eq('fundraiser_id', fundraiser.id)
+      .in('number', winNums)
+      .then(({ data }) => {
+        if (!data) return;
+        // Preserve prize order — winNums[0] is 1st place, [1] is 2nd, etc.
+        setWinnerDetails(winNums.map((num) => {
+          const sq = data.find((s) => s.number === num);
+          return { squareNum: num, name: sq?.buyer_name, email: sq?.buyer_email, phone: sq?.buyer_phone };
+        }));
+      });
+  }, [fundraiser.id, fundraiser.status, isOwner]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
@@ -989,7 +1010,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
 
           {isDrawn ? (
             <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20 }}>
-              <div style={{ background: 'linear-gradient(135deg,#1A3C2E,#0D2B1F)', color: '#fff', padding: '16px 20px', borderRadius: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
+              {/* Draw complete header */}
+              <div style={{ background: 'linear-gradient(135deg,#1A3C2E,#0D2B1F)', color: '#fff', padding: '16px 20px', borderRadius: 14, marginBottom: isOwner && winnerDetails.length > 0 ? 0 : 16, display: 'flex', alignItems: 'center', gap: 14, borderBottomLeftRadius: isOwner && winnerDetails.length > 0 ? 0 : 14, borderBottomRightRadius: isOwner && winnerDetails.length > 0 ? 0 : 14 }}>
                 <span style={{ fontSize: 28, flexShrink: 0 }}>🏆</span>
                 <div>
                   <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 900 }}>Draw complete!</div>
@@ -1004,6 +1026,43 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                   </div>
                 </div>
               </div>
+
+              {/* Winner contact details — organiser only */}
+              {isOwner && winnerDetails.length > 0 && (
+                <div style={{ background: '#F5F3EE', border: '1.5px solid #E5E0D5', borderTop: 'none', borderBottomLeftRadius: 14, borderBottomRightRadius: 14, padding: '12px 16px', marginBottom: 16 }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: '#9C8060', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: 10 }}>Winner contact details</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {winnerDetails.map((w, i) => {
+                      const prize = fundraiser.prizes?.[i];
+                      const place = ['1st','2nd','3rd'][i] ?? `${i + 1}th`;
+                      return (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 11, color: '#9C8060', fontWeight: 700, marginBottom: 2 }}>
+                              {place} prize{prize?.description ? `: ${prize.description}` : ''} — Square #{w.squareNum}
+                            </div>
+                            <div style={{ fontSize: 14, fontWeight: 800, color: '#1A1209' }}>{w.name || 'Unknown'}</div>
+                            <div style={{ fontSize: 12, color: '#4A3728', marginTop: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              {w.email && <span>✉ {w.email}</span>}
+                              {w.phone && <span>📞 {w.phone}</span>}
+                              {!w.email && !w.phone && <span style={{ color: '#9C8060', fontStyle: 'italic' }}>No contact details recorded</span>}
+                            </div>
+                          </div>
+                          {w.email && (
+                            <a
+                              href={`mailto:${w.email}?subject=Congratulations! You won ${place} prize in ${fundraiser.title}&body=Hi ${w.name ? w.name.split(' ')[0] : 'there'},%0D%0A%0D%0ACongratulations! You have won the ${place} prize${prize?.description ? ` (${prize.description})` : ''} in the ${fundraiser.title} Lucky Squares fundraiser.%0D%0A%0D%0APlease contact us to arrange your prize.%0D%0A%0D%0ARegards,%0D%0A${fundraiser.org}`}
+                              style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, textDecoration: 'none', background: '#7C3AED', color: '#fff', borderRadius: 8, padding: '6px 12px', whiteSpace: 'nowrap' }}
+                            >
+                              ✉ Email winner
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, fontWeight: 700 }}>
                 {[['#00C875','#009A5C','Winners 🏆'],['#4A90D9','#2165B5','Your squares'],['#F0EDE5','#DDD5C0','Sold']].map(([bg,bc,lbl]) => (
                   <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
