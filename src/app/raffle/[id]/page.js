@@ -142,19 +142,24 @@ export default function RaffleBuyPage({ params }) {
     setSuccessTickets([]);
   }, []);
 
-  const effectiveQty = customQty ? (parseInt(customQty, 10) || 1) : quantity;
+  const ticketsRemaining = campaign?.tickets_remaining ?? null; // null = unlimited
+  const isSoldOut        = ticketsRemaining !== null && ticketsRemaining === 0;
+  const maxQty           = ticketsRemaining !== null ? Math.min(20, ticketsRemaining) : 20;
 
-  const ticketPrice = campaign ? parseFloat(campaign.ticket_price) : 0;
-  const subtotal    = ticketPrice * effectiveQty;
-  const txFee       = calcTxFee(subtotal);
+  const rawQty       = customQty ? (parseInt(customQty, 10) || 1) : quantity;
+  const effectiveQty = Math.max(1, Math.min(rawQty, maxQty));
+
+  const ticketPrice  = campaign ? parseFloat(campaign.ticket_price) : 0;
+  const subtotal     = ticketPrice * effectiveQty;
+  const txFee        = calcTxFee(subtotal);
   const totalWithFee = subtotal + txFee;
-  const isStripe    = campaign?.payment_method === 'stripe';
+  const isStripe     = campaign?.payment_method === 'stripe';
 
   const pickedNums = selectionMode === 'pick'
     ? pickedNumbers.split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => Number.isInteger(n) && n > 0)
     : [];
 
-  const canSubmit = buyerName.trim() && buyerEmail.trim() && effectiveQty >= 1 && effectiveQty <= 20
+  const canSubmit = !isSoldOut && buyerName.trim() && buyerEmail.trim() && effectiveQty >= 1 && effectiveQty <= maxQty
     && (selectionMode === 'auto' || pickedNums.length === effectiveQty);
 
   const handleStripePurchase = async () => {
@@ -334,22 +339,40 @@ export default function RaffleBuyPage({ params }) {
 
         {/* Live jackpot hero */}
         {!isDrawn && (
-          <div style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', borderRadius: 20, padding: '32px 28px', marginBottom: 32, textAlign: 'center', color: '#fff', boxShadow: '0 8px 32px rgba(245,158,11,.35)' }}>
-            <div style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, opacity: 0.85, marginBottom: 8 }}>Current jackpot</div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(40px,8vw,72px)', fontWeight: 900, lineHeight: 1, marginBottom: 8 }}>
-              ${fmt(campaign.jackpot ?? 0)}
-            </div>
-            <div style={{ fontSize: 14, opacity: 0.85, lineHeight: 1.5 }}>
-              and growing — buy a ticket to enter!
-            </div>
-            <div style={{ marginTop: 16, fontSize: 13, opacity: 0.75 }}>
-              {campaign.tickets_sold} ticket{campaign.tickets_sold !== 1 ? 's' : ''} sold at ${fmt(campaign.ticket_price)} each
-            </div>
+          <div style={{ background: isSoldOut ? 'linear-gradient(135deg,#6B7280,#4B5563)' : 'linear-gradient(135deg,#F59E0B,#D97706)', borderRadius: 20, padding: '32px 28px', marginBottom: 32, textAlign: 'center', color: '#fff', boxShadow: isSoldOut ? '0 8px 32px rgba(0,0,0,.2)' : '0 8px 32px rgba(245,158,11,.35)' }}>
+            {isSoldOut ? (
+              <>
+                <div style={{ fontSize: 40, marginBottom: 8 }}>🎟️</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>Sold out!</div>
+                <div style={{ fontSize: 15, opacity: 0.85, lineHeight: 1.5 }}>All tickets have been sold. The draw is coming up!</div>
+                <div style={{ marginTop: 16, fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,6vw,48px)', fontWeight: 900 }}>
+                  Jackpot: ${fmt(campaign.jackpot ?? 0)}
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, opacity: 0.85, marginBottom: 8 }}>Current jackpot</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(40px,8vw,72px)', fontWeight: 900, lineHeight: 1, marginBottom: 8 }}>
+                  ${fmt(campaign.jackpot ?? 0)}
+                </div>
+                <div style={{ fontSize: 14, opacity: 0.85, lineHeight: 1.5 }}>
+                  and growing — buy a ticket to enter!
+                </div>
+                <div style={{ marginTop: 16, fontSize: 13, opacity: 0.75 }}>
+                  {campaign.tickets_sold} ticket{campaign.tickets_sold !== 1 ? 's' : ''} sold at ${fmt(campaign.ticket_price)} each
+                  {ticketsRemaining !== null && (
+                    <span style={{ marginLeft: 10, fontWeight: 800, opacity: 1, color: ticketsRemaining <= 20 ? '#FDE68A' : 'inherit' }}>
+                      ({ticketsRemaining.toLocaleString()} remaining)
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
 
         {/* Purchase form */}
-        {!isDrawn && (
+        {!isDrawn && !isSoldOut && (
           <div className="scratch-card" style={{ padding: 28, marginBottom: 24 }}>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 800, marginBottom: 20 }}>Buy tickets</h2>
 
@@ -357,24 +380,30 @@ export default function RaffleBuyPage({ params }) {
             <div className="form-group" style={{ marginBottom: 20 }}>
               <label className="form-label">How many tickets?</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-                {QUANTITY_PRESETS.map((q) => (
+                {QUANTITY_PRESETS.filter((q) => q <= maxQty).map((q) => (
                   <button key={q}
                     onClick={() => { setQuantity(q); setCustomQty(''); }}
                     style={{ padding: '10px 18px', borderRadius: 10, border: `2px solid ${quantity === q && !customQty ? '#F59E0B' : 'var(--border)'}`, background: quantity === q && !customQty ? '#FEF3C7' : 'transparent', fontWeight: 800, fontSize: 15, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
                     {q}
                   </button>
                 ))}
-                <input
-                  type="number"
-                  min={1}
-                  max={20}
-                  placeholder="Other"
-                  value={customQty}
-                  onChange={(e) => setCustomQty(e.target.value)}
-                  style={{ width: 90, padding: '10px 14px', borderRadius: 10, border: `2px solid ${customQty ? '#F59E0B' : 'var(--border)'}`, fontWeight: 800, fontSize: 14, fontFamily: 'inherit', background: customQty ? '#FEF3C7' : 'transparent', outline: 'none' }}
-                />
+                {maxQty > 1 && (
+                  <input
+                    type="number"
+                    min={1}
+                    max={maxQty}
+                    placeholder="Other"
+                    value={customQty}
+                    onChange={(e) => setCustomQty(e.target.value)}
+                    style={{ width: 90, padding: '10px 14px', borderRadius: 10, border: `2px solid ${customQty ? '#F59E0B' : 'var(--border)'}`, fontWeight: 800, fontSize: 14, fontFamily: 'inherit', background: customQty ? '#FEF3C7' : 'transparent', outline: 'none' }}
+                  />
+                )}
               </div>
-              <p style={{ fontSize: 12, color: 'var(--text2)' }}>Maximum 20 tickets per purchase.</p>
+              <p style={{ fontSize: 12, color: 'var(--text2)' }}>
+                {ticketsRemaining !== null
+                  ? `${ticketsRemaining.toLocaleString()} ticket${ticketsRemaining !== 1 ? 's' : ''} remaining. Maximum ${maxQty} per purchase.`
+                  : 'Maximum 20 tickets per purchase.'}
+              </p>
             </div>
 
             {/* Selection mode */}

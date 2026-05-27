@@ -1994,6 +1994,7 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
   const [lotteryLicence, setLotteryLicence] = useState('');
   const [ticketPrice,    setTicketPrice]    = useState('');
   const [customPrice,    setCustomPrice]    = useState('');
+  const [maxTickets,     setMaxTickets]     = useState(''); // '' = unlimited
   const [paymentMethod,  setPaymentMethod]  = useState('stripe');
   const [bankDetails,    setBankDetails]    = useState({ accountName: '', bsb: '', account: '' });
   const [stripeReady,    setStripeReady]    = useState(false);
@@ -2022,7 +2023,8 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
           state:          state || null,
           ticket_price:   selectedPrice,
           payment_method: paymentMethod,
-          lottery_licence: sanitize(lotteryLicence) || null,
+          lottery_licence:   sanitize(lotteryLicence) || null,
+          max_tickets:       maxTickets ? parseInt(maxTickets, 10) || null : null,
           stripe_account_id: paymentMethod === 'stripe' ? (user?.stripeAccountId || null) : null,
           bank_account_name: paymentMethod !== 'stripe' ? sanitize(bankDetails.accountName) || null : null,
           bank_bsb:          paymentMethod !== 'stripe' ? sanitize(bankDetails.bsb) || null : null,
@@ -2232,6 +2234,42 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
               )}
             </div>
 
+            {/* Max tickets cap */}
+            <div className="scratch-card" style={{ padding: 28, marginBottom: 20 }}>
+              <label className="form-label" style={{ marginBottom: 8, display: 'block' }}>Maximum number of tickets <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 400 }}>(optional)</span></label>
+              <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16, lineHeight: 1.6 }}>
+                Set a cap and the raffle closes automatically when all tickets are sold. Leave blank for unlimited tickets.
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {[100, 200, 500, 1000].map((preset) => (
+                  <button key={preset}
+                    onClick={() => setMaxTickets(maxTickets === String(preset) ? '' : String(preset))}
+                    style={{ padding: '8px 16px', borderRadius: 10, border: `2px solid ${maxTickets === String(preset) ? '#F59E0B' : 'var(--border)'}`, background: maxTickets === String(preset) ? '#FEF3C7' : 'transparent', fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+                    {preset.toLocaleString()}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setMaxTickets('')}
+                  style={{ padding: '8px 16px', borderRadius: 10, border: `2px solid ${!maxTickets ? '#F59E0B' : 'var(--border)'}`, background: !maxTickets ? '#FEF3C7' : 'transparent', fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+                  Unlimited
+                </button>
+              </div>
+              <input
+                className="form-input"
+                type="number"
+                min="1"
+                placeholder="Or enter a custom number"
+                value={maxTickets}
+                onChange={(e) => setMaxTickets(e.target.value)}
+                style={{ maxWidth: 220 }}
+              />
+              {maxTickets && parseInt(maxTickets, 10) > 0 && selectedPrice > 0 && (
+                <div style={{ marginTop: 12, padding: '10px 14px', background: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: 10, fontSize: 13, color: '#92400E' }}>
+                  Max jackpot at sell-out: <strong>${((parseInt(maxTickets, 10) * selectedPrice) * 0.5).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                </div>
+              )}
+            </div>
+
             {/* Lottery licence — shown with state context */}
             <div className="scratch-card" style={{ padding: 28 }}>
               <label className="form-label">Lottery/Raffle licence number (if applicable)</label>
@@ -2332,6 +2370,7 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
                 <div><span style={{ color: 'var(--text2)' }}>Ticket price:</span> <strong>${selectedPrice.toFixed(2)}</strong></div>
                 <div><span style={{ color: 'var(--text2)' }}>State:</span> <strong>{state}</strong></div>
                 <div><span style={{ color: 'var(--text2)' }}>Payment:</span> <strong>{paymentMethod === 'stripe' ? 'Online card' : 'Bank transfer'}</strong></div>
+                <div><span style={{ color: 'var(--text2)' }}>Max tickets:</span> <strong>{maxTickets && parseInt(maxTickets, 10) > 0 ? parseInt(maxTickets, 10).toLocaleString() : 'Unlimited'}</strong></div>
                 {lotteryLicence && <div><span style={{ color: 'var(--text2)' }}>Licence:</span> <strong>{lotteryLicence}</strong></div>}
               </div>
             </div>
@@ -2616,19 +2655,28 @@ function FiftyFiftyManage({ ff: initialFf, onBack, sendTxEmail }) {
         )}
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 16, marginBottom: 24 }}>
-          {[
-            { label: 'Tickets sold',   value: String(ff.tickets_sold ?? 0) },
-            { label: 'Current jackpot (50%)', value: `$${fmt(ff.jackpot ?? 0)}`,   highlight: true },
-            { label: 'Total raised',   value: `$${fmt(totalRaised)}` },
-            { label: 'Ticket price',   value: `$${fmt(ff.ticket_price)}` },
-          ].map(({ label, value, highlight }) => (
-            <div key={label} className="scratch-card" style={{ padding: '20px 24px', borderColor: highlight ? '#F59E0B' : undefined, background: highlight ? '#FFFBEB' : undefined }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text2)', marginBottom: 8 }}>{label}</div>
-              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 900, color: highlight ? '#92400E' : 'var(--text)' }}>{value}</div>
+        {(() => {
+          const soldOut = ff.max_tickets != null && (ff.tickets_sold ?? 0) >= ff.max_tickets;
+          const remaining = ff.max_tickets != null ? Math.max(0, ff.max_tickets - (ff.tickets_sold ?? 0)) : null;
+          const stats = [
+            { label: 'Tickets sold', value: ff.max_tickets != null ? `${ff.tickets_sold ?? 0} / ${ff.max_tickets.toLocaleString()}` : String(ff.tickets_sold ?? 0) },
+            { label: 'Current jackpot (50%)', value: `$${fmt(ff.jackpot ?? 0)}`, highlight: true },
+            { label: 'Total raised',  value: `$${fmt(totalRaised)}` },
+            { label: 'Ticket price',  value: `$${fmt(ff.ticket_price)}` },
+          ];
+          if (remaining !== null && !soldOut) stats.push({ label: 'Tickets remaining', value: remaining.toLocaleString(), warn: remaining < 20 });
+          if (soldOut) stats.push({ label: 'Status', value: 'SOLD OUT', warn: true });
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 16, marginBottom: 24 }}>
+              {stats.map(({ label, value, highlight, warn }) => (
+                <div key={label} className="scratch-card" style={{ padding: '20px 24px', borderColor: highlight ? '#F59E0B' : warn ? '#FCA5A5' : undefined, background: highlight ? '#FFFBEB' : warn ? '#FFF0F0' : undefined }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.8, color: 'var(--text2)', marginBottom: 8 }}>{label}</div>
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 900, color: highlight ? '#92400E' : warn ? '#991B1B' : 'var(--text)' }}>{value}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
 
         {/* Campaign link */}
         <div className="scratch-card" style={{ padding: 24, marginBottom: 24 }}>

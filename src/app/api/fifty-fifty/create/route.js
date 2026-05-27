@@ -36,6 +36,7 @@ export async function POST(req) {
       bank_bsb,
       bank_account,
       state,
+      max_tickets,
     } = body;
 
     // Validate required fields
@@ -63,6 +64,7 @@ export async function POST(req) {
       status:         'draft',
       lottery_licence: lottery_licence ? lottery_licence.trim().substring(0, 60) : null,
       state:           state ? state.trim().toUpperCase().substring(0, 3) : null,
+      max_tickets:     max_tickets ? parseInt(max_tickets, 10) || null : null,
     };
 
     if (payment_method === 'stripe' && stripe_account_id) {
