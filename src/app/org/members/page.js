@@ -57,12 +57,9 @@ export default function OrgMembers() {
     } else {
       // Send invite email via transactional email Edge Function
       const token = result?.token;
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      if (supabaseUrl && token) {
-        fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+      if (token) {
+        getSupabaseClient().functions.invoke('transactional-email', {
+          body: {
             type: 'org_member_invite',
             to: inviteEmail.trim(),
             data: {
@@ -71,7 +68,7 @@ export default function OrgMembers() {
               invite_url: `${window.location.origin}/invite/${token}`,
               expires_days: 7,
             },
-          }),
+          },
         }).catch(() => {});
       }
       setInviteMsg('Invite sent! They will receive an email with a link to join.');
