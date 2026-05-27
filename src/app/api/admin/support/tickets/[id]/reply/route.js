@@ -122,7 +122,7 @@ export async function POST(req, { params }) {
 
       const replyTo = `support+${id}@reply.luckysquares.com.au`;
 
-      await fetch('https://api.resend.com/emails', {
+      const emailRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -134,6 +134,14 @@ export async function POST(req, { params }) {
           text:     `Re: ${ticket.subject} [${ticket.ticket_ref}]\n\n${body.trim()}\n\n---\nLucky Squares Australia Support Team\nReply to this email to continue the conversation.`,
         }),
       });
+
+      if (!emailRes.ok) {
+        const errBody = await emailRes.text();
+        console.error(`[support-reply] Resend error ${emailRes.status} for ${ticket.ticket_ref}:`, errBody);
+        return NextResponse.json({ message: msg, email_warning: `Email delivery failed (${emailRes.status}). The reply was saved but the customer was NOT notified. Check Vercel logs.` });
+      }
+    } else {
+      console.warn('[support-reply] RESEND_API_KEY not set — reply saved but email NOT sent for', ticket.ticket_ref);
     }
   }
 

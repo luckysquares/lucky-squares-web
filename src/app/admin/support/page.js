@@ -398,13 +398,17 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
   const sendReply = async () => {
     if (!replyBody.trim()) return;
     setSending(true);
-    await adminFetch(`/api/admin/support/tickets/${ticketId}/reply`, {
+    const res  = await adminFetch(`/api/admin/support/tickets/${ticketId}/reply`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ body: replyBody.trim(), is_internal: isInternal }),
     });
+    const json = await res.json().catch(() => ({}));
     setReplyBody('');
     setSending(false);
+    if (json.email_warning) {
+      alert(`Reply saved.\n\nWARNING: ${json.email_warning}`);
+    }
     fetchDetail();
     onUpdate();
   };
