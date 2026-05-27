@@ -208,7 +208,7 @@ export default function PublicFundraiserPage({ params }) {
         </div>
       </header>
 
-      <LiveGrid fundraiser={fundraiser} user={null} onBack={null} />
+      <LiveGrid fundraiser={fundraiser} user={null} onBack={isOrganiser ? () => { window.location.href = '/fundraise'; } : null} />
       <ReportCampaign fundraiserId={fundraiser.id} />
     </>
   );
