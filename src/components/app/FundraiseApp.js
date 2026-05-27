@@ -91,6 +91,7 @@ function dbToFundraiser(row, soldCount = 0, prizes = []) {
   return {
     id:              row.id,
     slug:            row.slug || null,
+    fundraiserType:  row.fundraiser_type || 'individual',
     title:           row.title,
     org:             row.org,
     description:     row.description || '',
@@ -2205,7 +2206,7 @@ export default function FundraiseApp() {
 
     setWizardPrefill({
       step:          0,
-      fundraiserType: f.org ? 'org' : 'individual',
+      fundraiserType: f.fundraiserType || 'individual',
       orgDetails:    { name: f.org || '', orgType: '', abn: '' },
       gridOpt,
       price:         String(f.pricePerSq),
