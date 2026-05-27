@@ -67,9 +67,16 @@ export async function GET(req) {
       return NextResponse.json({ found: false });
     }
 
-    const entity = extractBlock(xml, 'businessEntity202001');
+    // ABRSearchByABN can return different schema versions depending on the method used.
+    // Try each known wrapper element name in descending version order.
+    const entity =
+      extractBlock(xml, 'businessEntity202001') ||
+      extractBlock(xml, 'businessEntity201408') ||
+      extractBlock(xml, 'businessEntity');
 
     if (!entity) {
+      // Log raw XML snippet to help diagnose unexpected response shapes
+      console.warn('[abn-lookup] no entity block found. XML snippet:', xml.slice(0, 500));
       return NextResponse.json({ found: false });
     }
 
