@@ -566,7 +566,7 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
             <FiftyFiftyCard key={ff.id} ff={ff} onView={() => onViewFiftyFifty(ff)} />
           ))}
           {canCreate && <NewFundraiserCard onClick={onNew} />}
-          {canCreate && <NewFiftyFiftyCard onClick={onNewFiftyFifty} />}
+          {canCreate && <NewFiftyFiftyCard />}
         </div>
 
         {/* Referral card */}
@@ -652,13 +652,13 @@ function FiftyFiftyCard({ ff, onView }) {
 }
 
 function NewFiftyFiftyCard({ onClick }) {
-  const [hovered, setHovered] = useState(false);
   return (
-    <div className="card" onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ padding: 24, cursor: 'pointer', border: `2px dashed ${hovered ? '#F59E0B' : '#FCD34D'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, background: hovered ? '#FFFBEB' : 'transparent', textAlign: 'center', gap: 12, transition: 'border-color .2s, background .2s' }}>
-      <div style={{ fontSize: 40, transition: 'transform .2s', transform: hovered ? 'scale(1.1)' : 'scale(1)' }}>🎟️</div>
+    <div className="card"
+      style={{ padding: 24, cursor: 'not-allowed', border: '2px dashed #E5E0D5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, background: 'transparent', textAlign: 'center', gap: 12, opacity: 0.5 }}>
+      <div style={{ fontSize: 40 }}>🎟️</div>
       <div style={{ fontWeight: 800, color: 'var(--text2)' }}>New 50/50 Raffle</div>
       <div style={{ fontSize: 13, color: 'var(--muted)' }}>Sell tickets, winner takes half the pot</div>
+      <div style={{ marginTop: 4, padding: '4px 12px', background: '#F3F4F6', border: '1.5px solid #D1D5DB', borderRadius: 20, fontSize: 11, fontWeight: 800, color: '#6B7280', textTransform: 'uppercase', letterSpacing: 1 }}>Coming soon</div>
     </div>
   );
 }
