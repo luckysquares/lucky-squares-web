@@ -124,6 +124,40 @@ export async function POST(req) {
       return new Response('ok', { status: 200 });
     }
 
+    // ── 50/50 raffle launch fee ──────────────────────────────────────────────
+    if (action === 'fifty_fifty_launch') {
+      const { campaign_id } = session.metadata;
+
+      if (!campaign_id) {
+        return new Response('Missing campaign_id', { status: 400 });
+      }
+
+      const { data: existing } = await db
+        .from('fifty_fifty_campaigns')
+        .select('status')
+        .eq('id', campaign_id)
+        .single();
+
+      if (existing?.status !== 'active') {
+        const { error: activateError } = await db
+          .from('fifty_fifty_campaigns')
+          .update({ status: 'active', launched_at: new Date().toISOString() })
+          .eq('id', campaign_id);
+
+        if (activateError) {
+          console.error('[webhook] fifty_fifty_launch activation failed:', activateError.message, 'campaign:', campaign_id);
+          try {
+            await stripe.refunds.create({ payment_intent: session.payment_intent });
+            console.log('[webhook] 50/50 launch fee auto-refunded for campaign:', campaign_id);
+          } catch (refundErr) {
+            console.error('[webhook] 50/50 launch fee auto-refund failed:', refundErr.message);
+          }
+        }
+      }
+
+      return new Response('ok', { status: 200 });
+    }
+
     // ── 50/50 raffle ticket purchase ─────────────────────────────────────────
     if (action === 'fifty_fifty') {
       const { campaign_id, buyer_name, buyer_email, buyer_phone, quantity } = session.metadata;

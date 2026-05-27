@@ -60,7 +60,7 @@ export async function POST(req) {
       description:    description ? description.trim().substring(0, 500) : null,
       ticket_price:   price,
       payment_method: payment_method,
-      status:         'active',
+      status:         'draft',
       lottery_licence: lottery_licence ? lottery_licence.trim().substring(0, 60) : null,
       state:           state ? state.trim().toUpperCase().substring(0, 3) : null,
     };

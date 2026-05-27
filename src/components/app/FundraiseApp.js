@@ -8,6 +8,7 @@ import { validateAbn, formatAbn } from '@/lib/abn';
 import { containsProfanity } from '@/lib/profanity';
 import LiveGrid from '@/components/app/LiveGrid';
 import StripeConnectSetup from '@/components/app/StripeConnectSetup';
+import { QRCodeSVG } from 'qrcode.react';
 import MemberBadge from '@/components/app/MemberBadge';
 import SurveyModal from '@/components/app/SurveyModal';
 import { resolveUniqueSlug } from '@/lib/slug';
@@ -633,6 +634,12 @@ function FiftyFiftyCard({ ff, onView }) {
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+        {ff.status === 'draft' ? (
+          <div style={{ padding: '10px 12px', background: '#FFF6EE', border: '1.5px solid #FFD8B0', borderRadius: 10, fontSize: 13, marginBottom: 4 }}>
+            <div style={{ fontWeight: 800, color: 'var(--orange)', marginBottom: 4 }}>⏳ Payment pending</div>
+            <div style={{ color: 'var(--text2)', lineHeight: 1.5 }}>Your raffle is saved. Complete the $19 launch payment to go live.</div>
+          </div>
+        ) : null}
         <button className="btn btn-primary btn-sm" style={{ width: '100%' }} onClick={onView}>Manage raffle →</button>
         {ff.status === 'drawn' && (
           <button className="btn btn-outline btn-sm" style={{ width: '100%' }} disabled>
@@ -2044,17 +2051,36 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
   const handleLaunch = async () => {
     setSaving(true);
     setSaveError('');
+    // Save as draft first
     const campaignId = await saveCampaign();
     if (!campaignId) {
-      setSaveError('Something went wrong. Please try again.');
+      setSaveError('Something went wrong saving your raffle. Please try again.');
       setSaving(false);
       return;
     }
-    setSaving(false);
-    onComplete(campaignId);
+    // Create Stripe checkout for the $19 launch fee
+    try {
+      const { data: { session: authSession } } = await getSupabaseClient().auth.getSession();
+      const token = authSession?.access_token;
+      const res = await fetch('/api/stripe/create-fifty-fifty-launch-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ campaign_id: campaignId }),
+      });
+      const json = await res.json();
+      if (json.url) {
+        window.location.href = json.url;
+      } else {
+        setSaveError(json.error || 'Payment setup failed. Please try again.');
+        setSaving(false);
+      }
+    } catch {
+      setSaveError('Something went wrong. Please try again.');
+      setSaving(false);
+    }
   };
 
-  const steps = ['Details', 'Location and pricing', 'Payment'];
+  const steps = ['Details', 'Location and pricing', 'Payment', 'Launch'];
 
   return (
     <div className="dot-bg" style={{ minHeight: '100vh' }}>
@@ -2287,6 +2313,44 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
           </div>
         )}
 
+        {/* Step 3: Launch */}
+        {step === 3 && (
+          <div>
+            <h2 className="section-title">Ready to launch</h2>
+            <p className="section-sub" style={{ marginBottom: 24 }}>Review your raffle, then pay the one-off launch fee to go live.</p>
+
+            {/* Summary card */}
+            <div className="scratch-card" style={{ padding: 28, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+                <span style={{ fontSize: 40 }}>{emoji}</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 800 }}>{title}</div>
+                  {description && <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{description}</div>}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 24px', fontSize: 13 }}>
+                <div><span style={{ color: 'var(--text2)' }}>Ticket price:</span> <strong>${selectedPrice.toFixed(2)}</strong></div>
+                <div><span style={{ color: 'var(--text2)' }}>State:</span> <strong>{state}</strong></div>
+                <div><span style={{ color: 'var(--text2)' }}>Payment:</span> <strong>{paymentMethod === 'stripe' ? 'Online card' : 'Bank transfer'}</strong></div>
+                {lotteryLicence && <div><span style={{ color: 'var(--text2)' }}>Licence:</span> <strong>{lotteryLicence}</strong></div>}
+              </div>
+            </div>
+
+            {/* Fee card */}
+            <div className="scratch-card" style={{ padding: 28, background: '#FFFBEB', border: '2px solid #F59E0B' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 16 }}>One-off launch fee</div>
+                  <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4, lineHeight: 1.5 }}>
+                    Same flat fee as Lucky Squares campaigns. No ongoing charges. The winner takes 50% of all ticket sales and your organisation keeps the rest.
+                  </div>
+                </div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 900, color: '#92400E', flexShrink: 0 }}>$19</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Footer nav */}
         <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'space-between', flexWrap: 'wrap' }}>
           <button className="btn btn-outline" onClick={() => step === 0 ? onCancel() : setStep((s) => s - 1)}>
@@ -2299,7 +2363,7 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
               className="btn btn-gold btn-lg"
               disabled={!canNext() || saving}
               onClick={handleLaunch}>
-              {saving ? 'Launching…' : '🚀 Launch raffle'}
+              {saving ? 'Processing…' : '🚀 Pay $19 and launch'}
             </button>
           )}
         </div>
@@ -2314,15 +2378,16 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
 // ─── FiftyFiftyManage ─────────────────────────────────────────────────────────
 
 function FiftyFiftyManage({ ff: initialFf, onBack, sendTxEmail }) {
-  const [ff,           setFf]           = useState(initialFf);
-  const [tickets,      setTickets]      = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [copiedLink,   setCopiedLink]   = useState(false);
-  const [showDrawModal,setShowDrawModal] = useState(false);
-  const [drawing,      setDrawing]      = useState(false);
-  const [drawError,    setDrawError]    = useState('');
-  const [drawResult,   setDrawResult]   = useState(null); // { winnerTicket, buyerName, buyerEmail }
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [ff,               setFf]               = useState(initialFf);
+  const [tickets,          setTickets]          = useState([]);
+  const [loading,          setLoading]          = useState(true);
+  const [copiedLink,       setCopiedLink]       = useState(false);
+  const [showDrawModal,    setShowDrawModal]    = useState(false);
+  const [drawing,          setDrawing]          = useState(false);
+  const [drawError,        setDrawError]        = useState('');
+  const [drawResult,       setDrawResult]       = useState(null); // { winnerTicket, buyerName, buyerEmail }
+  const [showConfetti,     setShowConfetti]     = useState(false);
+  const [resumingPayment,  setResumingPayment]  = useState(false);
 
   const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au';
   const publicUrl = `${appUrl}/raffle/${ff.id}`;
@@ -2351,6 +2416,26 @@ function FiftyFiftyManage({ ff: initialFf, onBack, sendTxEmail }) {
   };
 
   useEffect(() => { loadTickets(); refreshCampaign(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleResumePayment = async () => {
+    setResumingPayment(true);
+    try {
+      const { data: { session: authSession } } = await getSupabaseClient().auth.getSession();
+      const token = authSession?.access_token;
+      const res = await fetch('/api/stripe/create-fifty-fifty-launch-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ campaign_id: ff.id }),
+      });
+      const json = await res.json();
+      if (json.url) { window.location.href = json.url; }
+      else { alert(json.error || 'Something went wrong. Please try again.'); }
+    } catch {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setResumingPayment(false);
+    }
+  };
 
   // Build all sold ticket numbers from ticket rows
   const allSoldNumbers = tickets.flatMap((t) => t.ticket_numbers || []);
@@ -2452,6 +2537,24 @@ function FiftyFiftyManage({ ff: initialFf, onBack, sendTxEmail }) {
           </div>
         </div>
 
+        {/* Draft / pending payment banner */}
+        {ff.status === 'draft' && (
+          <div style={{ background: '#FFF6EE', border: '2px solid #FFD8B0', borderRadius: 14, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 28 }}>⏳</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--orange)', marginBottom: 4 }}>Payment required to go live</div>
+              <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>Your raffle is saved but not yet live. Pay the $19 launch fee to start accepting ticket purchases.</div>
+            </div>
+            <button
+              className="btn btn-lg"
+              style={{ background: '#F59E0B', color: '#fff', border: 'none', flexShrink: 0 }}
+              disabled={resumingPayment}
+              onClick={handleResumePayment}>
+              {resumingPayment ? 'Redirecting…' : '🚀 Complete payment ($19)'}
+            </button>
+          </div>
+        )}
+
         {/* Draw result hero */}
         {(ff.status === 'drawn' || drawResult) && (
           <div className="scratch-card" style={{ padding: 28, marginBottom: 24, background: 'linear-gradient(135deg,#FFFBEB,#FEF3C7)', border: '2px solid #F59E0B' }}>
@@ -2529,18 +2632,28 @@ function FiftyFiftyManage({ ff: initialFf, onBack, sendTxEmail }) {
 
         {/* Campaign link */}
         <div className="scratch-card" style={{ padding: 24, marginBottom: 24 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 8 }}>Public buy page</div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input readOnly value={publicUrl}
-              style={{ flex: 1, fontSize: 13, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--cream)', fontFamily: 'monospace', color: 'var(--text)' }}
-              onClick={(e) => e.target.select()} />
-            <button className="btn btn-primary btn-sm" style={{ flexShrink: 0 }} onClick={() => {
-              navigator.clipboard.writeText(publicUrl);
-              setCopiedLink(true);
-              setTimeout(() => setCopiedLink(false), 2000);
-            }}>
-              {copiedLink ? '✓ Copied' : 'Copy link'}
-            </button>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12 }}>Public buy page</div>
+          <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0 }}>
+              <QRCodeSVG value={publicUrl} size={140} bgColor="#FFFFFF" fgColor="#1A3C2E" />
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 0, marginBottom: 12, lineHeight: 1.6 }}>
+                Share this link or QR code so people can buy tickets. Scan the code to open the buy page on any device.
+              </p>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input readOnly value={publicUrl}
+                  style={{ flex: 1, fontSize: 13, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--cream)', fontFamily: 'monospace', color: 'var(--text)' }}
+                  onClick={(e) => e.target.select()} />
+                <button className="btn btn-primary btn-sm" style={{ flexShrink: 0 }} onClick={() => {
+                  navigator.clipboard.writeText(publicUrl);
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 2000);
+                }}>
+                  {copiedLink ? '✓ Copied' : 'Copy link'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3108,7 +3221,7 @@ export default function FundraiseApp() {
     }
   };
 
-  // Handle redirect back from Stripe after launch fee payment
+  // Handle redirect back from Stripe after Lucky Squares launch fee payment
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
@@ -3127,6 +3240,26 @@ export default function FundraiseApp() {
       }
     }
   }, [user]);
+
+  // Handle redirect back from Stripe after 50/50 launch fee payment
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('ff_launch') === '1') {
+      const ffid = params.get('ffid');
+      window.history.replaceState({}, '', window.location.pathname);
+      if (ffid) {
+        // Reload 50/50 campaigns then open the newly launched one
+        loadFiftyFiftyCampaigns().then(() => {
+          setFiftyFiftyCampaigns((prev) => {
+            const ff = prev.find((x) => x.id === ffid);
+            if (ff) setViewingFiftyFifty(ff);
+            return prev;
+          });
+        });
+      }
+    }
+  }, [user, loadFiftyFiftyCampaigns]);
 
   const handleSaveDraft = async (data) => {
     if (!supabaseConfigured || !user?.id) return null;
