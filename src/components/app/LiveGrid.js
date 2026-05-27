@@ -1043,8 +1043,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                             </div>
                             <div style={{ fontSize: 14, fontWeight: 800, color: '#1A1209' }}>{w.name || 'Unknown'}</div>
                             <div style={{ fontSize: 12, color: '#4A3728', marginTop: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                              {w.email && <span>✉ {w.email}</span>}
-                              {w.phone && <span>📞 {w.phone}</span>}
+                              {w.email && <a href={`mailto:${w.email}`} style={{ color: '#7C3AED', textDecoration: 'none', fontWeight: 600 }}>✉ {w.email}</a>}
+                              {w.phone && <a href={`tel:${w.phone}`} style={{ color: '#7C3AED', textDecoration: 'none', fontWeight: 600 }}>📞 {w.phone}</a>}
                               {!w.email && !w.phone && <span style={{ color: '#9C8060', fontStyle: 'italic' }}>No contact details recorded</span>}
                             </div>
                           </div>
