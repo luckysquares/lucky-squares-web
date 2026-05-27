@@ -1962,11 +1962,26 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
 const FF_EMOJIS = ['🎟️', '🍀', '🏆', '🎉', '⭐', '💛', '🌈', '🎯', '🏉', '🐨'];
 const FF_TICKET_PRESETS = [1, 2, 5, 10, 20];
 
+// Approximate thresholds for when a lottery/raffle licence is required.
+// Based on total ticket sales (gross proceeds). Figures are indicative only —
+// organisers should verify with the relevant authority before running their raffle.
+const STATE_THRESHOLDS = {
+  NSW: { label: 'New South Wales',             threshold: 30000,  note: 'Community gaming — no permit needed for prizes under $30,000 in value. Larger Art Unions require a permit from Liquor & Gaming NSW.' },
+  VIC: { label: 'Victoria',                    threshold: 5000,   note: 'No permit needed for total ticket sales under $5,000. Above that, a Trade Promotion or Community/Charitable Lottery permit is required from the VCGLR.' },
+  QLD: { label: 'Queensland',                  threshold: 100000, note: 'Incorporated associations may conduct raffles with gross proceeds up to $100,000 without a permit. Above that, a licence is required from the OLGR.' },
+  SA:  { label: 'South Australia',             threshold: 5000,   note: 'No licence needed if total ticket sales are under $5,000. Amounts above this require a permit from Consumer and Business Services SA.' },
+  WA:  { label: 'Western Australia',           threshold: 10000,  note: 'No licence required for total ticket sales under $10,000 by an approved association. Above that, contact the Department of Local Government.' },
+  TAS: { label: 'Tasmania',                    threshold: 5000,   note: 'No permit needed for total ticket sales under $5,000. Above this threshold, contact the Tasmanian Liquor and Gaming Commission.' },
+  ACT: { label: 'Australian Capital Territory',threshold: 25000,  note: 'No permit needed for a single raffle with total ticket sales under $25,000. Above this, a licence is required from the ACT Gambling and Racing Commission.' },
+  NT:  { label: 'Northern Territory',          threshold: 5000,   note: 'No permit needed for total ticket sales under $5,000. Contact the NT Racing Commission for amounts above this threshold.' },
+};
+
 function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete }) {
   const [step,           setStep]           = useState(0);
   const [emoji,          setEmoji]          = useState('🎟️');
   const [title,          setTitle]          = useState('');
   const [description,    setDescription]    = useState('');
+  const [state,          setState]          = useState('');
   const [lotteryLicence, setLotteryLicence] = useState('');
   const [ticketPrice,    setTicketPrice]    = useState('');
   const [customPrice,    setCustomPrice]    = useState('');
@@ -1995,6 +2010,7 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
           title:          sanitize(title),
           emoji,
           description:    sanitize(description),
+          state:          state || null,
           ticket_price:   selectedPrice,
           payment_method: paymentMethod,
           lottery_licence: sanitize(lotteryLicence) || null,
@@ -2015,7 +2031,7 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
 
   const canNext = () => {
     if (step === 0) return title.trim().length > 0;
-    if (step === 1) return selectedPrice > 0;
+    if (step === 1) return selectedPrice > 0 && state.trim().length > 0;
     if (step === 2) {
       if (paymentMethod === 'stripe') return stripeReady || stripeOnboardingComplete;
       return bankDetails.accountName.trim() && bankDetails.bsb.trim() && bankDetails.account.trim();
@@ -2036,7 +2052,7 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
     onComplete(campaignId);
   };
 
-  const steps = ['Details', 'Ticket price', 'Payment'];
+  const steps = ['Details', 'Location and pricing', 'Payment'];
 
   return (
     <div className="dot-bg" style={{ minHeight: '100vh' }}>
@@ -2090,32 +2106,64 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
                   <label className="form-label">Description</label>
                   <textarea className="form-input" rows={3} placeholder="What is this raffle supporting? Any important details for buyers." maxLength={500} value={description} onChange={(e) => setDescription(e.target.value)} style={{ resize: 'vertical' }} />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Lottery/Raffle licence number (if applicable)</label>
-                  <input className="form-input" placeholder="e.g. LSA-12345" maxLength={60} value={lotteryLicence} onChange={(e) => setLotteryLicence(e.target.value)} />
-                  <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 6, lineHeight: 1.5 }}>
-                    Required if your total prize pool will exceed your state's threshold. Leave blank if not required.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 1: Ticket price */}
+        {/* Step 1: State, ticket price, licence */}
         {step === 1 && (
           <div>
-            <h2 className="section-title">Ticket price</h2>
-            <p className="section-sub" style={{ marginBottom: 24 }}>How much per ticket?</p>
+            <h2 className="section-title">Location and ticket price</h2>
+            <p className="section-sub" style={{ marginBottom: 24 }}>Your state determines licensing requirements. The ticket price sets how fast the jackpot grows.</p>
 
-            <div className="scratch-card" style={{ padding: 24, marginBottom: 20, background: '#FFFBEB', border: '1.5px solid #FCD34D' }}>
-              <div style={{ fontSize: 13, color: '#92400E', lineHeight: 1.6 }}>
-                Jackpot grows as tickets sell. The winner receives 50% of total ticket sales. Your organisation keeps the other 50%.
+            {/* State selector */}
+            <div className="scratch-card" style={{ padding: 28, marginBottom: 20 }}>
+              <label className="form-label" style={{ marginBottom: 12, display: 'block' }}>Which state or territory is this raffle running in? <span style={{ color: '#CC0000' }}>*</span></label>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {Object.entries(STATE_THRESHOLDS).map(([code, info]) => (
+                  <button key={code}
+                    onClick={() => setState(code)}
+                    style={{ padding: '8px 14px', borderRadius: 10, border: `2px solid ${state === code ? '#F59E0B' : 'var(--border)'}`, background: state === code ? '#FEF3C7' : 'transparent', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', color: state === code ? '#92400E' : 'var(--text)' }}>
+                    {code}
+                  </button>
+                ))}
               </div>
+
+              {/* Threshold callout */}
+              {state && (() => {
+                const info = STATE_THRESHOLDS[state];
+                const thresholdTickets = selectedPrice > 0 ? Math.floor(info.threshold / selectedPrice) : null;
+                const needsLicence = selectedPrice > 0 && thresholdTickets !== null;
+                return (
+                  <div style={{ marginTop: 16, padding: '16px 20px', background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 12 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#92400E', marginBottom: 6 }}>
+                      {info.label} — licence threshold: ${info.threshold.toLocaleString()} in ticket sales
+                    </div>
+                    <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.6, marginBottom: needsLicence ? 8 : 0 }}>
+                      {info.note}
+                    </div>
+                    {needsLicence && (
+                      <div style={{ fontSize: 13, color: '#92400E', fontWeight: 700, marginTop: 4 }}>
+                        At ${selectedPrice.toFixed(2)}/ticket, you will need a licence after approximately {thresholdTickets.toLocaleString()} tickets sold.
+                      </div>
+                    )}
+                    {!selectedPrice && (
+                      <div style={{ fontSize: 12, color: '#92400E', marginTop: 4, fontStyle: 'italic' }}>
+                        Set your ticket price below to see how many tickets you can sell before a licence is required.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
-            <div className="scratch-card" style={{ padding: 28 }}>
-              <label className="form-label" style={{ marginBottom: 12, display: 'block' }}>Select a price per ticket</label>
+            {/* Ticket price */}
+            <div className="scratch-card" style={{ padding: 28, marginBottom: 20 }}>
+              <div style={{ padding: '12px 16px', background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 10, marginBottom: 20, fontSize: 13, color: '#92400E', lineHeight: 1.6 }}>
+                Jackpot grows as tickets sell. The winner receives 50% of total ticket sales. Your organisation keeps the other 50%.
+              </div>
+              <label className="form-label" style={{ marginBottom: 12, display: 'block' }}>Price per ticket <span style={{ color: '#CC0000' }}>*</span></label>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
                 {FF_TICKET_PRESETS.map((p) => (
                   <button key={p}
@@ -2153,6 +2201,17 @@ function FiftyFiftyWizard({ onComplete, onCancel, user, stripeOnboardingComplete
                   At <strong>${selectedPrice.toFixed(2)}</strong> per ticket, every 10 tickets sold adds <strong>${(selectedPrice * 10 * 0.5).toFixed(2)}</strong> to the jackpot and <strong>${(selectedPrice * 10 * 0.5).toFixed(2)}</strong> to your organisation.
                 </div>
               )}
+            </div>
+
+            {/* Lottery licence — shown with state context */}
+            <div className="scratch-card" style={{ padding: 28 }}>
+              <label className="form-label">Lottery/Raffle licence number (if applicable)</label>
+              <input className="form-input" placeholder="e.g. LSA-12345" maxLength={60} value={lotteryLicence} onChange={(e) => setLotteryLicence(e.target.value)} style={{ marginTop: 8 }} />
+              <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8, lineHeight: 1.6 }}>
+                {state && STATE_THRESHOLDS[state]
+                  ? `If your total ticket sales will exceed $${STATE_THRESHOLDS[state].threshold.toLocaleString()} in ${STATE_THRESHOLDS[state].label}, enter your licence number here. Leave blank if not required.`
+                  : 'If your total ticket sales will exceed your state\'s threshold, enter your licence number here. Leave blank if not required.'}
+              </p>
             </div>
           </div>
         )}

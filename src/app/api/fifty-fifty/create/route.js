@@ -35,6 +35,7 @@ export async function POST(req) {
       bank_account_name,
       bank_bsb,
       bank_account,
+      state,
     } = body;
 
     // Validate required fields
@@ -61,6 +62,7 @@ export async function POST(req) {
       payment_method: payment_method,
       status:         'active',
       lottery_licence: lottery_licence ? lottery_licence.trim().substring(0, 60) : null,
+      state:           state ? state.trim().toUpperCase().substring(0, 3) : null,
     };
 
     if (payment_method === 'stripe' && stripe_account_id) {
