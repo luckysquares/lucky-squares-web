@@ -1001,3 +1001,20 @@ textarea { font-family: inherit; }
   .fundraiser-mobile-nav  { display: block; }
 }
 
+/* Organiser app header — user info block */
+.app-header-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 768px) {
+  .app-header-user-info {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+  .app-header-dashboard-btn {
+    display: none;
+  }
+}
+

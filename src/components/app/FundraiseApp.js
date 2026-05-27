@@ -161,9 +161,11 @@ function AppHeader({ user, onLogout, onHome }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {user && (
             <>
-              <span style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 600 }}>{user.name}</span>
-              <MemberBadge isFoundingMember={user.isFoundingMember} isBetaTester={user.isBetaTester} />
-              <button className="btn btn-outline btn-sm" onClick={onHome}>Dashboard</button>
+              <div className="app-header-user-info">
+                <span style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 600 }}>{user.name}</span>
+                <MemberBadge isFoundingMember={user.isFoundingMember} isBetaTester={user.isBetaTester} />
+              </div>
+              <button className="btn btn-outline btn-sm app-header-dashboard-btn" onClick={onHome}>Dashboard</button>
               <button className="btn btn-outline btn-sm" onClick={onLogout}>Sign out</button>
             </>
           )}
