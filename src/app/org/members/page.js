@@ -22,14 +22,18 @@ export default function OrgMembers() {
   const [inviting,  setInviting]  = useState(false);
   const [inviteMsg, setInviteMsg] = useState('');
   const [acting,    setActing]    = useState({});
+  const [myName,    setMyName]    = useState('');
+  const [orgName,   setOrgName]   = useState('');
 
   useEffect(() => {
     if (!supabaseConfigured) { setData(DEMO_DATA); setLoading(false); return; }
     const sb = getSupabaseClient();
     sb.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) return;
-      const { data: profile } = await sb.from('profiles').select('plan').eq('id', session.user.id).single();
+      const { data: profile } = await sb.from('profiles').select('plan, full_name, organisation').eq('id', session.user.id).single();
       setIsOwner(profile?.plan === 'org');
+      setMyName(profile?.full_name || session.user.email || '');
+      setOrgName(profile?.organisation || '');
       const { data: membersData } = await sb.rpc('get_org_members');
       setData(membersData ?? { members: [], invites: [] });
       setLoading(false);
@@ -51,6 +55,25 @@ export default function OrgMembers() {
     if (result?.error) {
       setInviteMsg(result.error);
     } else {
+      // Send invite email via transactional email Edge Function
+      const token = result?.token;
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (supabaseUrl && token) {
+        fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'org_member_invite',
+            to: inviteEmail.trim(),
+            data: {
+              org_name: orgName,
+              invited_by_name: myName,
+              invite_url: `${window.location.origin}/invite/${token}`,
+              expires_days: 7,
+            },
+          }),
+        }).catch(() => {});
+      }
       setInviteMsg('Invite sent! They will receive an email with a link to join.');
       setInviteEmail('');
       // Refresh
