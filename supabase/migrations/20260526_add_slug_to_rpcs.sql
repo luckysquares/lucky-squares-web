@@ -29,7 +29,7 @@ returns table (
   slug            text
 ) language plpgsql security definer as $$
 begin
-  if not exists (select 1 from public.profiles where id = auth.uid() and is_admin = true) then
+  if not exists (select 1 from public.profiles where profiles.id = auth.uid() and is_admin = true) then
     raise exception 'Unauthorized';
   end if;
   return query
