@@ -158,22 +158,30 @@ export default function OrgSignupPage() {
           return;
         }
 
-        // Store application details
-        const { error: appError } = await supabase.from('org_applications').insert({
-          user_id:      authData.user?.id ?? null,
-          org_name:     sanitize(orgName),
-          abn:          abnDigits,
-          org_type:     sanitize(orgType),
-          street:       sanitize(street),
-          suburb:       sanitize(suburb),
-          state:        sanitize(state),
-          postcode:     postcode.replace(/\D/g, '').slice(0, 4),
-          contact_name: sanitize(name),
-          email:        sanitize(email),
-          phone:        sanitize(phone),
+        // Store application details via server-side API (service role bypasses RLS —
+        // signUp with email confirmation doesn't return a live session so the anon
+        // client would be blocked by RLS here).
+        const appRes = await fetch('/api/org-application', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id:      authData.user?.id ?? null,
+            org_name:     sanitize(orgName),
+            abn:          abnDigits,
+            org_type:     sanitize(orgType),
+            street:       sanitize(street),
+            suburb:       sanitize(suburb),
+            state:        sanitize(state),
+            postcode:     postcode.replace(/\D/g, '').slice(0, 4),
+            contact_name: sanitize(name),
+            email:        sanitize(email),
+            phone:        sanitize(phone),
+          }),
         });
 
-        if (appError) {
+        if (!appRes.ok) {
+          const { error: appErr } = await appRes.json().catch(() => ({}));
+          console.error('[org-signup] application save error:', appErr);
           setError('Account created but we could not save your application details. Please contact us via luckysquares.com.au/contact.');
           setLoading(false);
           return;
