@@ -154,11 +154,11 @@ function AppHeader({ user, onLogout, onHome }) {
   return (
     <>
       <div className="rainbow-strip" />
-      <header style={{ background: 'var(--card)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(61,46,26,.07)', position: 'sticky', top: 0, zIndex: 100 }}>
+      <header className="app-header" style={{ background: 'var(--card)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(61,46,26,.07)', position: 'sticky', top: 0, zIndex: 100 }}>
         <Link href="/" style={{ textDecoration: 'none' }}>
           <Logo size={88} />
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="app-header-actions">
           {user && (
             <>
               <div className="app-header-user-info">
