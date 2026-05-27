@@ -90,6 +90,7 @@ async function fetchProfile(userId) {
 function dbToFundraiser(row, soldCount = 0, prizes = []) {
   return {
     id:              row.id,
+    slug:            row.slug || null,
     title:           row.title,
     org:             row.org,
     description:     row.description || '',
@@ -501,7 +502,7 @@ function OrgTeamSection({ sendTxEmail }) {
   );
 }
 
-function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail }) {
+function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, onDuplicate, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail }) {
   const [copied, setCopied] = useState(false);
   const referralLink = referralInfo?.referral_code
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/app?ref=${referralInfo.referral_code}`
@@ -571,7 +572,7 @@ function Dashboard({ user, fundraisers, onNew, onView, onReport, onConnectBank, 
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20, marginTop: 24 }}>
           {fundraisers.map((f) => (
-            <FundraiserCard key={f.id} f={f} onView={() => onView(f)} onReport={() => onReport(f)} onConnectBank={() => onConnectBank(f)} />
+            <FundraiserCard key={f.id} f={f} onView={() => onView(f)} onReport={() => onReport(f)} onConnectBank={() => onConnectBank(f)} onDuplicate={() => onDuplicate(f)} />
           ))}
           {canCreate && <NewFundraiserCard onClick={onNew} />}
         </div>
@@ -611,7 +612,7 @@ const PLATFORM_FEES = { 25: 19, 50: 19, 100: 19 };
 const PLAN_LIMITS  = { trial: 3, casual: 5, org: 10 };
 const PLAN_LABELS  = { trial: 'Trial', casual: 'Casual', org: 'Organisation' };
 
-function FundraiserCard({ f, onView, onReport, onConnectBank }) {
+function FundraiserCard({ f, onView, onReport, onConnectBank, onDuplicate }) {
   const [hovered, setHovered] = useState(false);
   const pct            = Math.round((f.sold / f.grid) * 100);
   const platformFee    = PLATFORM_FEES[f.grid] ?? 0;
@@ -705,15 +706,9 @@ function FundraiserCard({ f, onView, onReport, onConnectBank }) {
         <button className="btn btn-primary btn-sm" style={{ width: '100%' }} onClick={onView}>View my campaign →</button>
         <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={onReport}>View campaign report</button>
         {f.status === 'drawn' && (
-          <a
-            href={`/${f.slug ?? f.id}/certificate`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-outline btn-sm"
-            style={{ width: '100%', textAlign: 'center', textDecoration: 'none', display: 'block' }}
-          >
-            📜 Download integrity certificate
-          </a>
+          <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={() => onDuplicate(f)}>
+            🔁 Duplicate this campaign
+          </button>
         )}
       </div>
     </div>
@@ -788,17 +783,39 @@ function CampaignReport({ fundraiser, onBack }) {
   const platformFee  = PLATFORM_FEES[fundraiser.grid] ?? 0;
   const netRaised    = Math.max(0, fundsRcvd - costPrizes - platformFee);
 
+  const isDrawn      = fundraiser.status === 'drawn';
+  const winnerNums   = fundraiser.winnerSquareNums ?? [];
+  // Match each winning square number to its buyer from the loaded squares list
+  const winnerRows   = winnerNums.map((num, idx) => {
+    const sq    = squares.find((s) => s.number === num);
+    const prize = (fundraiser.prizes || [])[idx] ?? null;
+    return { squareNum: num, name: sq?.buyer_name || 'Unknown', email: sq?.buyer_email || null, phone: sq?.buyer_phone || null, prize };
+  });
+
   return (
     <div className="dot-bg" style={{ flex: 1 }}>
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
         <button className="btn btn-outline btn-sm" style={{ marginBottom: 24 }} onClick={onBack}>← Dashboard</button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32 }}>
-          <span style={{ fontSize: 40 }}>{fundraiser.emoji}</span>
-          <div>
-            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, marginBottom: 2 }}>Campaign Report</h1>
-            <div style={{ fontSize: 14, color: 'var(--text2)' }}>{fundraiser.title}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <span style={{ fontSize: 40 }}>{fundraiser.emoji}</span>
+            <div>
+              <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 900, marginBottom: 2 }}>Campaign Report</h1>
+              <div style={{ fontSize: 14, color: 'var(--text2)' }}>{fundraiser.title}</div>
+            </div>
           </div>
+          {isDrawn && (
+            <a
+              href={`/${fundraiser.slug ?? fundraiser.id}/certificate`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline btn-sm"
+              style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}
+            >
+              📜 Download integrity certificate
+            </a>
+          )}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 16, marginBottom: 32 }}>
@@ -814,6 +831,34 @@ function CampaignReport({ fundraiser, onBack }) {
             </div>
           ))}
         </div>
+
+        {isDrawn && winnerRows.length > 0 && (
+          <div className="scratch-card" style={{ padding: 28, marginBottom: 20, background: 'linear-gradient(135deg,#F5FBF3,#EAF7F0)', borderColor: '#B6EDD8' }}>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, marginBottom: 16 }}>🏆 Draw results</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {winnerRows.map((w, i) => (
+                <div key={w.squareNum} style={{ background: '#fff', border: '1.5px solid #B6EDD8', borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: i === 0 ? '#F0D878' : i === 1 ? '#D1D5DB' : '#D4A574', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 2 }}>{w.name}</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', fontSize: 13, color: 'var(--text2)' }}>
+                      <span>Square #{w.squareNum}</span>
+                      {w.prize && <span>{w.prize.place} place{w.prize.description ? `: ${w.prize.description}` : ''}{w.prize.value ? ` (${w.prize.value})` : ''}</span>}
+                    </div>
+                    {(w.email || w.phone) && (
+                      <div style={{ display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap' }}>
+                        {w.email && <a href={`mailto:${w.email}`} style={{ fontSize: 12, color: 'var(--purple)', textDecoration: 'none', fontWeight: 600 }}>✉ {w.email}</a>}
+                        {w.phone && <a href={`tel:${w.phone}`} style={{ fontSize: 12, color: 'var(--purple)', textDecoration: 'none', fontWeight: 600 }}>📞 {w.phone}</a>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="scratch-card" style={{ padding: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
@@ -877,8 +922,17 @@ function CampaignReport({ fundraiser, onBack }) {
 
 const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
 
-function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false, userPrefill = null, stripeOnboardingComplete = false, onBankConnectDone = null }) {
-  const savedDraft = (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
+function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false, userPrefill = null, stripeOnboardingComplete = false, onBankConnectDone = null, campaignPrefill = null }) {
+  // campaignPrefill (from duplicate) takes priority over any localStorage draft
+  const savedDraft = campaignPrefill ?? (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
+
+  // Clear localStorage draft on mount when starting from a duplicate prefill so
+  // the auto-save loop doesn't immediately overwrite the prefilled values
+  useEffect(() => {
+    if (campaignPrefill) {
+      try { localStorage.removeItem(WIZARD_STORAGE_KEY); } catch {}
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [step,            setStep]            = useState(savedDraft?.step ?? 0);
   const [profanityFlags,  setProfanityFlags]  = useState({});
@@ -1903,6 +1957,7 @@ export default function FundraiseApp() {
   const [pendingEmail,     setPendingEmail]     = useState('');
   const [fundraisers,      setFundraisers]      = useState([]);
   const [activeFundraiser, setActiveFundraiser] = useState(null);
+  const [wizardPrefill,   setWizardPrefill]   = useState(null);
   const [authLoading,      setAuthLoading]      = useState(false);
   const [authError,        setAuthError]        = useState('');
   const [referralInfo,      setReferralInfo]      = useState(null);
@@ -2135,6 +2190,51 @@ export default function FundraiseApp() {
     setFundraisers((prev) => prev.map((f) => f.id === fundraiserId ? { ...f, status: 'active' } : f));
     setActiveFundraiser((prev) => prev?.id === fundraiserId ? { ...prev, status: 'active' } : prev);
   }, []);
+
+  const handleDuplicate = useCallback((f) => {
+    // Strip any existing "#N" suffix to get the base title
+    const baseTitle = f.title.replace(/\s*#\d+$/, '').trim();
+    // Escape special regex chars in the base title
+    const escaped   = baseTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Count all existing campaigns (any status) that share this base title
+    const baseRegex = new RegExp(`^${escaped}(\\s*#\\d+)?$`, 'i');
+    const count     = fundraisers.filter((fr) => baseRegex.test(fr.title.trim())).length;
+    const newTitle  = `${baseTitle} #${count + 1}`;
+
+    const gridOpt = GRID_OPTIONS.find((g) => g.size === f.grid) ?? GRID_OPTIONS[0];
+
+    setWizardPrefill({
+      step:          0,
+      fundraiserType: f.org ? 'org' : 'individual',
+      orgDetails:    { name: f.org || '', orgType: '', abn: '' },
+      gridOpt,
+      price:         String(f.pricePerSq),
+      prizes:        f.prizes?.length > 0
+        ? f.prizes.map((p) => ({ place: p.place, desc: p.description, value: p.value, donated: p.donated ?? false }))
+        : [{ place: '1st', desc: '', value: '', donated: false }, { place: '2nd', desc: '', value: '', donated: false }, { place: '3rd', desc: '', value: '', donated: false }],
+      campaign: {
+        title:        newTitle,
+        org:          f.org          || '',
+        state:        f.state        || 'SA',
+        contactName:  f.contactName  || '',
+        contactEmail: f.contactEmail || '',
+        contactPhone: f.contactPhone || '',
+        description:  f.description  || '',
+        thankYou:     f.thankYou     || '',
+        emoji:        f.emoji        || '🍀',
+      },
+      campaignImageUrl: '',    // fresh image — don't inherit old one
+      imageFocalY:      50,
+      drawRules: { type: f.drawType || 'manual', date: '' }, // reset draw date
+      payment: {
+        method:      f.payment?.method      || 'inperson',
+        accountName: f.payment?.accountName || '',
+        bsb:         f.payment?.bsb         || '',
+        account:     f.payment?.account     || '',
+      },
+    });
+    setPhase('wizard');
+  }, [fundraisers]);
 
   const handleLogout = async () => {
     if (supabaseConfigured) await getSupabaseClient().auth.signOut();
@@ -2478,10 +2578,10 @@ export default function FundraiseApp() {
       {phase === 'login'     && <LoginScreen    onLogin={handleLogin}        onRegister={() => { setAuthError(''); setPhase('register'); }} loading={authLoading} error={authError} />}
       {phase === 'register'  && <RegisterScreen onRegister={handleRegister}  onBack={() => { setAuthError(''); setPhase('login'); }} loading={authLoading} error={authError} />}
       {phase === 'verify'    && <VerifyScreen   email={pendingEmail}         onResend={async () => { if (supabaseConfigured) await getSupabaseClient().auth.resend({ type: 'signup', email: pendingEmail }); }} />}
-      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
+      {phase === 'dashboard' && user && <Dashboard user={user} fundraisers={fundraisers} onNew={handleNewFundraiser} onView={handleViewGrid} onReport={handleViewReport} onConnectBank={handleConnectBank} onDuplicate={handleDuplicate} canCreate={canCreate} planLimit={planLimit} referralInfo={referralInfo} suspension={suspension} orgInfo={orgInfo} sendTxEmail={sendTxEmail} />}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={handleWizardComplete} onCancel={() => setPhase('dashboard')} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false} onBankConnectDone={async () => { if (user?.id) { const p = await fetchProfile(user.id); setUser((prev) => prev ? { ...prev, stripeAccountId: p.stripeAccountId, stripeOnboardingComplete: p.stripeOnboardingComplete } : prev); } }} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={(data) => { setWizardPrefill(null); handleWizardComplete(data); }} onCancel={() => { setWizardPrefill(null); setPhase('dashboard'); }} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false} onBankConnectDone={async () => { if (user?.id) { const p = await fetchProfile(user.id); setUser((prev) => prev ? { ...prev, stripeAccountId: p.stripeAccountId, stripeOnboardingComplete: p.stripeOnboardingComplete } : prev); } }} campaignPrefill={wizardPrefill} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Post-draw survey modal */}
