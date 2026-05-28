@@ -1,4 +1,5 @@
 import { getAnonClient } from '@/lib/supabase/server';
+import { notFound } from 'next/navigation';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import BlogShareButtons from '@/components/marketing/BlogShareButtons';
 import Link from 'next/link';
@@ -145,21 +146,7 @@ export default async function BlogPostPage({ params }) {
   const post = await getPost(slug);
 
   if (!post) {
-    return (
-      <>
-        <MarketingNav />
-        <section className="section dot-bg" style={{ paddingTop: 80, paddingBottom: 80, minHeight: '60vh', display: 'flex', alignItems: 'center' }}>
-          <div className="section-inner" style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-            <h1 className="section-heading" style={{ margin: '0 auto 16px' }}>Post not found</h1>
-            <p className="section-body" style={{ margin: '0 auto 32px' }}>
-              This article does not exist or has not been published yet.
-            </p>
-            <Link href="/blog" className="btn btn-primary">Back to Blog</Link>
-          </div>
-        </section>
-      </>
-    );
+    notFound();
   }
 
   const html = renderMarkdown(post.content);

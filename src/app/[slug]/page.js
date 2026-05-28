@@ -156,16 +156,10 @@ export default function PublicFundraiserPage({ params }) {
     </div>
   );
 
-  if (notFound) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)', padding: 24 }}>
-      <div style={{ textAlign: 'center', maxWidth: 400 }}>
-        <div style={{ fontSize: 64, marginBottom: 16 }}>🍀</div>
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 12 }}>Fundraiser not found</h1>
-        <p style={{ color: 'var(--text2)', marginBottom: 32 }}>This fundraiser may have closed or the link may be incorrect.</p>
-        <Link href="/" className="btn btn-primary">Back to Lucky Squares</Link>
-      </div>
-    </div>
-  );
+  if (notFound) {
+    if (typeof window !== 'undefined') window.location.replace('/404');
+    return null;
+  }
 
   // ── Club Mode — full-screen stripped view for in-person selling ──────────────
   const clubModeAvailable = isOrganiser && CLUB_MODE_PAYMENT_METHODS.includes(fundraiser.payment?.method);
