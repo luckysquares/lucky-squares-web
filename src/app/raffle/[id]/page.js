@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { use } from 'react';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 import MarketingNav from '@/components/marketing/MarketingNav';
@@ -62,7 +63,7 @@ export default function RaffleBuyPage({ params }) {
 
   const [campaign,       setCampaign]       = useState(null);
   const [loading,        setLoading]        = useState(true);
-  const [notFound,       setNotFound]       = useState(false);
+  const [notFoundState,  setNotFound]       = useState(false);
   const [quantity,       setQuantity]       = useState(1);
   const [customQty,      setCustomQty]      = useState('');
   const [selectionMode,  setSelectionMode]  = useState('auto');
@@ -233,18 +234,8 @@ export default function RaffleBuyPage({ params }) {
     );
   }
 
-  if (notFound || !campaign) {
-    return (
-      <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
-        <MarketingNav links={RAFFLE_NAV_LINKS} />
-        <div style={{ maxWidth: 600, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>🎟️</div>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>Raffle not found</h1>
-          <p style={{ fontSize: 15, color: 'var(--text2)', marginBottom: 24 }}>This raffle may have ended or the link may be incorrect.</p>
-          <Link href="/" className="btn btn-primary">Back to Lucky Squares</Link>
-        </div>
-      </div>
-    );
+  if (notFoundState || !campaign) {
+    notFound();
   }
 
   // Success state
