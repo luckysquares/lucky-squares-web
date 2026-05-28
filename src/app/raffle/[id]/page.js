@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
-import NotFound from '@/app/not-found';
+import NotFoundPage from '@/components/ui/NotFoundPage';
 import Logo from '@/components/ui/Logo';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
@@ -235,7 +235,7 @@ export default function RaffleBuyPage({ params }) {
   }
 
   if (notFoundState || !campaign) {
-    return <NotFound />;
+    return <NotFoundPage />;
   }
 
   // Success state
