@@ -14,7 +14,7 @@ function normalise(text) {
 
 // Word list — checked against normalised input
 const WORDS = [
-  'fuck', 'fuck', 'fuk', 'fck', 'fucks', 'fucking', 'fuking', 'fucked', 'fucker', 'fuckers', 'fuckwit',
+  'fuck', 'fuk', 'fck', 'fucks', 'fucking', 'fuking', 'fucked', 'fucker', 'fuckers', 'fuckwit',
   'shit', 'shits', 'shitting', 'shitty', 'shat',
   'cunt', 'cunts', 'cunting',
   'ass', 'arse', 'arsehole', 'asshole', 'assholes', 'arseholes',

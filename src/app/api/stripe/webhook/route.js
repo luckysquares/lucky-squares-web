@@ -236,7 +236,7 @@ export async function POST(req) {
           data: {
             buyer_name,
             campaign_title:      campaignData?.title || 'Raffle',
-            org_name:            '',
+            org_name:            '', // 50/50 campaigns don't have an org name field
             ticket_numbers:      ticketNumbers,
             quantity:            qty,
             amount_paid:         amountPaid.toFixed(2),

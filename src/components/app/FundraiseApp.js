@@ -12,6 +12,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import MemberBadge from '@/components/app/MemberBadge';
 import SurveyModal from '@/components/app/SurveyModal';
 import { resolveUniqueSlug } from '@/lib/slug';
+import { fmtTime, shuffle, sanitize } from '@/lib/utils';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -35,14 +36,6 @@ const SAMPLE_FUNDRAISERS = [
   { id: 3, title: 'Footy Club Finals Fund 🏉', org: 'Werribee Eagles AFC', grid: 25, pricePerSq: 20, sold: 18, status: 'draft', emoji: '🏉', totalPrizeValue: 200, payment: { method: 'bank', accountName: 'Werribee Eagles AFC', bsb: '033-000', account: '87654321' } },
 ];
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
-
-const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-
-const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
-
-// Strip HTML tags and trim whitespace from any free-text field before storing
-const sanitize = (str) => String(str ?? '').trim().replace(/<[^>]*>/g, '');
 
 function makeGrid(size) {
   const takenCount    = Math.floor(size * 0.22);
@@ -651,7 +644,7 @@ function FiftyFiftyCard({ ff, onView }) {
   );
 }
 
-function NewFiftyFiftyCard({ onClick }) {
+function NewFiftyFiftyCard() {
   return (
     <div className="card"
       style={{ padding: 24, cursor: 'not-allowed', border: '2px dashed #E5E0D5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, background: 'transparent', textAlign: 'center', gap: 12, opacity: 0.5 }}>

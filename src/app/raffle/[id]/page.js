@@ -111,13 +111,6 @@ export default function RaffleBuyPage({ params }) {
 
   useEffect(() => {
     fetchCampaign();
-    // Check for success param
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('success') === '1') {
-        // Will be set after ticket load — show success state
-      }
-    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Poll jackpot every 30 seconds

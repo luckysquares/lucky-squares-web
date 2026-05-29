@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
+import { fmtTime, sanitize } from '@/lib/utils';
 
 const MAX_CART = 10;
-
-const fmtTime  = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-const sanitize = (str) => String(str ?? '').trim().replace(/<[^>]*>/g, '');
 
 function localizeSquare(row, myNums) {
   const expiredAt = row.reserved_until ? new Date(row.reserved_until).getTime() : null;

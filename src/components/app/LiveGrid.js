@@ -5,6 +5,7 @@ import SharePanel from './SharePanel';
 import MemberBadge from './MemberBadge';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { calcTxFee, STRIPE_FEE_PCT, STRIPE_FEE_FIXED } from '@/lib/stripeFees';
+import { fmtTime, sanitize, shuffle } from '@/lib/utils';
 
 const RESERVE_SECS   = 420;
 const WARN_SECS      = 120;
@@ -12,12 +13,7 @@ const MAX_CART       = 10;
 const PLATFORM_FEES  = { 25: 19, 50: 19, 100: 19 };
 const BUYER_STORAGE_KEY = 'ls_buyer_details';
 
-const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 const parsePrizeValue = (v) => parseFloat(String(v ?? '').replace(/[^0-9.]/g, '')) || 0;
-
-// Strip HTML tags and trim whitespace from any free-text field before storing
-const sanitize = (str) => String(str ?? '').trim().replace(/<[^>]*>/g, '');
-const shuffle  = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
 function makeEmptyGrid(size) {
   return [...Array(size)].map((_, i) => ({ id: i + 1, status: 'available', owner: null, reservedUntil: null }));

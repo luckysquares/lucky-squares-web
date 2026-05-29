@@ -1,5 +1,4 @@
 import { getAdminClient } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req) {
   try {
@@ -11,15 +10,17 @@ export async function POST(req) {
       return Response.json({ error: 'Unauthorised' }, { status: 401 });
     }
 
-    // Use the anon key to verify the JWT and get the user
-    const userClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      { auth: { persistSession: false } },
-    );
-    const { data: { user }, error: authError } = await userClient.auth.getUser(token);
-
-    if (authError || !user) {
+    const userRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      },
+    });
+    if (!userRes.ok) {
+      return Response.json({ error: 'Unauthorised' }, { status: 401 });
+    }
+    const user = await userRes.json();
+    if (!user?.id) {
       return Response.json({ error: 'Unauthorised' }, { status: 401 });
     }
 
