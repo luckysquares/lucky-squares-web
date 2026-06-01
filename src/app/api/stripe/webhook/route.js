@@ -456,5 +456,56 @@ export async function POST(req) {
     }
   }
 
+  // ── Org annual membership — initial subscription payment ─────────────────
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    if (session.metadata?.action === 'org_membership' && session.mode === 'subscription') {
+      const db = supabase();
+      const userId         = session.metadata.user_id;
+      const subscriptionId = session.subscription;
+      const customerId     = session.customer;
+
+      // Fetch subscription to get the billing period end date
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const memberUntil  = new Date(subscription.current_period_end * 1000).toISOString();
+
+      await db.from('profiles').update({
+        plan:                'org',
+        org_subscription_id: subscriptionId,
+        org_member_until:    memberUntil,
+        stripe_customer_id:  customerId,
+      }).eq('id', userId);
+
+      return new Response('ok', { status: 200 });
+    }
+  }
+
+  // ── Org membership renewal (annual) ──────────────────────────────────────
+  if (event.type === 'invoice.payment_succeeded') {
+    const invoice = event.data.object;
+    if (invoice.subscription && invoice.billing_reason === 'subscription_cycle') {
+      const db = supabase();
+      const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+      const memberUntil  = new Date(subscription.current_period_end * 1000).toISOString();
+
+      await db.from('profiles')
+        .update({ org_member_until: memberUntil })
+        .eq('org_subscription_id', invoice.subscription);
+    }
+    return new Response('ok', { status: 200 });
+  }
+
+  // ── Org membership cancelled (fires at end of paid period) ────────────────
+  if (event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object;
+    if (subscription.metadata?.action === 'org_membership') {
+      const db = supabase();
+      await db.from('profiles')
+        .update({ plan: 'casual', org_subscription_id: null, org_member_until: null })
+        .eq('org_subscription_id', subscription.id);
+    }
+    return new Response('ok', { status: 200 });
+  }
+
   return new Response('ok', { status: 200 });
 }

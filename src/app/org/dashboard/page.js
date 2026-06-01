@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
+async function getAuthToken() {
+  const { data: { session } } = await getSupabaseClient().auth.getSession();
+  return session?.access_token || null;
+}
+
 function fmtAud(cents) {
   return (cents / 100).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
 }
@@ -16,11 +21,22 @@ const DEMO_CAMPAIGNS = [
 ];
 
 export default function OrgDashboard() {
-  const [stats,     setStats]     = useState(null);
-  const [campaigns, setCampaigns] = useState([]);
-  const [loading,   setLoading]   = useState(true);
+  const [stats,              setStats]          = useState(null);
+  const [campaigns,          setCampaigns]      = useState([]);
+  const [loading,            setLoading]        = useState(true);
+  const [membershipBusy,     setMembershipBusy] = useState(false);
+  const [membershipSuccess,  setMembershipSuccess] = useState(false);
 
   useEffect(() => {
+    // Check for membership success return from Stripe
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('membership') === '1') {
+        setMembershipSuccess(true);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
     if (!supabaseConfigured) {
       setStats(DEMO_STATS);
       setCampaigns(DEMO_CAMPAIGNS);
@@ -33,12 +49,52 @@ export default function OrgDashboard() {
       sb.rpc('get_org_campaigns'),
     ]).then(([{ data: s }, { data: c }]) => {
       setStats(s);
-      setCampaigns((c ?? []).slice(0, 5)); // show 5 most recent
+      setCampaigns((c ?? []).slice(0, 5));
       setLoading(false);
     });
   }, []);
 
-  const fmtDate = (d) => new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  const fmtDate      = (d) => new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  const fmtDateLong  = (d) => new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  const isOrgMember  = stats?.plan === 'org' && stats?.org_member_until;
+
+  const handleGetMembership = async () => {
+    if (!supabaseConfigured) return;
+    setMembershipBusy(true);
+    try {
+      const token = await getAuthToken();
+      const res   = await fetch('/api/stripe/create-org-membership-checkout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const { url, error } = await res.json();
+      if (error) { alert(error); return; }
+      window.location.href = url;
+    } catch (err) {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setMembershipBusy(false);
+    }
+  };
+
+  const handleManageMembership = async () => {
+    if (!supabaseConfigured) return;
+    setMembershipBusy(true);
+    try {
+      const token = await getAuthToken();
+      const res   = await fetch('/api/stripe/org-portal', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const { url, error } = await res.json();
+      if (error) { alert(error); return; }
+      window.location.href = url;
+    } catch (err) {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setMembershipBusy(false);
+    }
+  };
 
   if (loading) return <div style={{ color: 'var(--text2)' }}>Loading…</div>;
 
@@ -48,6 +104,65 @@ export default function OrgDashboard() {
         {stats?.org_name || 'Dashboard'}
       </h1>
       <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 28 }}>Organisation overview</p>
+
+      {/* Membership success banner */}
+      {membershipSuccess && (
+        <div style={{ background: '#D4F5E9', border: '1.5px solid #6EE7B7', borderRadius: 12, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 600, color: '#065F46' }}>
+          <span style={{ fontSize: 20 }}>🎉</span>
+          Welcome to Annual Organisation Membership! Your account has been upgraded.
+        </div>
+      )}
+
+      {/* Membership card */}
+      {isOrgMember ? (
+        <div className="scratch-card" style={{ padding: '20px 24px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 16 }}>⭐</span>
+              <span style={{ fontWeight: 800, fontSize: 15 }}>Annual Organisation Member</span>
+              <span className="tag tag-green" style={{ fontSize: 11 }}>Active</span>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>
+              Membership renews on {fmtDateLong(stats.org_member_until)}. You have unlimited campaigns with up to 10 live simultaneously.
+            </div>
+          </div>
+          <button
+            onClick={handleManageMembership}
+            disabled={membershipBusy}
+            className="btn btn-outline btn-sm"
+            style={{ flexShrink: 0 }}
+          >
+            {membershipBusy ? 'Loading…' : 'Manage membership →'}
+          </button>
+        </div>
+      ) : (
+        <div className="scratch-card" style={{ padding: '20px 24px', marginBottom: 28, background: 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)', border: '1.5px solid #C4B5FD' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, color: '#5B21B6', marginBottom: 6 }}>
+                Get Annual Organisation Membership
+              </div>
+              <p style={{ fontSize: 13, color: '#6D28D9', lineHeight: 1.65, margin: '0 0 16px' }}>
+                Upgrade to run unlimited campaigns for your organisation for just <strong>$149/year</strong>, with up to 10 live simultaneously.
+                Your membership renews automatically each year — you can cancel any time before your renewal date and you'll retain full access until the end of your paid period.
+              </p>
+              <button
+                onClick={handleGetMembership}
+                disabled={membershipBusy}
+                className="btn btn-primary btn-sm"
+              >
+                {membershipBusy ? 'Loading…' : 'Get Annual Membership — $149/year →'}
+              </button>
+            </div>
+            <div style={{ fontSize: 13, color: '#7C3AED', lineHeight: 1.8, flexShrink: 0 }}>
+              <div>✓ Unlimited campaigns per year</div>
+              <div>✓ Up to 10 live simultaneously</div>
+              <div>✓ Team member access</div>
+              <div>✓ Dedicated org dashboard</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
