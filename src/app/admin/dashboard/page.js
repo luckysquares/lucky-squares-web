@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
 const DEMO = {
-  casual_clients: 24, org_clients: 3, live_campaigns: 11, drawn_campaigns: 47,
+  casual_clients: 24, org_clients: 3, new_org_approvals: 2, live_campaigns: 11, drawn_campaigns: 47,
   draft_campaigns: 8, total_fees: 1102, total_raised: 38450, total_prizes: 14200,
-  new_org_applications: 2, campaigns_expiring_soon: 3,
+  new_org_applications: 1, campaigns_expiring_soon: 3,
 };
 
 function Metric({ icon, label, value, sub, accent }) {
@@ -60,8 +60,8 @@ export default function AdminDashboard() {
                 <div style={{ background: '#F0FBF6', border: '1.5px solid #C8E8D8', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ fontSize: 20 }}>🏫</span>
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--green)' }}>{data.new_org_applications} new organisation application{data.new_org_applications !== 1 ? 's' : ''}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>New organisations have applied in the last 30 days.</div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--green)' }}>{data.new_org_applications} organisation application{data.new_org_applications !== 1 ? 's' : ''} pending review</div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>Waiting for approval or rejection.</div>
                   </div>
                   <a href="/admin/organisations" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--green)', textDecoration: 'none', flexShrink: 0 }}>View →</a>
                 </div>
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 16 }}>Clients</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
               <Metric icon="🧑" label="Casual clients"      value={fmt(data.casual_clients)}  sub="Pay per fundraiser" />
-              <Metric icon="🏫" label="Organisation clients" value={fmt(data.org_clients)}     sub="Annual plan" />
+              <Metric icon="🏫" label="Organisation clients" value={fmt(data.org_clients)}     sub={`Annual plan${data.new_org_approvals > 0 ? ` · +${data.new_org_approvals} approved this month` : ''}`} />
             </div>
           </div>
 
