@@ -980,11 +980,17 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
 
   const [step,            setStep]            = useState(savedDraft?.step ?? 0);
   const [profanityFlags,  setProfanityFlags]  = useState({});
-  const [fundraiserType,  setFundraiserType]  = useState(savedDraft?.fundraiserType ?? ''); // 'individual' | 'org'
+  const [fundraiserType,  setFundraiserType]  = useState(savedDraft?.fundraiserType ?? (userPrefill?.plan === 'org' ? 'org' : '')); // 'individual' | 'org'
   const [orgDetails,      setOrgDetails]      = useState(() => {
-    const defaults = { name: userPrefill?.org || '', orgType: '', abn: '' };
+    const defaults = { name: userPrefill?.org || '', orgType: userPrefill?.orgType || '', abn: userPrefill?.orgAbn || '' };
     if (!savedDraft?.orgDetails) return defaults;
-    return { ...defaults, ...savedDraft.orgDetails, name: savedDraft.orgDetails.name || userPrefill?.org || '' };
+    return {
+      ...defaults,
+      ...savedDraft.orgDetails,
+      name:    savedDraft.orgDetails.name    || userPrefill?.org     || '',
+      orgType: savedDraft.orgDetails.orgType || userPrefill?.orgType || '',
+      abn:     savedDraft.orgDetails.abn     || userPrefill?.orgAbn  || '',
+    };
   });
   const [gridOpt,         setGridOpt]         = useState(savedDraft?.gridOpt ?? GRID_OPTIONS[0]);
   const [price,     setPrice]     = useState(savedDraft?.price ?? '5');
@@ -2841,6 +2847,7 @@ export default function FundraiseApp() {
   const [showReferralModal,   setShowReferralModal]   = useState(false);
   const [suspension,          setSuspension]          = useState(null); // null | { suspended: true, reason }
   const [orgInfo,             setOrgInfo]             = useState(null); // null | { role, org_user_id, org_name }
+  const [myOrgDetails,       setMyOrgDetails]        = useState(null); // null | { name, abn, org_type }
   const [bankConnectId,       setBankConnectId]       = useState(null);
   const [surveyFundraiserId,  setSurveyFundraiserId]  = useState(null);
   const [showFiftyFiftyWizard, setShowFiftyFiftyWizard] = useState(false);
@@ -2909,9 +2916,13 @@ export default function FundraiseApp() {
           sendTxEmail('welcome_day1', u.email, { first_name: firstName });
           localStorage.removeItem('ls_new_signup');
         }
-        // Load org role (contributor or admin)
-        const { data: oi } = await supabase.rpc('get_my_org_info');
+        // Load org role (contributor or admin) and org details for wizard pre-fill
+        const [{ data: oi }, { data: od }] = await Promise.all([
+          supabase.rpc('get_my_org_info'),
+          supabase.rpc('get_my_org_details'),
+        ]);
         setOrgInfo(oi);
+        if (od?.[0]) setMyOrgDetails(od[0]);
         const fundraiserOwnerId = oi?.role === 'contributor' ? oi.org_user_id : u.id;
         loadFundraisers(fundraiserOwnerId);
         loadFiftyFiftyCampaigns();
@@ -3539,7 +3550,7 @@ export default function FundraiseApp() {
       )}
       {phase === 'report'    && activeFundraiser && <CampaignReport fundraiser={activeFundraiser} onBack={() => setPhase('dashboard')} />}
       {phase === 'bankconnect' && bankConnectId && <BankConnectScreen fundraiserId={bankConnectId} user={user} onDone={async () => { if (user?.id) await loadFundraisers(user.id); setBankConnectId(null); setPhase('dashboard'); }} />}
-      {phase === 'wizard'    && <SetupWizard    onComplete={(data) => { setWizardPrefill(null); handleWizardComplete(data); }} onCancel={() => { setWizardPrefill(null); setPhase('dashboard'); }} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: user.org || fundraisers[0]?.org || '', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false} onBankConnectDone={async () => { if (user?.id) { const p = await fetchProfile(user.id); setUser((prev) => prev ? { ...prev, stripeAccountId: p.stripeAccountId, stripeOnboardingComplete: p.stripeOnboardingComplete } : prev); } }} campaignPrefill={wizardPrefill} />}
+      {phase === 'wizard'    && <SetupWizard    onComplete={(data) => { setWizardPrefill(null); handleWizardComplete(data); }} onCancel={() => { setWizardPrefill(null); setPhase('dashboard'); }} onLaunchPay={handleLaunchPay} onSaveDraft={handleSaveDraft} isFoundingMember={user?.isFoundingMember ?? false} userPrefill={user ? { name: user.name, email: user.email, org: myOrgDetails?.name || user.org || fundraisers[0]?.org || '', orgType: myOrgDetails?.org_type || '', orgAbn: myOrgDetails?.abn || '', plan: user.plan || 'trial', phone: user.phone || fundraisers[0]?.contactPhone || '' } : null} stripeOnboardingComplete={user?.stripeOnboardingComplete ?? false} onBankConnectDone={async () => { if (user?.id) { const p = await fetchProfile(user.id); setUser((prev) => prev ? { ...prev, stripeAccountId: p.stripeAccountId, stripeOnboardingComplete: p.stripeOnboardingComplete } : prev); } }} campaignPrefill={wizardPrefill} />}
       {phase === 'live'      && activeFundraiser && <LiveGrid fundraiser={activeFundraiser} user={user} onBack={() => { if (user?.id) loadFundraisers(user.id); setPhase('dashboard'); }} onDrawComplete={handleDrawComplete} onDelete={handleDelete} onLaunch={handleLaunch} />}
 
       {/* Post-draw survey modal */}
