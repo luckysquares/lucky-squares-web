@@ -104,9 +104,17 @@ export default function PublicFundraiserPage({ params }) {
   const [isOrganiser,  setIsOrganiser]  = useState(false);
   const [clubMode,     setClubMode]     = useState(false);
 
-  // Initialise Club Mode from localStorage after mount
+  // Initialise Club Mode: auto-activate if ?club=1 in URL, otherwise restore from localStorage
   useEffect(() => {
-    try { setClubMode(localStorage.getItem(`ls_clubmode_${slug}`) === '1'); } catch {}
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('club') === '1') {
+      setClubMode(true);
+      // Clean the URL so refreshing doesn't re-trigger
+      window.history.replaceState({}, '', window.location.pathname);
+    } else {
+      try { setClubMode(localStorage.getItem(`ls_clubmode_${slug}`) === '1'); } catch {}
+    }
   }, [slug]);
 
   const toggleClubMode = () => {

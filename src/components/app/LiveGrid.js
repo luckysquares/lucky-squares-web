@@ -859,7 +859,22 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           </div>
         )}
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
-          {isOwner && <button className="btn btn-outline btn-sm" style={{ marginBottom: 16 }} onClick={onBack}>← Dashboard</button>}
+          {isOwner && (
+            <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+              <button className="btn btn-outline btn-sm" onClick={onBack}>← Dashboard</button>
+              {['inperson', 'bank', 'bank_inperson'].includes(fundraiser.payment?.method) && fundraiser.slug && (
+                <a
+                  href={`/${fundraiser.slug}?club=1`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-sm"
+                  style={{ background: 'var(--purple)', color: '#fff', border: 'none' }}
+                >
+                  🏟️ Open Club Mode →
+                </a>
+              )}
+            </div>
+          )}
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>{fundraiser.emoji}</div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 700, marginBottom: 4 }}>{fundraiser.title}</h1>
