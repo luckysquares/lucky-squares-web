@@ -130,7 +130,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     const supabase = getSupabaseClient();
     // Clear any stale reservations before showing the grid so expired squares are truly available
     supabase.rpc('expire_stale_reservations').then(() =>
-      supabase.from('squares').select('*').eq('fundraiser_id', fundraiser.id).order('number')
+      supabase.from('squares').select('number,status,reserved_until,is_sponsored,buyer_name,paid').eq('fundraiser_id', fundraiser.id).order('number')
         .then(({ data, error }) => {
           setSquares(data?.length ? data.map((row) => localizeSquare(row, myNumsRef.current)) : makeEmptyGrid(fundraiser.grid));
           setLoadingGrid(false);
