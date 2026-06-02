@@ -29,7 +29,7 @@ export async function POST(req) {
     if (!token) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const userRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
-      headers: { Authorization: `Bearer ${token}`, apikey: process.env.SUPABASE_SERVICE_ROLE_KEY },
+      headers: { Authorization: `Bearer ${token}`, apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY },
     });
     if (!userRes.ok) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const { id: userId } = await userRes.json();
