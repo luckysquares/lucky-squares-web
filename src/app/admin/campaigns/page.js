@@ -128,9 +128,13 @@ export default function AdminCampaigns() {
     if (!num || isNaN(num)) return;
     setGiftRedirecting(true);
     try {
+      const { data: { session } } = await getSupabaseClient().auth.getSession();
       const res = await fetch('/api/stripe/create-gift-checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ fundraiser_id: buyModal.campaign.id, square_number: num }),
       });
       const { url, error } = await res.json();
