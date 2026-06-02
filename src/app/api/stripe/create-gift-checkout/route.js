@@ -6,13 +6,27 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
   try {
+    // Admin-only endpoint
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const userRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY },
+    });
+    if (!userRes.ok) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const { id: userId } = await userRes.json();
+
+    const db = supabase();
+    const { data: profile } = await db.from('profiles').select('is_admin').eq('id', userId).single();
+    if (!profile?.is_admin) return Response.json({ error: 'Forbidden' }, { status: 403 });
+
     const { fundraiser_id, square_number } = await req.json();
 
     if (!fundraiser_id || !square_number) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const db = supabase();
     const { data: fundraiser, error } = await db
       .from('fundraisers')
       .select('title, price_per_sq')

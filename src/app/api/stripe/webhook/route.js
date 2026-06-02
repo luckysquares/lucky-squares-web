@@ -27,6 +27,26 @@ export async function POST(req) {
     const session = event.data.object;
     const { action, fundraiser_id, buyer_name, buyer_email, buyer_phone, square_numbers, subtotal_cents, coupon_code } = session.metadata;
 
+    // ── Org annual membership — must be handled before the fundraiser_id guard ──
+    // Org membership checkouts have no fundraiser_id in metadata.
+    if (action === 'org_membership' && session.mode === 'subscription') {
+      const db          = supabase();
+      const userId      = session.metadata.user_id;
+      const subId       = session.subscription;
+      const customerId  = session.customer;
+      const sub         = await stripe.subscriptions.retrieve(subId);
+      const memberUntil = new Date(sub.current_period_end * 1000).toISOString();
+
+      await db.from('profiles').update({
+        plan:                'org',
+        org_subscription_id: subId,
+        org_member_until:    memberUntil,
+        stripe_customer_id:  customerId,
+      }).eq('id', userId);
+
+      return new Response('ok', { status: 200 });
+    }
+
     if (!fundraiser_id) {
       return new Response('Missing fundraiser_id', { status: 400 });
     }
@@ -453,30 +473,6 @@ export async function POST(req) {
           }).catch(() => {});
         }
       }
-    }
-  }
-
-  // ── Org annual membership — initial subscription payment ─────────────────
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    if (session.metadata?.action === 'org_membership' && session.mode === 'subscription') {
-      const db = supabase();
-      const userId         = session.metadata.user_id;
-      const subscriptionId = session.subscription;
-      const customerId     = session.customer;
-
-      // Fetch subscription to get the billing period end date
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      const memberUntil  = new Date(subscription.current_period_end * 1000).toISOString();
-
-      await db.from('profiles').update({
-        plan:                'org',
-        org_subscription_id: subscriptionId,
-        org_member_until:    memberUntil,
-        stripe_customer_id:  customerId,
-      }).eq('id', userId);
-
-      return new Response('ok', { status: 200 });
     }
   }
 
