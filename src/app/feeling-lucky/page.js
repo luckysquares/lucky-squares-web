@@ -310,7 +310,7 @@ export default function FeelingLuckyPage() {
           <p style={{ fontSize: 16, color: 'var(--text2)', marginBottom: 28, maxWidth: 420, margin: '0 auto 28px' }}>
             Set up your Lucky Squares campaign in minutes. Share a link, sell squares, run a live draw. Free to try.
           </p>
-          <Link href="/fundraise?register=1" className="btn btn-gold btn-lg">
+          <Link href="/fundraise?register=1" className="btn btn-purple btn-lg">
             Create your fundraiser free →
           </Link>
         </div>
