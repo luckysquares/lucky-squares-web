@@ -303,6 +303,16 @@ export default function AdminCampaigns() {
                         <span><strong>{c.sold_count}</strong> sold · <strong>${revenue.toLocaleString()}</strong> raised</span>
                         <span style={{ textTransform: 'capitalize' }}>{c.payment_method?.replace('_', ' + ')}</span>
                         {days !== null && <span>{days} days live</span>}
+                        {(c.slug || c.id) && (
+                          <a
+                            href={`/${c.slug ?? c.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: 'var(--green)', fontWeight: 700, textDecoration: 'none' }}
+                          >
+                            luckysquares.com.au/{c.slug ?? c.id} ↗
+                          </a>
+                        )}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
