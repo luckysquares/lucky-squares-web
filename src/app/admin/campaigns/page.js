@@ -29,9 +29,12 @@ export default function AdminCampaigns() {
   const [buyNum,         setBuyNum]         = useState('');
   const [buyMsg,         setBuyMsg]         = useState('');
   const [giftRedirecting, setGiftRedirecting] = useState(false);
-  const [payoutNotes,  setPayoutNotes]  = useState('');
-  const [processingId, setProcessingId] = useState(null);
-  const [cancelling,   setCancelling]   = useState(null); // campaign being cancelled
+  const [payoutNotes,       setPayoutNotes]       = useState('');
+  const [processingId,      setProcessingId]      = useState(null);
+  const [cancelling,        setCancelling]        = useState(null);
+  const [fiftyFiftyCampaigns, setFiftyFiftyCampaigns] = useState([]);
+  const [deleting,          setDeleting]          = useState(null); // { id, title, type }
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   useEffect(() => {
     load();
@@ -42,6 +45,23 @@ export default function AdminCampaigns() {
     }
   }, []);
 
+  const handleDelete = async () => {
+    if (!deleting) return;
+    const res = await adminFetch('/api/admin/campaigns/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: deleting.id, type: deleting.type }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setDeleting(null);
+      setDeleteConfirmText('');
+      load();
+    } else {
+      alert(`Delete failed: ${json.error}`);
+    }
+  };
+
   const load = async () => {
     setLoading(true);
     if (!supabaseConfigured) {
@@ -50,14 +70,16 @@ export default function AdminCampaigns() {
       setLoading(false);
       return;
     }
-    const [{ data: camps }, { data: pq }, rpts] = await Promise.all([
+    const [{ data: camps }, { data: pq }, rpts, { data: ff }] = await Promise.all([
       getSupabaseClient().rpc('admin_get_fundraisers'),
       getSupabaseClient().rpc('admin_get_payout_queue', { p_status: 'pending' }),
       adminFetch('/api/admin/campaigns/reports'),
+      getSupabaseClient().rpc('admin_get_fifty_fifty_campaigns'),
     ]);
     setCampaigns(camps ?? []);
     setPayouts(pq ?? []);
     setReports(Array.isArray(rpts) ? rpts : []);
+    setFiftyFiftyCampaigns(ff ?? []);
     setLoading(false);
   };
 
@@ -330,6 +352,7 @@ export default function AdminCampaigns() {
                       {c.status === 'active' && (
                         <button className="btn btn-sm" style={{ background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', fontWeight: 700 }} onClick={() => setCancelling(c)}>Cancel</button>
                       )}
+                      <button className="btn btn-sm" style={{ background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', fontWeight: 700 }} onClick={() => { setDeleting({ id: c.id, title: c.title, type: 'fundraiser' }); setDeleteConfirmText(''); }}>Delete</button>
                     </div>
                   </div>
                 </div>
@@ -338,6 +361,74 @@ export default function AdminCampaigns() {
             {filtered.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 14, padding: '40px 0', textAlign: 'center' }}>No campaigns match your search.</div>}
           </div>
         </>
+      )}
+
+      {/* 50/50 Raffles section */}
+      {fiftyFiftyCampaigns.length > 0 && (
+        <div style={{ marginTop: 48 }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 800, marginBottom: 16 }}>50/50 Raffles</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {fiftyFiftyCampaigns.map((c) => (
+              <div key={c.id} className="scratch-card" style={{ padding: '16px 20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 700 }}>🎟️ {c.title}</span>
+                      <span className={`tag ${STATUS_COLOURS[c.status] ?? 'tag-muted'}`}>{STATUS_LABELS[c.status] ?? c.status}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>
+                      ${c.ticket_price}/ticket · <strong>{c.sold_count}</strong> sold
+                      {c.max_tickets && ` of ${c.max_tickets}`}
+                      {' · '}Created {new Date(c.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-sm"
+                    style={{ background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', fontWeight: 700 }}
+                    onClick={() => { setDeleting({ id: c.id, title: c.title, type: 'fifty_fifty' }); setDeleteConfirmText(''); }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleting && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
+          <div className="scratch-card" style={{ padding: 32, maxWidth: 460, width: '100%' }}>
+            <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>⚠️</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>Are you sure?</h2>
+            <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 8, textAlign: 'center', lineHeight: 1.6 }}>
+              This will permanently delete <strong>{deleting.title}</strong> and all associated data — squares, tickets, prizes, and buyer records. This cannot be undone.
+            </p>
+            <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>
+              Type <code style={{ background: '#F5F0E8', padding: '2px 6px', borderRadius: 4 }}>DELETE</code> to confirm
+            </p>
+            <input
+              className="form-input"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+              placeholder="Type DELETE to confirm"
+              style={{ marginBottom: 16, textAlign: 'center', fontWeight: 700, letterSpacing: 2 }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => { setDeleting(null); setDeleteConfirmText(''); }}>Cancel</button>
+              <button
+                className="btn btn-sm"
+                style={{ flex: 1, background: deleteConfirmText === 'DELETE' ? '#991B1B' : '#FEE2E2', color: deleteConfirmText === 'DELETE' ? '#fff' : '#991B1B', border: '1px solid #FECACA', fontWeight: 700, cursor: deleteConfirmText === 'DELETE' ? 'pointer' : 'not-allowed', opacity: deleteConfirmText === 'DELETE' ? 1 : 0.6 }}
+                disabled={deleteConfirmText !== 'DELETE'}
+                onClick={handleDelete}
+              >
+                Permanently delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Edit modal */}
