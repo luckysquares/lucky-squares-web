@@ -59,7 +59,7 @@ export default function FeelingLuckyPage() {
     (async () => {
       const { data: rows, error } = await supabase
         .from('fundraisers')
-        .select('id, title, org, contact_name, description, price_per_sq, grid_size, emoji')
+        .select('id, slug, title, org, contact_name, description, price_per_sq, grid_size, emoji')
         .eq('status', 'active')
         .eq('payment_method', 'stripe');
 
@@ -85,6 +85,7 @@ export default function FeelingLuckyPage() {
         const totalPrizeValue = ps.reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0);
         return {
           id:           r.id,
+          slug:         r.slug,
           title:        r.title,
           org:          r.org,
           contactName:  r.contact_name || '',
