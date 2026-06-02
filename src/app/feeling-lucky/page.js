@@ -63,8 +63,7 @@ export default function FeelingLuckyPage() {
         .eq('status', 'active')
         .eq('payment_method', 'stripe');
 
-      if (error) { setCampaigns(SAMPLE_CAMPAIGNS); setLoadError(true); return; }
-      if (!rows?.length) { setNoRealCampaigns(true); setCampaigns(SAMPLE_CAMPAIGNS); return; }
+      if (error || !rows?.length) { setNoRealCampaigns(true); setCampaigns(SAMPLE_CAMPAIGNS); return; }
 
       const ids = rows.map((r) => r.id);
       const [{ data: stats }, { data: prizes }] = await Promise.all([
@@ -241,7 +240,11 @@ export default function FeelingLuckyPage() {
                   </div>
 
                   {/* CTA */}
-                  {selected.available > 0 ? (
+                  {noRealCampaigns ? (
+                    <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 14, color: 'var(--text2)', fontWeight: 600 }}>
+                      This is a sample fundraiser. Check back soon for live campaigns to support.
+                    </div>
+                  ) : selected.available > 0 ? (
                     <Link href={`/${selected.slug ?? selected.id}`} className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }}>
                       Support this fundraiser →
                     </Link>
