@@ -150,7 +150,7 @@ export default function OrgSignupPage() {
           const msg = authError.message.toLowerCase();
           if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('email address is already')) {
             setEmailExists(true);
-            setError('An account with this email address already exists. Please sign in or use a different email.');
+            setError('This email is already registered with Lucky Squares. Please sign in or use a different email address.');
           } else {
             setError(authError.message);
           }
@@ -439,7 +439,7 @@ export default function OrgSignupPage() {
                         <span style={{ fontSize: 12, color: 'var(--text2)' }}>Checking…</span>
                       )}
                       {!emailChecking && emailExists && (
-                        <span style={{ fontSize: 12, color: '#CC0000' }}>An application with this email already exists. Please <a href="/fundraise" style={{ color: '#CC0000', fontWeight: 700 }}>sign in</a> or contact support@luckysquares.com.au.</span>
+                        <span style={{ fontSize: 12, color: '#CC0000', marginTop: 4, display: 'block' }}>This email is already registered with Lucky Squares. Please <a href="/fundraise" style={{ color: '#CC0000', fontWeight: 700 }}>sign in</a> or use a different email address.</span>
                       )}
                     </div>
                     <div className="form-group">

@@ -250,6 +250,15 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
   const [phone, setPhone] = useState('');
   const [org,   setOrg]   = useState('');
   const [pass,  setPass]  = useState('');
+
+  // Detect email-already-registered errors so we can show inline field feedback
+  const emailTaken = !!error && (
+    error.toLowerCase().includes('already registered') ||
+    error.toLowerCase().includes('already exists') ||
+    error.toLowerCase().includes('email address is already') ||
+    error.toLowerCase().includes('user already registered')
+  );
+
   return (
     <AuthShell>
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '52px 28px 80px' }}>
@@ -299,7 +308,19 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Email</label>
-                  <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <input className="form-input" type="email" placeholder="you@example.com" maxLength={254}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ borderColor: emailTaken ? '#FF4444' : undefined }}
+                  />
+                  {emailTaken && (
+                    <span style={{ fontSize: 12, color: '#CC0000', marginTop: 4, display: 'block' }}>
+                      This email is already registered.{' '}
+                      <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#CC0000', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, textDecoration: 'underline', padding: 0 }}>
+                        Sign in instead →
+                      </button>
+                    </span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="form-label">Phone</label>
@@ -310,7 +331,7 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
                   <input className="form-input" type="password" placeholder="8+ characters" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && onRegister({ name, email, org, phone, password: pass })} />
                 </div>
-                {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
+                {error && !emailTaken && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
                 <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={loading} onClick={() => onRegister({ name, email, org, phone, password: pass })}>
                   {loading ? 'Creating account…' : 'Create account'}
                 </button>
