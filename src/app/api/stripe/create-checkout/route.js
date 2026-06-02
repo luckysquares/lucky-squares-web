@@ -30,7 +30,7 @@ export async function POST(req) {
     // Also need grid_size for the range check.
     const { data: fundraiser, error } = await db
       .from('fundraisers')
-      .select('title, org, price_per_sq, stripe_account_id, stripe_onboarding_complete, grid_size, status')
+      .select('title, org, slug, price_per_sq, stripe_account_id, stripe_onboarding_complete, grid_size, status')
       .eq('id', fundraiser_id)
       .single();
 
@@ -116,8 +116,8 @@ export async function POST(req) {
         square_numbers: uniqueNums.join(','),
         subtotal_cents: String(subtotalCents),
       },
-      success_url: `${appUrl}/f/${fundraiser_id}?success=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${appUrl}/f/${fundraiser_id}`,
+      success_url: `${appUrl}/${fundraiser.slug ?? fundraiser_id}?success=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${appUrl}/${fundraiser.slug ?? fundraiser_id}`,
     });
 
     return Response.json({ url: session.url });
