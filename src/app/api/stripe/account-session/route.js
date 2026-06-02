@@ -3,14 +3,16 @@ import { getAdminClient as supabase } from '@/lib/supabase/server';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Maps our org types to Stripe company structures for AU
-const ORG_TYPE_TO_STRUCTURE = {
-  sporting_club:   'unincorporated_association',
-  school:          'incorporated_non_profit',
-  charity:         'registered_charity',
-  community_group: 'unincorporated_association',
-  business:        'private_company',
-  other:           'unincorporated_association',
+// Maps our org types to Stripe business_type for AU.
+// Non-commercial orgs (clubs, schools, charities) use 'non_profit' not 'company'.
+// 'business' is the only type that maps to 'company'.
+const ORG_TYPE_TO_BUSINESS_TYPE = {
+  sporting_club:   'non_profit',
+  school:          'non_profit',
+  charity:         'non_profit',
+  community_group: 'non_profit',
+  business:        'company',
+  other:           'non_profit',
 };
 
 // Pre-filled for all accounts — suppresses the industry/website/product description screens
@@ -73,12 +75,12 @@ export async function POST(req) {
     }
 
     if (!accountId) {
-      const isOrg      = prefill?.businessType === 'company';
-      const nameParts  = (prefill?.name || '').trim().split(' ');
-      const firstName  = nameParts[0] || undefined;
-      const lastName   = nameParts.slice(1).join(' ') || undefined;
-      const abn        = prefill?.orgAbn ? prefill.orgAbn.replace(/\s/g, '') : undefined;
-      const structure  = prefill?.orgType ? (ORG_TYPE_TO_STRUCTURE[prefill.orgType] ?? 'unincorporated_association') : undefined;
+      const isOrg       = prefill?.businessType === 'company';
+      const nameParts   = (prefill?.name || '').trim().split(' ');
+      const firstName   = nameParts[0] || undefined;
+      const lastName    = nameParts.slice(1).join(' ') || undefined;
+      const abn         = prefill?.orgAbn ? prefill.orgAbn.replace(/\s/g, '') : undefined;
+      const bizType     = prefill?.orgType ? (ORG_TYPE_TO_BUSINESS_TYPE[prefill.orgType] ?? 'non_profit') : 'non_profit';
 
       const accountParams = {
         controller: {
@@ -100,12 +102,12 @@ export async function POST(req) {
       };
 
       if (isOrg) {
-        // Organisation account — pre-fill company name, ABN, and structure
-        accountParams.business_type = 'company';
+        // Organisation account — use correct Stripe business_type for AU.
+        // non_profit covers clubs, schools, charities; company covers businesses.
+        accountParams.business_type = bizType;
         accountParams.company = {
           ...(prefill?.orgName ? { name: prefill.orgName } : {}),
           ...(abn              ? { tax_id: abn }           : {}),
-          ...(structure        ? { structure }             : {}),
         };
       } else {
         // Individual account — pre-fill personal details to reduce what Stripe asks
