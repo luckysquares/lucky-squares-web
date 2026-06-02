@@ -65,13 +65,14 @@ export async function POST(req) {
         if (coupon.discount_type === 'percent') {
           finalFee = Math.max(0, PLATFORM_FEE_AUD * (1 - Number(coupon.discount_value) / 100));
         } else {
-          // fixed discount
           finalFee = Math.max(0, PLATFORM_FEE_AUD - Number(coupon.discount_value));
         }
         appliedCouponCode = coupon_code;
+      } else {
+        // The coupon was invalid or expired — tell the client so they can
+        // show an error rather than silently charging the full fee.
+        return Response.json({ error: 'COUPON_INVALID' }, { status: 422 });
       }
-      // Invalid or expired coupons are silently ignored — the organiser sees
-      // the standard fee. We do not reveal whether a code exists.
     }
 
     // Guard: a zero-cost launch should use the free launch path on the client,

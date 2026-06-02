@@ -1020,6 +1020,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [bankSaving,        setBankSaving]        = useState(false);
   const [bankSaveError,     setBankSaveError]     = useState(false);
   const [bankConnectDone,   setBankConnectDone]   = useState(false);
+  const [launchError,       setLaunchError]       = useState(null); // null | 'COUPON_INVALID' | 'UNKNOWN'
 
   // Auto-populate campaign.org from org details when type is 'org'
   useEffect(() => {
@@ -1821,6 +1822,14 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                 )}
               </div>
 
+              {launchError && (
+                <div style={{ background: '#FEF2F2', border: '1.5px solid #FECACA', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#991B1B' }}>
+                  {launchError === 'COUPON_INVALID'
+                    ? 'This coupon code is no longer valid or has expired. Please remove it and try again.'
+                    : 'Something went wrong. Please try again or contact support if the problem continues.'}
+                </div>
+              )}
+
               <p style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
                 By launching this campaign you confirm that it complies with all applicable fundraising and lottery laws in {STATE_LABELS[campaign.state || 'SA'] || 'your state'}, including that total prizes do not exceed the permitted threshold. <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--purple)' }}>Platform terms</a>
               </p>
@@ -1839,7 +1848,12 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                   clearDraft();
                   onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment, coupon: launchData.couponCode }, false);
                 } else {
-                  await onLaunchPay(launchData);
+                  setLaunchError(null);
+                  const result = await onLaunchPay(launchData);
+                  if (result?.error) {
+                    setLaunchError(result.error);
+                    if (result.error === 'COUPON_INVALID') setCouponState('invalid');
+                  }
                 }
               }}>
                 {isFree ? '🚀 Launch free' : 'Pay and launch'}
@@ -3460,7 +3474,10 @@ export default function FundraiseApp() {
       body: JSON.stringify({ fundraiser_id: fundraiserId, coupon_code: data.couponCode || '' }),
     });
     const { url, error: stripeErr } = await res.json();
-    if (stripeErr || !url) { console.error('Checkout creation failed:', stripeErr); return; }
+    if (stripeErr || !url) {
+      console.error('Checkout creation failed:', stripeErr);
+      return { error: stripeErr || 'UNKNOWN' };
+    }
 
     try { localStorage.removeItem(WIZARD_STORAGE_KEY); } catch {}
     window.location.href = url;
