@@ -44,11 +44,12 @@ function LogoIcon({ size, dark }) {
   );
 }
 
-export default function Logo({ size = 44, dark = false, priority = false }) {
+export default function Logo({ size = 44, dark = false, white = false, priority = false }) {
   // Wordmark colours per spec
-  const luckyColor   = dark ? '#C4B5FD'                : '#6B46F5';
-  const squaresColor = dark ? 'rgba(255,255,255,0.88)' : '#2A1F0F';
-  const ausColor     = dark ? 'rgba(255,255,255,0.28)' : '#9C8060';
+  // white=true: fully white text for dark footer/background use
+  const luckyColor   = white ? '#ffffff'                : dark ? '#C4B5FD'                : '#6B46F5';
+  const squaresColor = white ? 'rgba(255,255,255,0.9)'  : dark ? 'rgba(255,255,255,0.88)' : '#2A1F0F';
+  const ausColor     = white ? 'rgba(255,255,255,0.45)' : dark ? 'rgba(255,255,255,0.28)' : '#9C8060';
 
   // Font size: ~0.47× icon height, matching reference (36px icon → 18px, 44px → 21px)
   const fontSize = Math.round(size * 0.47);

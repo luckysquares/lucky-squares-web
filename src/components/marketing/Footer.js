@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="footer-top">
           <div className="footer-brand">
             <div style={{ marginBottom: 12 }}>
-              <Logo size={64} dark />
+              <Logo size={36} white />
             </div>
             <p className="footer-tagline">
               The easiest way to run a Lucky Squares fundraiser in Australia.
