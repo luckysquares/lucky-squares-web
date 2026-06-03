@@ -1097,3 +1097,38 @@ Thank you for taking part. Better luck next time!
 ${SIG}`,
   };
 }
+
+// ── Early access invitation ────────────────────────────────────────────────────
+
+export function emailEarlyAccessInvite(d: {
+  first_name: string;
+  coupon_code?: string;
+  coupon_label?: string;
+}) {
+  const couponBlock = d.coupon_code ? `
+I'd also like to offer you a little gift for being one of the first through the door:
+
+Your invite code: ${d.coupon_code}
+${d.coupon_label ? `(${d.coupon_label})` : ''}
+
+Use it when you launch your first campaign.
+` : '';
+
+  return {
+    subject: `Your Lucky Squares early access is ready`,
+    text: `Hi ${d.first_name},
+
+You signed up to hear when Lucky Squares Australia opened its doors. That day is today.
+
+Lucky Squares lets you run a fully online Lucky Squares fundraiser in minutes. Set up your grid, share a link with your community, and watch the squares sell. When you're ready, run the draw live. No spreadsheets, no cash handling, no stress.
+${couponBlock}
+Head here to create your account and get started:
+https://luckysquares.com.au/get-started
+
+We built this specifically for Australian schools, clubs, and charities, and we'd love to see what you raise with it.
+
+If you have any questions just reply to this email. I read everything.
+
+${SIG}`,
+  };
+}

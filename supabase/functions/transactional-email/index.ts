@@ -36,6 +36,7 @@ const TRANSACTIONAL_TYPES = new Set([
   'org_member_invite',
   'campaign_launched_notification',
   'account_suspended',
+  'early_access_invite',
   'foundation_member',
   // Prize claim flow
   'organizer_prize_claim',
@@ -181,6 +182,8 @@ async function buildTemplate(type: string, d: any): Promise<{ subject: string; t
     case 'refund_notification':           return T.emailRefundNotification(d);
     // Org member invite
     case 'org_member_invite':             return T.emailOrgMemberInvite(d);
+    // Early access invitation
+    case 'early_access_invite':           return T.emailEarlyAccessInvite(d);
     // Admin internal
     case 'admin_new_org_application':     return T.emailAdminNewOrgApplication(d);
     // Foundation Member
