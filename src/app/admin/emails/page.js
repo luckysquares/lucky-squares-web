@@ -81,7 +81,7 @@ function tplSquareDailyDigest() {
 Here's your daily update for {{campaign_title}}.
 
 Squares sold today: {{sales_today}} ({{buyer_names}})
-Running total: {{sold_count}} of {{grid_size}} squares sold, ${{amount_raised}} raised
+Running total: {{sold_count}} of {{grid_size}} squares sold, \${{amount_raised}} raised
 
 Keep sharing your link to keep the momentum going!
 
@@ -116,7 +116,7 @@ function tplExpiryReminder7() {
     subject: `How's your fundraiser going, {{first_name}}?`,
     text: `Hi {{first_name}},
 
-{{campaign_title}} has been live for 7 days. You've sold {{sold_count}} of {{grid_size}} squares so far, which means ${{amount_raised}} raised for {{org_name}}.
+{{campaign_title}} has been live for 7 days. You've sold {{sold_count}} of {{grid_size}} squares so far, which means \${{amount_raised}} raised for {{org_name}}.
 
 You've already covered your prize costs, so anything more you sell is pure profit for your cause. Keep going!
 
@@ -132,7 +132,7 @@ function tplExpiryReminder14() {
     subject: `Two weeks in: {{sold_count}} squares sold`,
     text: `Hi {{first_name}},
 
-{{campaign_title}} is two weeks old. You've sold {{sold_count}} of {{grid_size}} squares, raising ${{amount_raised}} so far.
+{{campaign_title}} is two weeks old. You've sold {{sold_count}} of {{grid_size}} squares, raising \${{amount_raised}} so far.
 
 You have {{days_remaining}} days remaining before the campaign expires. If your fundraiser hasn't covered prize costs by day 30, it will be automatically cancelled and buyers will be refunded.
 
@@ -152,7 +152,7 @@ function tplExpiryReminder21() {
 
 Quick heads-up: {{campaign_title}} expires in {{days_remaining}} days.
 
-You've sold {{sold_count}} of {{grid_size}} squares and raised ${{amount_raised}}.
+You've sold {{sold_count}} of {{grid_size}} squares and raised \${{amount_raised}}.
 
 You've covered your prize costs, which means you're good to draw whenever you're ready. You don't have to wait until day 30. Run your draw when it feels right!
 
@@ -197,11 +197,11 @@ Because your campaign used online card payments, here is what happens next:
 - Once you have a winner's bank details, transfer their prize directly from your bank account. Aim to pay within a few business days of receiving their details.
 - Your square sales were transferred to your connected bank account progressively as each square sold. The full prize reserve has also been transferred to your account to cover winner payments.
 
-You raised ${{amount_raised}} for {{org_name}} from {{sold_count}} of {{grid_size}} squares sold.
+You raised \${{amount_raised}} for {{org_name}} from {{sold_count}} of {{grid_size}} squares sold.
 
 Want to share the result? Here's a quick message you can post:
 
-"{{campaign_title}} draw is done! Big thanks to everyone who took part. We raised ${{amount_raised}} for {{org_name}}. Congratulations to all our winners!"
+"{{campaign_title}} draw is done! Big thanks to everyone who took part. We raised \${{amount_raised}} for {{org_name}}. Congratulations to all our winners!"
 
 Whenever you're ready to run your next campaign, we'll be here:
 https://luckysquares.com.au/fundraise
@@ -278,8 +278,8 @@ A new Lucky Squares campaign has just gone live under {{org_name}}.
 
 Campaign: {{campaign_title}}
 Grid size: {{grid_size}} squares
-Price per square: ${{price_per_sq}}
-Potential raise at sell-out: ${{max_raise}}
+Price per square: \${{price_per_sq}}
+Potential raise at sell-out: \${{max_raise}}
 
 View the campaign:
 {{campaign_url}}
@@ -313,7 +313,7 @@ Here's a quick look at how {{org_name}} performed on Lucky Squares in {{month_na
 
 Campaigns run: {{campaign_count}}
 Squares sold: {{total_squares_sold}}
-Total raised: ${{total_raised}}
+Total raised: \${{total_raised}}
 Draws completed: {{draws_completed}}
 
 Log in to your dashboard:
@@ -368,7 +368,7 @@ function tplSquarePurchaseConfirmation() {
 You've secured your squares in {{campaign_title}} — good luck in the draw!
 
 Squares: #{{square_numbers}}
-Amount paid: ${{amount_paid}}
+Amount paid: \${{amount_paid}}
 Draw: {{draw_type_description}}
 
 Thanks for supporting {{org_name}}'s fundraiser. We'll send you the result as soon as the draw is complete.
@@ -410,7 +410,7 @@ The winning square(s):
 
 {{winner_lines}}
 
-You didn't win this time, but your support made a real difference to {{org_name}}. The fundraiser raised ${{amount_raised}} in total. Thank you for being part of it.
+You didn't win this time, but your support made a real difference to {{org_name}}. The fundraiser raised \${{amount_raised}} in total. Thank you for being part of it.
 
 ${SIG}`,
   };
@@ -423,7 +423,7 @@ function tplRefundNotification() {
 
 {{campaign_title}} has been cancelled before the draw took place.
 
-Your payment of ${{amount_paid}} for square(s) #{{square_numbers}} will be refunded in full.
+Your payment of \${{amount_paid}} for square(s) #{{square_numbers}} will be refunded in full.
 
 Your refund will appear on your card within 5 to 10 business days.
 
@@ -527,7 +527,7 @@ Make it visual. A screenshot of the grid with a few squares already sold creates
 
 Use this message as a template (feel free to edit it):
 
-"Hey! I'm running a Lucky Squares fundraiser for {{org_name}}. Pick a number, pay ${{price_per_sq}}, and you're in the draw to win {{prize_summary}}. Here's the link: {{campaign_url}}"
+"Hey! I'm running a Lucky Squares fundraiser for {{org_name}}. Pick a number, pay \${{price_per_sq}}, and you're in the draw to win {{prize_summary}}. Here's the link: {{campaign_url}}"
 
 Good luck, we're rooting for you!
 
