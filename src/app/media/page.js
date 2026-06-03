@@ -201,7 +201,7 @@ export default function MediaPage() {
             <p style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 700, fontStyle: 'italic', lineHeight: 1.5, color: 'var(--text)', marginBottom: 16 }}>
               "I've seen firsthand how challenging fundraising can be. A friend was trying to run a Lucky Squares fundraiser using SMS messages and a spreadsheet and complained about how time-consuming it was. I went looking for an online version to help her and was surprised that nobody had already built one. So I did."
             </p>
-            <cite style={{ fontSize: 14, fontWeight: 700, color: 'var(--text2)', fontStyle: 'normal' }}>Jamie Stott, Founder and CEO, Lucky Squares Australia</cite>
+            <cite style={{ fontSize: 14, fontWeight: 700, color: 'var(--text2)', fontStyle: 'normal' }}>Jamie Stott, Founder, Lucky Squares Australia</cite>
           </blockquote>
         </div>
       </section>
@@ -247,7 +247,7 @@ export default function MediaPage() {
             </div>
             <div style={{ flex: 1, minWidth: 260 }}>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 900, marginBottom: 4, color: 'var(--text)' }}>Jamie Stott</h3>
-              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--purple)', marginBottom: 20 }}>Founder and CEO, Lucky Squares Australia</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--purple)', marginBottom: 20 }}>Founder, Lucky Squares Australia</p>
               <div style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.85, display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <p>
                   Jamie Stott is an Adelaide-based entrepreneur, sportswoman, and community advocate with a long history in community sport. She has represented South Australia in Masters Hockey, played competitive baseball, and spent years giving back to the clubs and competitions that shaped her. Jamie understands both the financial pressures facing community organisations and the power of sport to bring people together.
