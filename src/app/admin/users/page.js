@@ -139,7 +139,10 @@ export default function AdminUsers() {
                       <a href={`mailto:${u.email}`} style={{ color: 'var(--green)', fontWeight: 600 }}>{u.email}</a>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span className={`tag ${PLAN_COLOURS[u.plan] ?? 'tag-muted'}`} style={{ fontSize: 11 }}>{PLAN_LABELS[u.plan] ?? u.plan}</span>
+                      {u.is_admin
+                        ? <span className="tag" style={{ background: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', fontSize: 11, fontWeight: 800 }}>Admin</span>
+                        : <span className={`tag ${PLAN_COLOURS[u.plan] ?? 'tag-muted'}`} style={{ fontSize: 11 }}>{PLAN_LABELS[u.plan] ?? u.plan}</span>
+                      }
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       {u.suspended ? (
