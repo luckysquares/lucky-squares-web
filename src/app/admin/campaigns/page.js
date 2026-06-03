@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { adminFetch } from '@/lib/adminFetch';
+import ImageUploadZone from '@/components/ui/ImageUploadZone';
 import { calcTxFee, STRIPE_FEE_PCT, STRIPE_FEE_FIXED } from '@/lib/stripeFees';
 
 const STATUS_COLOURS = { active: 'tag-green', drawn: 'tag-drawn', draft: 'tag-muted', cancelled: 'tag-muted' };
@@ -453,10 +454,7 @@ export default function AdminCampaigns() {
               {editing.image_url && (
                 <img src={editing.image_url} alt="Campaign" style={{ width: '100%', height: 140, objectFit: 'cover', objectPosition: `center ${editing.image_focal_y ?? 50}%`, borderRadius: 10, marginBottom: 8, display: 'block' }} />
               )}
-              <label style={{ display: 'inline-block', cursor: 'pointer' }}>
-                <span className="btn btn-outline btn-sm">{imageUploading ? 'Uploading…' : editing.image_url ? 'Replace image' : 'Upload image'}</span>
-                <input type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} disabled={imageUploading} onChange={(e) => e.target.files[0] && handleImageUpload(e.target.files[0])} />
-              </label>
+              <ImageUploadZone onFile={handleImageUpload} uploading={imageUploading} />
               {editing.image_url && (
                 <div style={{ marginTop: 10 }}>
                   <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>

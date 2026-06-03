@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { adminFetch } from '@/lib/adminFetch';
+import ImageUploadZone from '@/components/ui/ImageUploadZone';
 
 const toSlug = (s) =>
   s.toLowerCase().trim()
@@ -361,13 +362,11 @@ export default function AdminBlogPage() {
 
               {imageTab === 'upload' ? (
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: uploading ? 'not-allowed' : 'pointer', background: 'var(--cream)', border: '1.5px dashed var(--border)', borderRadius: 'var(--radius)', padding: '14px 18px' }}>
-                    <span style={{ fontSize: 22 }}>{uploading ? '⏳' : '🖼️'}</span>
-                    <span style={{ fontSize: 13, color: 'var(--text2)' }}>
-                      {uploading ? 'Uploading…' : 'Click to choose an image (JPEG, PNG, WebP — max 5 MB)'}
-                    </span>
-                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageUpload} disabled={uploading} style={{ display: 'none' }} />
-                  </label>
+                  <ImageUploadZone
+                    onFile={(file) => handleImageUpload({ target: { files: [file] } })}
+                    uploading={uploading}
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                  />
                   {uploadSuccess && <p style={{ fontSize: 12, color: '#16A34A', marginTop: 6 }}>Image uploaded — remember to save the post.</p>}
                   {uploadError && <p style={{ fontSize: 12, color: '#CC0000', marginTop: 6 }}>{uploadError}</p>}
                 </div>
