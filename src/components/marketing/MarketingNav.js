@@ -20,7 +20,7 @@ export default function MarketingNav({ links } = {}) {
       <div className="rainbow-strip" />
       <nav className="marketing-nav">
         <div className="marketing-nav-inner">
-          <Link href="/" onClick={close}>
+          <Link href="/" onClick={close} className="nav-logo-link">
             <Logo size={40} priority />
           </Link>
 

@@ -959,6 +959,7 @@ textarea { font-family: inherit; }
   .hero    { padding: 56px 20px 72px; }
   .section { padding: 56px 20px; }
   .marketing-nav-inner { height: 60px; }
+  .nav-logo-link > div { transform: scale(0.78); transform-origin: left center; }
   .nav-links  { display: none; }
   .nav-cta    { display: none; }
   .nav-hamburger { display: flex; }
