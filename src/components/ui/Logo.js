@@ -44,7 +44,7 @@ function LogoIcon({ size, dark }) {
   );
 }
 
-export default function Logo({ size = 44, dark = false, white = false, priority = false }) {
+export default function Logo({ size = 44, dark = false, white = false, stacked = false, priority = false }) {
   // Wordmark colours per spec
   // white=true: fully white text for dark footer/background use
   const luckyColor   = white ? '#ffffff'                : dark ? '#C4B5FD'                : '#6B46F5';
@@ -53,6 +53,23 @@ export default function Logo({ size = 44, dark = false, white = false, priority 
 
   // Font size: ~0.47× icon height, matching reference (36px icon → 18px, 44px → 21px)
   const fontSize = Math.round(size * 0.47);
+
+  if (stacked) {
+    return (
+      <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center', lineHeight: 1 }}>
+        <LogoIcon size={size} dark={dark} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, lineHeight: 1.2, justifyContent: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 900, fontSize, color: luckyColor, letterSpacing: '-0.3px' }}>Lucky</span>
+            <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontStyle: 'italic', fontSize, color: squaresColor, letterSpacing: '-0.3px' }}>Squares</span>
+          </div>
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 7, fontWeight: 700, letterSpacing: '2.2px', textTransform: 'uppercase', color: ausColor, marginTop: 3 }}>
+            Australia
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 11, lineHeight: 1 }}>
