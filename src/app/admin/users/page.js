@@ -31,13 +31,20 @@ export default function AdminUsers() {
 
   const saveUser = async () => {
     setSaving(true);
-    if (supabaseConfigured) {
-      await getSupabaseClient().rpc('admin_update_profile', {
-        p_id: editing.id, p_full_name: editing.full_name, p_plan: editing.plan,
-      }).catch(() => {});
+    try {
+      if (supabaseConfigured) {
+        const { error } = await getSupabaseClient().rpc('admin_update_profile', {
+          p_id: editing.id, p_full_name: editing.full_name, p_plan: editing.plan,
+        });
+        if (error) { alert(`Save failed: ${error.message}`); return; }
+      }
+      setUsers((prev) => prev.map((u) => u.id === editing.id ? { ...u, ...editing } : u));
+      setEditing(null);
+    } catch (e) {
+      alert(`Save failed: ${e?.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
     }
-    setUsers((prev) => prev.map((u) => u.id === editing.id ? { ...u, ...editing } : u));
-    setEditing(null); setSaving(false);
   };
 
   const doSuspend = async () => {
