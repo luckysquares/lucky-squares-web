@@ -40,10 +40,10 @@ export default function GetStartedPage() {
                   I want to run a fundraiser
                 </h2>
                 <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, flex: 1, marginBottom: 28 }}>
-                  For individuals, clubs, schools or charities. Register free, set up your grid and preview everything before you decide to launch.
+                  For individuals, clubs, schools or charities who want to test the waters, or who run infrequent campaigns. Register free, set up your grid and preview everything before you decide to launch.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: 'var(--text2)', marginBottom: 28 }}>
-                  {['Free to register and explore', '$19 flat fee when you launch', 'No percentage cut from proceeds', 'Bank transfer, in-person or online card payments'].map((f) => (
+                  {['Free to register and explore', '$19 flat fee when you launch', 'No percentage cut from proceeds', 'Accept payments via bank transfer, in-person or online'].map((f) => (
                     <div key={f} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                       <span style={{ color: 'var(--green)', fontWeight: 800, flexShrink: 0 }}>✓</span>
                       <span>{f}</span>
