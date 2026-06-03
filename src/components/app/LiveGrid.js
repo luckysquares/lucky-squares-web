@@ -854,8 +854,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
 
       <div className="dot-bg">
         {fundraiser.imageUrl && (
-          <div style={{ width: '100%', maxHeight: 280, overflow: 'hidden' }}>
-            <img src={fundraiser.imageUrl} alt={fundraiser.title} style={{ width: '100%', maxHeight: 280, objectFit: 'cover', objectPosition: `center ${fundraiser.imageFocalY ?? 50}%`, display: 'block' }} />
+          <div style={{ width: '100%', height: 260, overflow: 'hidden' }}>
+            <img src={fundraiser.imageUrl} alt={fundraiser.title} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `center ${fundraiser.imageFocalY ?? 50}%`, display: 'block' }} />
           </div>
         )}
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
@@ -1000,8 +1000,16 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                       <div style={{ height: 1, background: 'var(--border)', margin: '2px 0' }} />
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
                         <span style={{ fontSize: 13, fontWeight: 800 }}>Total funds raised so far</span>
-                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, color: 'var(--green)' }}>${fmt(netRaised)}</span>
+                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, color: netRaised > 0 ? 'var(--green)' : 'var(--text2)' }}>${fmt(netRaised)}</span>
                       </div>
+                      {netRaised === 0 && (
+                        <div style={{ marginTop: 8, padding: '8px 12px', background: 'var(--cream)', borderRadius: 8, border: '1px solid var(--border)' }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 2 }}>Not seeing anything here?</div>
+                          <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>
+                            Sell {Math.max(0, Math.ceil((prizePool + platformFee) / fundraiser.pricePerSq) - soldCount)} more {Math.max(0, Math.ceil((prizePool + platformFee) / fundraiser.pricePerSq) - soldCount) === 1 ? 'square' : 'squares'} to cover your prize pool and platform fee, then this number will start to increase.
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
