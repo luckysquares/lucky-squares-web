@@ -2933,11 +2933,15 @@ export default function FundraiseApp() {
   // Call the transactional-email Edge Function (fire-and-forget)
   const sendTxEmail = useCallback((type, to, data) => {
     if (!supabaseConfigured || !to) return;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!supabaseUrl) return;
     fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(supabaseAnon ? { Authorization: `Bearer ${supabaseAnon}` } : {}),
+      },
       body: JSON.stringify({ type, to, data }),
     }).catch(() => {});
   }, []);
