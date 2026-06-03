@@ -612,6 +612,9 @@ textarea { font-family: inherit; }
 }
 
 /* ── marketing: sticky header wrapper (rainbow + nav together) ── */
+.get-started-card .scratch-card { border: 2px solid transparent; transition: border-color .15s; }
+.get-started-card:hover .scratch-card { border-color: var(--purple); }
+
 .marketing-header {
   position: sticky;
   top: 0;

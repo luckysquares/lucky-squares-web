@@ -296,7 +296,7 @@ function RegisterScreen({ onRegister, onBack, loading, error }) {
           <div style={{ flex: '1 1 340px', maxWidth: 460 }}>
             <div className="scratch-card" style={{ padding: '36px 40px' }}>
               <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', margin: '0 0 4px' }}>Create your account</h2>
-              <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 0 24px' }}>Free to set up. No credit card needed.</p>
+              <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 0 24px' }}>Free to register and explore. $19 flat fee when you launch.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div className="form-group">
                   <label className="form-label">Full name</label>

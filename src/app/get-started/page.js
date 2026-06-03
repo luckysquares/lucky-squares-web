@@ -6,6 +6,15 @@ export const metadata = {
   description: 'Start a Lucky Squares fundraiser or register your organisation.',
 };
 
+const CARD_STYLE = {
+  padding: '36px 32px',
+  cursor: 'pointer',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  transition: 'border-color .15s',
+};
+
 export default function GetStartedPage() {
   return (
     <div style={{ background: 'var(--cream)', minHeight: '100vh' }}>
@@ -17,27 +26,24 @@ export default function GetStartedPage() {
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(30px, 5vw, 46px)', fontWeight: 900, lineHeight: 1.1, marginBottom: 16, color: 'var(--text)' }}>
             How would you like to get started?
           </h1>
-          <p style={{ fontSize: 17, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 52, maxWidth: 520, margin: '0 auto 52px' }}>
-            Lucky Squares is free to set up. Choose the option that fits your situation.
+          <p style={{ fontSize: 17, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 520, margin: '0 auto 52px' }}>
+            Register free and explore the platform. A flat $19 fee applies when you choose to launch a live campaign.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, textAlign: 'left' }}>
 
             {/* Individual / Casual */}
-            <Link href="/fundraise?register=1" style={{ textDecoration: 'none' }}>
-              <div className="scratch-card" style={{ padding: '36px 32px', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', transition: 'box-shadow .15s', border: '2px solid transparent' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--purple)'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
-              >
+            <Link href="/fundraise?register=1" style={{ textDecoration: 'none' }} className="get-started-card">
+              <div className="scratch-card" style={CARD_STYLE}>
                 <div style={{ fontSize: 44, marginBottom: 20 }}>🍀</div>
                 <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', marginBottom: 10 }}>
                   I want to run a fundraiser
                 </h2>
                 <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, flex: 1, marginBottom: 28 }}>
-                  For individuals, clubs, schools or charities running occasional fundraisers. Free to set up, $19 flat fee to launch. No subscriptions.
+                  For individuals, clubs, schools or charities. Register free, set up your grid and preview everything before you decide to launch.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: 'var(--text2)', marginBottom: 28 }}>
-                  {['Free to create and preview', '$19 flat fee per campaign launch', 'No percentage cut from proceeds', 'Bank transfer, in-person or online payments'].map((f) => (
+                  {['Free to register and explore', '$19 flat fee when you launch', 'No percentage cut from proceeds', 'Bank transfer, in-person or online card payments'].map((f) => (
                     <div key={f} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                       <span style={{ color: 'var(--green)', fontWeight: 800, flexShrink: 0 }}>✓</span>
                       <span>{f}</span>
@@ -51,17 +57,14 @@ export default function GetStartedPage() {
             </Link>
 
             {/* Organisation Plan */}
-            <Link href="/org-signup" style={{ textDecoration: 'none' }}>
-              <div className="scratch-card" style={{ padding: '36px 32px', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', transition: 'box-shadow .15s', border: '2px solid transparent' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--purple)'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
-              >
+            <Link href="/org-signup" style={{ textDecoration: 'none' }} className="get-started-card">
+              <div className="scratch-card" style={CARD_STYLE}>
                 <div style={{ fontSize: 44, marginBottom: 20 }}>🏫</div>
                 <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, color: 'var(--text)', marginBottom: 10 }}>
                   I'm registering my organisation
                 </h2>
                 <p style={{ fontSize: 15, color: 'var(--text2)', lineHeight: 1.7, flex: 1, marginBottom: 28 }}>
-                  For clubs, schools and charities that fundraise regularly and want unlimited campaigns, team access, and an organisation dashboard. $149/year.
+                  For clubs, schools and charities that fundraise regularly. Unlimited campaigns, team access, and an organisation dashboard for $149/year.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: 'var(--text2)', marginBottom: 28 }}>
                   {['Unlimited campaigns per year', 'Up to 10 live simultaneously', 'Team member access', 'Organisation dashboard and reporting'].map((f) => (
