@@ -77,7 +77,7 @@ export default function HomePage() {
           Set up your fundraising campaign in minutes, share a link, and watch the squares sell. Run a live draw when you&apos;re ready. No spreadsheets, no unintelligible handwriting and no cash handling headaches.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/fundraise?register=1" className="btn btn-purple btn-xl">
+          <Link href="/get-started" className="btn btn-purple btn-xl">
             Start your fundraiser free →
           </Link>
           <Link href="/how-it-works" className="btn btn-outline btn-lg">
@@ -294,7 +294,7 @@ export default function HomePage() {
           <p style={{ fontSize: 18, color: 'var(--text2)', marginBottom: 36, maxWidth: 480, margin: '0 auto 36px' }}>
             Join hundreds of Australian schools, clubs, and charities who&apos;ve made fundraising fun again.
           </p>
-          <Link href="/fundraise?register=1" className="btn btn-gold btn-xl">
+          <Link href="/get-started" className="btn btn-gold btn-xl">
             Create your first fundraiser, it&apos;s free →
           </Link>
         </div>

@@ -566,11 +566,31 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
             <h1 className="section-title">G&apos;day, {user?.name?.split(' ')[0] || 'there'}! 👋</h1>
             <p className="section-sub">
               {fundraisers.length === 0 && (!fiftyFiftyCampaigns || fiftyFiftyCampaigns.length === 0)
-                ? "You don't have any active fundraising campaigns yet. Use the cards below to get started."
+                ? 'Ready to run your first Lucky Squares fundraiser? It takes about 5 minutes to set up.'
                 : 'Here are your fundraising campaigns'}
             </p>
           </div>
         </div>
+
+        {/* First-time onboarding steps — shown only when no campaigns exist */}
+        {fundraisers.length === 0 && (!fiftyFiftyCampaigns || fiftyFiftyCampaigns.length === 0) && !orgInfo?.role && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, margin: '24px 0 8px', padding: '28px 24px', background: 'var(--card)', borderRadius: 16, border: '1.5px solid var(--border)' }}>
+            {[
+              { step: '1', icon: '🎯', title: 'Set up your grid', desc: 'Choose your grid size, set a price per square, and add your prizes.' },
+              { step: '2', icon: '🔗', title: 'Share your link', desc: 'Send your campaign link via WhatsApp, email, or social media.' },
+              { step: '3', icon: '🎲', title: 'Run the draw', desc: 'Hit draw when ready and the winner is revealed live to everyone watching.' },
+              { step: '4', icon: '💸', title: 'Funds go to you', desc: 'Proceeds transfer directly to your account. We charge a flat $19 fee, nothing more.' },
+            ].map(({ step, icon, title, desc }) => (
+              <div key={step} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--purple-light)', border: '1.5px solid #C4B5FD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{icon}</div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', marginBottom: 3 }}>{title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 20, marginTop: 24 }}>
           {fundraisers.map((f) => (
