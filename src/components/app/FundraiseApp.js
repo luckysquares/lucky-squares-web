@@ -1654,7 +1654,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
           <div style={{ fontSize: 32, marginBottom: 10 }}>💳</div>
           <div style={{ fontWeight: 800, marginBottom: 6 }}>Online card payments</div>
           <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
-            After completing your campaign details, you&apos;ll connect your bank account once as part of the launch process. This takes about 2 minutes. Funds are transferred directly to your bank account after the draw completes — Lucky Squares never holds your money.
+            After completing your campaign details, you&apos;ll connect your bank account once as part of the launch process. This takes about 2 minutes. Funds are transferred directly to your bank account after the draw completes. Lucky Squares never holds your money.
           </div>
         </div>
       )}
