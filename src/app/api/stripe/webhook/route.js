@@ -126,16 +126,34 @@ export async function POST(req) {
           await db.rpc('redeem_coupon', { p_code: coupon_code });
         }
 
+        // Fetch campaign details for emails
+        const { data: fr } = await db.from('fundraisers').select('title, org, slug, contact_name, contact_email').eq('id', fundraiser_id).single();
+        const appUrl      = process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au';
+        const campaignUrl = `${appUrl}/${fr?.slug ?? fundraiser_id}`;
+        const txEmail     = (type: string, to: string, data: Record<string, string>) =>
+          fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+            body: JSON.stringify({ type, to, data }),
+          }).catch(() => {});
+
+        // Email the organiser — your campaign is live
+        if (fr?.contact_email) {
+          await txEmail('campaign_launched', fr.contact_email, {
+            first_name:    (fr.contact_name || 'there').split(' ')[0],
+            campaign_title: fr.title || 'Your campaign',
+            campaign_url:  campaignUrl,
+          });
+        }
+
         // Notify opted-in buyers from previous campaigns
         const { data: followers } = await db.rpc('get_campaign_notification_followers', { p_fundraiser_id: fundraiser_id });
         if (followers?.length) {
-          const { data: fr } = await db.from('fundraisers').select('title, org, slug').eq('id', fundraiser_id).single();
-          const campaignUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au'}/f/${fr?.slug ?? fundraiser_id}`;
-          await Promise.all(followers.map((f) =>
-            fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
-              body: JSON.stringify({ type: 'campaign_launched_notification', to: f.email, data: { organiser_name: fr?.org || 'the organiser', campaign_title: fr?.title || 'New fundraiser', campaign_url: campaignUrl } }),
+          await Promise.all(followers.map((f: { email: string }) =>
+            txEmail('campaign_launched_notification', f.email, {
+              organiser_name: fr?.org || 'the organiser',
+              campaign_title: fr?.title || 'New fundraiser',
+              campaign_url:  campaignUrl,
             })
           ));
         }
