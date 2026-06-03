@@ -130,7 +130,7 @@ export async function POST(req) {
         const { data: fr } = await db.from('fundraisers').select('title, org, slug, contact_name, contact_email').eq('id', fundraiser_id).single();
         const appUrl      = process.env.NEXT_PUBLIC_APP_URL || 'https://luckysquares.com.au';
         const campaignUrl = `${appUrl}/${fr?.slug ?? fundraiser_id}`;
-        const txEmail     = (type: string, to: string, data: Record<string, string>) =>
+        const txEmail     = (type, to, data) =>
           fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
@@ -149,7 +149,7 @@ export async function POST(req) {
         // Notify opted-in buyers from previous campaigns
         const { data: followers } = await db.rpc('get_campaign_notification_followers', { p_fundraiser_id: fundraiser_id });
         if (followers?.length) {
-          await Promise.all(followers.map((f: { email: string }) =>
+          await Promise.all(followers.map((f) =>
             txEmail('campaign_launched_notification', f.email, {
               organiser_name: fr?.org || 'the organiser',
               campaign_title: fr?.title || 'New fundraiser',
