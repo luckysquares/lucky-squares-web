@@ -591,6 +591,26 @@ ${SIG}`,
   };
 }
 
+function tplEarlyAccessInvite() {
+  return {
+    subject: `Your Lucky Squares early access is ready`,
+    text: `Hi {{first_name}},
+
+You signed up to hear when Lucky Squares Australia opened its doors. That day is today.
+
+Lucky Squares lets you run a fully online Lucky Squares fundraiser in minutes. Set up your grid, share a link with your community, and watch the squares sell. When you're ready, run the draw live. No spreadsheets, no cash handling, no stress.
+
+Head here to create your account and get started:
+https://luckysquares.com.au/get-started
+
+We built this specifically for Australian schools, clubs, and charities, and we'd love to see what you raise with it.
+
+If you have any questions just reply to this email. I read everything.
+
+${SIG}`,
+  };
+}
+
 // ── Email list ────────────────────────────────────────────────────────────────
 
 const EMAIL_GROUPS = [
@@ -646,6 +666,12 @@ const EMAIL_GROUPS = [
     label: 'Org member',
     items: [
       { key: 'org_member_invite',            label: 'Org member invite',          render: tplOrgMemberInvite },
+    ],
+  },
+  {
+    label: 'Waitlist',
+    items: [
+      { key: 'early_access_invite',          label: 'Early access invite',        render: tplEarlyAccessInvite },
     ],
   },
 ];
