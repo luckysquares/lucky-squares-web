@@ -189,7 +189,7 @@ export default function HomePage() {
           <div className="testimonial-grid">
             {[
               { quote: "We raised $1,800 in two days for our school camp. Parents loved picking their own squares. It felt personal and exciting. The live draw was a highlight at assembly.", name: 'Mel T.', role: 'P&C President, Sunbury Primary School' },
-              { quote: "Used to do this on a whiteboard at the club. Now we share a link in the WhatsApp group and the grid fills itself. Saved me hours of admin and the kids love watching the squares get sold.", name: 'Dave K.', role: 'Treasurer, L'Aces Masters Baseball ⚾' },
+              { quote: "Used to do this on a whiteboard at the club. Now we share a link in the WhatsApp group and the grid fills itself. Saved me hours of admin and the kids love watching the squares get sold.", name: 'Jamie S.', role: 'Squad member, L'Aces Masters Baseball ⚾' },
               { quote: "Simple, clean, Australian. I appreciated that bank transfer was a proper option. Half our donors are older and don't use card. Raised $2,500 for our koala rescue program.", name: 'Priya S.', role: 'Volunteer Coordinator, Wildlife Friends VIC' },
             ].map((t) => (
               <div key={t.name} className="testimonial-card">
