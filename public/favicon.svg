@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 46">
+  <rect width="46" height="46" rx="11" fill="#6B46F5"/>
+  <!-- Row 1 -->
+  <rect x="5"  y="5"  width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="15" y="5"  width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="25" y="5"  width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="35" y="5"  width="6" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <!-- Row 2 — winner at col 2 -->
+  <rect x="5"  y="15" width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="15" y="15" width="8" height="8" rx="2" fill="#F5C820"/>
+  <rect x="25" y="15" width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="35" y="15" width="6" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <!-- Row 3 -->
+  <rect x="5"  y="25" width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="15" y="25" width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="25" y="25" width="8" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="35" y="25" width="6" height="8" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <!-- Row 4 — bottom row 6px tall -->
+  <rect x="5"  y="35" width="8" height="6" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="15" y="35" width="8" height="6" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="25" y="35" width="8" height="6" rx="2" fill="rgba(255,255,255,0.22)"/>
+  <rect x="35" y="35" width="6" height="6" rx="2" fill="rgba(255,255,255,0.22)"/>
+</svg>

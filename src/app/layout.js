@@ -70,6 +70,11 @@ export const metadata = {
     description: 'Set up a Lucky Squares fundraiser in minutes. Sell squares online, run a live draw, and raise more for your community.',
     images: ['/og-default.png'],
   },
+  icons: {
+    icon:     [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    shortcut: '/favicon.svg',
+    apple:    '/apple-touch-icon.png',
+  },
   alternates: { canonical: SITE_URL },
   robots: {
     index: true,
