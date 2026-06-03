@@ -152,7 +152,7 @@ function AppHeader({ user, onLogout, onHome }) {
       <div className="rainbow-strip" />
       <header className="app-header" style={{ background: 'var(--card)', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(61,46,26,.07)', position: 'sticky', top: 0, zIndex: 100 }}>
         <Link href="/" style={{ textDecoration: 'none' }}>
-          <Logo size={88} />
+          <Logo size={32} />
         </Link>
         <div className="app-header-actions">
           {user && (
@@ -1086,6 +1086,28 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const BANK_STEP    = WIZARD_STEPS.indexOf('Connect Bank'); // 8
   const LAUNCH_STEP  = WIZARD_STEPS.indexOf('Launch'); // 9
   const isStripePayment = payment.method === 'stripe';
+
+  // Intercept browser back button — navigate to previous step instead of leaving the wizard
+  useEffect(() => {
+    // Push a history entry when entering the wizard so back has somewhere to go
+    window.history.pushState({ wizardStep: step }, '');
+    const handlePop = (e) => {
+      if (e.state?.wizardStep !== undefined) {
+        // Back button pressed inside wizard — go to previous step
+        if (step > 0) {
+          setStep((s) => s - 1);
+        } else {
+          clearDraft();
+          onCancel();
+          return;
+        }
+        // Re-push so the next back press still works
+        window.history.pushState({ wizardStep: step - 1 }, '');
+      }
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When the user arrives at step 8 (Connect Bank), save the draft so StripeConnectSetup
   // has a real fundraiser_id to pass to the account-session API.
