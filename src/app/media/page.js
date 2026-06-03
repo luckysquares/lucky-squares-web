@@ -256,7 +256,7 @@ export default function MediaPage() {
                   Drawing on that experience, Jamie co-founded Play With Heart Pty Ltd (trading as Lucky Squares Australia) to give clubs, schools, and not-for-profits a modern, easy-to-use platform that reduces volunteer workload while helping organisations raise more for the causes that matter.
                 </p>
                 <p>
-                  Jamie is a participant in the 2025 cohort of the Marjorie Jackson-Nelson Centre for Women in Sport at the University of South Australia, a program supporting women leaders across the Australian sport sector.
+                  Jamie is a participant in the 2025 cohort of the Marjorie Jackson-Nelson Centre for Women in Sport, a program supporting women leaders across the Australian sport sector.
                 </p>
                 <p>
                   Away from the platform, Jamie recently published her first children's book, <em>The Catcher With Heart</em>, a story about courage, kindness, and the joy of playing ball.
