@@ -237,7 +237,7 @@ export default function MediaPage() {
             <div style={{ flexShrink: 0 }}>
               <div style={{ width: 180, height: 180, borderRadius: 16, overflow: 'hidden', background: 'var(--cream2)', border: '2px solid var(--border)' }}>
                 <Image
-                  src="/jamie-stott.jpg"
+                  src="/jamie-stott.png"
                   alt="Jamie Stott, founder of Lucky Squares Australia"
                   width={180}
                   height={180}
