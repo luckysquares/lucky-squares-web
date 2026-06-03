@@ -159,30 +159,36 @@ export default function AdminUsers() {
                     <td style={{ padding: '12px 16px', color: 'var(--text2)' }}>{fmtDate(u.created_at)}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...u })}>Edit</button>
-                        <button
-                          className="btn btn-sm"
-                          style={{ background: u.is_founding_member ? '#FEF3C7' : '#F9FAFB', color: u.is_founding_member ? '#92400E' : '#6B7280', border: `1px solid ${u.is_founding_member ? '#F59E0B' : '#D1D5DB'}`, fontSize: 11 }}
-                          onClick={() => toggleFoundingMember(u)}
-                        >
-                          {u.is_founding_member ? '★ Founding' : '☆ Founding'}
-                        </button>
-                        {u.suspended ? (
-                          <button
-                            className="btn btn-sm"
-                            style={{ background: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0' }}
-                            onClick={() => doUnsuspend(u.id)}
-                          >
-                            Reinstate
-                          </button>
+                        {u.is_admin ? (
+                          <span style={{ fontSize: 11, color: 'var(--text2)', fontStyle: 'italic', alignSelf: 'center' }}>Manage in Supabase</span>
                         ) : (
-                          <button
-                            className="btn btn-sm"
-                            style={{ background: '#FEF2F2', color: '#991B1B', border: '1px solid #FCA5A5' }}
-                            onClick={() => { setSuspendModal(u); setSuspendReason(''); }}
-                          >
-                            Suspend
-                          </button>
+                          <>
+                            <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...u })}>Edit</button>
+                            <button
+                              className="btn btn-sm"
+                              style={{ background: u.is_founding_member ? '#FEF3C7' : '#F9FAFB', color: u.is_founding_member ? '#92400E' : '#6B7280', border: `1px solid ${u.is_founding_member ? '#F59E0B' : '#D1D5DB'}`, fontSize: 11 }}
+                              onClick={() => toggleFoundingMember(u)}
+                            >
+                              {u.is_founding_member ? '★ Founding' : '☆ Founding'}
+                            </button>
+                            {u.suspended ? (
+                              <button
+                                className="btn btn-sm"
+                                style={{ background: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0' }}
+                                onClick={() => doUnsuspend(u.id)}
+                              >
+                                Reinstate
+                              </button>
+                            ) : (
+                              <button
+                                className="btn btn-sm"
+                                style={{ background: '#FEF2F2', color: '#991B1B', border: '1px solid #FCA5A5' }}
+                                onClick={() => { setSuspendModal(u); setSuspendReason(''); }}
+                              >
+                                Suspend
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>
