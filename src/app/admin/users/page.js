@@ -260,7 +260,7 @@ export default function AdminUsers() {
 
 const DEMO_USERS = [
   { id: '1', email: 'mel@sunburyprimary.edu.au',  full_name: 'Mel Thompson',  plan: 'casual', suspended: false, suspension_reason: null, created_at: new Date(Date.now() - 45 * 86400000).toISOString() },
-  { id: '2', email: 'dave@werribeeeagles.com.au',  full_name: 'Dave Kowalski', plan: 'org',    suspended: false, suspension_reason: null, created_at: new Date(Date.now() - 90 * 86400000).toISOString() },
+  { id: '2', email: 'contact@lacesmasters.com.au',  full_name: 'Dave Kowalski', plan: 'org',    suspended: false, suspension_reason: null, created_at: new Date(Date.now() - 90 * 86400000).toISOString() },
   { id: '3', email: 'priya@wildlife.org.au',       full_name: 'Priya Sharma',  plan: 'casual', suspended: true,  suspension_reason: 'Complaint received: prizes not paid out for campaign Wildlife Raffle. Under investigation.', created_at: new Date(Date.now() - 12 * 86400000).toISOString() },
   { id: '4', email: 'tom@baysidefc.com.au',        full_name: 'Tom Reynolds',  plan: 'trial',  suspended: false, suspension_reason: null, created_at: new Date(Date.now() - 5 * 86400000).toISOString() },
 ];

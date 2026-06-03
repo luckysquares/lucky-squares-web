@@ -34,7 +34,7 @@ const EMOJIS = ['🍀', '🌈', '🏆', '⚾', '🐨', '🏉', '⭐', '🎯', '�
 const SAMPLE_FUNDRAISERS = [
   { id: 1, title: 'Koala Rescue Raffle 🐨', org: 'Wildlife Friends', grid: 100, pricePerSq: 10, sold: 63, status: 'active', emoji: '🐨', totalPrizeValue: 800, payment: { method: 'bank', accountName: 'Wildlife Friends Inc', bsb: '062-000', account: '12345678' } },
   { id: 2, title: 'School Fete Lucky Dip 🎪', org: 'Sunbury Primary P&C', grid: 50, pricePerSq: 15, sold: 31, status: 'active', emoji: '🎪', totalPrizeValue: 500, payment: { method: 'stripe' } },
-  { id: 3, title: 'Footy Club Finals Fund 🏉', org: 'Werribee Eagles AFC', grid: 25, pricePerSq: 20, sold: 18, status: 'draft', emoji: '🏉', totalPrizeValue: 200, payment: { method: 'bank', accountName: 'Werribee Eagles AFC', bsb: '033-000', account: '87654321' } },
+  { id: 3, title: 'Footy Club Finals Fund 🏉', org: 'L'Aces Masters Baseball ⚾', grid: 25, pricePerSq: 20, sold: 18, status: 'draft', emoji: '🏉', totalPrizeValue: 200, payment: { method: 'bank', accountName: 'L'Aces Masters Baseball ⚾', bsb: '033-000', account: '87654321' } },
 ];
 
 
