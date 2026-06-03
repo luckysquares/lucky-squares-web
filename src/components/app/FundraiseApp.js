@@ -181,7 +181,7 @@ function AuthShell({ children }) {
       <div style={{ padding: '18px 28px', borderBottom: '1px solid var(--border)', background: 'rgba(253,248,240,.92)', backdropFilter: 'blur(8px)' }}>
         <div style={{ maxWidth: 1060, margin: '0 auto' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <Logo size={80} />
+            <Logo size={44} />
           </Link>
         </div>
       </div>
@@ -3563,7 +3563,7 @@ export default function FundraiseApp() {
   if (phase === 'loading') return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)' }}>
       <div style={{ textAlign: 'center' }}>
-        <Logo size={72} />
+        <Logo size={44} />
         <div style={{ marginTop: 20, fontSize: 14, color: 'var(--text2)', fontWeight: 600 }}>Loading…</div>
       </div>
     </div>
