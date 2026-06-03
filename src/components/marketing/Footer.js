@@ -30,6 +30,7 @@ export default function Footer() {
             <Link href="/faq">FAQ</Link>
             <Link href="/contact">Contact us</Link>
             <Link href="/blog">Blog</Link>
+            <Link href="/media">Media</Link>
           </div>
 
           <div className="footer-col">

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
+  <!-- Icon -->
+  <rect width="60" height="60" rx="14" fill="#6B46F5"/>
+  <rect x="6.5"  y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="19.5" y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="32.5" y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="45.5" y="6.5"  width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="6.5"  y="19.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="19.5" y="19.5" width="10.5" height="10.5" rx="2.5" fill="#F5C820"/>
+  <rect x="32.5" y="19.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="45.5" y="19.5" width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="6.5"  y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="19.5" y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="32.5" y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="45.5" y="32.5" width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="6.5"  y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="19.5" y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="32.5" y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <rect x="45.5" y="45.5" width="8"    height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
+  <!-- Wordmark: requires Fraunces — embed as text -->
+  <text x="76" y="38" font-family="Fraunces, Georgia, serif" font-weight="900" font-size="28" fill="#6B46F5">Lucky</text>
+  <text x="148" y="38" font-family="Fraunces, Georgia, serif" font-weight="400" font-style="italic" font-size="28" fill="#2A1F0F">Squares</text>
+  <text x="77" y="52" font-family="Nunito, Arial, sans-serif" font-weight="700" font-size="9" fill="#9C8060" letter-spacing="2.8">AUSTRALIA</text>
+</svg>
