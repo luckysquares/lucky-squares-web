@@ -110,6 +110,19 @@ export async function POST(req) {
           return new Response('ok', { status: 200 });
         }
 
+        // Auto-upgrade trial users to casual on first campaign launch
+        const { data: launcher } = await db
+          .from('fundraisers')
+          .select('owner_id')
+          .eq('id', fundraiser_id)
+          .single();
+        if (launcher?.owner_id) {
+          await db.from('profiles')
+            .update({ plan: 'casual' })
+            .eq('id', launcher.owner_id)
+            .eq('plan', 'trial'); // only upgrade if still on trial
+        }
+
         // Create one row per square in the squares table so buyers can reserve them.
         // Uses upsert + ignoreDuplicates for idempotency (safe if webhook fires twice).
         const gridSize = existing.grid_size;
