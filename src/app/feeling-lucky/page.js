@@ -31,7 +31,7 @@ const SAMPLE_CAMPAIGNS = [
   {
     id: 'demo-2',
     title: 'Finals Trip Fund 🏉',
-    org: "L'Aces Masters Baseball ⚾",
+    org: "L\'Aces Masters Baseball ⚾",
     contactName: 'Dave K.',
     description: 'Our under-16s have made the state finals and we need to cover travel, accommodation, and uniforms. Help us get these kids there.',
     pricePerSq: 20,
