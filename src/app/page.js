@@ -68,7 +68,7 @@ export default function HomePage() {
         <div className="hero-dots" />
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(107,70,245,.12)', borderRadius: 20, padding: '6px 14px', marginBottom: 24, fontSize: 13, fontWeight: 700, color: 'var(--purple)' }}>
-          🍀 Now in early access
+          🍀 Early Access Open
         </div>
         <h1 className="hero-title">
           The <span style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #4A28D4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>easiest</span> Lucky Squares <span style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #4A28D4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>fundraiser</span> in Australia
