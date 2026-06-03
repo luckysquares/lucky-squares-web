@@ -98,7 +98,7 @@ export default function HomePage() {
             Trusted by schools, sports clubs &amp; charities across Australia
           </p>
           <div style={{ display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap', opacity: .6 }}>
-            {['🏫 Sunbury Primary', '⚾ L'Aces Masters Baseball', '🐨 Wildlife Friends', '⚽ Bayside FC', '🎓 St Brendan\'s P&C'].map((org) => (
+            {['🏫 Sunbury Primary', "⚾ L'Aces Masters Baseball", '🐨 Wildlife Friends', '⚽ Bayside FC', '🎓 St Brendan\'s P&C'].map((org) => (
               <span key={org} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text2)' }}>{org}</span>
             ))}
           </div>

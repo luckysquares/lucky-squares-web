@@ -162,5 +162,5 @@ export default function AdminOrganisations() {
 const DEMO_ORGS = [
   { id: '1', org_name: 'Sunbury Primary P&C', abn: '12 345 678 901', org_type: 'School P&C', contact_name: 'Mel Thompson', email: 'mel@sunburyprimary.edu.au', phone: '0412 345 678', suburb: 'Sunbury', state: 'SA', postcode: '3429', status: 'pending',  created_at: new Date(Date.now() - 3 * 86400000).toISOString() },
   { id: '2', org_name: 'Wildlife Friends VIC', abn: '98 765 432 109', org_type: 'Registered charity', contact_name: 'Priya Sharma', email: 'priya@wildlife.org.au', phone: '0423 456 789', suburb: 'Geelong', state: 'SA', postcode: '3220', status: 'approved', created_at: new Date(Date.now() - 18 * 86400000).toISOString() },
-  { id: '3', org_name: 'L'Aces Masters Baseball ⚾',  abn: '45 678 901 234', org_type: 'Sporting club', contact_name: 'Dave Kowalski', email: 'contact@lacesmasters.com.au', phone: '0434 567 890', suburb: 'Adelaide', state: 'SA', postcode: '5000', status: 'pending',  created_at: new Date(Date.now() - 1 * 86400000).toISOString() },
+  { id: '3', org_name: "L'Aces Masters Baseball ⚾",  abn: '45 678 901 234', org_type: 'Sporting club', contact_name: 'Dave Kowalski', email: 'contact@lacesmasters.com.au', phone: '0434 567 890', suburb: 'Adelaide', state: 'SA', postcode: '5000', status: 'pending',  created_at: new Date(Date.now() - 1 * 86400000).toISOString() },
 ];
