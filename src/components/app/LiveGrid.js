@@ -709,8 +709,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   );
 
   if (phase === 'checkout') return (
-    <div className="dot-bg" style={{ minHeight: '100vh' }}>
-      <div style={{ maxWidth: 540, margin: '0 auto', padding: 32 }}>
+    <div className="dot-bg" style={{ minHeight: '100vh', overflowX: 'hidden' }}>
+      <div style={{ maxWidth: 540, margin: '0 auto', padding: '24px 16px' }}>
         <button className="btn btn-outline btn-sm" style={{ marginBottom: 24 }} onClick={() => { setTimerPaused(false); setPhase('browse'); window.scrollTo(0, 0); }}>← Back to grid</button>
         <h2 className="section-title" style={{ marginBottom: 24 }}>Checkout</h2>
         <div className="scratch-card" style={{ padding: 24, marginBottom: 20 }}>
