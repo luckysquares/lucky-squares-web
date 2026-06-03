@@ -82,6 +82,17 @@ export async function POST(req) {
       const abn         = prefill?.orgAbn ? prefill.orgAbn.replace(/\s/g, '') : undefined;
       const bizType     = prefill?.orgType ? (ORG_TYPE_TO_BUSINESS_TYPE[prefill.orgType] ?? 'non_profit') : 'non_profit';
 
+      // Normalise phone to E.164 — Stripe rejects local AU format (e.g. 0423...)
+      const normalisePhone = (p) => {
+        if (!p) return undefined;
+        const d = p.replace(/\D/g, '');
+        if (d.startsWith('61') && d.length === 11) return `+${d}`;
+        if (d.startsWith('0') && d.length === 10) return `+61${d.slice(1)}`;
+        if (d.length === 9) return `+61${d}`;
+        return p.startsWith('+') ? p : undefined; // discard unrecognised formats
+      };
+      const phone = normalisePhone(prefill?.phone);
+
       const accountParams = {
         controller: {
           stripe_dashboard:       { type: 'none' },
@@ -115,8 +126,8 @@ export async function POST(req) {
         accountParams.individual = {
           ...(firstName      ? { first_name: firstName }   : {}),
           ...(lastName       ? { last_name:  lastName }    : {}),
-          ...(prefill?.email ? { email: prefill.email }    : {}),
-          ...(prefill?.phone ? { phone: prefill.phone }    : {}),
+          ...(prefill?.email ? { email: prefill.email } : {}),
+          ...(phone          ? { phone }               : {}),
         };
       }
 
