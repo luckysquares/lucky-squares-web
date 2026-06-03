@@ -78,7 +78,7 @@ export default function HomePage() {
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/get-started" className="btn btn-purple btn-xl">
-            Start your fundraiser free →
+            Get started: Register for free →
           </Link>
           <Link href="/how-it-works" className="btn btn-outline btn-lg">
             ▷ See how it works
