@@ -21,7 +21,7 @@ export default function MarketingNav({ links } = {}) {
       <nav className="marketing-nav">
         <div className="marketing-nav-inner">
           <Link href="/" onClick={close} className="nav-logo-link">
-            <Logo size={40} priority />
+            <Logo size={32} priority />
           </Link>
 
           {/* Desktop links */}
