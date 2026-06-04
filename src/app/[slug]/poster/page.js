@@ -78,9 +78,13 @@ export default function PosterPage({ params }) {
 
   const fundraiserUrl = f ? `${origin}/${f.slug ?? f.id}` : origin;
 
-  // Footer QR links to campaign with UTM for attribution tracking
+  // Footer QR: homepage with UTM attribution so GA4 records which organiser's
+  // poster drove the visit. org slug used as campaign name for readability.
+  const orgSlug = f?.org
+    ? f.org.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)
+    : 'unknown';
   const footerQrUrl = f
-    ? `${origin}/${f.slug ?? f.id}?utm_source=poster&utm_medium=print&utm_campaign=${f.id}`
+    ? `${HOME_URL}?utm_source=poster&utm_medium=print&utm_campaign=${orgSlug}&utm_content=${f.slug ?? f.id}`
     : HOME_URL;
 
   if (loading) return (
@@ -264,8 +268,8 @@ export default function PosterPage({ params }) {
                 <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 2 }}>Powered by</div>
                 <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', wordBreak: 'break-all', maxWidth: 120 }}>{HOME_URL}</div>
               </div>
-              <div style={{ background: '#fff', borderRadius: 6, padding: 4 }}>
-                <QRCodeSVG value={footerQrUrl} size={40} fgColor="#1A0A3C" bgColor="#ffffff" level="M" />
+              <div style={{ background: '#fff', borderRadius: 8, padding: 5 }}>
+                <QRCodeSVG value={footerQrUrl} size={56} fgColor="#1A0A3C" bgColor="#ffffff" level="L" />
               </div>
             </div>
           </div>
