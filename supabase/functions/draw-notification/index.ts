@@ -315,7 +315,7 @@ Deno.serve(async (req) => {
         const prizeSummary = prizeList.length > 0
           ? prizeList[0].description ?? 'a prize'
           : 'a prize';
-        const campaignUrl = `${Deno.env.get('APP_URL') ?? 'https://luckysquares.com.au'}/f/${fundraiserId}`;
+        const campaignUrl = `${Deno.env.get('APP_URL') ?? 'https://luckysquares.com.au'}/${f.slug ?? fundraiserId}`;
         const tipsTpl = emailFirstCampaignTips({
           first_name:     firstName,
           campaign_title: f.title,

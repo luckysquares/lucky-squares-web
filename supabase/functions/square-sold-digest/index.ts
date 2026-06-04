@@ -30,7 +30,7 @@ Deno.serve(async () => {
   // Fetch all active campaigns with contact email
   const { data: campaigns } = await supabase
     .from('fundraisers')
-    .select('id, title, org, contact_email, contact_name, grid_size, price_per_sq, last_digest_at, last_nudge_at')
+    .select('id, slug, title, org, contact_email, contact_name, grid_size, price_per_sq, last_digest_at, last_nudge_at')
     .eq('status', 'active')
     .not('contact_email', 'is', null);
 
@@ -43,7 +43,7 @@ Deno.serve(async () => {
 
   for (const c of campaigns) {
     const appUrl = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://luckysquares.com.au';
-    const campaignUrl = `${appUrl}/f/${c.id}`;
+    const campaignUrl = `${appUrl}/${c.slug ?? c.id}`;
 
     // Fetch squares sold since last digest (or ever, if no digest sent yet)
     const since = c.last_digest_at ?? new Date(0).toISOString();
