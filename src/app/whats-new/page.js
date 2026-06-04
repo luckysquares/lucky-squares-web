@@ -136,8 +136,20 @@ export default function WhatsNewPage() {
             ))}
           </div>
 
-          {/* CTA */}
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 40, textAlign: 'center' }}>
+          {/* CTAs */}
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 40, display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, marginBottom: 6, color: 'var(--text)' }}>Got a feature request?</div>
+              <p style={{ fontSize: 14, color: 'var(--text2)', margin: 0 }}>
+                We read every message. Tell us what would make Lucky Squares work better for you.
+              </p>
+            </div>
+            <Link href="/contact?category=Feature+request" className="btn btn-outline" style={{ flexShrink: 0 }}>
+              Send a request →
+            </Link>
+          </div>
+
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 40, marginTop: 40, textAlign: 'center' }}>
             <p style={{ fontSize: 15, color: 'var(--text2)', marginBottom: 20 }}>
               Ready to run your first campaign?
             </p>

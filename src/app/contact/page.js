@@ -6,6 +6,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 const CATEGORIES = [
   'General enquiry',
+  'Feature request',
   'Technical support',
   'Billing',
   'Privacy enquiry',
