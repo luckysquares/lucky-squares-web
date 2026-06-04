@@ -221,7 +221,7 @@ export default async function BlogPostPage({ params }) {
               background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)',
               padding: '3px 8px', borderRadius: 4, lineHeight: 1.4,
             }}>
-              Image credit: {post.image_credit_name}{post.image_credit_year ? ` (c) ${post.image_credit_year}` : ''}
+              Image credit: {post.image_credit_name}{post.image_credit_year ? ` © ${post.image_credit_year}` : ''}
             </div>
           )}
         </div>
