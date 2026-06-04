@@ -29,7 +29,6 @@ function dbToFundraiser(row, prizes = []) {
 const PLACE_LABELS = ['1st', '2nd', '3rd', '4th', '5th'];
 const PLACE_EMOJIS = ['🥇', '🥈', '🥉', '🎖️', '🎖️'];
 
-// Inline SVG logo icon — no web font dependency for print
 function LogoIcon({ size = 40 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 46 46" xmlns="http://www.w3.org/2000/svg">
@@ -79,6 +78,11 @@ export default function PosterPage({ params }) {
 
   const fundraiserUrl = f ? `${origin}/${f.slug ?? f.id}` : origin;
 
+  // Footer QR links to campaign with UTM for attribution tracking
+  const footerQrUrl = f
+    ? `${origin}/${f.slug ?? f.id}?utm_source=poster&utm_medium=print&utm_campaign=${f.id}`
+    : HOME_URL;
+
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F5F3EE', fontFamily: 'sans-serif', fontSize: 14, color: '#6B7280' }}>
       Loading poster…
@@ -96,19 +100,31 @@ export default function PosterPage({ params }) {
       <style>{`
         * { box-sizing: border-box; }
         body { margin: 0; padding: 0; background: #D6D0C4; }
+
         @media print {
-          /* Hide everything outside the poster */
-          body { background: #fff; }
-          body > * { display: none !important; }
-          .poster-print-root { display: flex !important; }
-          .no-print { display: none !important; }
-          .poster-wrap { padding: 0 !important; }
-          footer, header, nav, [class*="chat"], [class*="widget"] { display: none !important; }
+          /* Reliable "print only the poster" technique:
+             hide everything via visibility, then un-hide just the poster.
+             Works regardless of Next.js DOM nesting. */
           @page { size: A4 portrait; margin: 0; }
+          body { background: #fff !important; }
+          body * { visibility: hidden; }
+          .poster-sheet,
+          .poster-sheet * { visibility: visible; }
+          .poster-sheet {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+          }
+          .no-print { display: none !important; }
         }
       `}</style>
 
-      {/* Control bar */}
+      {/* Control bar — hidden on print */}
       <div className="no-print" style={{ background: '#1A1209', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ fontFamily: 'sans-serif', fontSize: 14, color: 'rgba(255,255,255,.6)' }}>
           <strong style={{ color: '#fff' }}>Poster preview</strong> — print or save as PDF
@@ -123,12 +139,13 @@ export default function PosterPage({ params }) {
         </div>
       </div>
 
-      {/* Centre the A4 on screen */}
-      <div className="poster-print-root poster-wrap" style={{ padding: '40px 20px 60px', display: 'flex', justifyContent: 'center' }}>
-        <div style={{
+      {/* Screen wrapper — centres the A4 preview */}
+      <div style={{ padding: '40px 20px 60px', display: 'flex', justifyContent: 'center' }}>
+
+        {/* ── Poster sheet (A4) ─────────────────────────────────────────── */}
+        <div className="poster-sheet" style={{
           width: '210mm',
-          minHeight: '297mm',
-          maxHeight: '297mm',
+          height: '297mm',
           background: '#fff',
           boxShadow: '0 8px 48px rgba(0,0,0,.3)',
           display: 'flex',
@@ -137,19 +154,18 @@ export default function PosterPage({ params }) {
           overflow: 'hidden',
         }}>
 
-          {/* ── Header with logo ─────────────────────────────────────── */}
+          {/* ── Header ───────────────────────────────────────────────── */}
           <div style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 45%, #4A28D4 100%)', padding: '14px 28px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
             <LogoIcon size={44} />
             <div>
               <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.3px', lineHeight: 1.1 }}>
-                <span style={{ fontWeight: 900 }}>Lucky</span>
-                {' '}
+                <span style={{ fontWeight: 900 }}>Lucky</span>{' '}
                 <span style={{ fontWeight: 400, fontStyle: 'italic' }}>Squares</span>
               </div>
               <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: 1 }}>Australia</div>
             </div>
-            <div style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>
-              <div>{f.org}</div>
+            <div style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.8)', textAlign: 'right' }}>
+              {f.org}
             </div>
           </div>
 
@@ -158,13 +174,13 @@ export default function PosterPage({ params }) {
             <div style={{ fontSize: 24, fontWeight: 900, color: '#1A1209', lineHeight: 1.2 }}>{f.title}</div>
           </div>
 
-          {/* ── Campaign image (if set) ───────────────────────────────── */}
+          {/* ── Campaign image ────────────────────────────────────────── */}
           {f.imageUrl && (
-            <div style={{ flexShrink: 0, height: '160px', overflow: 'hidden' }}>
+            <div style={{ flexShrink: 0, height: '210px', overflow: 'hidden' }}>
               <img
                 src={f.imageUrl}
                 alt={f.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', display: 'block' }}
               />
             </div>
           )}
@@ -224,15 +240,34 @@ export default function PosterPage({ params }) {
           </div>
 
           {/* ── Footer ────────────────────────────────────────────────── */}
-          <div style={{ background: '#F5F3EE', borderTop: '1.5px solid #E5E0D5', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <QRCodeSVG value={HOME_URL} size={28} fgColor="#6B46F5" bgColor="#F5F3EE" level="M" />
+          <div style={{
+            background: '#1A0A3C',
+            borderTop: '3px solid #6B46F5',
+            padding: '14px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexShrink: 0,
+          }}>
+            {/* Left: branding */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <LogoIcon size={36} />
               <div>
-                <div style={{ fontSize: 10, fontWeight: 800, color: '#1A1209' }}>Powered by Lucky Squares Australia</div>
-                <div style={{ fontSize: 9, color: '#9C8060' }}>Run your own fundraiser at luckysquares.com.au</div>
+                <div style={{ fontSize: 11, fontWeight: 900, color: '#fff', letterSpacing: 0.3 }}>Lucky Squares Australia</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>luckysquares.com.au — run your own fundraiser free</div>
               </div>
             </div>
-            <LogoIcon size={28} />
+            {/* Right: campaign QR for attribution */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 2 }}>Powered by</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', wordBreak: 'break-all', maxWidth: 120 }}>{HOME_URL}</div>
+              </div>
+              <div style={{ background: '#fff', borderRadius: 6, padding: 4 }}>
+                <QRCodeSVG value={footerQrUrl} size={40} fgColor="#1A0A3C" bgColor="#ffffff" level="M" />
+              </div>
+            </div>
           </div>
 
         </div>
