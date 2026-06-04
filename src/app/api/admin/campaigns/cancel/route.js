@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const { campaign_id } = await req.json();
     if (!campaign_id) {

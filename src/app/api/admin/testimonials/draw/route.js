@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL     = 'Lucky Squares <hello@luckysquares.com.au>';
-const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'jwstott@me.com';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
 
 // GET — check draw status for a given month
 export async function GET(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const month = searchParams.get('month'); // YYYY-MM
   if (!month) return NextResponse.json({ error: 'month required' }, { status: 400 });
@@ -36,6 +38,7 @@ export async function GET(req) {
 
 // POST — run the draw for a given month
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { month } = await req.json(); // YYYY-MM
   if (!month) return NextResponse.json({ error: 'month required' }, { status: 400 });
 

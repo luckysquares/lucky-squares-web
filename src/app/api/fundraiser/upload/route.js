@@ -9,7 +9,7 @@ export async function POST(req) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const userRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
-      headers: { Authorization: `Bearer ${token}`, apikey: process.env.SUPABASE_SERVICE_ROLE_KEY },
+      headers: { Authorization: `Bearer ${token}`, apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY },
     });
     if (!userRes.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -34,7 +34,7 @@ export async function POST(req) {
       .webp({ quality: 82 })
       .toBuffer();
 
-    const path = `uploads/${Date.now()}.webp`;
+    const path = `uploads/${Date.now()}-${crypto.randomUUID()}.webp`;
 
     const supabase = getSupabase();
     const { data, error } = await supabase.storage

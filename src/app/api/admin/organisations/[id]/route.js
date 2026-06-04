@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 
 const SUPABASE_FUNCTIONS_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`
@@ -24,6 +25,7 @@ async function sendEmail(type, to, data) {
 // POST /api/admin/organisations/[id]
 // body: { action: 'approve' | 'reject' }
 export async function POST(req, { params }) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { id } = await params;
   const { action } = await req.json();
 

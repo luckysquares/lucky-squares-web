@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 import { getAdminClient } from '@/lib/supabase/server';
 
 const SEO_TOPICS = [
@@ -136,6 +137,7 @@ Tags must be 2-3 lowercase values from: fundraising, sport, community, marketing
 }
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not set' }, { status: 503 });
 
@@ -179,7 +181,8 @@ export async function POST(req) {
   return NextResponse.json({ ok: true, slug, title: generated.title, index, total: topics.length, source });
 }
 
-export async function GET() {
+export async function GET(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   return NextResponse.json({
     seed: { total: SEED_TOPICS.length, topics: SEED_TOPICS.map((t) => t.title) },
     seo:  { total: SEO_TOPICS.length,  topics: SEO_TOPICS.map((t) => t.title)  },

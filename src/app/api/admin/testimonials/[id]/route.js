@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 
 export async function PATCH(req, { params }) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { id } = await params;
   const { action, display_name, quote } = await req.json();
 

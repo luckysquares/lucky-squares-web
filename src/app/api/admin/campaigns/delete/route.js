@@ -1,6 +1,8 @@
 import { getAdminClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return Response.json({ error: 'Unauthorized' }, { status: 401 });
   const { id, type } = await req.json();
   if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
 
