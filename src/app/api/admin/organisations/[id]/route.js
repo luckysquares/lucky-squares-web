@@ -64,10 +64,9 @@ export async function POST(req, { params }) {
     return NextResponse.json({ error: updateErr.message }, { status: 500 });
   }
 
-  // If approving, set plan to 'casual' — the user can upgrade to full annual
-  // membership ($149/year) from their org dashboard when ready.
+  // If approving, upgrade the user to the org plan immediately.
   if (action === 'approve' && app.user_id) {
-    await db.from('profiles').update({ plan: 'casual' }).eq('id', app.user_id);
+    await db.from('profiles').update({ plan: 'org' }).eq('id', app.user_id);
   }
 
   // Send notification email
