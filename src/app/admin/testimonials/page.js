@@ -8,6 +8,23 @@ function fmtDate(iso) {
   return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+function currentMonthValue() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function prevMonthValue() {
+  const d = new Date();
+  d.setDate(1); d.setMonth(d.getMonth() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function monthLabel(yyyyMM) {
+  if (!yyyyMM) return '';
+  const [y, m] = yyyyMM.split('-');
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+}
+
 const STATUS_COLOURS = {
   pending:   { bg: '#F9F8F6', colour: '#9B8F80', label: 'Pending' },
   submitted: { bg: '#FFFBEB', colour: '#92400E', label: 'Submitted' },
@@ -16,11 +33,23 @@ const STATUS_COLOURS = {
 };
 
 export default function AdminTestimonialsPage() {
-  const [items,    setItems]    = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [editing,  setEditing]  = useState(null); // { id, quote, display_name }
-  const [saving,   setSaving]   = useState(null);
-  const [filter,   setFilter]   = useState('submitted');
+  const [items,       setItems]       = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [editing,     setEditing]     = useState(null);
+  const [saving,      setSaving]      = useState(null);
+  const [filter,      setFilter]      = useState('submitted');
+
+  // Draw state
+  const [drawMonth,   setDrawMonth]   = useState(prevMonthValue());
+  const [drawStatus,  setDrawStatus]  = useState(null); // { draw, entry_count }
+  const [drawLoading, setDrawLoading] = useState(false);
+  const [drawing,     setDrawing]     = useState(false);
+  const [drawResult,  setDrawResult]  = useState(null);
+  const [drawError,   setDrawError]   = useState('');
+
+  // Winners history
+  const [winners,     setWinners]     = useState([]);
+  const [winnersLoad, setWinnersLoad] = useState(true);
 
   const load = async () => {
     setLoading(true);
@@ -32,7 +61,43 @@ export default function AdminTestimonialsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  const loadWinners = async () => {
+    setWinnersLoad(true);
+    try {
+      const res  = await adminFetch('/api/admin/testimonials/draws');
+      const json = await res.json();
+      setWinners(Array.isArray(json) ? json : []);
+    } catch { setWinners([]); }
+    setWinnersLoad(false);
+  };
+
+  const loadDrawStatus = async (month) => {
+    setDrawLoading(true); setDrawError('');
+    try {
+      const res  = await adminFetch(`/api/admin/testimonials/draw?month=${month}`);
+      const json = await res.json();
+      setDrawStatus(json);
+    } catch { setDrawStatus(null); }
+    setDrawLoading(false);
+  };
+
+  useEffect(() => { load(); loadWinners(); }, []);
+  useEffect(() => { loadDrawStatus(drawMonth); }, [drawMonth]);
+
+  const handleDraw = async () => {
+    if (!confirm(`Run the Testimonial Prize Draw for ${monthLabel(drawMonth)}? This cannot be undone.`)) return;
+    setDrawing(true); setDrawError(''); setDrawResult(null);
+    try {
+      const res  = await adminFetch('/api/admin/testimonials/draw', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ month: drawMonth }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) { setDrawError(json.error ?? 'Draw failed'); }
+      else { setDrawResult(json); await loadDrawStatus(drawMonth); await loadWinners(); }
+    } catch { setDrawError('Something went wrong. Please try again.'); }
+    setDrawing(false);
+  };
 
   const handleAction = async (id, action, overrides = {}) => {
     setSaving(id + action);
@@ -60,6 +125,65 @@ export default function AdminTestimonialsPage() {
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Testimonials</h1>
         <p style={{ fontSize: 14, color: 'var(--text2)' }}>Review and approve organiser testimonials for the homepage.</p>
+      </div>
+
+      {/* ── Prize Draw Panel ───────────────────────────────────────── */}
+      <div className="scratch-card" style={{ padding: 24, marginBottom: 32, background: '#FFFBEB', borderColor: '#F0D070' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <span style={{ fontSize: 22 }}>🎁</span>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 16, color: '#7A5C00' }}>Testimonial Prize Draw</div>
+            <div style={{ fontSize: 12, color: '#9A7A00' }}>$100 Visa debit gift card — drawn on the first business day of each month</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 16 }}>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 700, color: '#7A5C00', display: 'block', marginBottom: 4 }}>Draw month</label>
+            <input
+              type="month"
+              value={drawMonth}
+              onChange={(e) => setDrawMonth(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: 8, border: '1.5px solid #E0C840', fontSize: 14, background: '#FFFFF0', fontFamily: 'inherit' }}
+            />
+          </div>
+          <div style={{ fontSize: 13, color: '#7A5C00' }}>
+            {drawLoading ? 'Checking…' : drawStatus ? (
+              drawStatus.draw
+                ? <span style={{ color: '#16A34A', fontWeight: 700 }}>✓ Draw already run — winner: {drawStatus.draw.winner_name} ({drawStatus.draw.winner_email})</span>
+                : <span><strong>{drawStatus.entry_count}</strong> eligible {drawStatus.entry_count === 1 ? 'entry' : 'entries'} for {monthLabel(drawMonth)}</span>
+            ) : '—'}
+          </div>
+        </div>
+
+        {drawResult && (
+          <div style={{ background: '#F0FDF4', border: '1.5px solid #86EFAC', borderRadius: 10, padding: '14px 18px', marginBottom: 14 }}>
+            <div style={{ fontWeight: 800, color: '#15803D', marginBottom: 4 }}>🎉 Winner drawn!</div>
+            <div style={{ fontSize: 14, color: '#1A3A25' }}>
+              <strong>{drawResult.winner.name}</strong> ({drawResult.winner.org})<br />
+              <span style={{ fontSize: 13, color: '#6B5E4E' }}>{drawResult.winner.email}</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#6B5E4E', marginTop: 6 }}>
+              Winner email sent. Contact them to arrange the $100 Visa debit card.
+            </div>
+          </div>
+        )}
+
+        {drawError && <p style={{ fontSize: 13, color: '#CC0000', marginBottom: 12 }}>{drawError}</p>}
+
+        <button
+          onClick={handleDraw}
+          disabled={drawing || !!drawStatus?.draw || !drawStatus?.entry_count || drawLoading}
+          style={{
+            padding: '10px 24px', borderRadius: 8, fontSize: 14, fontWeight: 800,
+            border: 'none', cursor: drawing || !!drawStatus?.draw || !drawStatus?.entry_count ? 'not-allowed' : 'pointer',
+            background: drawStatus?.draw ? '#E5E0D5' : '#F5C820',
+            color: drawStatus?.draw ? '#9B8F80' : '#1A1209',
+            fontFamily: 'inherit',
+          }}
+        >
+          {drawing ? 'Drawing…' : drawStatus?.draw ? 'Already drawn' : `Draw winner for ${monthLabel(drawMonth)}`}
+        </button>
       </div>
 
       {/* Filter tabs */}
@@ -220,6 +344,43 @@ export default function AdminTestimonialsPage() {
           })}
         </div>
       )}
+    </div>
+
+      {/* ── Winners History ─────────────────────────────────────────── */}
+      <div style={{ marginTop: 48 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 16 }}>
+          Prize Draw History
+        </div>
+        {winnersLoad ? (
+          <div style={{ fontSize: 13, color: 'var(--text2)' }}>Loading…</div>
+        ) : winners.length === 0 ? (
+          <div style={{ fontSize: 13, color: 'var(--text2)', fontStyle: 'italic' }}>No draws run yet.</div>
+        ) : (
+          <div className="scratch-card" style={{ padding: 0, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)' }}>
+                  {['Month', 'Winner', 'Organisation', 'Email', 'Entries', 'Drawn'].map((h) => (
+                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: .5 }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {winners.map((w) => (
+                  <tr key={w.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 700 }}>{w.month_label || monthLabel(w.draw_month)}</td>
+                    <td style={{ padding: '12px 16px' }}>{w.winner_name || '—'}</td>
+                    <td style={{ padding: '12px 16px', color: 'var(--text2)' }}>{w.winner_org || '—'}</td>
+                    <td style={{ padding: '12px 16px', color: 'var(--text2)', fontSize: 12 }}>{w.winner_email || '—'}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text2)' }}>{w.entry_count}</td>
+                    <td style={{ padding: '12px 16px', color: 'var(--text2)' }}>{fmtDate(w.drawn_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

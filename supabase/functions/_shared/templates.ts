@@ -1150,14 +1150,57 @@ Congratulations on completing your Lucky Squares fundraiser for ${d.org_name}!
 
 You raised ${d.amount_raised} with ${d.campaign_title} — that's a great result.
 
-We'd love to hear how it went. If you have a moment, sharing your experience helps other Australian schools, clubs, and charities discover Lucky Squares and run their own fundraisers.
+We'd love to hear how it went. If you have a moment, sharing your experience helps other schools, clubs, and charities discover Lucky Squares and run their own fundraisers.
 
 Leave a quick note here (takes less than a minute):
 ${d.testimonial_url}
 
 No login required — just click the link and share your thoughts.
 
+**Testimonial Prize Draw:** Every approved testimonial is entered into our monthly Testimonial Prize Draw. One winner is drawn on the first business day of each month and wins a $100 Visa debit gift card. See full terms at luckysquares.com.au/terms.
+
 Thank you for using Lucky Squares, and good luck with your next campaign!
+
+${SIG}`,
+  };
+}
+
+export function emailTestimonialWinner(d: {
+  first_name: string;
+  org_name: string;
+  month_label: string;
+}) {
+  return {
+    subject: `You won the Lucky Squares Testimonial Prize Draw!`,
+    text: `Hi ${d.first_name},
+
+Great news — you've won the Lucky Squares Testimonial Prize Draw for ${d.month_label}!
+
+Your testimonial for ${d.org_name} was randomly selected from all approved entries this month, and you've won a $100 Visa debit gift card.
+
+We'll be in touch shortly to arrange delivery of your prize.
+
+Congratulations, and thank you for sharing your experience with the Lucky Squares community!
+
+${SIG}`,
+  };
+}
+
+export function emailTestimonialDrawReminder(d: {
+  month_label: string;
+  entry_count: number;
+  draw_url: string;
+}) {
+  return {
+    subject: `Reminder: Testimonial Prize Draw — ${d.month_label}`,
+    text: `Hi Jamie,
+
+This is your monthly reminder to run the Lucky Squares Testimonial Prize Draw for ${d.month_label}.
+
+There ${d.entry_count === 1 ? 'is' : 'are'} ${d.entry_count} approved testimonial${d.entry_count !== 1 ? 's' : ''} eligible for this month's draw.
+
+Run the draw here:
+${d.draw_url}
 
 ${SIG}`,
   };

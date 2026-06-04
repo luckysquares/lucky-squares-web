@@ -198,7 +198,17 @@ export default function TermsPage() {
               <p>These Terms are governed by the laws of South Australia, Australia. Each party submits to the non-exclusive jurisdiction of the courts of South Australia for the resolution of any dispute arising under or in connection with these Terms.</p>
             </Section>
 
-            <Section n="14" title="Contact" last>
+            <Section n="14" id="testimonial-prize-draw" title="Testimonial Prize Draw">
+              <p>Lucky Squares Australia runs a monthly Testimonial Prize Draw open to organisers who submit an approved testimonial about their fundraising experience.</p>
+              <p><strong>Eligibility:</strong> Each approved testimonial submitted earns one entry into the draw for the calendar month in which it is approved. There is no limit on the number of entries per person — each approved testimonial from a separate campaign earns a separate entry.</p>
+              <p><strong>Prize:</strong> One winner is randomly selected each month and receives a $100 Visa debit gift card. The prize has no cash alternative.</p>
+              <p><strong>Draw date:</strong> Winners are drawn on the first business day of the following month. If no approved entries exist for a given month, no draw is held and the prize does not roll over.</p>
+              <p><strong>Notification:</strong> Winners are notified by email using the address associated with their Lucky Squares account. If a winner cannot be contacted within 14 days, a new winner may be selected.</p>
+              <p><strong>Approval:</strong> Lucky Squares Australia reserves the right to approve or reject any testimonial submission at its sole discretion. Submission does not guarantee approval or entry into the draw.</p>
+              <p>Lucky Squares Australia reserves the right to modify or discontinue the Testimonial Prize Draw at any time with reasonable notice.</p>
+            </Section>
+
+            <Section n="15" title="Contact" last>
               <p>For any questions regarding these Terms, please contact Play With Heart Pty Ltd ACN 698 202 069 (trading as Lucky Squares Australia) at:</p>
               <p><a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>Contact us</a></p>
             </Section>

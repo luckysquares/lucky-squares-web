@@ -165,6 +165,10 @@ export default function TestimonialPage({ params }) {
           <button type="submit" disabled={submitting || quote.trim().length < 20} style={btnPrimary}>
             {submitting ? 'Submitting…' : 'Submit testimonial'}
           </button>
+
+          <div style={{ marginTop: 24, padding: '14px 16px', background: '#FFFBEB', borderRadius: 10, border: '1px solid #F0D070', fontSize: 12, color: '#7A5C00', lineHeight: 1.6 }}>
+            <strong>Testimonial Prize Draw:</strong> Each approved testimonial earns one entry into our monthly Testimonial Prize Draw. One winner is randomly selected on the first business day of each month and receives a $100 Visa debit gift card. <a href="/terms#testimonial-prize-draw" style={{ color: '#7A5C00', fontWeight: 700 }}>Terms apply.</a>
+          </div>
         </form>
       </div>
     </div>
