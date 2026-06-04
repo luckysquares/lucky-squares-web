@@ -41,7 +41,7 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { id, slug, title, excerpt, content, author, cover_image_url, image_prompt, tags, status } = body;
+    const { id, slug, title, excerpt, content, author, cover_image_url, image_prompt, image_credit_name, image_credit_year, tags, status } = body;
 
     const supabase = getSupabase();
     const { data, error } = await supabase.rpc('admin_upsert_blog_post', {
@@ -57,6 +57,15 @@ export async function POST(req) {
       p_status:          status ?? 'draft',
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Save credit fields directly (not in the RPC — simpler than altering the function)
+    const postId = data ?? id;
+    if (postId) {
+      await supabase.from('blog_posts').update({
+        image_credit_name: image_credit_name ?? null,
+        image_credit_year: image_credit_year ?? null,
+      }).eq('id', postId);
+    }
 
     // Ping search engines when publishing (not for drafts)
     if (status === 'published' && slug) {
