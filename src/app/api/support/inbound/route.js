@@ -3,7 +3,7 @@ import { Webhook } from 'svix';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
 const INTERNAL_TO  = 'jamie@luckysquares.com.au';
-const SUPPORT_FROM = 'support@luckysquares.com.au';
+const SUPPORT_FROM = 'hello@luckysquares.com.au';
 
 // Parse ticket ID from address like: support+{ticketId}@reply.luckysquares.com.au
 // Also accepts root domain: support+{ticketId}@luckysquares.com.au
@@ -77,14 +77,51 @@ export async function POST(req) {
       html:    payloadHtml,
     } = event.data ?? {};
 
-    const ticketId = parseTicketId(toField);
-    if (!ticketId) {
-      console.warn('[inbound] Could not parse ticket ID from:', toField);
-      return NextResponse.json({ ok: true }); // Accept but ignore
-    }
-
+    const ticketId  = parseTicketId(toField);
     const supabase  = getSupabase();
     const resendKey = process.env.RESEND_API_KEY;
+
+    // No ticket ID — this is a direct email to hello@ (not a reply to a specific ticket).
+    // Create a new support ticket from it.
+    if (!ticketId) {
+      const fromMatch2   = (fromField ?? '').match(/^(.+?)\s*<([^>]+)>/);
+      const senderName2  = fromMatch2 ? fromMatch2[1].trim() : 'Unknown';
+      const senderEmail2 = fromMatch2 ? fromMatch2[2].trim() : (fromField ?? '').trim().toLowerCase();
+
+      if (!senderEmail2) {
+        console.warn('[inbound] No ticket ID and no sender — ignoring');
+        return NextResponse.json({ ok: true });
+      }
+
+      const rawText2   = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).split('\n').filter((l) => !l.trim().startsWith('>')).join('\n').trim();
+      const ticketRef2 = `LS-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+
+      await supabase.from('support_tickets').insert({
+        ticket_ref:    ticketRef2,
+        contact_name:  senderName2,
+        contact_email: senderEmail2,
+        category:      'Email reply',
+        subject:       (emailSubject ?? '(no subject)').replace(/^(Re:\s*)+/i, '').trim(),
+        message:       rawText2 || '(no body)',
+        status:        'open',
+      });
+
+      if (resendKey) {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from:    SUPPORT_FROM,
+            to:      INTERNAL_TO,
+            subject: `New ticket ${ticketRef2} from ${senderName2}`,
+            text:    `New ticket ${ticketRef2}\n\nFrom: ${senderName2} <${senderEmail2}>\nSubject: ${emailSubject}\n\n${rawText2}\n\nView: https://luckysquares.com.au/admin/support`,
+            html:    `<p><strong>New ticket ${ticketRef2}</strong></p><p>From: ${senderName2} &lt;${senderEmail2}&gt;</p><blockquote style="border-left:3px solid #E5E0D5;padding-left:16px;color:#4A3728">${rawText2.replace(/\n/g, '<br>')}</blockquote><p><a href="https://luckysquares.com.au/admin/support">View in admin portal</a></p>`,
+          }),
+        });
+      }
+
+      return NextResponse.json({ ok: true });
+    }
 
     // Use body from webhook payload directly. Fall back to API fetch only if both are missing
     // (older Resend webhook versions may not include body in payload).
