@@ -109,8 +109,16 @@ export default function PosterPage({ params }) {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body { background: #fff !important; }
           .no-print { display: none !important; }
-          .poster-wrap { padding: 0 !important; background: #fff !important; }
-          .poster-sheet { box-shadow: none !important; }
+          .poster-wrap {
+            padding: 0 !important;
+            background: #fff !important;
+            height: 297mm !important;
+            overflow: hidden !important;
+          }
+          .poster-sheet {
+            box-shadow: none !important;
+            zoom: 0.96;
+          }
         }
       `}</style>
 
