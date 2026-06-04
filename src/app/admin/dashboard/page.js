@@ -21,14 +21,30 @@ function Metric({ icon, label, value, sub, accent }) {
 }
 
 export default function AdminDashboard() {
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [data,         setData]         = useState(null);
+  const [loading,      setLoading]      = useState(true);
+  const [drawAlert,    setDrawAlert]    = useState(null); // { month, month_label, entry_count }
 
   useEffect(() => {
     if (!supabaseConfigured) { setData(DEMO); setLoading(false); return; }
     getSupabaseClient().rpc('admin_dashboard_metrics').then(({ data: d }) => {
       setData(d ?? DEMO); setLoading(false);
     });
+  }, []);
+
+  // Check if last month has undrawn testimonial entries
+  useEffect(() => {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1);
+    const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    fetch(`/api/admin/testimonials/draw?month=${month}`, { headers: { 'x-admin': '1' } })
+      .then((r) => r.json())
+      .then((j) => {
+        if (!j.draw && j.entry_count > 0) {
+          const label = d.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+          setDrawAlert({ month, month_label: label, entry_count: j.entry_count });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const fmt  = (n) => Number(n).toLocaleString('en-AU');
@@ -44,7 +60,7 @@ export default function AdminDashboard() {
       ) : (
         <>
           {/* Alerts */}
-          {(data.campaigns_expiring_soon > 0 || data.new_org_applications > 0) && (
+          {(data.campaigns_expiring_soon > 0 || data.new_org_applications > 0 || drawAlert) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
               {data.campaigns_expiring_soon > 0 && (
                 <div style={{ background: '#FFF6EE', border: '1.5px solid #FFD8B0', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -64,6 +80,16 @@ export default function AdminDashboard() {
                     <div style={{ fontSize: 13, color: 'var(--text2)' }}>Waiting for approval or rejection.</div>
                   </div>
                   <a href="/admin/organisations" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--green)', textDecoration: 'none', flexShrink: 0 }}>View →</a>
+                </div>
+              )}
+              {drawAlert && (
+                <div style={{ background: '#FFFBEB', border: '1.5px solid #F0D070', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 20 }}>🎁</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#7A5C00' }}>Testimonial Prize Draw — {drawAlert.month_label}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>{drawAlert.entry_count} approved {drawAlert.entry_count === 1 ? 'entry' : 'entries'} waiting. Run the draw on the first business day of this month.</div>
+                  </div>
+                  <a href="/admin/testimonials" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: '#7A5C00', textDecoration: 'none', flexShrink: 0 }}>Run draw →</a>
                 </div>
               )}
             </div>

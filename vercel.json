@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/testimonial-reminder",
+      "schedule": "0 22 1-3 * *"
+    }
+  ]
+}
