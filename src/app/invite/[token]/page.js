@@ -43,10 +43,25 @@ export default function AcceptInvitePage() {
     });
   }, [token, doAccept]);
 
+  // Listen for magic link sign-in completing (user clicked the email button)
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user && phase === 'otp') {
+        doAccept(supabase);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [phase, doAccept]);
+
   const sendOtp = async () => {
     setLoading(true);
     setError('');
-    const { error: e } = await getSupabaseClient().auth.signInWithOtp({ email: invite.email });
+    const redirectTo = typeof window !== 'undefined' ? window.location.href : `https://luckysquares.com.au/invite/${token}`;
+    const { error: e } = await getSupabaseClient().auth.signInWithOtp({
+      email: invite.email,
+      options: { emailRedirectTo: redirectTo },
+    });
     setLoading(false);
     if (e) { setError(e.message); return; }
     setPhase('otp');
@@ -117,7 +132,8 @@ export default function AcceptInvitePage() {
             <div style={{ fontSize: 40, marginBottom: 16 }}>📬</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, marginBottom: 8 }}>Check your email</h2>
             <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
-              We sent a 6-digit code to <strong>{invite.email}</strong>
+              We sent a confirmation to <strong>{invite.email}</strong>. Click the button in the email to continue,
+              or enter the 6-digit code below if one was included.
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 20 }}>
               {digits.map((d, i) => (
