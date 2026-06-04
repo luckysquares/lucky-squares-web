@@ -9,21 +9,33 @@ export default function AcceptInvitePage() {
   const { token } = useParams();
   const router    = useRouter();
 
-  const [invite,  setInvite]  = useState(null);
-  const [phase,   setPhase]   = useState('loading'); // loading | info | otp | accepting | done | invalid
-  const [error,   setError]   = useState('');
-  const [loading, setLoading] = useState(false);
+  const [invite,   setInvite]   = useState(null);
+  const [phase,    setPhase]    = useState('loading'); // loading | info | otp | accepting | done | setpassword | invalid
+  const [error,    setError]    = useState('');
+  const [loading,  setLoading]  = useState(false);
+  const [password, setPassword] = useState('');
+  const [pwError,  setPwError]  = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
 
   const doAccept = useCallback(async (supabase) => {
     setPhase('accepting');
     const { data } = await supabase.rpc('accept_org_invite', { p_token: token });
     if (data?.ok) {
-      setPhase('done');
+      setPhase('setpassword');
     } else {
       setError(data?.error ?? 'Something went wrong accepting the invite.');
       setPhase('invalid');
     }
   }, [token]);
+
+  const savePassword = async () => {
+    if (password.length < 8) { setPwError('Password must be at least 8 characters.'); return; }
+    setPwSaving(true); setPwError('');
+    const { error: e } = await getSupabaseClient().auth.updateUser({ password });
+    setPwSaving(false);
+    if (e) { setPwError(e.message); return; }
+    setPhase('done');
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -34,9 +46,12 @@ export default function AcceptInvitePage() {
       setInvite(data);
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
+      // Only auto-accept if the logged-in user's email matches the invite
+      if (session?.user && session.user.email?.toLowerCase() === data.email?.toLowerCase()) {
         doAccept(supabase);
       } else {
+        // Sign out any mismatched session so the correct user can authenticate
+        if (session?.user) await supabase.auth.signOut();
         setPhase('info');
       }
     });
@@ -124,12 +139,37 @@ export default function AcceptInvitePage() {
           </>
         )}
 
-        {phase === 'done' && invite && (
+        {phase === 'setpassword' && invite && (
           <>
             <div style={{ fontSize: 40, marginBottom: 16 }}>🎉</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, marginBottom: 8 }}>You&apos;re in!</h2>
             <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              You&apos;ve joined {invite.org_name} as a contributor and can now view and help manage their campaigns.
+              You&apos;ve joined {invite.org_name}. Set a password so you can sign back in next time.
+            </p>
+            <input
+              type="password"
+              className="form-input"
+              placeholder="Choose a password (min. 8 characters)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ marginBottom: 12 }}
+            />
+            {pwError && <p style={{ color: '#CC0000', fontSize: 13, marginBottom: 12 }}>{pwError}</p>}
+            <button className="btn btn-primary btn-lg" style={{ width: '100%', marginBottom: 10 }} onClick={savePassword} disabled={pwSaving}>
+              {pwSaving ? 'Saving...' : 'Set password and continue'}
+            </button>
+            <button className="btn btn-outline" style={{ width: '100%', fontSize: 13 }} onClick={() => router.push('/fundraise')}>
+              Skip for now
+            </button>
+          </>
+        )}
+
+        {phase === 'done' && invite && (
+          <>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>✅</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, marginBottom: 8 }}>Password saved!</h2>
+            <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+              You can now sign in to {invite.org_name}&apos;s account with your email and password.
             </p>
             <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={() => router.push('/fundraise')}>
               Go to dashboard
