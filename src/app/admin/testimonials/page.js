@@ -344,7 +344,6 @@ export default function AdminTestimonialsPage() {
           })}
         </div>
       )}
-    </div>
 
       {/* ── Winners History ─────────────────────────────────────────── */}
       <div style={{ marginTop: 48 }}>
