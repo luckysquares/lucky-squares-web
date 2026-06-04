@@ -65,7 +65,16 @@ async function rpc(fn: string, args: Record<string, unknown>): Promise<unknown> 
   return res.json();
 }
 
+const CORS = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS });
+  }
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
@@ -110,7 +119,7 @@ Deno.serve(async (req) => {
 
   await sendEmail({ to, subject: template.subject, text: template.text, unsubscribe_url: unsubscribeUrl });
 
-  return new Response(JSON.stringify({ ok: true, type }), { status: 200 });
+  return new Response(JSON.stringify({ ok: true, type }), { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } });
 });
 
 // ── DB template override ─────────────────────────────────────────────────────
