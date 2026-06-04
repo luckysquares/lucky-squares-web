@@ -106,22 +106,29 @@ export default function PosterPage({ params }) {
         body { margin: 0; padding: 0; background: #D6D0C4; }
 
         @media print {
-          /* Reliable "print only the poster" technique:
-             hide everything via visibility, then un-hide just the poster.
-             Works regardless of Next.js DOM nesting. */
           @page { size: A4 portrait; margin: 0; }
-          body { background: #fff !important; }
+          /* Clamp html+body to exactly A4 — nothing can overflow to page 2 */
+          html, body {
+            width: 210mm !important;
+            height: 297mm !important;
+            overflow: hidden !important;
+            background: #fff !important;
+          }
+          /* Hide everything (preserves layout) */
           body * { visibility: hidden; }
+          /* Also remove space for global site elements */
+          footer, header, nav,
+          .footer, .mariposa-chat-widget,
+          [class*="chat-widget"] { display: none !important; }
+          /* Show only the poster */
           .poster-sheet,
           .poster-sheet * { visibility: visible; }
           .poster-sheet {
             position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
+            top: 0 !important; left: 0 !important;
             width: 210mm !important;
             height: 297mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
+            overflow: hidden !important;
             box-shadow: none !important;
           }
           .no-print { display: none !important; }
