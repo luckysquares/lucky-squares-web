@@ -40,9 +40,9 @@ export default async function PosterPage({ params }) {
   const footerQrUrl = `${SITE_URL}?utm_source=poster&utm_medium=print&utm_campaign=${orgSlug}&utm_content=${data.slug ?? data.id}`;
   const focalY      = data.image_focal_y ?? 50;
 
-  // QR codes via Google Chart API (server-safe, no client JS needed)
-  const mainQr   = `https://chart.googleapis.com/chart?chs=160x160&cht=qr&chl=${encodeURIComponent(campaignUrl)}&chco=1A1209&chf=bg,s,ffffff`;
-  const footerQr = `https://chart.googleapis.com/chart?chs=56x56&cht=qr&chl=${encodeURIComponent(footerQrUrl)}&chco=1A0A3C&chf=bg,s,ffffff`;
+  // QR codes via qrserver.com (reliable free API, no client JS needed)
+  const mainQr   = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(campaignUrl)}&color=1A1209&bgcolor=ffffff&margin=2`;
+  const footerQr = `https://api.qrserver.com/v1/create-qr-code/?size=56x56&data=${encodeURIComponent(footerQrUrl)}&color=1A0A3C&bgcolor=ffffff&margin=1`;
 
   const css = `
     *{box-sizing:border-box}
