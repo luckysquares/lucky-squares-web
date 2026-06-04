@@ -18,6 +18,7 @@ const NAV = [
   { href: '/admin/emails',         icon: '📧',  label: 'Emails'        },
   { href: '/admin/support',        icon: '🎧',  label: 'Support'       },
   { href: '/admin/mariposa-logs',  icon: '🐰',  label: 'Mari logs'     },
+  { href: '/admin/testimonials',    icon: '⭐',  label: 'Testimonials'  },
   { href: '/admin/feedback',        icon: '💬',  label: 'Feedback'      },
   { href: '/admin/reporting',      icon: '📋',  label: 'Reporting'     },
   { href: '/admin/errors',         icon: '🚨',  label: 'Error logs'    },

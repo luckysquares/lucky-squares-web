@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import MarketingNav from '@/components/marketing/MarketingNav';
+import { getAnonClient } from '@/lib/supabase/server';
 
 const SITE_URL = 'https://luckysquares.com.au';
 
@@ -50,7 +51,31 @@ const homeSchema = {
   ],
 };
 
-export default function HomePage() {
+const FALLBACK_TESTIMONIALS = [
+  { quote: "We raised $1,800 in two days for our school camp. Parents loved picking their own squares. It felt personal and exciting. The live draw was a highlight at assembly.", name: 'Mel T.', role: 'P&C President, Sunbury Primary School' },
+  { quote: "Used to do this on a whiteboard at the club. Now we share a link in the WhatsApp group and the grid fills itself. Saved me hours of admin and the kids love watching the squares get sold.", name: 'Jamie S.', role: "Squad member, L'Aces Masters Baseball" },
+  { quote: "Simple, clean, Australian. I appreciated that bank transfer was a proper option. Half our donors are older and don't use card. Raised $2,500 for our koala rescue program.", name: 'Priya S.', role: 'Volunteer Coordinator, Wildlife Friends VIC' },
+];
+
+export default async function HomePage() {
+  // Fetch approved testimonials — fall back to hardcoded if none yet
+  let testimonials = FALLBACK_TESTIMONIALS;
+  try {
+    const sb = getAnonClient();
+    const { data } = await sb
+      .from('testimonials')
+      .select('quote, display_name, org_name')
+      .eq('status', 'approved')
+      .order('approved_at', { ascending: false })
+      .limit(6);
+    if (data && data.length >= 2) {
+      testimonials = data.map((t) => ({
+        quote: t.quote,
+        name:  t.display_name || 'Lucky Squares organiser',
+        role:  t.org_name || '',
+      }));
+    }
+  } catch { /* use fallback */ }
   return (
     <>
       <script
@@ -187,12 +212,8 @@ export default function HomePage() {
             <h2 className="section-heading" style={{ margin: '0 auto' }}>Real fundraisers, real results</h2>
           </div>
           <div className="testimonial-grid">
-            {[
-              { quote: "We raised $1,800 in two days for our school camp. Parents loved picking their own squares. It felt personal and exciting. The live draw was a highlight at assembly.", name: 'Mel T.', role: 'P&C President, Sunbury Primary School' },
-              { quote: "Used to do this on a whiteboard at the club. Now we share a link in the WhatsApp group and the grid fills itself. Saved me hours of admin and the kids love watching the squares get sold.", name: 'Jamie S.', role: 'Squad member, L\'Aces Masters Baseball ⚾' },
-              { quote: "Simple, clean, Australian. I appreciated that bank transfer was a proper option. Half our donors are older and don't use card. Raised $2,500 for our koala rescue program.", name: 'Priya S.', role: 'Volunteer Coordinator, Wildlife Friends VIC' },
-            ].map((t) => (
-              <div key={t.name} className="testimonial-card">
+            {testimonials.map((t, i) => (
+              <div key={i} className="testimonial-card">
                 <p className="testimonial-quote">&quot;{t.quote}&quot;</p>
                 <div className="testimonial-name">{t.name}</div>
                 <div className="testimonial-role">{t.role}</div>

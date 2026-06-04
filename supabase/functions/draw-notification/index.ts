@@ -7,6 +7,7 @@ import {
   emailDrawResultWinnerClaim,
   emailDrawResultDidNotWin,
   emailFirstCampaignTips,
+  emailTestimonialInvite,
 } from '../_shared/templates.ts';
 
 const supabase = createClient(
@@ -424,6 +425,32 @@ Deno.serve(async (req) => {
         winners:        winnerSummaryList,
       });
       await sendEmail({ to: buyer.buyer_email!, subject: tpl.subject, text: tpl.text });
+    }
+  }
+
+  // Send testimonial invite to organiser
+  if (f.contact_email) {
+    const { data: testimonial } = await supabase
+      .from('testimonials')
+      .insert({
+        fundraiser_id:  fundraiserId,
+        organiser_name: f.contact_name,
+        org_name:       f.org,
+        contact_email:  f.contact_email,
+      })
+      .select('token')
+      .single();
+
+    if (testimonial?.token) {
+      const appUrl = Deno.env.get('APP_URL') ?? 'https://luckysquares.com.au';
+      const tpl = emailTestimonialInvite({
+        first_name:      firstName,
+        campaign_title:  f.title,
+        org_name:        f.org,
+        amount_raised:   `$${fundsRaised}`,
+        testimonial_url: `${appUrl}/testimonial/${testimonial.token}`,
+      });
+      await sendEmail({ to: f.contact_email, subject: tpl.subject, text: tpl.text });
     }
   }
 

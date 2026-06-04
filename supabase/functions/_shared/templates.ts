@@ -1132,3 +1132,34 @@ If you have any questions just reply to this email. I read everything.
 ${SIG}`,
   };
 }
+
+// ── Testimonial invite ────────────────────────────────────────────────────────
+
+export function emailTestimonialInvite(d: {
+  first_name: string;
+  campaign_title: string;
+  org_name: string;
+  amount_raised: string;
+  testimonial_url: string;
+}) {
+  return {
+    subject: `How did your fundraiser go, ${d.first_name}?`,
+    text: `Hi ${d.first_name},
+
+Congratulations on completing your Lucky Squares fundraiser for ${d.org_name}!
+
+You raised ${d.amount_raised} with ${d.campaign_title} — that's a great result.
+
+We'd love to hear how it went. If you have a moment, sharing your experience helps other Australian schools, clubs, and charities discover Lucky Squares and run their own fundraisers.
+
+Leave a quick note here (takes less than a minute):
+${d.testimonial_url}
+
+No login required — just click the link and share your thoughts.
+
+Thank you for using Lucky Squares, and good luck with your next campaign!
+
+${SIG}`,
+  };
+}
+
