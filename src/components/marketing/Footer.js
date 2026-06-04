@@ -23,6 +23,7 @@ export default function Footer() {
             <Link href="/fundraise">Start a fundraiser</Link>
             <Link href="/org-signup">Organisation plan</Link>
             <Link href="/feeling-lucky">Feeling Lucky</Link>
+            <Link href="/whats-new">What&apos;s new</Link>
           </div>
 
           <div className="footer-col">

@@ -1,0 +1,153 @@
+import MarketingNav from '@/components/marketing/MarketingNav';
+import Link from 'next/link';
+
+export const metadata = {
+  title: "What's New",
+  description: 'The latest features, improvements, and fixes from Lucky Squares Australia.',
+};
+
+// ── Changelog entries ─────────────────────────────────────────────────────────
+// Add new entries at the TOP of this array.
+// badge options: 'New' | 'Improved' | 'Fixed' | 'Coming soon'
+const ENTRIES = [
+  {
+    date: 'June 2026',
+    items: [
+      {
+        badge: 'New',
+        title: 'Share links show your campaign preview',
+        body: 'When you share your campaign link on WhatsApp, Facebook, iMessage or Slack, the recipient now sees your campaign photo, title and description — not just a generic Lucky Squares link.',
+      },
+      {
+        badge: 'New',
+        title: 'Club Mode for in-person selling',
+        body: 'Running a sausage sizzle or game day stall? Open Club Mode from your campaign page for a full-screen grid optimised for face-to-face selling. Hand your phone or tablet to each buyer, they pick their square, you confirm payment. Hit "Next buyer" and you\'re ready to go again.',
+      },
+      {
+        badge: 'New',
+        title: 'QR code posters',
+        body: 'Generate a print-ready A4 poster for your campaign from the campaign management page. Includes your campaign photo, prizes, price per square, and a QR code buyers can scan to go straight to your grid.',
+      },
+      {
+        badge: 'New',
+        title: 'Organisation plan',
+        body: 'Clubs, schools and charities that fundraise regularly can now apply for the Organisation plan. Unlimited campaigns, up to 10 live simultaneously, team member access, and a dedicated organisation dashboard. $149/year.',
+      },
+    ],
+  },
+  {
+    date: 'May 2026',
+    items: [
+      {
+        badge: 'New',
+        title: 'Lucky Squares Australia launches',
+        body: 'The platform is live. Set up a grid in minutes, share a link with your community, and watch the squares fill up. Online card payments, bank transfer, or in-person — your choice. A flat $19 fee when you launch, nothing more.',
+      },
+      {
+        badge: 'New',
+        title: 'Online card payments',
+        body: 'Buyers can now pay securely by card directly from the grid. A 1.7% + 30c processing fee is added to the buyer total, so your fundraising proceeds stay intact. Funds transfer to your bank account after the draw completes.',
+      },
+      {
+        badge: 'New',
+        title: 'Live draw',
+        body: 'When you\'re ready to draw, hit the button and the winning square is revealed live to everyone watching the grid. Winners are highlighted instantly. For multiple prizes, multiple squares are drawn in sequence.',
+      },
+      {
+        badge: 'New',
+        title: 'Email notifications for buyers',
+        body: 'Buyers receive a confirmation email when they purchase squares, and are notified of the draw result. Organisers receive a daily sales digest while their campaign is live.',
+      },
+      {
+        badge: 'New',
+        title: 'Feeling Lucky',
+        body: 'Not running a fundraiser but want to support one? The Feeling Lucky page randomly selects a live campaign for you to back. Every square you buy goes directly to a real Australian school, club or charity.',
+      },
+    ],
+  },
+];
+
+const BADGE_STYLES = {
+  'New':         { background: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD' },
+  'Improved':    { background: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0' },
+  'Fixed':       { background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' },
+  'Coming soon': { background: '#F3F4F6', color: '#4B5563', border: '1px solid #D1D5DB' },
+};
+
+export default function WhatsNewPage() {
+  return (
+    <div style={{ background: 'var(--cream)', minHeight: '100vh' }}>
+      <MarketingNav />
+
+      <section style={{ padding: '64px 24px 80px' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+
+          {/* Header */}
+          <div style={{ marginBottom: 56 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--text2)', marginBottom: 12 }}>Changelog</div>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, lineHeight: 1.1, marginBottom: 16, color: 'var(--text)' }}>
+              What&apos;s new
+            </h1>
+            <p style={{ fontSize: 17, color: 'var(--text2)', lineHeight: 1.7, maxWidth: 520 }}>
+              Features, improvements, and fixes from the Lucky Squares team. New entries added as we ship.
+            </p>
+          </div>
+
+          {/* Timeline */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {ENTRIES.map((group, gi) => (
+              <div key={gi} style={{ display: 'flex', gap: 0, marginBottom: 56 }}>
+
+                {/* Date column */}
+                <div style={{ width: 120, flexShrink: 0, paddingTop: 4 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text2)', position: 'sticky', top: 88 }}>
+                    {group.date}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div style={{ width: 1, background: 'var(--border)', flexShrink: 0, margin: '0 32px', position: 'relative' }}>
+                  <div style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--purple)', border: '2px solid var(--cream)', position: 'absolute', top: 6, left: -4 }} />
+                </div>
+
+                {/* Items */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  {group.items.map((item, ii) => (
+                    <div key={ii} className="scratch-card" style={{ padding: '20px 24px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                        <span style={{
+                          fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 20,
+                          ...BADGE_STYLES[item.badge],
+                        }}>
+                          {item.badge}
+                        </span>
+                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 800, color: 'var(--text)' }}>
+                          {item.title}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.75, margin: 0 }}>
+                        {item.body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 40, textAlign: 'center' }}>
+            <p style={{ fontSize: 15, color: 'var(--text2)', marginBottom: 20 }}>
+              Ready to run your first campaign?
+            </p>
+            <Link href="/get-started" className="btn btn-purple btn-lg">
+              Get started free →
+            </Link>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  );
+}
