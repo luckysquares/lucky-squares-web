@@ -519,7 +519,7 @@ function OrgTeamSection({ sendTxEmail }) {
   );
 }
 
-function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onReport, onConnectBank, onDuplicate, canCreate, planLimit, referralInfo, suspension, orgInfo, sendTxEmail, onNewFiftyFifty, onViewFiftyFifty }) {
+function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onReport, onConnectBank, onDuplicate, canCreate, planLimit, activeCampaignCount, myOrgDetails, referralInfo, suspension, orgInfo, sendTxEmail, onNewFiftyFifty, onViewFiftyFifty }) {
   const [copied, setCopied] = useState(false);
   const referralLink = referralInfo?.referral_code
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/app?ref=${referralInfo.referral_code}`
@@ -532,9 +532,62 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
   };
   const hasAnyCampaign = fundraisers.some((f) => ['active', 'drawn'].includes(f.status));
 
+  const isOrg = user?.plan === 'org' && orgInfo?.role !== 'contributor';
+  const totalRaised = fundraisers.reduce((s, f) => s + (f.sold_count || 0) * parseFloat(f.price_per_sq || 0), 0);
+  const totalSold   = fundraisers.reduce((s, f) => s + (f.sold_count || 0), 0);
+  const drawnCount  = fundraisers.filter((f) => f.status === 'drawn').length;
+  const activeCount = activeCampaignCount ?? fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
+
   return (
     <div className="dot-bg" style={{ flex: 1 }}>
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
+
+        {/* ── Organisation Plan Panel ──────────────────────────────────── */}
+        {isOrg && (
+          <div style={{ background: 'linear-gradient(135deg, #4A28D4 0%, #6B46F5 60%, #7C3AED 100%)', borderRadius: 16, padding: '24px 28px', marginBottom: 24, color: '#fff' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900 }}>
+                    {myOrgDetails?.name || user?.org || 'Your Organisation'}
+                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, background: 'rgba(255,255,255,0.2)', padding: '3px 8px', borderRadius: 99 }}>
+                    Organisation Plan
+                  </span>
+                </div>
+                {myOrgDetails?.abn && (
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>ABN: {myOrgDetails.abn}</div>
+                )}
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginBottom: 2 }}>Concurrent campaign limit</div>
+                <div style={{ fontSize: 26, fontWeight: 900, lineHeight: 1 }}>
+                  {activeCount} <span style={{ fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.7)' }}>of {planLimit}</span>
+                </div>
+                {activeCount >= planLimit && (
+                  <div style={{ fontSize: 11, color: '#FCA5A5', marginTop: 4 }}>Limit reached — complete or cancel a campaign to start a new one</div>
+                )}
+                {activeCount < planLimit && activeCount >= planLimit - 2 && (
+                  <div style={{ fontSize: 11, color: '#FDE68A', marginTop: 4 }}>{planLimit - activeCount} slot{planLimit - activeCount !== 1 ? 's' : ''} remaining</div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+              {[
+                { label: 'Total raised', value: `$${totalRaised.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+                { label: 'Squares sold', value: totalSold.toLocaleString('en-AU') },
+                { label: 'Active campaigns', value: fundraisers.filter((f) => f.status === 'active').length },
+                { label: 'Draws completed', value: drawnCount },
+              ].map(({ label, value }) => (
+                <div key={label} style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginBottom: 4 }}>{label}</div>
+                  <div style={{ fontSize: 20, fontWeight: 900 }}>{value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Contributor banner */}
         {orgInfo?.role === 'contributor' && (
@@ -576,12 +629,17 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
         {/* First-time onboarding steps — shown only when no campaigns exist */}
         {fundraisers.length === 0 && (!fiftyFiftyCampaigns || fiftyFiftyCampaigns.length === 0) && !orgInfo?.role && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, margin: '24px 0 8px', padding: '28px 24px', background: 'var(--card)', borderRadius: 16, border: '1.5px solid var(--border)' }}>
-            {[
+            {(isOrg ? [
+              { step: '1', icon: '🎯', title: 'Launch your first campaign', desc: 'Set up a grid, add prizes, and share your link with your community.' },
+              { step: '2', icon: '👥', title: 'Invite your team', desc: 'Add committee members and coordinators to help manage campaigns.' },
+              { step: '3', icon: '📊', title: 'Run multiple campaigns', desc: 'Run up to 10 concurrent campaigns across your organisation.' },
+              { step: '4', icon: '💸', title: 'Funds go directly to you', desc: 'All proceeds transfer straight to your account. Flat $19 fee per campaign.' },
+            ] : [
               { step: '1', icon: '🎯', title: 'Set up your grid', desc: 'Choose your grid size, set a price per square, and add your prizes.' },
               { step: '2', icon: '🔗', title: 'Share your link', desc: 'Send your campaign link via WhatsApp, email, or social media.' },
               { step: '3', icon: '🎲', title: 'Run the draw', desc: 'Hit draw when ready and the winner is revealed live to everyone watching.' },
               { step: '4', icon: '💸', title: 'Funds go to you', desc: 'Proceeds transfer directly to your account. We charge a flat $19 fee, nothing more.' },
-            ].map(({ step, icon, title, desc }) => (
+            ]).map(({ step, icon, title, desc }) => (
               <div key={step} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--purple-light)', border: '1.5px solid #C4B5FD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{icon}</div>
                 <div>
@@ -625,8 +683,8 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
           </div>
         )}
 
-        {/* Team section: visible to org plan admins only */}
-        {user?.plan === 'org' && orgInfo?.role !== 'contributor' && (
+        {/* Team section: visible to org plan admins, always shown */}
+        {isOrg && (
           <OrgTeamSection sendTxEmail={sendTxEmail} />
         )}
       </div>
@@ -3709,6 +3767,8 @@ export default function FundraiseApp() {
           onDuplicate={handleDuplicate}
           canCreate={canCreate}
           planLimit={planLimit}
+          activeCampaignCount={activeCampaignCount}
+          myOrgDetails={myOrgDetails}
           referralInfo={referralInfo}
           suspension={suspension}
           orgInfo={orgInfo}
