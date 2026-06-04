@@ -96,7 +96,7 @@ export default function AcceptInvitePage() {
               The invite was sent to <strong>{invite.email}</strong>.
             </p>
             <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={sendOtp} disabled={loading}>
-              {loading ? 'Sending code...' : 'Accept invite'}
+              {loading ? 'Sending confirmation link...' : 'Accept invite'}
             </button>
             {error && <p style={{ color: '#CC0000', fontSize: 13, marginTop: 12 }}>{error}</p>}
           </>
