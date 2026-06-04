@@ -53,7 +53,7 @@ export default async function PosterPage({ params }) {
       html,body{margin:0!important;padding:0!important;background:#fff!important}
       .no-print{display:none!important}
       .poster-page{display:block!important;padding:0!important;margin:0!important;background:#fff!important}
-      .poster-sheet{box-shadow:none!important;page-break-inside:avoid;break-inside:avoid}
+      .poster-sheet{box-shadow:none!important;zoom:0.9;page-break-inside:avoid;break-inside:avoid}
     }
   `;
 
