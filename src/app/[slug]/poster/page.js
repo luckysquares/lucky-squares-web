@@ -19,6 +19,7 @@ function dbToFundraiser(row, prizes = []) {
     pricePerSq:  parseFloat(row.price_per_sq),
     emoji:       row.emoji || '🍀',
     imageUrl:    row.image_url || null,
+    imageFocalY: row.image_focal_y ?? 50,
     prizes:      prizes
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map((p) => ({ place: p.place, description: p.description, value: p.value, donated: p.donated ?? false }))
@@ -112,12 +113,13 @@ export default function PosterPage({ params }) {
           .poster-wrap {
             padding: 0 !important;
             background: #fff !important;
-            height: 297mm !important;
+            display: block !important;
             overflow: hidden !important;
           }
           .poster-sheet {
             box-shadow: none !important;
-            zoom: 0.96;
+            transform: scale(0.93) !important;
+            transform-origin: top left !important;
           }
         }
       `}</style>
@@ -181,7 +183,7 @@ export default function PosterPage({ params }) {
               <img
                 src={f.imageUrl}
                 alt={f.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', display: 'block' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `center ${f.imageFocalY}%`, display: 'block' }}
               />
             </div>
           )}
