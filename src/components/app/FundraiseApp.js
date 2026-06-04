@@ -526,11 +526,12 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
   };
   const hasAnyCampaign = fundraisers.some((f) => ['active', 'drawn'].includes(f.status));
 
-  const isOrg = user?.plan === 'org' && orgInfo?.role !== 'contributor';
+  const isOrg = user?.plan === 'org' || isContributor;
   const totalRaised = fundraisers.reduce((s, f) => s + (f.sold_count || 0) * parseFloat(f.price_per_sq || 0), 0);
   const totalSold   = fundraisers.reduce((s, f) => s + (f.sold_count || 0), 0);
   const drawnCount  = fundraisers.filter((f) => f.status === 'drawn').length;
   const activeCount = activeCampaignCount ?? fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
+  const orgDisplayName = myOrgDetails?.name || orgInfo?.org_name || user?.org || 'Your Organisation';
 
   return (
     <div className="dot-bg" style={{ flex: 1 }}>
@@ -543,10 +544,10 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                   <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900 }}>
-                    {myOrgDetails?.name || user?.org || 'Your Organisation'}
+                    {orgDisplayName}
                   </div>
                   <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, background: 'rgba(255,255,255,0.2)', padding: '3px 8px', borderRadius: 99 }}>
-                    Organisation Plan
+                    {isContributor ? 'Contributor' : 'Organisation Plan'}
                   </span>
                 </div>
                 {myOrgDetails?.abn && (
@@ -584,11 +585,11 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
         )}
 
         {/* Contributor banner */}
-        {orgInfo?.role === 'contributor' && (
+        {isContributor && (
           <div style={{ background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)', border: '1.5px solid #BFDBFE', borderRadius: 14, padding: '14px 20px', marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
             <span style={{ fontSize: 20 }}>👥</span>
             <div style={{ fontSize: 13, color: '#1E40AF', lineHeight: 1.5 }}>
-              You are contributing to <strong>{orgInfo.org_name}</strong>. You can view and manage their campaigns but cannot create new ones.
+              You are a contributor for <strong>{orgInfo.org_name}</strong>. You can create and manage campaigns on behalf of this organisation.
             </div>
           </div>
         )}
@@ -3735,10 +3736,11 @@ export default function FundraiseApp() {
   const showHeader = !['login', 'register', 'verify', 'loading'].includes(phase);
 
   const activeCampaignCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
-  const planLimit           = PLAN_LIMITS[user?.plan ?? 'trial'];
   const isSuspended         = suspension?.suspended === true;
   const isContributor       = orgInfo?.role === 'contributor';
-  const canCreate           = activeCampaignCount < planLimit && !isSuspended && !isContributor;
+  // Contributors use the org plan limit (10), not their own plan
+  const planLimit           = isContributor ? PLAN_LIMITS['org'] : PLAN_LIMITS[user?.plan ?? 'trial'];
+  const canCreate           = activeCampaignCount < planLimit && !isSuspended;
 
   const handleNewFundraiser = () => {
     if (!canCreate) return;
