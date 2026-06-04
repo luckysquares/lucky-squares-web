@@ -687,6 +687,24 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
         {isOrg && (
           <OrgTeamSection sendTxEmail={sendTxEmail} />
         )}
+
+        {/* Upgrade to org plan — shown to non-org, non-contributor users with at least one campaign */}
+        {!isOrg && orgInfo?.role !== 'contributor' && hasAnyCampaign && (
+          <div style={{ marginTop: 24, background: '#fff', border: '1.5px solid var(--border)', borderRadius: 16, padding: '22px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--purple-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🏫</div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text)', marginBottom: 2 }}>Running campaigns for a club, school or charity?</div>
+                <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>
+                  The Organisation Plan gives you up to 10 concurrent campaigns, team management, and priority support for $149/year.
+                </div>
+              </div>
+            </div>
+            <a href="/upgrade-to-org" className="btn btn-purple" style={{ flexShrink: 0 }}>
+              Upgrade to Org Plan →
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
