@@ -428,7 +428,15 @@ export function emailOrgApplicationReceived(d: {
     subject: `We've received your application, ${d.org_name}`,
     text: `Hi ${d.first_name},
 
-Thanks for applying for the Lucky Squares Organisation Plan. We've received your application and will be in touch shortly.
+Thanks for applying for the Lucky Squares Organisation Plan. We've received your application for ${d.org_name} and will be in touch shortly.
+
+**Next steps:**
+
+1. Confirm your email address — check your inbox for a separate confirmation email and click the link to verify your account.
+
+2. We'll review your application — our team verifies every ABN and reviews each application personally. You'll hear from us within 1 business day.
+
+3. Once approved, your account is automatically upgraded to the Organisation Plan with full access to all features.
 
 Here's what we received:
 
@@ -436,9 +444,7 @@ Organisation: ${d.org_name}
 ABN: ${d.abn}
 Type: ${d.org_type}
 
-We review all applications personally and aim to get back to you within 2 business days.
-
-In the meantime, you can get started on your first campaign straight away. Just log in and create one when you're ready.
+In the meantime, you can explore the platform on the Trial plan straight away.
 
 ${SIG}`,
   };
