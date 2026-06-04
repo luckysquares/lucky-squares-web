@@ -1,5 +1,5 @@
-export const FROM_EMAIL    = 'Lucky Squares <noreply@luckysquares.com.au>';
-export const SUPPORT_EMAIL = 'support@luckysquares.com.au';
+export const FROM_EMAIL    = 'Lucky Squares <hello@luckysquares.com.au>';
+export const SUPPORT_EMAIL = 'hello@luckysquares.com.au';
 export const ADMIN_EMAIL   = 'jwstott@me.com';
 
 export interface EmailPayload {

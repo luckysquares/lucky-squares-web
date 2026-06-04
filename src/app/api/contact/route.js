@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
-const SUPPORT_FROM  = 'support@luckysquares.com.au';
+const SUPPORT_FROM  = 'hello@luckysquares.com.au';
 const INTERNAL_TO   = 'jamie@luckysquares.com.au';
 
 function safe(s) {
