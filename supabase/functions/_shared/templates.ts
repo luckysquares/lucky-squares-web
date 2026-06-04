@@ -68,32 +68,22 @@ export function emailSquareSold(d: {
   sold_count: number;
   grid_size: number;
   amount_raised: string;
-  is_first: boolean;
+  is_first?: boolean; // kept for backwards compat; always treated as first sale now
 }) {
-  const subject = d.is_first
-    ? `You've sold your first square in ${d.campaign_title}!`
-    : `Square #${d.square_number} just sold in ${d.campaign_title}`;
 
-  const body = d.is_first
-    ? `Hi ${d.first_name},
+  const body = `Hi ${d.first_name},
 
-You've just sold your very first square in ${d.campaign_title} and we think that deserves a little celebration! Every great fundraiser starts exactly like this. The grid has officially come to life.
+You've just sold your very first square in ${d.campaign_title} — every great fundraiser starts exactly like this. The grid has officially come to life!
 
-${d.buyer_name} has claimed square #${d.square_number}. Now get sharing — the more people who see your link, the faster that grid fills up.`
-    : `Hi ${d.first_name},
+${d.buyer_name} has claimed square #${d.square_number}. Now get sharing — the more people who see your link, the faster that grid fills up.
 
-Great news! ${d.buyer_name} just bought square #${d.square_number} in ${d.campaign_title}.
-
-Running total: ${d.sold_count} of ${d.grid_size} squares sold ($${d.amount_raised} raised so far).`;
+From here, we'll send you a daily summary each evening with all the squares sold that day. No individual emails for every sale — just one clean update at the end of the day if there's been activity.`;
 
   return {
-    subject,
+    subject: `You've sold your first square in ${d.campaign_title}!`,
     text: `${body}
 
-${SIG}
-
----
-Prefer fewer emails? Log in to your dashboard to switch to a daily summary or turn off square sold notifications.`,
+${SIG}`,
   };
 }
 
@@ -377,32 +367,22 @@ export function emailOrgSquareSold(d: {
   sold_count: number;
   grid_size: number;
   amount_raised: string;
-  is_first: boolean;
+  is_first?: boolean; // kept for backwards compat; always treated as first sale now
 }) {
-  const subject = d.is_first
-    ? `Your first square just sold in ${d.campaign_title}!`
-    : `Square sold in ${d.campaign_title}`;
 
-  const body = d.is_first
-    ? `Hi ${d.first_name},
+  const body = `Hi ${d.first_name},
 
-The first square in ${d.campaign_title} has just been sold and we think that deserves a moment. This is where every successful fundraiser begins!
+The first square in ${d.campaign_title} has just been sold — this is where every successful fundraiser begins!
 
-${d.buyer_name} has claimed square #${d.square_number}. The grid is officially open for business.`
-    : `Hi ${d.first_name},
+${d.buyer_name} has claimed square #${d.square_number}. The grid is officially open for business.
 
-${d.buyer_name} just purchased square #${d.square_number} in ${d.campaign_title}.
-
-Running total: ${d.sold_count} of ${d.grid_size} squares ($${d.amount_raised} raised).`;
+From here, we'll send you a daily summary each evening with all the squares sold that day. No individual emails for every sale — just one clean update at the end of the day if there's been activity.`;
 
   return {
-    subject,
+    subject: `Your first square just sold in ${d.campaign_title}!`,
     text: `${body}
 
-${SIG}
-
----
-Prefer fewer emails? Log in to your dashboard to switch to a daily summary or turn off square sold notifications.`,
+${SIG}`,
   };
 }
 

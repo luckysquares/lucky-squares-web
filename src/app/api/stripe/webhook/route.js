@@ -461,8 +461,8 @@ export async function POST(req) {
         const txHeaders    = { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` };
 
         if (isOrgPlan) {
-          // Org plan: send org_square_sold for every sale (first and subsequent)
-          await fetch(txUrl, {
+          // Org plan: first sale only — digest handles subsequent sales
+          if (isFirstSale) await fetch(txUrl, {
             method: 'POST',
             headers: txHeaders,
             body: JSON.stringify({
@@ -477,7 +477,7 @@ export async function POST(req) {
                 sold_count:     totalSold,
                 grid_size:      fundraiser.grid_size,
                 amount_raised:  amountRaised,
-                is_first:       isFirstSale,
+                is_first:       true,
               },
             }),
           }).catch(() => {});
