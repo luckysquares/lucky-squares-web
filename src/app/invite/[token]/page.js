@@ -12,7 +12,6 @@ export default function AcceptInvitePage() {
   const [invite,  setInvite]  = useState(null);
   const [phase,   setPhase]   = useState('loading'); // loading | info | otp | accepting | done | invalid
   const [error,   setError]   = useState('');
-  const [digits,  setDigits]  = useState(['','','','','','']);
   const [loading, setLoading] = useState(false);
 
   const doAccept = useCallback(async (supabase) => {
@@ -67,30 +66,6 @@ export default function AcceptInvitePage() {
     setPhase('otp');
   };
 
-  const verifyOtp = async () => {
-    setLoading(true);
-    setError('');
-    const supabase = getSupabaseClient();
-    const { error: e } = await supabase.auth.verifyOtp({
-      email: invite.email,
-      token: digits.join(''),
-      type:  'email',
-    });
-    setLoading(false);
-    if (e) { setError('Invalid code. Please try again.'); return; }
-    doAccept(supabase);
-  };
-
-  const handleDigit = (i, val) => {
-    const next = [...digits];
-    next[i] = val.replace(/\D/, '').slice(-1);
-    setDigits(next);
-    if (val && i < 5) document.getElementById(`inv-d${i + 1}`)?.focus();
-  };
-
-  const handleKey = (i, e) => {
-    if (e.key === 'Backspace' && !digits[i] && i > 0) document.getElementById(`inv-d${i - 1}`)?.focus();
-  };
 
   return (
     <div className="dot-bg" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
@@ -131,27 +106,14 @@ export default function AcceptInvitePage() {
           <>
             <div style={{ fontSize: 40, marginBottom: 16 }}>📬</div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, marginBottom: 8 }}>Check your email</h2>
-            <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
-              We sent a confirmation to <strong>{invite.email}</strong>. Click the button in the email to continue,
-              or enter the 6-digit code below if one was included.
+            <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 8, lineHeight: 1.6 }}>
+              We sent a confirmation link to <strong>{invite.email}</strong>.
             </p>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 20 }}>
-              {digits.map((d, i) => (
-                <input
-                  key={i}
-                  id={`inv-d${i}`}
-                  className="verify-digit"
-                  maxLength={1}
-                  value={d}
-                  onChange={(e) => handleDigit(i, e.target.value)}
-                  onKeyDown={(e) => handleKey(i, e)}
-                />
-              ))}
-            </div>
-            {error && <p style={{ color: '#CC0000', fontSize: 13, marginBottom: 12 }}>{error}</p>}
-            <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={verifyOtp} disabled={loading || digits.join('').length < 6}>
-              {loading ? 'Verifying...' : 'Verify and join'}
-            </button>
+            <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+              Click the link in that email to confirm your address and join {invite.org_name}.
+              This page will update automatically once confirmed.
+            </p>
+            {error && <p style={{ color: '#CC0000', fontSize: 13 }}>{error}</p>}
           </>
         )}
 
