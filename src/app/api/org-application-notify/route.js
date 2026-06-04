@@ -1,6 +1,6 @@
 const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const ADMIN_EMAIL   = 'jwstott@me.com';
+const ADMIN_EMAIL   = process.env.ADMIN_EMAIL;
 
 function sendTxEmail(type, to, data) {
   return fetch(`${SUPABASE_URL}/functions/v1/transactional-email`, {

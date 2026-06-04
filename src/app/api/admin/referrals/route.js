@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 
 // Flag referrals where both accounts were created within this many hours of each other
 const SUSPICIOUS_HOURS = 24;
 
-export async function GET() {
+export async function GET(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const db = getAdminClient();
 

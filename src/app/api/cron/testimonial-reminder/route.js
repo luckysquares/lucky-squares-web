@@ -6,7 +6,7 @@
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const CRON_SECRET    = process.env.CRON_SECRET;
-const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'jwstott@me.com';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
 
 function isFirstBusinessDayOfMonth(date) {
   const d   = new Date(date);
@@ -39,9 +39,9 @@ function monthLabel(yyyyMM) {
 }
 
 export async function GET(req) {
-  // Verify cron secret
+  // Verify cron secret — fail closed if not configured
   const auth = req.headers.get('authorization');
-  if (CRON_SECRET && auth !== `Bearer ${CRON_SECRET}`) {
+  if (!CRON_SECRET || auth !== `Bearer ${CRON_SECRET}`) {
     return new Response('Unauthorized', { status: 401 });
   }
 

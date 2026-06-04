@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/adminAuth';
 
 const SITE_URL       = 'https://luckysquares.com.au';
-const INDEXNOW_KEY   = process.env.INDEXNOW_KEY || '50bb10538b3042f09dbf9aa4f030aa5b';
+const INDEXNOW_KEY   = process.env.INDEXNOW_KEY;
 
 // Ping Bing (IndexNow) and Google Search Console whenever a post is published.
 // Silent on failure — never blocks the save.
@@ -27,7 +28,8 @@ async function pingSearchEngines(slug) {
   ]);
 }
 
-export async function GET() {
+export async function GET(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const supabase = getSupabase();
     const { data, error } = await supabase.rpc('admin_get_blog_posts');
@@ -39,6 +41,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const body = await req.json();
     const { id, slug, title, excerpt, content, author, cover_image_url, image_prompt, image_credit_name, image_credit_year, tags, status } = body;
@@ -79,6 +82,7 @@ export async function POST(req) {
 }
 
 export async function DELETE(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 });

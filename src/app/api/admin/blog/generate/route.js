@@ -1,3 +1,4 @@
+import { verifyAdmin } from '@/lib/adminAuth';
 import { NextResponse } from 'next/server';
 
 const SYSTEM_PROMPT = `You are a skilled content writer for Lucky Squares Australia, a platform that helps community organisations (schools, sporting clubs, charities) run Lucky Squares grid fundraisers online. Write in a warm, helpful, Australian English voice. Never use em-dashes or middle dots.
@@ -5,6 +6,7 @@ const SYSTEM_PROMPT = `You are a skilled content writer for Lucky Squares Austra
 You MUST respond with a single valid JSON object and nothing else. No markdown fences, no explanation — just the raw JSON.`;
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
