@@ -104,32 +104,25 @@ export default function PosterPage({ params }) {
       <style>{`
         * { box-sizing: border-box; }
         body { margin: 0; padding: 0; background: #D6D0C4; }
-
+        @page { size: A4 portrait; margin: 0; }
         @media print {
-          @page { size: A4 portrait; margin: 0; }
-          /* Clamp html+body to exactly A4 — nothing can overflow to page 2 */
-          html, body {
-            width: 210mm !important;
-            height: 297mm !important;
-            overflow: hidden !important;
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body { background: #fff !important; }
+          /* Hide all direct children of body except the poster wrap */
+          body > * { display: none !important; }
+          body > .poster-wrap { display: flex !important; }
+          /* Reset screen padding — poster fills the page */
+          .poster-wrap {
+            padding: 0 !important;
             background: #fff !important;
+            justify-content: flex-start !important;
+            align-items: flex-start !important;
           }
-          /* Hide everything (preserves layout) */
-          body * { visibility: hidden; }
-          /* Also remove space for global site elements */
-          footer, header, nav,
-          .footer, .mariposa-chat-widget,
-          [class*="chat-widget"] { display: none !important; }
-          /* Show only the poster */
-          .poster-sheet,
-          .poster-sheet * { visibility: visible; }
           .poster-sheet {
-            position: fixed !important;
-            top: 0 !important; left: 0 !important;
+            box-shadow: none !important;
             width: 210mm !important;
             height: 297mm !important;
             overflow: hidden !important;
-            box-shadow: none !important;
           }
           .no-print { display: none !important; }
         }
@@ -144,7 +137,10 @@ export default function PosterPage({ params }) {
           <button onClick={() => window.history.back()} style={{ background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', color: '#fff', padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>
             ← Back
           </button>
-          <button onClick={() => window.print()} style={{ background: '#F5C842', border: 'none', color: '#1A1209', padding: '9px 22px', borderRadius: 8, fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'sans-serif' }}>
+          <button onClick={() => {
+            window.addEventListener('afterprint', () => { try { window.close(); } catch {} }, { once: true });
+            window.print();
+          }} style={{ background: '#F5C842', border: 'none', color: '#1A1209', padding: '9px 22px', borderRadius: 8, fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'sans-serif' }}>
             🖨 Print / Save as PDF
           </button>
         </div>

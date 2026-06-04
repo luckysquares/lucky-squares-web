@@ -89,7 +89,7 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') ?? '';
-  const isStandalone = pathname.endsWith('/certificate');
+  const isStandalone = pathname.endsWith('/certificate') || pathname.endsWith('/poster');
 
   return (
     <html lang="en-AU" className={`${fraunces.variable} ${nunito.variable}`}>
