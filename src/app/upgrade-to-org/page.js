@@ -58,11 +58,14 @@ export default function UpgradeToOrgPage() {
 
     setSaving(true);
     try {
-      const appRes = await fetch('/api/org-application', {
+      // Create Stripe Checkout session — org details stored in session metadata
+      const res = await fetch('/api/stripe/org-checkout', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id:      user.id,
+          email:        user.email,
+          contact_name: sanitize(user.name),
           org_name:     sanitize(orgName),
           abn:          abnVal.digits,
           org_type:     orgType,
@@ -70,35 +73,19 @@ export default function UpgradeToOrgPage() {
           suburb:       sanitize(suburb),
           state:        orgState,
           postcode:     postcode.replace(/\D/g, '').slice(0, 4),
-          contact_name: sanitize(user.name),
-          email:        user.email,
           phone:        sanitize(phone),
         }),
       });
 
-      if (!appRes.ok) {
-        const { error: appErr } = await appRes.json().catch(() => ({}));
-        setError(appErr || 'Something went wrong. Please try again.');
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        setError(json.error || 'Something went wrong. Please try again.');
         setSaving(false);
         return;
       }
 
-      await fetch('/api/org-application-notify', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          first_name:    (user.name || '').split(' ')[0] || 'there',
-          org_name:      sanitize(orgName),
-          abn:           abnVal.digits,
-          org_type:      orgType,
-          contact_name:  sanitize(user.name),
-          contact_email: user.email,
-          suburb:        sanitize(suburb),
-          state:         orgState,
-        }),
-      }).catch(() => {});
-
-      window.location.href = '/org-next-steps';
+      // Redirect to Stripe Checkout
+      window.location.href = json.url;
     } catch {
       setError('Something went wrong. Please try again.');
       setSaving(false);
@@ -200,11 +187,12 @@ export default function UpgradeToOrgPage() {
             {error && <p style={{ fontSize: 13, color: '#CC0000', marginBottom: 16 }}>{error}</p>}
 
             <button type="submit" className="btn btn-purple btn-lg" disabled={saving} style={{ width: '100%', justifyContent: 'center' }}>
-              {saving ? 'Submitting...' : 'Submit application →'}
+              {saving ? 'Redirecting to payment...' : 'Continue to payment — $149/year →'}
             </button>
 
             <p style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 16, lineHeight: 1.6 }}>
-              We review all applications within 1 business day. Your current account remains active while we review.
+              You will be taken to Stripe to complete payment. Your account is reviewed within 1 business day of payment.
+              If your application is not approved, your payment is fully refunded.
             </p>
           </form>
 
