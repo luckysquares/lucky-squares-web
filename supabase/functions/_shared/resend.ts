@@ -55,37 +55,7 @@ function toHtml(text: string, unsubscribeUrl?: string): string {
         <!-- Logo header -->
         <tr><td style="text-align:center;padding-bottom:28px">
           <a href="https://luckysquares.com.au" style="text-decoration:none;display:inline-block">
-            <!-- Icon: 4×4 grid in purple container, gold winner square at row2/col2 -->
-            <table cellpadding="0" cellspacing="2" style="margin:0 auto 6px;background:#6B46F5;border-radius:10px;padding:7px">
-              <tr>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:7px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-              </tr>
-              <tr>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:9px;background:#F5C820;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:7px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-              </tr>
-              <tr>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:7px;height:9px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-              </tr>
-              <tr>
-                <td style="width:9px;height:7px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:7px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:9px;height:7px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-                <td style="width:7px;height:7px;background:#8C6FF7;border-radius:2px;font-size:0">&nbsp;</td>
-              </tr>
-            </table>
-            <div style="font-size:18px;color:#1A1209;letter-spacing:-0.5px;margin-top:2px">
-              <span style="font-weight:900">Lucky</span> <span style="font-weight:400;font-style:italic">Squares</span>
-            </div>
-            <div style="font-size:9px;font-weight:700;color:#6B7280;letter-spacing:2.2px;text-transform:uppercase;margin-top:3px">Australia</div>
+            <img src="https://luckysquares.com.au/lucky-squares-logo.png" alt="Lucky Squares Australia" width="180" style="display:block;margin:0 auto;border:0;outline:none;max-width:180px" />
           </a>
         </td></tr>
 
