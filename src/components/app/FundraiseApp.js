@@ -1062,6 +1062,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
   const [bankSaving,        setBankSaving]        = useState(false);
   const [bankSaveError,     setBankSaveError]     = useState(false);
   const [bankConnectDone,   setBankConnectDone]   = useState(false);
+  const [bankReadyToConnect, setBankReadyToConnect] = useState(false);
   const [launchError,       setLaunchError]       = useState(null); // null | 'COUPON_INVALID' | 'UNKNOWN'
 
   // Auto-populate campaign.org from org details when type is 'org'
@@ -1110,10 +1111,10 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     return () => window.removeEventListener('popstate', handlePop);
   }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When the user arrives at step 8 (Connect Bank), save the draft so StripeConnectSetup
-  // has a real fundraiser_id to pass to the account-session API.
+  // When the user arrives at step 8 (Connect Bank) and clicks "Connect my bank account",
+  // save the draft so StripeConnectSetup has a real fundraiser_id.
   useEffect(() => {
-    if (step !== BANK_STEP || bankDraftId || bankSaving) return;
+    if (step !== BANK_STEP || bankDraftId || bankSaving || !bankReadyToConnect) return;
     setBankSaving(true);
     setBankSaveError(false);
     onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment })
@@ -1650,11 +1651,28 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
         </div>
       )}
       {payment.method === 'stripe' && (
-        <div className="scratch-card" style={{ padding: 24, background: '#F5F3FF', border: '1.5px solid #C4B5FD' }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>💳</div>
-          <div style={{ fontWeight: 800, marginBottom: 6 }}>Online card payments</div>
-          <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
-            After completing your campaign details, you&apos;ll connect your bank account once as part of the launch process. This takes about 2 minutes. Funds are transferred directly to your bank account after the draw completes. Lucky Squares never holds your money.
+        <div className="scratch-card" style={{ padding: '24px 28px', background: '#F5F3FF', border: '1.5px solid #C4B5FD' }}>
+          <div style={{ fontWeight: 900, fontSize: 15, color: 'var(--text)', marginBottom: 6 }}>
+            One quick setup before you go live
+          </div>
+          <p style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 20 }}>
+            Online card payments require you to connect your bank account through Stripe — the same payment infrastructure used by Atlassian, Canva, Xero and millions of businesses worldwide. You do this once, right before launch. Every future campaign reuses the same account automatically.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+            {[
+              { icon: '💸', title: 'Direct to you', body: 'Funds go straight from buyers to your bank account. Lucky Squares never holds your money.' },
+              { icon: '⏱️', title: 'Takes ~2 minutes', body: 'Stripe will ask for your BSB, account number, and basic identity details (required by Australian law).' },
+              { icon: '✅', title: 'One and done', body: 'Connect once, done forever. Future campaigns reuse the same account — no re-entering details.' },
+            ].map(({ icon, title, body }) => (
+              <div key={title} style={{ background: 'rgba(255,255,255,0.7)', borderRadius: 10, padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 22, marginBottom: 6 }}>{icon}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', marginBottom: 4 }}>{title}</div>
+                <div style={{ fontSize: 11, color: 'var(--text2)', lineHeight: 1.5 }}>{body}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: '#5B21B6', background: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '10px 14px', lineHeight: 1.6 }}>
+            <strong>Timeline:</strong> Funds transfer to your bank within 2 business days of the draw completing.
           </div>
         </div>
       )}
@@ -1739,66 +1757,130 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
 
     // ── Step 8: Connect Bank (stripe only) ────────────────────────────────────
     <div key="bank">
-      <div style={{ marginBottom: 28 }}>
-        <h2 className="section-title" style={{ marginBottom: 8 }}>Connect your bank account</h2>
-        <p className="section-sub">
-          Because your buyers pay by card, Lucky Squares needs to know where to send the money. Funds are transferred directly to your bank account once the draw is complete.
-        </p>
-      </div>
 
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-        {[
-          { icon: '🔒', text: 'Your details are secured by Stripe, the same payment infrastructure used by millions of businesses worldwide.' },
-          { icon: '🏦', text: 'Funds land directly in your nominated account within 2 business days of your draw completing.' },
-          { icon: '✅', text: 'You only need to do this once. Future campaigns reuse the same account automatically.' },
-        ].map((item) => (
-          <div key={item.icon} style={{ flex: 1, fontSize: 12, color: 'var(--text2)', lineHeight: 1.6, textAlign: 'center' }}>
-            <div style={{ fontSize: 24, marginBottom: 6 }}>{item.icon}</div>
-            {item.text}
+      {/* Pre-connect explainer — shown until organiser clicks "Connect" */}
+      {!bankReadyToConnect && !bankDraftId && !bankSaving && (
+        <div>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>🏦</div>
+            <h2 className="section-title" style={{ marginBottom: 8 }}>One quick step before you go live</h2>
+            <p className="section-sub" style={{ maxWidth: 480, margin: '0 auto' }}>
+              To send your buyers' payments directly to you, we need to connect your bank account through Stripe. This is the only technical step — and you only ever do it once.
+            </p>
           </div>
-        ))}
-      </div>
 
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#EEF2FF', border: '1.5px solid #C7D2FE', borderRadius: 12, padding: '14px 16px', marginBottom: 16, fontSize: 13, color: '#3730A3', lineHeight: 1.6 }}>
-        <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
-        <span><strong>Heads up:</strong> Stripe will ask for a customer support phone number. Just enter your contact number (it appears on payment receipts so buyers can reach you if needed).</span>
-      </div>
-
-      <div className="scratch-card" style={{ padding: 28 }}>
-        {bankSaving && (
-          <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
-        )}
-        {bankSaveError && (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <div style={{ fontSize: 14, color: '#CC0000', marginBottom: 12 }}>Something went wrong saving your campaign. Please try again.</div>
-            <button className="btn btn-outline btn-sm" onClick={() => {
-              setBankSaveError(false);
-              setBankSaving(true);
-              onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment })
-                .then((id) => {
-                  setBankSaving(false);
-                  if (id) setBankDraftId(id);
-                  else setBankSaveError(true);
-                });
-            }}>Try again</button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+            {[
+              {
+                icon: '💸',
+                title: 'Why we need this',
+                body: 'When a buyer pays for a square, the money goes straight to your bank account — Lucky Squares never holds your funds. Stripe is the secure layer that makes that happen.',
+              },
+              {
+                icon: '📋',
+                title: "What Stripe will ask for",
+                body: 'Your BSB and account number, a few basic identity details (required by Australian banking regulations), and a contact phone number that appears on payment receipts.',
+              },
+              {
+                icon: '✅',
+                title: 'One and done',
+                body: 'Connect once and you\'re set for life. Every future campaign you run automatically uses the same bank account — no re-entering details, no extra steps.',
+              },
+              {
+                icon: '⏱️',
+                title: 'Takes about 2 minutes',
+                body: 'Stripe\'s process is straightforward. Most organisers finish in under 2 minutes. Your campaign details are already saved — just complete the bank setup and you\'re ready to launch.',
+              },
+            ].map(({ icon, title, body }) => (
+              <div key={title} className="scratch-card" style={{ padding: '16px 20px', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <div style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>{icon}</div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>{title}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.65 }}>{body}</div>
+                </div>
+              </div>
+            ))}
           </div>
+
+          <div style={{ background: '#F5F3FF', border: '1.5px solid #C4B5FD', borderRadius: 12, padding: '12px 18px', marginBottom: 28, fontSize: 12, color: '#5B21B6', lineHeight: 1.6, textAlign: 'center' }}>
+            🔒 Stripe processes over $1 trillion in payments annually — the same infrastructure trusted by Atlassian, Canva, Xero and millions of businesses worldwide.
+          </div>
+
+          <button
+            className="btn btn-purple btn-lg"
+            style={{ width: '100%', justifyContent: 'center' }}
+            onClick={() => setBankReadyToConnect(true)}
+          >
+            Connect my bank account →
+          </button>
+        </div>
+      )}
+
+      {/* Stripe connect flow — shown after organiser clicks "Connect" */}
+      {(bankReadyToConnect || bankDraftId || bankSaving) && (
+        <div>
+          <div style={{ marginBottom: 24 }}>
+            <h2 className="section-title" style={{ marginBottom: 8 }}>Connect your bank account</h2>
+            <p className="section-sub">
+              Funds transfer directly to your account after the draw. Lucky Squares never holds your money.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
+            {[
+              { icon: '🔒', text: 'Secured by Stripe, the same infrastructure used by millions of businesses worldwide.' },
+              { icon: '🏦', text: 'Funds land in your account within 2 business days of your draw completing.' },
+              { icon: '✅', text: 'One-time setup. Future campaigns reuse the same account automatically.' },
+            ].map((item) => (
+              <div key={item.icon} style={{ flex: 1, fontSize: 12, color: 'var(--text2)', lineHeight: 1.6, textAlign: 'center' }}>
+                <div style={{ fontSize: 22, marginBottom: 6 }}>{item.icon}</div>
+                {item.text}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#EEF2FF', border: '1.5px solid #C7D2FE', borderRadius: 12, padding: '14px 16px', marginBottom: 16, fontSize: 13, color: '#3730A3', lineHeight: 1.6 }}>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
+            <span><strong>Heads up:</strong> Stripe will ask for a customer support phone number. Just enter your contact number (it appears on payment receipts so buyers can reach you if needed).</span>
+          </div>
+
+          <div className="scratch-card" style={{ padding: 28 }}>
+            {bankSaving && (
+              <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text2)', fontSize: 14 }}>Saving your campaign…</div>
+            )}
+            {bankSaveError && (
+              <div style={{ padding: '20px', textAlign: 'center' }}>
+                <div style={{ fontSize: 14, color: '#CC0000', marginBottom: 12 }}>Something went wrong saving your campaign. Please try again.</div>
+                <button className="btn btn-outline btn-sm" onClick={() => {
+                  setBankSaveError(false);
+                  setBankSaving(true);
+                  onSaveDraft({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment })
+                    .then((id) => {
+                      setBankSaving(false);
+                      if (id) setBankDraftId(id);
+                      else setBankSaveError(true);
+                    });
+                }}>Try again</button>
+              </div>
+            )}
+            {bankDraftId && (
+              <StripeConnectSetup
+                key={bankDraftId}
+                fundraiserId={bankDraftId}
+                onComplete={() => setBankConnectDone(true)}
+                prefill={fundraiserType === 'org' && orgDetails.name.trim()
+                  ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, orgType: orgDetails.orgType, email: userPrefill?.email, phone: userPrefill?.phone }
+                  : { name: userPrefill?.name, email: userPrefill?.email, phone: userPrefill?.phone }}
+              />
         )}
-        {bankDraftId && (
-          <StripeConnectSetup
-            key={bankDraftId}
-            fundraiserId={bankDraftId}
-            onComplete={() => setBankConnectDone(true)}
-            prefill={fundraiserType === 'org' && orgDetails.name.trim()
-              ? { businessType: 'company', orgName: orgDetails.name, orgAbn: orgDetails.abn, orgType: orgDetails.orgType, email: userPrefill?.email, phone: userPrefill?.phone }
-              : { name: userPrefill?.name, email: userPrefill?.email, phone: userPrefill?.phone }}
-          />
-        )}
-        {!bankConnectDone && !bankSaving && !bankSaveError && bankDraftId && (
-          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text2)', marginTop: 16 }}>
-            Complete the bank account setup above to continue to your campaign launch.
-          </p>
-        )}
-      </div>
+            {!bankConnectDone && !bankSaving && !bankSaveError && bankDraftId && (
+              <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text2)', marginTop: 16 }}>
+                Complete the bank account setup above to continue to your campaign launch.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>,
 
     // ── Step 9: Launch ────────────────────────────────────────────────────────
