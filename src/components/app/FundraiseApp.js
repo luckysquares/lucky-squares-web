@@ -1656,13 +1656,13 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             One quick setup before you go live
           </div>
           <p style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 20 }}>
-            Online card payments require you to connect your bank account through Stripe — the same payment infrastructure used by Atlassian, Canva, Xero and millions of businesses worldwide. You do this once, right before launch. Every future campaign reuses the same account automatically.
+            Online card payments require you to connect your bank account through Stripe, the same payment infrastructure used by Canva, Xero and millions of businesses worldwide. You do this once, right before launch. Every future campaign reuses the same account automatically.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
             {[
-              { icon: '💸', title: 'Direct to you', body: 'Funds go straight from buyers to your bank account. Lucky Squares never holds your money.' },
+              { icon: '💸', title: 'Direct to you', body: 'Funds from buyers are held by Stripe, before being paid out to your bank account when the campaign ends.' },
               { icon: '⏱️', title: 'Takes ~2 minutes', body: 'Stripe will ask for your BSB, account number, and basic identity details (required by Australian law).' },
-              { icon: '✅', title: 'One and done', body: 'Connect once, done forever. Future campaigns reuse the same account — no re-entering details.' },
+              { icon: '✅', title: 'One and done', body: 'Connect once, done forever. Future campaigns reuse the same account with no re-entering details.' },
             ].map(({ icon, title, body }) => (
               <div key={title} style={{ background: 'rgba(255,255,255,0.7)', borderRadius: 10, padding: '14px 12px', textAlign: 'center' }}>
                 <div style={{ fontSize: 22, marginBottom: 6 }}>{icon}</div>
@@ -1758,14 +1758,25 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     // ── Step 8: Connect Bank (stripe only) ────────────────────────────────────
     <div key="bank">
 
+      {/* Already connected — shown when returning organiser navigates back to this step */}
+      {!bankReadyToConnect && !bankDraftId && !bankSaving && stripeOnboardingComplete && (
+        <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <div style={{ fontSize: 52, marginBottom: 16 }}>✅</div>
+          <h2 className="section-title" style={{ marginBottom: 12 }}>Your bank account is already connected</h2>
+          <p className="section-sub" style={{ maxWidth: 440, margin: '0 auto' }}>
+            Your previous campaigns set this up. This campaign will automatically pay out to the same bank account with no action needed from you.
+          </p>
+        </div>
+      )}
+
       {/* Pre-connect explainer — shown until organiser clicks "Connect" */}
-      {!bankReadyToConnect && !bankDraftId && !bankSaving && (
+      {!bankReadyToConnect && !bankDraftId && !bankSaving && !stripeOnboardingComplete && (
         <div>
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <div style={{ fontSize: 52, marginBottom: 12 }}>🏦</div>
             <h2 className="section-title" style={{ marginBottom: 8 }}>One quick step before you go live</h2>
             <p className="section-sub" style={{ maxWidth: 480, margin: '0 auto' }}>
-              To send your buyers' payments directly to you, we need to connect your bank account through Stripe. This is the only technical step — and you only ever do it once.
+              To send your buyers' payments directly to you, we need to connect your bank account through Stripe. This is the only technical step, and you only ever do it once.
             </p>
           </div>
 
