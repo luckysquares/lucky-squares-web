@@ -81,7 +81,7 @@ export async function POST(req) {
     const supabase  = getSupabase();
     const resendKey = process.env.RESEND_API_KEY;
 
-    // No ticket ID — this is a direct email to hello@ (not a reply to a specific ticket).
+    // No ticket ID — direct email to hello@ (not a reply to a specific ticket).
     // Create a new support ticket from it.
     if (!ticketId) {
       const fromMatch2   = (fromField ?? '').match(/^(.+?)\s*<([^>]+)>/);
@@ -93,7 +93,8 @@ export async function POST(req) {
         return NextResponse.json({ ok: true });
       }
 
-      const rawText2   = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).split('\n').filter((l) => !l.trim().startsWith('>')).join('\n').trim();
+      const rawText2   = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
+        .split('\n').filter((l) => !l.trim().startsWith('>')).join('\n').trim();
       const ticketRef2 = `LS-${Date.now().toString(36).toUpperCase().slice(-6)}`;
 
       await supabase.from('support_tickets').insert({

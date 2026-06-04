@@ -214,6 +214,16 @@ export default async function BlogPostPage({ params }) {
             priority
             style={{ objectFit: 'cover', opacity: .92 }}
           />
+          {post.image_credit_name && (
+            <div style={{
+              position: 'absolute', bottom: 10, right: 12,
+              fontSize: 11, color: 'rgba(255,255,255,0.75)',
+              background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)',
+              padding: '3px 8px', borderRadius: 4, lineHeight: 1.4,
+            }}>
+              Image credit: {post.image_credit_name}{post.image_credit_year ? ` (c) ${post.image_credit_year}` : ''}
+            </div>
+          )}
         </div>
       )}
 

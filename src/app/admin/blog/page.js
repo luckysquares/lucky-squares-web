@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   id: null, slug: '', title: '', excerpt: '', content: '',
   author: 'Lucky Squares Australia', cover_image_url: '',
   image_prompt: '', tags: '', status: 'draft',
+  image_credit_name: '', image_credit_year: '',
 };
 
 const EMPTY_GENERATE = { title: '', audience: '', tone: 'Helpful and informative', keyPoints: '' };
@@ -70,6 +71,8 @@ export default function AdminBlogPage() {
       image_prompt: post.image_prompt ?? '',
       tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
       status: post.status ?? 'draft',
+      image_credit_name: post.image_credit_name ?? '',
+      image_credit_year: post.image_credit_year ? String(post.image_credit_year) : '',
     });
     setSlugManual(true); setSaveError('');
     setShowGenerate(false); setGenerateForm(EMPTY_GENERATE); setGenerateError('');
@@ -92,14 +95,16 @@ export default function AdminBlogPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id:              editing.id || undefined,
-        slug:            editing.slug.trim(),
-        title:           editing.title.trim(),
-        excerpt:         editing.excerpt.trim(),
-        content:         editing.content,
-        author:          editing.author.trim() || 'Lucky Squares Australia',
-        cover_image_url: editing.cover_image_url.trim() || null,
-        image_prompt:    editing.image_prompt.trim() || '',
+        id:                editing.id || undefined,
+        slug:              editing.slug.trim(),
+        title:             editing.title.trim(),
+        excerpt:           editing.excerpt.trim(),
+        content:           editing.content,
+        author:            editing.author.trim() || 'Lucky Squares Australia',
+        cover_image_url:   editing.cover_image_url.trim() || null,
+        image_prompt:      editing.image_prompt.trim() || '',
+        image_credit_name: editing.image_credit_name.trim() || null,
+        image_credit_year: editing.image_credit_year ? parseInt(editing.image_credit_year, 10) : null,
         tags, status: editing.status,
       }),
     });
@@ -384,6 +389,18 @@ export default function AdminBlogPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Image credit */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, marginBottom: 20 }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Image credit (photographer name)</label>
+                <input className="form-input" value={editing.image_credit_name} onChange={(e) => fld('image_credit_name', e.target.value)} placeholder="e.g. Jane Smith" />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0, width: 100 }}>
+                <label className="form-label">Year</label>
+                <input className="form-input" value={editing.image_credit_year} onChange={(e) => fld('image_credit_year', e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder={new Date().getFullYear()} maxLength={4} />
+              </div>
             </div>
 
             {/* Image prompt */}
