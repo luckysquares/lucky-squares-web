@@ -71,7 +71,7 @@ export default async function PosterPage({ params }) {
         {/* A4 poster sheet */}
         <div className="poster-sheet" style={{
           width: '210mm',
-          minHeight: '200mm',
+          height: '297mm',
           background: '#fff',
           boxShadow: '0 8px 48px rgba(0,0,0,.3)',
           display: 'flex',
