@@ -27,8 +27,84 @@ export async function POST(req) {
     const session = event.data.object;
     const { action, fundraiser_id, buyer_name, buyer_email, buyer_phone, square_numbers, subtotal_cents, coupon_code } = session.metadata;
 
-    // ── Org annual membership — must be handled before the fundraiser_id guard ──
-    // Org membership checkouts have no fundraiser_id in metadata.
+    // ── Org application with payment — save as pending, notify admin ─────────
+    if (session.metadata?.type === 'org_application' && session.mode === 'subscription') {
+      const db         = supabase();
+      const meta       = session.metadata;
+      const subId      = session.subscription;
+      const customerId = session.customer;
+
+      // Save the org application — plan stays 'trial' until admin approves
+      await db.from('org_applications').insert({
+        user_id:             meta.user_id || null,
+        org_name:            meta.org_name,
+        abn:                 meta.abn,
+        org_type:            meta.org_type || null,
+        street:              meta.street || null,
+        suburb:              meta.suburb || null,
+        state:               meta.state || null,
+        postcode:            meta.postcode || null,
+        contact_name:        meta.contact_name || null,
+        email:               meta.email,
+        phone:               meta.phone || null,
+        stripe_subscription_id: subId,
+        stripe_customer_id:  customerId,
+        status:              'pending',
+      });
+
+      // Store subscription + customer on profile for later use
+      if (meta.user_id) {
+        await db.from('profiles').update({
+          stripe_customer_id:  customerId,
+          org_subscription_id: subId,
+        }).eq('id', meta.user_id);
+      }
+
+      // Notify admin
+      const notifyUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (notifyUrl && serviceKey) {
+        await fetch(notifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` },
+          body: JSON.stringify({
+            type: 'admin_new_org_application',
+            to:   process.env.ADMIN_EMAIL,
+            data: {
+              org_name:      meta.org_name,
+              abn:           meta.abn,
+              org_type:      meta.org_type || '',
+              contact_name:  meta.contact_name || '',
+              contact_email: meta.email,
+              suburb:        meta.suburb || '',
+              state:         meta.state || '',
+              applied_date:  new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
+              payment_confirmed: 'Yes — $149 paid via Stripe',
+            },
+          }),
+        }).catch(() => {});
+      }
+
+      // Send applicant confirmation
+      await fetch(notifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` },
+        body: JSON.stringify({
+          type: 'org_application_received',
+          to:   meta.email,
+          data: {
+            first_name: (meta.contact_name || '').split(' ')[0] || 'there',
+            org_name:   meta.org_name,
+            abn:        meta.abn,
+            org_type:   meta.org_type || '',
+          },
+        }),
+      }).catch(() => {});
+
+      return new Response('ok', { status: 200 });
+    }
+
+    // ── Legacy org membership (direct upgrade, no review) ─────────────────────
     if (action === 'org_membership' && session.mode === 'subscription') {
       const db          = supabase();
       const userId      = session.metadata.user_id;
