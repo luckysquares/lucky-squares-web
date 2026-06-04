@@ -93,19 +93,40 @@ export async function POST(req) {
         return NextResponse.json({ ok: true });
       }
 
-      const rawText2   = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
+      const rawText2  = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
         .split('\n').filter((l) => !l.trim().startsWith('>')).join('\n').trim();
-      const ticketRef2 = `LS-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+      const subject2  = (emailSubject ?? '(no subject)').replace(/^(Re:\s*)+/i, '').trim();
 
-      await supabase.from('support_tickets').insert({
-        ticket_ref:    ticketRef2,
-        contact_name:  senderName2,
-        contact_email: senderEmail2,
-        category:      'Email reply',
-        subject:       (emailSubject ?? '(no subject)').replace(/^(Re:\s*)+/i, '').trim(),
-        message:       rawText2 || '(no body)',
-        status:        'open',
+      // Insert ticket — no message column; trigger auto-sets ticket_ref
+      const { data: newTicket, error: ticketErr } = await supabase
+        .from('support_tickets')
+        .insert({
+          contact_name:  senderName2,
+          contact_email: senderEmail2,
+          category:      'general',
+          subject:       subject2,
+          ticket_ref:    '',
+          status:        'open',
+        })
+        .select('id, ticket_ref')
+        .single();
+
+      if (ticketErr) {
+        console.error('[inbound] Ticket insert error:', ticketErr.message);
+        return NextResponse.json({ ok: true });
+      }
+
+      // Insert the message body into support_messages
+      await supabase.from('support_messages').insert({
+        ticket_id:    newTicket.id,
+        body:         rawText2 || '(no body)',
+        is_internal:  false,
+        sender_type:  'customer',
+        sender_name:  senderName2,
+        sender_email: senderEmail2,
       });
+
+      const ticketRef2 = newTicket.ticket_ref;
 
       if (resendKey) {
         await fetch('https://api.resend.com/emails', {
@@ -115,7 +136,7 @@ export async function POST(req) {
             from:    SUPPORT_FROM,
             to:      INTERNAL_TO,
             subject: `New ticket ${ticketRef2} from ${senderName2}`,
-            text:    `New ticket ${ticketRef2}\n\nFrom: ${senderName2} <${senderEmail2}>\nSubject: ${emailSubject}\n\n${rawText2}\n\nView: https://luckysquares.com.au/admin/support`,
+            text:    `New ticket ${ticketRef2}\n\nFrom: ${senderName2} <${senderEmail2}>\nSubject: ${subject2}\n\n${rawText2}\n\nView: https://luckysquares.com.au/admin/support`,
             html:    `<p><strong>New ticket ${ticketRef2}</strong></p><p>From: ${senderName2} &lt;${senderEmail2}&gt;</p><blockquote style="border-left:3px solid #E5E0D5;padding-left:16px;color:#4A3728">${rawText2.replace(/\n/g, '<br>')}</blockquote><p><a href="https://luckysquares.com.au/admin/support">View in admin portal</a></p>`,
           }),
         });
