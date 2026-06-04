@@ -108,18 +108,10 @@ export default function PosterPage({ params }) {
         @page { size: A4 portrait; margin: 0; }
         @media print {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-          body > * { display: none !important; }
-          body > .poster-wrap { display: block !important; }
-          html, body { min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+          html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
           .no-print { display: none !important; }
-          .poster-wrap { padding: 0 !important; background: #fff !important; }
-          .poster-sheet {
-            box-shadow: none !important;
-            height: auto !important;
-            min-height: 0 !important;
-            page-break-inside: avoid;
-            break-inside: avoid;
-          }
+          .poster-wrap { display: block !important; padding: 0 !important; background: #fff !important; }
+          .poster-sheet { box-shadow: none !important; page-break-inside: avoid; break-inside: avoid; }
         }
       `}</style>
 
