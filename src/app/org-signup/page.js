@@ -143,6 +143,7 @@ export default function OrgSignupPage() {
           password,
           options: {
             data: { full_name: name.trim(), organisation: orgName.trim() },
+            emailRedirectTo: 'https://luckysquares.com.au/org-next-steps',
           },
         });
 
@@ -213,36 +214,10 @@ export default function OrgSignupPage() {
   };
 
   if (step === 'submitted') {
-    return (
-      <>
-        <MarketingNav />
-        <section className="section dot-bg" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center' }}>
-          <div className="section-inner" style={{ maxWidth: 560, textAlign: 'center' }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-            <h1 className="section-heading" style={{ margin: '0 auto 16px' }}>Application submitted!</h1>
-            <p className="section-body" style={{ margin: '0 auto 24px' }}>
-              Thanks, {name.split(' ')[0]}. We have received your Organisation plan application for{' '}
-              <strong>{orgName}</strong>.
-            </p>
-            <div className="scratch-card" style={{ background: '#fff', padding: 28, textAlign: 'left', marginBottom: 32 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: 14 }}>
-                <Row label="What happens next">
-                  We will verify your ABN and review your application. You will hear from us within 1 business day.
-                </Row>
-                <Row label="In the meantime">
-                  Check your inbox for a confirmation email and click the link to verify your account. You can start
-                  exploring the platform on the Trial plan straight away.
-                </Row>
-                <Row label="Questions">
-                  <a href="/contact" style={{ color: 'var(--green)', fontWeight: 700 }}>Contact us</a>
-                </Row>
-              </div>
-            </div>
-            <Link href="/fundraise" className="btn btn-primary">Go to the app →</Link>
-          </div>
-        </section>
-      </>
-    );
+    if (typeof window !== 'undefined') {
+      window.location.href = '/org-next-steps';
+    }
+    return null;
   }
 
   return (
