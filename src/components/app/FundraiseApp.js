@@ -1008,6 +1008,15 @@ function CampaignReport({ fundraiser, onBack }) {
 
 const WIZARD_STORAGE_KEY = 'ls_wizard_draft';
 
+// ── GA4 wizard funnel tracking ───────────────────────────────────────────────
+function trackWizard(event, props = {}) {
+  try {
+    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+      window.gtag('event', event, { event_category: 'wizard', ...props });
+    }
+  } catch {}
+}
+
 function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundingMember = false, userPrefill = null, stripeOnboardingComplete = false, onBankConnectDone = null, campaignPrefill = null }) {
   // campaignPrefill (from duplicate) takes priority over any localStorage draft
   const savedDraft = campaignPrefill ?? (() => { try { return JSON.parse(localStorage.getItem(WIZARD_STORAGE_KEY) || 'null'); } catch { return null; } })();
@@ -1109,6 +1118,16 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
     };
     window.addEventListener('popstate', handlePop);
     return () => window.removeEventListener('popstate', handlePop);
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── GA4: track step views ────────────────────────────────────────────────────
+  useEffect(() => {
+    trackWizard('wizard_step_viewed', {
+      step_number:     step + 1,
+      step_name:       WIZARD_STEPS[step],
+      payment_method:  payment.method || 'unknown',
+      fundraiser_type: fundraiserType || 'unknown',
+    });
   }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When the user arrives at step 8 (Connect Bank) and clicks "Connect my bank account",
@@ -2001,10 +2020,12 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                   if (couponState === 'valid' && couponCode.trim() && supabaseConfigured) {
                     await getSupabaseClient().rpc('redeem_coupon', { p_code: couponCode.trim().toUpperCase() });
                   }
+                  trackWizard('wizard_launched', { payment_method: payment.method, fundraiser_type: fundraiserType, grid_size: gridOpt?.size, is_free: true });
                   clearDraft();
                   onComplete({ fundraiserType, orgDetails, gridOpt, price, prizes, campaign, campaignImageUrl, imageFocalY, drawRules, payment, coupon: launchData.couponCode }, false);
                 } else {
                   setLaunchError(null);
+                  trackWizard('wizard_launched', { payment_method: payment.method, fundraiser_type: fundraiserType, grid_size: gridOpt?.size, is_free: false });
                   const result = await onLaunchPay(launchData);
                   if (result?.error) {
                     setLaunchError(result.error);
@@ -2039,7 +2060,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             })()}
           </div>
           {step > 0 && (
-            <button className="btn btn-outline btn-sm" style={{ fontSize: 12 }} onClick={() => onCancel()}>
+            <button className="btn btn-outline btn-sm" style={{ fontSize: 12 }} onClick={() => { trackWizard('wizard_abandoned', { step_number: step + 1, step_name: WIZARD_STEPS[step], payment_method: payment.method, fundraiser_type: fundraiserType }); onCancel(); }}>
               Save &amp; exit
             </button>
           )}
@@ -2099,10 +2120,10 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
                   Save as draft
                 </button>
                 <button className="btn btn-primary btn-lg" disabled={!canNext()} onClick={() => {
+                  trackWizard('wizard_step_completed', { step_number: step + 1, step_name: WIZARD_STEPS[step], payment_method: payment.method, fundraiser_type: fundraiserType });
                   if (isStripePayment && !stripeOnboardingComplete) {
                     setStep(BANK_STEP);
                   } else {
-                    // Already onboarded or non-stripe: skip straight to Launch
                     setStep(LAUNCH_STEP);
                   }
                 }}>
@@ -2112,10 +2133,8 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             ) : (
               <button className="btn btn-primary" disabled={!canNext()} onClick={async () => {
                 if (step === PAYMENT_STEP && ['bank', 'bank_inperson'].includes(payment.method)) { setPaymentConfirming(true); return; }
-                // Leaving the bank connect step: refresh user profile so stripeOnboardingComplete is up to date
-                if (step === BANK_STEP) {
-                  await onBankConnectDone?.();
-                }
+                if (step === BANK_STEP) { await onBankConnectDone?.(); }
+                trackWizard('wizard_step_completed', { step_number: step + 1, step_name: WIZARD_STEPS[step], payment_method: payment.method, fundraiser_type: fundraiserType });
                 setStep((s) => s + 1);
               }}>Next →</button>
             )}
