@@ -1012,12 +1012,13 @@ function StatCard({ label, value, sub, colour = '#7C3AED' }) {
 }
 
 function ReportingTab() {
-  const [campaigns, setCampaigns] = useState([]);
-  const [users,     setUsers]     = useState([]);
-  const [tickets,   setTickets]   = useState([]);
-  const [ga4,       setGa4]       = useState(null);
-  const [ga4Error,  setGa4Error]  = useState('');
-  const [loading,   setLoading]   = useState(true);
+  const [campaigns,  setCampaigns]  = useState([]);
+  const [users,      setUsers]      = useState([]);
+  const [tickets,    setTickets]    = useState([]);
+  const [referrals,  setReferrals]  = useState([]);
+  const [ga4,        setGa4]        = useState(null);
+  const [ga4Error,   setGa4Error]   = useState('');
+  const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -1037,6 +1038,12 @@ function ReportingTab() {
         const json = await res.json();
         setTickets(json.tickets ?? []);
       } catch { /* support metrics optional */ }
+
+      try {
+        const res  = await adminFetch('/api/admin/referrals');
+        const json = await res.json();
+        setReferrals(json.referrals ?? []);
+      } catch { /* referrals optional */ }
 
       try {
         const res  = await adminFetch('/api/admin/reporting/ga4');
@@ -1271,6 +1278,72 @@ function ReportingTab() {
           )}
         </Card>
       </div>
+
+      {/* ── Referrals ─────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}><SectionTitle>Referral Program</SectionTitle></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, marginBottom: 20 }}>
+        <StatCard label="Total referrals"   value={referrals.length}                                          colour="#7C3AED" />
+        <StatCard label="Rewarded"          value={referrals.filter((r) => r.status === 'rewarded').length}   colour="#16A34A" sub="Free campaign issued" />
+        <StatCard label="Pending"           value={referrals.filter((r) => r.status === 'pending').length}    colour="#F59E0B" sub="Awaiting first campaign" />
+        <StatCard label="Flagged"           value={referrals.filter((r) => r.suspicious).length}              colour="#DC2626" sub="Possible self-referral" />
+      </div>
+
+      {referrals.length > 0 && (
+        <Card style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>All referrals</div>
+          <div style={{ fontSize: 12, color: '#9B8F80', marginBottom: 16 }}>
+            Accounts created within 24 hours of each other are flagged as possible self-referrals.
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: '1.5px solid #E5E0D5' }}>
+                {['Referrer', 'Referred', 'Gap', 'Status', 'Reward', 'Date'].map((h) => (
+                  <th key={h} style={{ padding: '6px 10px', textAlign: 'left', color: '#9B8F80', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {referrals.map((r) => (
+                <tr key={r.id} style={{ borderBottom: '1px solid #F0EAE0', background: r.suspicious ? '#FFF5F5' : 'transparent' }}>
+                  <td style={{ padding: '10px 10px', color: '#1A1209', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.referrer_email}>
+                    {r.suspicious && <span title="Possible self-referral: accounts created within 24 hours" style={{ marginRight: 4 }}>⚠️</span>}
+                    {r.referrer_email}
+                  </td>
+                  <td style={{ padding: '10px 10px', color: '#4A3728', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.referred_email}>
+                    {r.referred_email}
+                  </td>
+                  <td style={{ padding: '10px 10px', whiteSpace: 'nowrap' }}>
+                    {r.hours_between !== null ? (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: r.suspicious ? '#DC2626' : '#6B5E4E' }}>
+                        {r.hours_between < 1
+                          ? `${Math.round(r.hours_between * 60)}m`
+                          : r.hours_between < 48
+                          ? `${r.hours_between}h`
+                          : `${Math.round(r.hours_between / 24)}d`}
+                      </span>
+                    ) : <span style={{ color: '#C4B9AA' }}>n/a</span>}
+                  </td>
+                  <td style={{ padding: '10px 10px' }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                      background: r.status === 'rewarded' ? '#F0FDF4' : '#FFFBEB',
+                      color:      r.status === 'rewarded' ? '#15803D' : '#92400E',
+                    }}>
+                      {r.status === 'rewarded' ? 'Rewarded' : 'Pending'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '10px 10px', fontFamily: 'monospace', fontSize: 11, color: '#7C3AED' }}>
+                    {r.reward_code ?? <span style={{ color: '#C4B9AA' }}>none yet</span>}
+                  </td>
+                  <td style={{ padding: '10px 10px', color: '#9B8F80', whiteSpace: 'nowrap' }}>
+                    {new Date(r.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
 
       {/* ── Analytics Dashboards ──────────────────────────────────── */}
       <div style={{ marginBottom: 12 }}><SectionTitle>Analytics Dashboards</SectionTitle></div>
