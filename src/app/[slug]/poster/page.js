@@ -52,10 +52,10 @@ export default async function PosterPage({ params }) {
       *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
       body>*{display:none!important}
       body>.poster-page{display:block!important}
-      html,body{height:297mm!important;overflow:hidden!important;margin:0!important;padding:0!important;background:#fff!important}
+      html,body{min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important;background:#fff!important}
       .no-print{display:none!important}
-      .poster-page{padding:0!important;margin:0!important;background:#fff!important;overflow:hidden!important;height:297mm!important}
-      .poster-sheet{box-shadow:none!important;overflow:hidden!important}
+      .poster-page{padding:0!important;margin:0!important;background:#fff!important}
+      .poster-sheet{box-shadow:none!important;height:auto!important;min-height:0!important;page-break-inside:avoid;break-inside:avoid}
     }
   `;
 
