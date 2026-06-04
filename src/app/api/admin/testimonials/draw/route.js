@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
-import { FROM_EMAIL } from '@/lib/email';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const FROM_EMAIL     = 'Lucky Squares <hello@luckysquares.com.au>';
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'jwstott@me.com';
 
 // GET — check draw status for a given month
