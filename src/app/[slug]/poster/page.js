@@ -115,13 +115,16 @@ export default function PosterPage({ params }) {
             background: #fff !important;
             display: block !important;
             width: 210mm !important;
-            height: 297mm !important;
+            height: 295mm !important;
+            max-height: 295mm !important;
             overflow: hidden !important;
           }
           .poster-sheet {
             box-shadow: none !important;
             width: 210mm !important;
-            height: 297mm !important;
+            height: 295mm !important;
+            max-height: 295mm !important;
+            min-height: 0 !important;
             overflow: hidden !important;
           }
         }
