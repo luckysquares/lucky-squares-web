@@ -791,7 +791,7 @@ function FundraiserCard({ f, onView, onReport, onConnectBank, onDuplicate }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
         <button className="btn btn-primary btn-sm" style={{ width: '100%' }} onClick={onView}>View my campaign →</button>
         <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={onReport}>View campaign report</button>
-        {f.status === 'drawn' && (
+        {['active', 'drawn'].includes(f.status) && (
           <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={() => onDuplicate(f)}>
             🔁 Duplicate this campaign
           </button>
