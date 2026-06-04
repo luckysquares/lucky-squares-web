@@ -411,19 +411,13 @@ function OrgTeamSection({ sendTxEmail }) {
     const { data } = await getSupabaseClient().rpc('invite_org_member', { p_email: inviteEmail.trim().toLowerCase() });
     setInviting(false);
     if (data?.error) { setInviteMsg(data.error); return; }
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const inviteUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/invite/${data.token}`;
-    if (supabaseUrl) {
-      fetch(`${supabaseUrl}/functions/v1/transactional-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'org_member_invite',
-          to: inviteEmail.trim().toLowerCase(),
-          data: { org_name: data.org_name || 'your organisation', invited_by_name: 'your organisation admin', invite_url: inviteUrl, expires_days: 7 },
-        }),
-      }).catch(() => {});
-    }
+    sendTxEmail('org_member_invite', inviteEmail.trim().toLowerCase(), {
+      org_name:          data.org_name || 'your organisation',
+      invited_by_name:   'your organisation admin',
+      invite_url:        inviteUrl,
+      expires_days:      7,
+    });
     setInviteEmail('');
     setInviteMsg('Invite sent!');
     load();
