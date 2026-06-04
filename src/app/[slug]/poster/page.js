@@ -108,23 +108,9 @@ export default function PosterPage({ params }) {
         @media print {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body { background: #fff !important; }
-          /* Hide all direct children of body except the poster wrap */
-          body > * { display: none !important; }
-          body > .poster-wrap { display: flex !important; }
-          /* Reset screen padding — poster fills the page */
-          .poster-wrap {
-            padding: 0 !important;
-            background: #fff !important;
-            justify-content: flex-start !important;
-            align-items: flex-start !important;
-          }
-          .poster-sheet {
-            box-shadow: none !important;
-            width: 210mm !important;
-            height: 297mm !important;
-            overflow: hidden !important;
-          }
           .no-print { display: none !important; }
+          .poster-wrap { padding: 0 !important; background: #fff !important; }
+          .poster-sheet { box-shadow: none !important; }
         }
       `}</style>
 
