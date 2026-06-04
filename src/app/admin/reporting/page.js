@@ -23,6 +23,8 @@ const DEFAULTS = {
   campaignsPerOrg: 6,
   upgradeRate: 0.05,
   blitzAdoption: 0.50,
+  indivChurnRate: 0.03,   // monthly: ~30% annual attrition for individual organisers
+  orgChurnRate:   0.015,  // monthly: ~17% annual attrition for org clients (non-renewal)
   seasonal: [0.9, 0.85, 1.1, 1.2, 1.0, 0.8, 0.75, 0.9, 1.1, 1.2, 1.1, 0.85],
 };
 
@@ -54,7 +56,9 @@ function buildModel(assumptions, scenario, actualData) {
   const {
     indivLeads, orgLeads, indivConvRate, orgConvRate,
     organicNewPerMonth, referralCoeff, campaignsPerIndiv,
-    campaignsPerOrg, upgradeRate, blitzAdoption, seasonal,
+    campaignsPerOrg, upgradeRate, blitzAdoption,
+    indivChurnRate, orgChurnRate,
+    seasonal,
   } = assumptions;
 
   const months = [];
@@ -84,11 +88,16 @@ function buildModel(assumptions, scenario, actualData) {
     // Upgrades from individual to org
     const upgrades = Math.round(cumulativeIndiv * (upgradeRate / 12));
 
+    // Attrition: organisers ceasing activity / orgs not renewing
+    // Note: churn is not scenario-adjusted — it represents real-world drop-off
+    const indivChurn = Math.round(cumulativeIndiv * indivChurnRate);
+    const orgChurn   = Math.round(cumulativeOrgs * orgChurnRate);
+
     // Update pools and bases
-    indivPool      = Math.max(0, indivPool - newIndivFromPool);
-    orgPool        = Math.max(0, orgPool - newOrgFromPool);
-    cumulativeIndiv = cumulativeIndiv + totalNewIndiv - upgrades;
-    cumulativeOrgs  = cumulativeOrgs + totalNewOrg + upgrades;
+    indivPool       = Math.max(0, indivPool - newIndivFromPool);
+    orgPool         = Math.max(0, orgPool - newOrgFromPool);
+    cumulativeIndiv = Math.max(0, cumulativeIndiv + totalNewIndiv - upgrades - indivChurn);
+    cumulativeOrgs  = Math.max(0, cumulativeOrgs + totalNewOrg + upgrades - orgChurn);
 
     // Revenue calcs
     const campaignRevIndiv = Math.round(
@@ -118,6 +127,8 @@ function buildModel(assumptions, scenario, actualData) {
       isCurrent: i === CURRENT_MONTH_IDX,
       newIndiv: actual?.newIndiv ?? totalNewIndiv,
       newOrg:   actual?.newOrg ?? totalNewOrg,
+      indivChurn,
+      orgChurn,
       cumulativeIndiv,
       cumulativeOrgs,
       campaignRevIndiv,
@@ -690,12 +701,14 @@ export default function AdminReporting() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
             {[
-              { label: 'New Individual Organisers', value: sel.newIndiv, color: '#16A34A' },
-              { label: 'New Org Clients', value: sel.newOrg, color: '#7C3AED' },
-              { label: 'Cumulative Organisers', value: sel.cumulativeIndiv, color: '#6B5E4E' },
-              { label: 'Cumulative Orgs', value: sel.cumulativeOrgs, color: '#6B5E4E' },
-              { label: 'Gross Revenue', value: aud(sel.gross), color: '#16A34A' },
-              { label: 'Fixed Costs', value: aud(FIXED_COSTS), color: '#9B8F80' },
+              { label: 'New Individual Organisers', value: sel.newIndiv,        color: '#16A34A' },
+              { label: 'New Org Clients',            value: sel.newOrg,          color: '#7C3AED' },
+              { label: 'Indiv Attrition',            value: `-${sel.indivChurn ?? 0}`, color: '#DC2626' },
+              { label: 'Org Attrition',              value: `-${sel.orgChurn ?? 0}`,   color: '#DC2626' },
+              { label: 'Cumulative Organisers',      value: sel.cumulativeIndiv, color: '#6B5E4E' },
+              { label: 'Cumulative Orgs',            value: sel.cumulativeOrgs,  color: '#6B5E4E' },
+              { label: 'Gross Revenue',              value: aud(sel.gross),      color: '#16A34A' },
+              { label: 'Fixed Costs',                value: aud(FIXED_COSTS),    color: '#9B8F80' },
             ].map((item) => (
               <div key={item.label} style={{ padding: '14px 16px', background: '#F9F8F6', borderRadius: 12, border: '1px solid #E5E0D5' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#9B8F80', marginBottom: 6 }}>{item.label}</div>
@@ -808,6 +821,9 @@ export default function AdminReporting() {
                 <Slider label="Organic new organisers/month" value={assumptions.organicNewPerMonth} min={0} max={20} step={0.5} format={(v) => v} onChange={(v) => updateAssumption('organicNewPerMonth', v)} />
                 <Slider label="Referral coefficient" value={assumptions.referralCoeff} min={0} max={0.3} step={0.01} format={pct} onChange={(v) => updateAssumption('referralCoeff', v)} />
                 <Slider label="Individual-to-org upgrade rate/yr" value={assumptions.upgradeRate} min={0} max={0.3} step={0.01} format={pct} onChange={(v) => updateAssumption('upgradeRate', v)} />
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#9B8F80', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16, marginTop: 8 }}>Attrition</div>
+                <Slider label="Individual organiser monthly churn" value={assumptions.indivChurnRate} min={0} max={0.15} step={0.005} format={pct} onChange={(v) => updateAssumption('indivChurnRate', v)} />
+                <Slider label="Org client monthly churn (non-renewal)" value={assumptions.orgChurnRate} min={0} max={0.08} step={0.005} format={pct} onChange={(v) => updateAssumption('orgChurnRate', v)} />
               </div>
 
               <div>
@@ -935,6 +951,15 @@ export default function AdminReporting() {
                 <li><strong>Organic acquisition:</strong> 2 new individual organisers per month from month 1, independent of pipeline (word of mouth, social, search). This grows as the installed base grows.</li>
                 <li><strong>Referral coefficient of 8%:</strong> For every 100 active organisers, 8 additional organisers join through direct referral each month. Compounds significantly in years 2-5.</li>
                 <li><strong>First-mover advantage:</strong> Lucky Squares is the first purpose-built Lucky Squares platform in Australia. No direct competitors currently exist in this niche, supporting stronger early conversion rates.</li>
+              </ul>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#1A1209', marginBottom: 12 }}>Attrition</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>Individual organiser monthly churn of 3%:</strong> Each month, approximately 3% of the cumulative individual organiser base ceases activity — roughly equivalent to 30% annual attrition. This reflects organisers who run one or two campaigns and don&apos;t return. Attrition is applied to the base before revenue is calculated, so it directly reduces campaign revenue in later years if not offset by new acquisitions.</li>
+                <li><strong>Org client monthly churn of 1.5%:</strong> Approximately 1.5% of org clients don&apos;t renew each month — roughly equivalent to 17% annual churn. This reflects clubs or schools that try the platform but don&apos;t integrate it into their long-term fundraising mix. Org churn is not scenario-adjusted; it represents a realistic floor regardless of growth scenario.</li>
+                <li><strong>Churn is not scenario-multiplied.</strong> Growth assumptions (new acquisitions, referrals) scale with the scenario multiplier; attrition does not. This means the conservative scenario shows net base contraction sooner than the optimistic one.</li>
               </ul>
             </div>
 
