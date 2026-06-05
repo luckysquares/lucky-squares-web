@@ -139,7 +139,7 @@ function InvestorPortal({ visitorName }) {
                 Lucky Squares fundraisers (where participants pay to claim a numbered square on a grid, with prizes drawn at the end) have been run by Australian sporting clubs and schools for decades. Until now, entirely by hand: SMS group chats, paper grids, spreadsheets, and cash in envelopes.
               </p>
               <p style={bodyStyle}>
-                Watching a volunteer struggle to coordinate a fundraiser across a WhatsApp group while managing a spreadsheet of 100 squares, Jamie Stott went looking for an online tool to help her. None existed. So he built one.
+                Watching a volunteer struggle to coordinate a fundraiser across a WhatsApp group while managing a spreadsheet of 100 squares, Jamie Stott went looking for an online tool to help her. None existed. So she built one.
               </p>
             </div>
             <div>
@@ -176,10 +176,10 @@ function InvestorPortal({ visitorName }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
               <div>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, margin: 0 }}>
-                  Sport SA represents approximately 1,800 sporting clubs across South Australia. At conservative 5% adoption in year one (90 clubs) and factoring in the $149 annual subscription plus campaign fees, a single state body relationship generates material recurring revenue.
+                  Sport SA represents approximately 1,800 sporting clubs across South Australia. At conservative 5% adoption in year one (90 clubs), the $149 annual Organisation Plan subscription alone generates material recurring revenue from a single state body relationship.
                 </p>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginTop: 12, marginBottom: 0 }}>
-                  Replicate across QLD, VIC, and NSW equivalents and the sporting club channel alone represents a <strong style={{ color: '#F5C820' }}>$200K-$500K ARR pathway</strong>, before schools, charities, or P&Cs.
+                  Replicate across QLD, VIC, and NSW equivalents and the sporting club channel alone represents a <strong style={{ color: '#F5C820' }}>$200K+ ARR pathway</strong>, before schools, charities, or P&Cs.
                 </p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -187,8 +187,8 @@ function InvestorPortal({ visitorName }) {
                   { label: 'Sport SA member clubs', value: '1,800' },
                   { label: 'Year 1 adoption (5%)', value: '90 clubs' },
                   { label: 'Annual subscription revenue', value: aud(149 * 90) },
-                  { label: 'Campaign fee revenue (2/yr)', value: aud(90 * 2 * 19) },
-                  { label: 'SA channel year 1 total', value: aud(149 * 90 + 90 * 2 * 19), highlight: true },
+                  { label: 'Blitz events (Phase 2, 50% adoption)', value: aud(Math.round(90 * 0.5 * 99)) },
+                  { label: 'SA channel year 1 total', value: aud(149 * 90 + Math.round(90 * 0.5 * 99)), highlight: true },
                 ].map(({ label, value, highlight }) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 8 }}>
                     <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{label}</span>
@@ -224,7 +224,7 @@ function InvestorPortal({ visitorName }) {
             <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6', marginBottom: 12 }}>Unit Economics</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {[
-                { label: 'Org LTV (3yr)', value: '$2,100+', sub: '$149 sub + campaigns + Blitz' },
+                { label: 'Org LTV (3yr)', value: '$640+', sub: '$149/yr subscription + Blitz events at 50% adoption' },
                 { label: 'CAC target', value: '<$50', sub: 'Channel partnerships reduce CAC dramatically' },
                 { label: 'Gross margin', value: '~85%', sub: 'SaaS margins at scale' },
                 { label: 'Payback period', value: '<12mo', sub: 'At target org CAC' },
@@ -245,7 +245,7 @@ function InvestorPortal({ visitorName }) {
             <div>
               <h3 style={h3Style}>Strategic partnerships</h3>
               {[
-                { name: 'Sport SA', desc: 'Verbal commitment to launch the platform to their network of 1,800+ member sporting clubs across South Australia. Provides warm access to the largest single channel of potential customers.', badge: 'Verbal commitment' },
+                { name: 'Sport SA', desc: 'Verbal commitment to promote the platform to their network of 1,800+ member sporting clubs across South Australia, and to host the Lucky Squares launch event. Provides warm access to the largest single channel of potential customers in the state.', badge: 'Verbal commitment' },
                 { name: 'Marjorie Jackson Centre for Women\'s Sport', desc: 'Verbal commitment to use Lucky Squares Australia as a fundraising tool for women\'s sport initiatives in South Australia.', badge: 'Verbal commitment' },
                 { name: 'Ashleigh Young Foundation', desc: 'Verbal commitment to run campaigns through the platform, validating the charity sector use case. Ashleigh Young is a two-time Olympic medallist.', badge: 'Verbal commitment' },
               ].map(({ name, desc, badge }) => (
@@ -447,10 +447,10 @@ function InvestorPortal({ visitorName }) {
               <div style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#1A1209', marginBottom: 4 }}>Jamie Stott</div>
               <div style={{ fontSize: 13, color: '#6B46F5', fontWeight: 700, marginBottom: 16 }}>Founder and CEO, Lucky Squares Australia</div>
               <p style={{ fontSize: 14, color: '#4A3728', lineHeight: 1.8, marginBottom: 12 }}>
-                Jamie brings three decades of business leadership across multiple industries. As a business owner, CEO, and company director, he has led organisations through launch, growth, and scale, including a ground-breaking award-winning mental health business and an ecommerce agency in the late 1990s that built South Australia's first home delivery grocery shopping website.
+                Jamie brings three decades of business leadership across multiple industries. As a business owner, CEO, and company director, she has led organisations through launch, growth, and scale, including a ground-breaking award-winning mental health business and an ecommerce agency in the late 1990s that built South Australia's first home delivery grocery shopping website.
               </p>
               <p style={{ fontSize: 14, color: '#4A3728', lineHeight: 1.8, marginBottom: 12 }}>
-                A 25-year background in community sport (for physical and mental health, and social connection) gave Jamie firsthand understanding of the fundraising challenges facing clubs and committees. When he watched a volunteer struggle to coordinate a Lucky Squares fundraiser using SMS and spreadsheets, he went looking for a purpose-built tool. Finding none, he built Lucky Squares Australia.
+                A 25-year background in community sport (for physical and mental health, and social connection) gave Jamie firsthand understanding of the fundraising challenges facing clubs and committees. When she watched a volunteer struggle to coordinate a Lucky Squares fundraiser using SMS and spreadsheets, she went looking for a purpose-built tool. Finding none, she built Lucky Squares Australia.
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {['30+ years business leadership', 'Multiple industries', 'Community sport advocate', 'Award-winning founder', 'First-to-market product builder'].map((tag) => (
