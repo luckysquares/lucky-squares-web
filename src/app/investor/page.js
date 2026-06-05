@@ -110,10 +110,10 @@ function InvestorPortal({ visitorName }) {
           {/* Live stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, maxWidth: 700 }}>
             {[
-              { label: 'Campaigns launched', value: stats ? fmt(stats.campaigns) : '—', sub: 'Live on platform now' },
-              { label: 'Squares sold', value: stats ? fmt(stats.totalSold) : '—', sub: 'Real paid transactions' },
-              { label: 'Total raised for causes', value: stats ? aud(stats.totalRaised) : '—', sub: 'By Australian communities' },
-              { label: 'Organisation clients', value: stats ? fmt(stats.orgClients) : '—', sub: 'Paying $149/year' },
+              { label: 'Campaigns launched', value: stats ? fmt(stats.campaigns) : '...', sub: 'Live on platform now' },
+              { label: 'Squares sold', value: stats ? fmt(stats.totalSold) : '...', sub: 'Real paid transactions' },
+              { label: 'Total raised for causes', value: stats ? aud(stats.totalRaised) : '...', sub: 'By Australian communities' },
+              { label: 'Organisation clients', value: stats ? fmt(stats.orgClients) : '...', sub: 'Paying $149/year' },
             ].map(({ label, value, sub }) => (
               <div key={label} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '18px 20px' }}>
                 <div style={{ fontSize: 28, fontWeight: 900, color: '#F5C820', marginBottom: 4 }}>{value}</div>
@@ -221,7 +221,7 @@ function InvestorPortal({ visitorName }) {
 
           <div style={{ background: '#F5F0FF', border: '1.5px solid #C4B5FD', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6', marginBottom: 4 }}>Unit Economics</div>
-            <div style={{ fontSize: 12, color: '#7C5CF6', marginBottom: 16 }}>Conservative direct figures only — see network multiplier below</div>
+            <div style={{ fontSize: 12, color: '#7C5CF6', marginBottom: 16 }}>Conservative direct figures only. See network multiplier below.</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {[
                 { label: 'Direct org LTV (3yr)', value: '$640+', sub: '$149/yr subscription + Blitz events at 50% adoption' },
@@ -240,7 +240,7 @@ function InvestorPortal({ visitorName }) {
 
           {/* Network multiplier */}
           <div style={{ background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 14, padding: '20px 24px' }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#1A1209', marginBottom: 4 }}>Network multiplier effects — not included in base LTV</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#1A1209', marginBottom: 4 }}>Network multiplier effects (not included in base LTV)</div>
             <div style={{ fontSize: 12, color: '#9B8F80', marginBottom: 20 }}>Each org client generates two additional revenue streams beyond their own subscription</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
               <div style={{ borderLeft: '3px solid #6B46F5', paddingLeft: 16 }}>
@@ -255,7 +255,7 @@ function InvestorPortal({ visitorName }) {
               <div style={{ borderLeft: '3px solid #F5C820', paddingLeft: 16 }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: '#1A1209', marginBottom: 6 }}>Member casual campaigns</div>
                 <p style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.7, margin: '0 0 10px' }}>
-                  Individual members of an org client run their own personal fundraisers independently: travel funds, individual sport goals, personal causes. These pay the $19 casual fee per campaign — separate from the org account.
+                  Individual members of an org client run their own personal fundraisers independently: travel funds, individual sport goals, personal causes. These pay the $19 casual fee per campaign, separate from the org account.
                 </p>
                 <p style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.7, margin: 0 }}>
                   A club with 150 members where 5% run one campaign over 3 years = approximately <strong>$143 in halo casual revenue</strong> per org relationship.
