@@ -16,7 +16,7 @@ const ENTRIES = [
       {
         badge: 'New',
         title: 'Share links show your campaign preview',
-        body: 'When you share your campaign link on WhatsApp, Facebook, iMessage or Slack, the recipient now sees your campaign photo, title and description — not just a generic Lucky Squares link.',
+        body: 'When you share your campaign link on WhatsApp, Facebook, iMessage or Slack, the recipient now sees your campaign photo, title and description (not just a generic Lucky Squares link).',
       },
       {
         badge: 'New',
@@ -31,7 +31,7 @@ const ENTRIES = [
       {
         badge: 'New',
         title: 'Organisation plan',
-        body: 'Clubs, schools and charities that fundraise regularly can now apply for the Organisation plan. Unlimited campaigns, up to 10 live simultaneously, team member access, and a dedicated organisation dashboard. $149/year.',
+        body: 'Clubs, schools and charities that fundraise regularly can now apply for the Organisation plan. Up to 10 campaigns running simultaneously, team member access, and a dedicated organisation dashboard. $149/year.',
       },
     ],
   },
@@ -41,7 +41,7 @@ const ENTRIES = [
       {
         badge: 'New',
         title: 'Lucky Squares Australia launches',
-        body: 'The platform is live. Set up a grid in minutes, share a link with your community, and watch the squares fill up. Online card payments, bank transfer, or in-person — your choice. A flat $19 fee when you launch, nothing more.',
+        body: 'The platform is live. Set up a grid in minutes, share a link with your community, and watch the squares fill up. Online card payments, bank transfer, or in-person: your choice. A flat $19 fee when you launch, nothing more.',
       },
       {
         badge: 'New',
