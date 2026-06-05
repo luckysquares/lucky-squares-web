@@ -93,19 +93,19 @@ function InvestorPortal({ visitorName }) {
 
       {/* Disclaimer */}
       <div style={{ background: '#1A0A3C', padding: '12px 24px', textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
-        <strong style={{ color: 'rgba(255,255,255,0.8)' }}>Confidential — not a public offer.</strong> This document is intended solely for sophisticated investors and does not constitute an offer to sell or a solicitation of an offer to buy securities in any jurisdiction. Past performance is not indicative of future results.
+        <strong style={{ color: 'rgba(255,255,255,0.8)' }}>Confidential: not a public offer.</strong> This document is intended solely for sophisticated investors and does not constitute an offer to sell or a solicitation of an offer to buy securities in any jurisdiction. Past performance is not indicative of future results.
       </div>
 
       {/* Hero */}
       <div style={{ background: 'linear-gradient(160deg, #0D0820 0%, #1A0A3C 50%, #2D1060 100%)', padding: '80px 24px 96px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 70% 50%, rgba(107,70,245,0.15) 0%, transparent 60%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 900, margin: '0 auto', position: 'relative' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 3, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', marginBottom: 20 }}>Investor Information — Confidential</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 3, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', marginBottom: 20 }}>Investor Information: Confidential</div>
           <div style={{ fontSize: 36, fontWeight: 900, color: '#fff', fontFamily: 'Georgia, serif', marginBottom: 8, lineHeight: 1.1 }}>
             Lucky <span style={{ fontWeight: 400, fontStyle: 'italic' }}>Squares</span> Australia
           </div>
           <p style={{ fontSize: 22, color: 'rgba(255,255,255,0.75)', maxWidth: 640, lineHeight: 1.5, marginBottom: 40 }}>
-            Australia's first purpose-built Lucky Squares fundraising platform — live, revenue-generating, and backed by strategic partnerships with Sport SA, the Marjorie Jackson Centre for Women's Sport, and the Ashleigh Young Foundation.
+            Australia's first purpose-built Lucky Squares fundraising platform, live, revenue-generating, and backed by strategic partnerships with Sport SA, the Marjorie Jackson Centre for Women's Sport, and the Ashleigh Young Foundation.
           </p>
 
           {/* Live stats */}
@@ -136,7 +136,7 @@ function InvestorPortal({ visitorName }) {
             <div>
               <h3 style={h3Style}>The problem we solved</h3>
               <p style={bodyStyle}>
-                Lucky Squares fundraisers — where participants pay to claim a numbered square on a grid, with prizes drawn at the end — have been run by Australian sporting clubs and schools for decades. Until now, entirely by hand: SMS group chats, paper grids, spreadsheets, and cash in envelopes.
+                Lucky Squares fundraisers (where participants pay to claim a numbered square on a grid, with prizes drawn at the end) have been run by Australian sporting clubs and schools for decades. Until now, entirely by hand: SMS group chats, paper grids, spreadsheets, and cash in envelopes.
               </p>
               <p style={bodyStyle}>
                 Watching a volunteer struggle to coordinate a fundraiser across a WhatsApp group while managing a spreadsheet of 100 squares, Jamie Stott went looking for an online tool to help her. None existed. So he built one.
@@ -148,7 +148,7 @@ function InvestorPortal({ visitorName }) {
                 Volunteer culture is under pressure across Australia. Committees are smaller, people are time-poor, and expectations of digital convenience are higher than ever. Organisations that once ran fundraisers through networks of dedicated volunteers are losing capacity.
               </p>
               <p style={bodyStyle}>
-                Lucky Squares Australia reduces the admin burden to minutes. Any committee member can set up a campaign, share a link, and let the platform do the rest — payments, tracking, the live draw, everything.
+                Lucky Squares Australia reduces the admin burden to minutes. Any committee member can set up a campaign, share a link, and let the platform do the rest: payments, tracking, the live draw, everything.
               </p>
             </div>
           </div>
@@ -172,14 +172,14 @@ function InvestorPortal({ visitorName }) {
           </div>
 
           <div style={{ background: 'linear-gradient(135deg,#1A0A3C,#2D1060)', borderRadius: 16, padding: '28px 32px', color: '#fff' }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>The Sport SA Channel — One Relationship, Hundreds of Customers</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>The Sport SA Channel: One Relationship, Hundreds of Customers</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
               <div>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, margin: 0 }}>
-                  Sport SA represents approximately 1,800 sporting clubs across South Australia. At conservative 5% adoption in year one — 90 clubs — and factoring in the $149 annual subscription plus campaign fees, a single state body relationship generates material recurring revenue.
+                  Sport SA represents approximately 1,800 sporting clubs across South Australia. At conservative 5% adoption in year one (90 clubs) and factoring in the $149 annual subscription plus campaign fees, a single state body relationship generates material recurring revenue.
                 </p>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginTop: 12, marginBottom: 0 }}>
-                  Replicate across QLD, VIC, and NSW equivalents and the sporting club channel alone represents a <strong style={{ color: '#F5C820' }}>$200K–$500K ARR pathway</strong> — before schools, charities, or P&Cs.
+                  Replicate across QLD, VIC, and NSW equivalents and the sporting club channel alone represents a <strong style={{ color: '#F5C820' }}>$200K-$500K ARR pathway</strong>, before schools, charities, or P&Cs.
                 </p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -261,13 +261,13 @@ function InvestorPortal({ visitorName }) {
             <div>
               <h3 style={h3Style}>Platform milestones</h3>
               {[
-                'Live product at luckysquares.com.au — fully operational',
+                'Live product at luckysquares.com.au: fully operational',
                 'First paying customers on the platform',
-                'Stripe Connect live — real money flowing to organisers',
+                'Stripe Connect live: real money flowing to organisers',
                 'Online card payments and bank transfer both operational',
                 'Support portal, admin dashboard, and org team management built',
                 'Legal compliance review in progress with Lynch Meyer (SA)',
-                'Company incorporated — Play With Heart Pty Ltd ACN 698 202 069',
+                'Company incorporated: Play With Heart Pty Ltd ACN 698 202 069',
                 'First successful Lucky Squares draw completed on platform',
               ].map((item) => (
                 <div key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
@@ -332,7 +332,7 @@ function InvestorPortal({ visitorName }) {
                   { use: 'Marketing and customer acquisition', amount: 80000 },
                   { use: 'Working capital and contingency', amount: 65000 },
                   { use: 'Accounting, audit, insurance', amount: 18000 },
-                  { use: 'Legal — compliance, company structure', amount: 15000 },
+                  { use: 'Legal: compliance, company structure', amount: 15000 },
                   { use: 'Infrastructure and tools', amount: 12000 },
                 ].map(({ use, amount }, i) => (
                   <tr key={use} style={{ borderTop: '1px solid #F0EDE5' }}>
@@ -358,7 +358,7 @@ function InvestorPortal({ visitorName }) {
             {[
               {
                 phase: '1', months: 'Months 1–3', title: 'Foundation', subtitle: 'Prove the model works', colour: '#16A34A',
-                items: ['Sport SA launch event — platform introduced to SA club network', 'Ashleigh Young Foundation first live campaign', '10 paying organisations on platform', 'Stripe Connect production payments live', 'Legal sign-off obtained — written compliance opinion', 'GST registration and accounting structure in place'],
+                items: ['Sport SA launch event: platform introduced to SA club network', 'Ashleigh Young Foundation first live campaign', '10 paying organisations on platform', 'Stripe Connect production payments live', 'Legal sign-off obtained: written compliance opinion', 'GST registration and accounting structure in place'],
               },
               {
                 phase: '2', months: 'Months 3–6', title: 'Early Traction', subtitle: 'SA market validation', colour: '#2563EB',
@@ -366,19 +366,19 @@ function InvestorPortal({ visitorName }) {
               },
               {
                 phase: '3', months: 'Months 6–9', title: 'Channel Expansion', subtitle: 'Replicate the SA model', colour: '#7C3AED',
-                items: ['100 paying organisations', '$60,000 ARR', 'Second state body fully launched', 'School and P&C channel opened — first 10 schools', '5 registered charities beyond Ashleigh Young Foundation', 'Referral program launched — clubs referring clubs'],
+                items: ['100 paying organisations', '$60,000 ARR', 'Second state body fully launched', 'School and P&C channel opened: first 10 schools', '5 registered charities beyond Ashleigh Young Foundation', 'Referral program launched: clubs referring clubs'],
               },
               {
                 phase: '4', months: 'Months 9–12', title: 'Scale', subtitle: 'National footprint emerging', colour: '#D97706',
-                items: ['200 paying organisations', '$120,000 ARR', 'Three states commercially active', 'Blitz launch — whole-of-club activation targeting Sport SA clubs', '$500,000 total raised through platform — major social proof milestone', 'National sporting body in active discussions'],
+                items: ['200 paying organisations', '$120,000 ARR', 'Three states commercially active', 'Blitz launch: whole-of-club activation targeting Sport SA clubs', '$500,000 total raised through platform (major social proof milestone)', 'National sporting body in active discussions'],
               },
               {
                 phase: '5', months: 'Months 12–15', title: 'Deepening', subtitle: 'Strengthen and systematise', colour: '#DC2626',
-                items: ['300 paying organisations', '$175,000 ARR', 'Enterprise/Network plan live — umbrella organisations', 'RevSport or PlayHQ API integration in development', 'First annual external audit completed — clean result', '1,000 campaigns completed on platform'],
+                items: ['300 paying organisations', '$175,000 ARR', 'Enterprise/Network plan live: umbrella organisations', 'RevSport or PlayHQ API integration in development', 'First annual external audit completed: clean result', '1,000 campaigns completed on platform'],
               },
               {
                 phase: '6', months: 'Months 15–18', title: 'Series A Preparation', subtitle: 'Demonstrate path to $1M ARR', colour: '#6B46F5',
-                items: ['500 paying organisations', '$250,000 ARR', 'Five states commercially active', 'RevSport or PlayHQ API live — embedded in club management software', '$2,000,000 total raised through platform', 'Series A raise initiated'],
+                items: ['500 paying organisations', '$250,000 ARR', 'Five states commercially active', 'RevSport or PlayHQ API live: embedded in club management software', '$2,000,000 total raised through platform', 'Series A raise initiated'],
               },
             ].map(({ phase, months, title, subtitle, colour, items }) => (
               <div key={phase} style={{ display: 'flex', gap: 20 }}>
@@ -447,10 +447,10 @@ function InvestorPortal({ visitorName }) {
               <div style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#1A1209', marginBottom: 4 }}>Jamie Stott</div>
               <div style={{ fontSize: 13, color: '#6B46F5', fontWeight: 700, marginBottom: 16 }}>Founder and CEO, Lucky Squares Australia</div>
               <p style={{ fontSize: 14, color: '#4A3728', lineHeight: 1.8, marginBottom: 12 }}>
-                Jamie brings three decades of business leadership across multiple industries. As a business owner, CEO, and company director, he has led organisations through launch, growth, and scale — including a ground-breaking award-winning mental health business and an ecommerce agency in the late 1990s that built South Australia's first home delivery grocery shopping website.
+                Jamie brings three decades of business leadership across multiple industries. As a business owner, CEO, and company director, he has led organisations through launch, growth, and scale, including a ground-breaking award-winning mental health business and an ecommerce agency in the late 1990s that built South Australia's first home delivery grocery shopping website.
               </p>
               <p style={{ fontSize: 14, color: '#4A3728', lineHeight: 1.8, marginBottom: 12 }}>
-                A 25-year background in community sport — for physical and mental health, and social connection — gave Jamie firsthand understanding of the fundraising challenges facing clubs and committees. When he watched a volunteer struggle to coordinate a Lucky Squares fundraiser using SMS and spreadsheets, he went looking for a purpose-built tool. Finding none, he built Lucky Squares Australia.
+                A 25-year background in community sport (for physical and mental health, and social connection) gave Jamie firsthand understanding of the fundraising challenges facing clubs and committees. When he watched a volunteer struggle to coordinate a Lucky Squares fundraiser using SMS and spreadsheets, he went looking for a purpose-built tool. Finding none, he built Lucky Squares Australia.
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {['30+ years business leadership', 'Multiple industries', 'Community sport advocate', 'Award-winning founder', 'First-to-market product builder'].map((tag) => (
@@ -466,7 +466,7 @@ function InvestorPortal({ visitorName }) {
           <div style={{ fontSize: 11, fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Beyond 18 Months</div>
           <div style={{ fontSize: 16, fontWeight: 800, color: '#15803D', marginBottom: 8 }}>🇳🇿 New Zealand</div>
           <p style={{ fontSize: 14, color: '#166534', lineHeight: 1.7, margin: 0 }}>
-            New Zealand represents a natural first international market — same language, comparable regulatory environment, and 13,000+ sporting clubs. The luckysquares.co domain is secured and NZ expansion is targeted for exploration post-Series A with minimal additional infrastructure cost.
+            New Zealand represents a natural first international market: same language, comparable regulatory environment, and 13,000+ sporting clubs. The luckysquares.co domain is secured and NZ expansion is targeted for exploration post-Series A with minimal additional infrastructure cost.
           </p>
         </div>
 
