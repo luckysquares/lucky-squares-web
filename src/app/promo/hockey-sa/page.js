@@ -61,9 +61,9 @@ export default function HockeySAPromo() {
               backgroundSize: '18px 18px' }} />
 
             {/* Logo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+            <div style={{ marginBottom: 32 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/lucky-squares-logo.png" alt="Lucky Squares Australia" style={{ height: 32, display: 'block' }} />
+              <img src="/logos/lucky-squares-logo-white.svg" alt="Lucky Squares Australia" style={{ height: 36, display: 'block' }} />
             </div>
 
             {/* Main headline */}
@@ -96,10 +96,10 @@ export default function HockeySAPromo() {
           </div>
 
           {/* Sports image strip */}
-          <div style={{ height: 110, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+          <div style={{ height: 160, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/sports-club-fundraiser.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%', display: 'block' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #2D0E6B 0%, transparent 30%, transparent 70%, rgba(255,255,255,1) 100%)' }} />
+            <img src="/sports-club-fundraiser.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', display: 'block' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, #2D0E6B 0%, transparent 25%, transparent 75%, rgba(255,255,255,1) 100%)' }} />
           </div>
 
           {/* How it works — light section */}
@@ -121,13 +121,6 @@ export default function HockeySAPromo() {
               ))}
             </div>
 
-            {/* Partner badge */}
-            <div style={{ background: 'linear-gradient(135deg,#ECFDF5,#D1FAE5)', border: '1px solid #6EE7B7', borderRadius: 10, padding: '10px 14px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 16 }}>🤝</span>
-              <div style={{ fontSize: 11, color: '#065F46', lineHeight: 1.5 }}>
-                <strong>Sport SA launch partner.</strong> Lucky Squares Australia is the fundraising platform backed by Sport SA — built specifically for South Australian sporting clubs and communities.
-              </div>
-            </div>
           </div>
 
           {/* Footer CTA */}
@@ -149,14 +142,14 @@ export default function HockeySAPromo() {
         <div className="a4" style={{ display: 'flex', flexDirection: 'column', background: '#F5F3EE' }}>
 
           {/* Header */}
-          <div style={{ background: '#fff', borderBottom: '3px solid #6B46F5', padding: '24px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ background: '#fff', borderBottom: '3px solid #6B46F5', padding: '20px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/lucky-squares-logo.png" alt="Lucky Squares Australia" style={{ height: 28, display: 'block' }} />
+            <img src="/logos/lucky-squares-logo-colour.svg" alt="Lucky Squares Australia" style={{ height: 30, display: 'block' }} />
             <div style={{ fontSize: 12, fontWeight: 700, color: '#6B46F5' }}>luckysquares.com.au</div>
           </div>
 
           {/* Hero image — full width */}
-          <div style={{ height: 130, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+          <div style={{ height: 170, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/help-for-sports-clubs-to-raise-money.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', display: 'block' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(107,70,245,0.85) 0%, rgba(107,70,245,0.3) 50%, transparent 100%)' }} />
@@ -228,9 +221,9 @@ export default function HockeySAPromo() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                     <div style={{ fontSize: 11, fontWeight: 800, color: '#6B46F5', letterSpacing: 2, textTransform: 'uppercase' }}>What a Lucky Squares grid looks like</div>
                     <div style={{ display: 'flex', gap: 12, fontSize: 10, color: '#9B8F80', fontWeight: 600 }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#6B46F5', display: 'inline-block' }} />Claimed</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#F5C820', display: 'inline-block' }} />Winner</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#E5E0D5', display: 'inline-block' }} />Available</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#F0EDE5', border: '1px solid #DDD5C0', display: 'inline-block' }} />Claimed</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#00C875', display: 'inline-block' }} />Winner</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#fff', border: '1px solid #C8E8D8', display: 'inline-block' }} />Available</span>
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 3 }}>
@@ -239,18 +232,24 @@ export default function HockeySAPromo() {
                       const isSold   = name !== '';
                       return (
                         <div key={i} style={{
-                          background: isWinner ? '#F5C820' : isSold ? '#6B46F5' : '#F0EDE5',
-                          borderRadius: 4,
-                          padding: '4px 2px',
+                          background: isWinner ? '#00C875' : isSold ? '#F0EDE5' : '#fff',
+                          borderRadius: 5,
+                          padding: '3px 2px',
                           textAlign: 'center',
-                          position: 'relative',
-                          border: isWinner ? '1.5px solid #D4A017' : 'none',
-                          boxShadow: isWinner ? '0 0 6px rgba(245,200,32,0.6)' : 'none',
+                          aspectRatio: '1',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: isWinner ? '1.5px solid #009A5C' : isSold ? '1.5px solid #DDD5C0' : '1.5px solid #C8E8D8',
+                          boxShadow: isWinner ? '0 0 8px rgba(0,200,117,0.5)' : 'none',
                         }}>
-                          {isWinner && <div style={{ fontSize: 9, position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }}>🏆</div>}
-                          <div style={{ fontSize: 7.5, fontWeight: isSold ? 700 : 400, color: isSold ? '#fff' : '#C4B9AA', lineHeight: 1.2, marginTop: isWinner ? 4 : 0 }}>
-                            {isSold ? name.split(' ')[0] : `#${i + 1}`}
+                          <div style={{ fontSize: 8, fontWeight: 800, color: isWinner ? '#fff' : isSold ? '#9B8F80' : '#C8E8D8', lineHeight: 1 }}>
+                            {i + 1}
                           </div>
+                          {isSold && <div style={{ fontSize: 6, fontWeight: 700, color: isWinner ? '#fff' : '#6B5E4E', lineHeight: 1.2, marginTop: 1, overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 1px' }}>
+                            {isWinner ? '🏆' : name.split(' ')[0]}
+                          </div>}
                         </div>
                       );
                     })}
