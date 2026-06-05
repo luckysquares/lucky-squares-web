@@ -601,12 +601,86 @@ export async function POST(req) {
   // ── Org membership cancelled (fires at end of paid period) ────────────────
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object;
-    if (subscription.metadata?.action === 'org_membership') {
-      const db = supabase();
-      await db.from('profiles')
-        .update({ plan: 'casual', org_subscription_id: null, org_member_until: null })
-        .eq('org_subscription_id', subscription.id);
+    const db = supabase();
+
+    // Downgrade any profile with this subscription ID (handles both old and new metadata formats)
+    const { data: profile } = await db.from('profiles')
+      .update({ plan: 'casual', org_subscription_id: null, org_member_until: null })
+      .eq('org_subscription_id', subscription.id)
+      .select('id, stripe_customer_id')
+      .single();
+
+    // Notify the org admin their subscription has ended
+    if (profile) {
+      const { data: { users } } = await stripe.customers.listPaymentMethods
+        ? { data: { users: [] } }
+        : { data: { users: [] } }; // Skip — notify via email using customer email from Stripe
+      const customer = await stripe.customers.retrieve(subscription.customer).catch(() => null);
+      const email = customer?.email;
+      if (email) {
+        const notifyUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`;
+        await fetch(notifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+          body: JSON.stringify({
+            type: 'org_subscription_cancelled',
+            to:   email,
+            data: { first_name: 'there' },
+          }),
+        }).catch(() => {});
+      }
     }
+
+    return new Response('ok', { status: 200 });
+  }
+
+  // ── Org membership payment failed ─────────────────────────────────────────
+  if (event.type === 'invoice.payment_failed') {
+    const invoice = event.data.object;
+    if (!invoice.subscription) return new Response('ok', { status: 200 });
+
+    const db  = supabase();
+    const { data: profile } = await db.from('profiles')
+      .select('id')
+      .eq('org_subscription_id', invoice.subscription)
+      .single();
+
+    if (profile) {
+      const customer = await stripe.customers.retrieve(invoice.customer).catch(() => null);
+      const email    = customer?.email;
+      const notifyUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`;
+
+      if (email) {
+        await fetch(notifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+          body: JSON.stringify({
+            type: 'org_payment_failed',
+            to:   email,
+            data: { first_name: 'there', invoice_url: invoice.hosted_invoice_url || 'https://luckysquares.com.au' },
+          }),
+        }).catch(() => {});
+      }
+
+      // Internal alert
+      if (process.env.ADMIN_EMAIL) {
+        await fetch(notifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+          body: JSON.stringify({
+            type: 'admin_new_org_application', // reuse admin notification channel
+            to:   process.env.ADMIN_EMAIL,
+            data: {
+              org_name: 'Unknown', abn: '', org_type: '',
+              contact_name: email || 'Unknown', contact_email: email || '',
+              suburb: '', state: '',
+              applied_date: `PAYMENT FAILED — Invoice ${invoice.id} for subscription ${invoice.subscription}`,
+            },
+          }),
+        }).catch(() => {});
+      }
+    }
+
     return new Response('ok', { status: 200 });
   }
 
