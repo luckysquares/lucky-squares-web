@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
-const SUPPORT_FROM = 'support@luckysquares.com.au';
+const SUPPORT_FROM = 'hello@luckysquares.com.au';
 
 async function verifyAdmin(req) {
   const auth = req.headers.get('Authorization');

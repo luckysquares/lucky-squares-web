@@ -72,7 +72,7 @@ export default function ParticipantTermsPage() {
 
             <Section n="6" title="Prizes">
               <SubSection n="6.1">Prizes are paid by the Organiser, not by Lucky Squares Australia. Lucky Squares Australia has no liability for prize payment under any circumstances.</SubSection>
-              <SubSection n="6.2">Prize amounts displayed on the fundraiser page are set by the Organiser. Where a 50/50 prize split is selected, prize amounts shown are estimates based on squares sold and will be confirmed following the close of the fundraiser.</SubSection>
+              <SubSection n="6.2">Prize amounts displayed on the fundraiser page are set by the Organiser. Where a 50/50 prize split is selected (where available), prize amounts shown are estimates based on squares sold and will be confirmed following the close of the fundraiser.</SubSection>
               <SubSection n="6.3">If you win a prize, you will be notified by email and provided with instructions for claiming your prize from the Organiser.</SubSection>
               <SubSection n="6.4">Prize claims must be made in accordance with any instructions provided by the Organiser. Lucky Squares Australia is not responsible for unclaimed prizes.</SubSection>
             </Section>

@@ -170,10 +170,10 @@ For blended campaigns (in-person and bank transfer): buyers who scan the QR code
 ### Refunds
 - Refund requests go to the organiser, not Lucky Squares (unless the platform was used improperly)
 - If a campaign is cancelled before the draw, the organiser refunds all participants
-- If you have a problem with a fundraiser, contact the organiser first; if you believe the platform was used improperly or unlawfully, contact support@luckysquares.com.au
+- If you have a problem with a fundraiser, contact the organiser first; if you believe the platform was used improperly or unlawfully, contact hello@luckysquares.com.au
 
 ### Contact and support
-- Email: support@luckysquares.com.au
+- Email: hello@luckysquares.com.au
 - Website: luckysquares.com.au
 - Support requests: https://luckysquares.com.au/contact (submissions create a support ticket with a reference number; the team responds within one business day)
 
