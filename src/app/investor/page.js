@@ -280,7 +280,7 @@ function InvestorPortal({ visitorName }) {
               <h3 style={h3Style}>Strategic partnerships</h3>
               {[
                 { name: 'Sport SA', desc: 'Verbal commitment to promote the platform to their network of 1,800+ member sporting clubs across South Australia, and to host the Lucky Squares launch event. Provides warm access to the largest single channel of potential customers in the state.', badge: 'Verbal commitment' },
-                { name: 'Marjorie Jackson Centre for Women\'s Sport', desc: 'Verbal commitment to use Lucky Squares Australia as a fundraising tool for women\'s sport initiatives in South Australia.', badge: 'Verbal commitment' },
+                { name: 'Marjorie Jackson Centre for Women\'s Sport', desc: 'Verbal commitment to use Lucky Squares Australia as a fundraising tool for women\'s sport initiatives in South Australia, and to promote the platform through their networks.', badge: 'Verbal commitment' },
                 { name: 'Ashleigh Young Foundation', desc: 'Verbal commitment to run campaigns through the platform, validating the charity sector use case. Ashleigh Young is a two-time Olympic medallist.', badge: 'Verbal commitment' },
               ].map(({ name, desc, badge }) => (
                 <div key={name} style={{ borderLeft: '3px solid #6B46F5', paddingLeft: 16, marginBottom: 20 }}>
