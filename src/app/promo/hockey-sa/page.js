@@ -1,6 +1,6 @@
-import Link from 'next/link';
+'use client';
 
-export const metadata = { title: 'Lucky Squares — Promo Poster', robots: { index: false } };
+import Link from 'next/link';
 
 const QR_MAIN    = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fluckysquares.com.au&color=1A0A3C&bgcolor=ffffff&margin=4';
 const QR_SIGNUP  = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fluckysquares.com.au%2Ffundraise%3Fregister%3D1&color=6B46F5&bgcolor=ffffff&margin=4';
@@ -39,8 +39,7 @@ export default function HockeySAPromo() {
           <Link href="/admin/marketing" className="back-link">← Back to Marketing</Link>
           <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>Double-sided A4 · Hockey SA Junior Country Championships</span>
         </div>
-        <button className="print-btn" onClick={() => {}} id="printBtn">🖨 Print both sides</button>
-        <script dangerouslySetInnerHTML={{ __html: `document.getElementById('printBtn').onclick=()=>window.print()` }} />
+        <button className="print-btn" onClick={() => window.print()}>🖨 Print both sides</button>
       </div>
 
       <div className="page-wrap">
