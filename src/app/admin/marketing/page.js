@@ -158,7 +158,6 @@ function CampaignsTab() {
                   <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 700 }}>{item.signups_attributed || ''}</td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button className="btn btn-outline btn-sm" onClick={() => setLogging(item)}>Log</button>
                       <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...item })}>Edit</button>
                       <button className="btn btn-outline btn-sm" style={{ color: '#CC0000', borderColor: '#FFCCCC' }} onClick={() => del(item.id)}>Delete</button>
                     </div>
@@ -578,6 +577,7 @@ function ContactsTab() {
                     </td>
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ display: 'flex', gap: 8 }}>
+                        <button className="btn btn-outline btn-sm" onClick={() => setLogging(item)}>Log</button>
                         <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...item })}>Edit</button>
                         <button className="btn btn-outline btn-sm" style={{ color: '#CC0000', borderColor: '#FFCCCC' }} onClick={() => del(item.id)}>Delete</button>
                       </div>
