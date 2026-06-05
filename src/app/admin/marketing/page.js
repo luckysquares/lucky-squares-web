@@ -372,13 +372,17 @@ function ContentTab() {
 const ENTRY_TYPES = ['Call', 'Email', 'Meeting', 'Follow-up', 'Note'];
 
 function ContactLogModal({ contact, onClose }) {
-  const [logs,      setLogs]      = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [entry,     setEntry]     = useState('');
-  const [entryType, setEntryType] = useState('Note');
-  const [loggedAt,  setLoggedAt]  = useState(() => new Date().toISOString().slice(0, 16));
-  const [saving,    setSaving]    = useState(false);
-  const [error,     setError]     = useState('');
+  const [logs,           setLogs]           = useState([]);
+  const [loading,        setLoading]        = useState(true);
+  const [entry,          setEntry]          = useState('');
+  const [entryType,      setEntryType]      = useState('Note');
+  const [loggedAt,       setLoggedAt]       = useState(() => new Date().toISOString().slice(0, 16));
+  const [saving,         setSaving]         = useState(false);
+  const [error,          setError]          = useState('');
+  const [nextAction,     setNextAction]     = useState(contact.next_action || '');
+  const [nextActionDate, setNextActionDate] = useState(contact.next_action_date || '');
+  const [savingNext,     setSavingNext]     = useState(false);
+  const [nextSaved,      setNextSaved]      = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -403,6 +407,16 @@ function ContactLogModal({ contact, onClose }) {
     setEntry('');
     setLoggedAt(new Date().toISOString().slice(0, 16));
     load();
+  };
+
+  const saveNextAction = async () => {
+    setSavingNext(true); setNextSaved(false);
+    await adminFetch(`/api/admin/marketing/contacts/${contact.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ next_action: nextAction, next_action_date: nextActionDate || null }),
+    });
+    setSavingNext(false); setNextSaved(true);
+    setTimeout(() => setNextSaved(false), 2000);
   };
 
   const deleteEntry = async (logId) => {
@@ -464,6 +478,22 @@ function ContactLogModal({ contact, onClose }) {
           ))}
         </div>
       )}
+
+      {/* Next action */}
+      <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+        <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Next action</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px auto', gap: 10, alignItems: 'flex-end' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <input className="form-input" value={nextAction} onChange={(e) => setNextAction(e.target.value)} placeholder="e.g. Send follow-up email with pricing" style={{ fontSize: 13 }} />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <input className="form-input" type="date" value={nextActionDate} onChange={(e) => setNextActionDate(e.target.value)} style={{ fontSize: 13 }} />
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={saveNextAction} disabled={savingNext} style={{ height: 40 }}>
+            {nextSaved ? '✓ Saved' : savingNext ? 'Saving...' : 'Save'}
+          </button>
+        </div>
+      </div>
     </Modal>
   );
 }
