@@ -274,7 +274,7 @@ Your free campaign coupon code is:
 
 ${d.coupon_code}
 
-Enter this code when launching your next campaign to waive the platform fee entirely.
+To use it: log in to your Lucky Squares dashboard, start a new campaign, and enter this code on the payment step when you launch. It waives the $19 platform fee entirely — one use only.
 
 Thanks for spreading the word. It means a lot to us and to the causes you're helping.
 
@@ -1114,6 +1114,55 @@ https://luckysquares.com.au/get-started
 We built this specifically for Australian schools, clubs, and charities, and we'd love to see what you raise with it.
 
 If you have any questions just reply to this email. I read everything.
+
+${SIG}`,
+  };
+}
+
+// ── Org subscription emails ───────────────────────────────────────────────────
+
+export function emailOrgSubscriptionCancelled(d: { first_name: string }) {
+  return {
+    subject: 'Your Lucky Squares Organisation Plan has ended',
+    text: `Hi ${d.first_name},
+
+Your Lucky Squares Organisation Plan subscription has ended and your account has been moved to the Casual plan.
+
+You can still access all your existing campaigns and data. To run more than 5 concurrent campaigns or access team management features, you can resubscribe to the Organisation Plan from your dashboard at any time.
+
+If you believe this is an error or have any questions, please reply to this email.
+
+${SIG}`,
+  };
+}
+
+export function emailOrgPaymentFailed(d: { first_name: string; invoice_url: string }) {
+  return {
+    subject: 'Action required: payment failed for your Lucky Squares Organisation Plan',
+    text: `Hi ${d.first_name},
+
+We were unable to process the renewal payment for your Lucky Squares Organisation Plan.
+
+To keep your Organisation Plan active, please update your payment details or pay the outstanding invoice:
+
+${d.invoice_url}
+
+If payment is not completed, your account will be downgraded to the Casual plan at the end of your current billing period. All your campaign data will be preserved.
+
+If you need help, reply to this email and we'll sort it out.
+
+${SIG}`,
+  };
+}
+
+export function emailOrgRenewalReminder(d: { first_name: string; org_name: string; renewal_date: string; amount: string }) {
+  return {
+    subject: `Your Lucky Squares Organisation Plan renews on ${d.renewal_date}`,
+    text: `Hi ${d.first_name},
+
+Just a heads-up: your Lucky Squares Organisation Plan for ${d.org_name} will automatically renew on ${d.renewal_date} for ${d.amount}.
+
+No action is needed — we'll charge the card on file. If you'd like to update your payment method or cancel before the renewal date, reply to this email.
 
 ${SIG}`,
   };

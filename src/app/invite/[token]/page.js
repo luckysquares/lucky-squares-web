@@ -94,9 +94,20 @@ export default function AcceptInvitePage() {
 
         {phase === 'invalid' && (
           <>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>⚠️</div>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, marginBottom: 12 }}>Invite not available</h2>
-            <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.6 }}>{error}</p>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>{error?.includes('expired') ? '⏰' : '⚠️'}</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, marginBottom: 12 }}>
+              {error?.includes('expired') ? 'Invite expired' : 'Invite not available'}
+            </h2>
+            <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.6, marginBottom: error?.includes('expired') ? 16 : 0 }}>
+              {error?.includes('expired')
+                ? 'This invite link has expired (invites are valid for 7 days). Please ask your organisation admin to send you a new invite.'
+                : error}
+            </p>
+            {error?.includes('expired') && (
+              <a href="mailto:hello@luckysquares.com.au" style={{ fontSize: 13, color: 'var(--text2)' }}>
+                Need help? Contact us
+              </a>
+            )}
           </>
         )}
 

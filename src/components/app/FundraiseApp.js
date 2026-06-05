@@ -193,42 +193,97 @@ function AuthShell({ children }) {
 // ─── LoginScreen ──────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin, onRegister, loading, error }) {
-  const [email, setEmail] = useState('');
-  const [pass,  setPass]  = useState('');
+  const [email,       setEmail]       = useState('');
+  const [pass,        setPass]        = useState('');
+  const [resetMode,   setResetMode]   = useState(false);
+  const [resetEmail,  setResetEmail]  = useState('');
+  const [resetSent,   setResetSent]   = useState(false);
+  const [resetLoading,setResetLoading]= useState(false);
+  const [resetError,  setResetError]  = useState('');
+
+  const handleReset = async () => {
+    if (!resetEmail.trim()) { setResetError('Please enter your email address.'); return; }
+    setResetLoading(true); setResetError('');
+    const { error: e } = await getSupabaseClient().auth.resetPasswordForEmail(resetEmail.trim(), {
+      redirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/fundraise`,
+    });
+    setResetLoading(false);
+    if (e) { setResetError(e.message); return; }
+    setResetSent(true);
+  };
+
   return (
     <AuthShell>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '60px 24px 80px' }}>
         <div style={{ width: '100%', maxWidth: 440 }}>
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div className="section-label" style={{ justifyContent: 'center', display: 'flex' }}>Organiser sign in</div>
+            <div className="section-label" style={{ justifyContent: 'center', display: 'flex' }}>Sign in</div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px,4vw,36px)', fontWeight: 900, color: 'var(--text)', margin: '10px 0 8px', lineHeight: 1.2 }}>
               Welcome back
             </h1>
-            <p style={{ fontSize: 15, color: 'var(--text2)', margin: 0 }}>Sign in to manage your fundraisers</p>
+            <p style={{ fontSize: 15, color: 'var(--text2)', margin: 0 }}>
+              {resetMode ? 'Reset your password' : 'Sign in to manage your fundraisers'}
+            </p>
           </div>
           <div className="scratch-card" style={{ padding: '32px 36px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <input className="form-input" type="password" placeholder="••••••••" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && onLogin({ email, password: pass })} />
-              </div>
-              {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
-              <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={loading} onClick={() => onLogin({ email, password: pass })}>
-                {loading ? 'Signing in…' : 'Sign in'}
-              </button>
-            </div>
-            <div className="divider" />
-            <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text2)', margin: 0 }}>
-              New to Lucky Squares?{' '}
-              <button onClick={onRegister} style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
-                Create a free account →
-              </button>
-            </p>
+            {resetMode ? (
+              resetSent ? (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>Check your email</p>
+                  <p style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6, marginBottom: 20 }}>
+                    We sent a password reset link to <strong>{resetEmail}</strong>. Click the link to set a new password.
+                  </p>
+                  <button onClick={() => { setResetMode(false); setResetSent(false); setResetEmail(''); }} style={{ background: 'none', border: 'none', color: 'var(--purple)', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
+                    ← Back to sign in
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  <div className="form-group">
+                    <label className="form-label">Email address</label>
+                    <input className="form-input" type="email" placeholder="you@example.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} autoFocus />
+                  </div>
+                  {resetError && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{resetError}</div>}
+                  <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={resetLoading} onClick={handleReset}>
+                    {resetLoading ? 'Sending…' : 'Send reset link'}
+                  </button>
+                  <button onClick={() => setResetMode(false)} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, textAlign: 'center' }}>
+                    ← Back to sign in
+                  </button>
+                </div>
+              )
+            ) : (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  <div className="form-group">
+                    <label className="form-label">Email</label>
+                    <input className="form-input" type="email" placeholder="you@example.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+                      <button onClick={() => { setResetMode(true); setResetEmail(email); }} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12 }}>
+                        Forgot password?
+                      </button>
+                    </div>
+                    <input className="form-input" type="password" placeholder="••••••••" maxLength={128} value={pass} onChange={(e) => setPass(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && onLogin({ email, password: pass })} />
+                  </div>
+                  {error && <div style={{ padding: '10px 14px', background: '#FFF0F0', border: '1px solid #FFCCCC', borderRadius: 10, fontSize: 13, color: '#CC0000' }}>{error}</div>}
+                  <button className="btn btn-purple btn-lg" style={{ width: '100%', justifyContent: 'center' }} disabled={loading} onClick={() => onLogin({ email, password: pass })}>
+                    {loading ? 'Signing in…' : 'Sign in'}
+                  </button>
+                </div>
+                <div className="divider" />
+                <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text2)', margin: 0 }}>
+                  New to Lucky Squares?{' '}
+                  <button onClick={onRegister} style={{ background: 'none', border: 'none', color: 'var(--green)', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
+                    Create a free account →
+                  </button>
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -437,6 +492,23 @@ function OrgTeamSection({ sendTxEmail }) {
     load();
   };
 
+  const resendInvite = async (inv) => {
+    setRevoking(inv.id);
+    await getSupabaseClient().rpc('revoke_org_invite', { p_invite_id: inv.id });
+    const { data } = await getSupabaseClient().rpc('invite_org_member', { p_email: inv.email });
+    setRevoking(null);
+    if (data?.error) { setInviteMsg(data.error); load(); return; }
+    const inviteUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://luckysquares.com.au'}/invite/${data.token}`;
+    sendTxEmail('org_member_invite', inv.email, {
+      org_name:        data.org_name || 'your organisation',
+      invited_by_name: 'your organisation admin',
+      invite_url:      inviteUrl,
+      expires_days:    7,
+    });
+    setInviteMsg('Invite resent!');
+    load();
+  };
+
   const memberCount  = (teamData?.members ?? []).length;
   const inviteCount  = (teamData?.invites ?? []).length;
   const totalUsed    = memberCount + inviteCount;
@@ -479,13 +551,22 @@ function OrgTeamSection({ sendTxEmail }) {
           {teamData.invites.map((inv) => (
             <div key={inv.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #F0EDE5', gap: 12 }}>
               <div style={{ fontSize: 13, color: 'var(--text2)' }}>{inv.email}</div>
-              <button
-                onClick={() => revokeInvite(inv.id)}
-                disabled={revoking === inv.id}
-                style={{ background: 'none', border: 'none', fontSize: 12, color: 'var(--text2)', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', flexShrink: 0 }}
-              >
-                {revoking === inv.id ? '...' : 'Cancel invite'}
-              </button>
+              <div style={{ display: 'flex', gap: 8', flexShrink: 0 }}>
+                <button
+                  onClick={() => resendInvite(inv)}
+                  disabled={!!revoking}
+                  style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 10px', fontSize: 12, color: 'var(--purple)', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  {revoking === inv.id ? '...' : 'Resend'}
+                </button>
+                <button
+                  onClick={() => revokeInvite(inv.id)}
+                  disabled={!!revoking}
+                  style={{ background: 'none', border: 'none', fontSize: 12, color: 'var(--text2)', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           ))}
         </div>

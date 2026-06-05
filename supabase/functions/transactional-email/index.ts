@@ -34,6 +34,9 @@ const TRANSACTIONAL_TYPES = new Set([
   'org_application_approved',
   'org_application_rejected',
   'org_member_invite',
+  'org_subscription_cancelled',
+  'org_payment_failed',
+  'org_renewal_reminder',
   'campaign_launched_notification',
   'account_suspended',
   'early_access_invite',
@@ -195,6 +198,9 @@ async function buildTemplate(type: string, d: any): Promise<{ subject: string; t
     case 'early_access_invite':           return T.emailEarlyAccessInvite(d);
     // Admin internal
     case 'admin_new_org_application':     return T.emailAdminNewOrgApplication(d);
+    case 'org_subscription_cancelled':    return T.emailOrgSubscriptionCancelled(d);
+    case 'org_payment_failed':            return T.emailOrgPaymentFailed(d);
+    case 'org_renewal_reminder':          return T.emailOrgRenewalReminder(d);
     // Foundation Member
     case 'foundation_member':             return T.emailFoundationMember(d);
     // Prize claim flow
