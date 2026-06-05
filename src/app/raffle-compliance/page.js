@@ -152,7 +152,7 @@ export default function CompliancePage() {
 
             <Section n="7" title="Legal Review" last>
               <p>
-                This Compliance Statement and Lucky Squares Australia&apos;s overall platform model has been subject to independent legal review. A written legal opinion is held on file.
+                5 June 2026: an independent legal review is being sought on this Compliance Statement and Lucky Squares Australia&apos;s overall platform model. The service will not be officially launched until that review has concluded.
               </p>
             </Section>
 
