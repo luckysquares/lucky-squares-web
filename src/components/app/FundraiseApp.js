@@ -551,7 +551,7 @@ function OrgTeamSection({ sendTxEmail }) {
           {teamData.invites.map((inv) => (
             <div key={inv.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #F0EDE5', gap: 12 }}>
               <div style={{ fontSize: 13, color: 'var(--text2)' }}>{inv.email}</div>
-              <div style={{ display: 'flex', gap: 8', flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 <button
                   onClick={() => resendInvite(inv)}
                   disabled={!!revoking}
