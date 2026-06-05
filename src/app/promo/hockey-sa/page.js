@@ -63,7 +63,7 @@ export default function HockeySAPromo() {
             {/* Logo */}
             <div style={{ marginBottom: 32 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logos/lucky-squares-logo-white.svg" alt="Lucky Squares Australia" style={{ height: 36, display: 'block' }} />
+              <img src="/lucky-squares-logo.png" alt="Lucky Squares Australia" style={{ height: 36, display: 'block', filter: 'brightness(0) invert(1)' }} />
             </div>
 
             {/* Main headline */}
@@ -108,7 +108,7 @@ export default function HockeySAPromo() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
               {[
                 { n: '1', icon: '🎯', title: 'Set up your grid', body: 'Choose your grid size, set your price per square, and add your prizes. Takes about five minutes.' },
-                { n: '2', icon: '🔗', title: 'Share your link', body: 'Send your link to members via WhatsApp, Facebook or email. Buyers pick their square and pay by card on the spot.' },
+                { n: '2', icon: '🔗', title: 'Share your link', body: 'Send your link to members via WhatsApp, social media, SMS or email. Buyers pick their square and pay by card on the spot.' },
                 { n: '3', icon: '🎲', title: 'Run the live draw', body: 'Hit draw when your grid is full and the winning square is revealed live to everyone watching. Winners notified instantly.' },
               ].map(({ n, icon, title, body }) => (
                 <div key={n} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
@@ -144,7 +144,7 @@ export default function HockeySAPromo() {
           {/* Header */}
           <div style={{ background: '#fff', borderBottom: '3px solid #6B46F5', padding: '20px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/lucky-squares-logo-colour.svg" alt="Lucky Squares Australia" style={{ height: 30, display: 'block' }} />
+            <img src="/lucky-squares-logo.png" alt="Lucky Squares Australia" style={{ height: 30, display: 'block' }} />
             <div style={{ fontSize: 12, fontWeight: 700, color: '#6B46F5' }}>luckysquares.com.au</div>
           </div>
 
@@ -174,8 +174,8 @@ export default function HockeySAPromo() {
                   { icon: '💸', title: 'Funds go directly to you', body: 'Proceeds transfer straight to your bank account. We charge a flat $19 fee, nothing more.' },
                   { icon: '🎯', title: 'No spreadsheets', body: 'The grid manages itself. You can see who has which square in real time, from anywhere.' },
                   { icon: '🎲', title: 'Live draw your whole club can watch', body: 'Run the draw on any screen. Winners are revealed live. Everyone loves it.' },
-                  { icon: '🔗', title: 'Share via WhatsApp, Facebook or email', body: 'One link. Share it wherever your community is active. That\'s all it takes.' },
-                  { icon: '🏆', title: 'Multiple prizes supported', body: 'First, second, and third prize — or as many as you like. All drawn automatically.' },
+                  { icon: '🔗', title: 'Share via WhatsApp, social media, SMS or email', body: 'One link. Share it wherever your community is active. That\'s all it takes.' },
+                  { icon: '🏆', title: 'Multiple prizes supported', body: 'First, second, and third prize, or as many as you like. All drawn automatically.' },
                 ].map(({ icon, title, body }) => (
                   <div key={title} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', border: '1px solid #E5E0D5' }}>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
@@ -209,13 +209,13 @@ export default function HockeySAPromo() {
             {/* Demo grid */}
             {(() => {
               const names = [
-                'Sarah M','Tom K','','Jess W','Luke B','Priya S','','Dan H','','Mia T',
-                '','Ben A','Cath L','','Jake R','','Amy C','','Zoe P','Matt G',
-                'Liam F','','Ruby S','','Connor B','Ella T','','Noah W','','Grace H',
-                'Kai O','Bella R','','Tyler M','','Isla J','Josh D','','Finn K','Rosa E',
-                '','Sam V','','Lily N','Max A','','Ava Q','Riley H','','Tara B',
+                'Sarah M','Tom K','','Jess W','Luke B',
+                'Priya S','','Dan H','Cath L','Mia T',
+                '','Ben A','','Jake R','Amy C',
+                'Liam F','','Ruby S','','Connor B',
+                '','Bella R','Tyler M','','Isla J',
               ];
-              const winner = 13; // square index of the winner
+              const winner = 8; // Cath L wins (index 8)
               return (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -226,7 +226,7 @@ export default function HockeySAPromo() {
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#fff', border: '1px solid #C8E8D8', display: 'inline-block' }} />Available</span>
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 3 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 5 }}>
                     {names.map((name, i) => {
                       const isWinner = i === winner;
                       const isSold   = name !== '';
@@ -244,10 +244,10 @@ export default function HockeySAPromo() {
                           border: isWinner ? '1.5px solid #009A5C' : isSold ? '1.5px solid #DDD5C0' : '1.5px solid #C8E8D8',
                           boxShadow: isWinner ? '0 0 8px rgba(0,200,117,0.5)' : 'none',
                         }}>
-                          <div style={{ fontSize: 8, fontWeight: 800, color: isWinner ? '#fff' : isSold ? '#9B8F80' : '#C8E8D8', lineHeight: 1 }}>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: isWinner ? '#fff' : isSold ? '#9B8F80' : '#C8E8D8', lineHeight: 1 }}>
                             {i + 1}
                           </div>
-                          {isSold && <div style={{ fontSize: 6, fontWeight: 700, color: isWinner ? '#fff' : '#6B5E4E', lineHeight: 1.2, marginTop: 1, overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 1px' }}>
+                          {isSold && <div style={{ fontSize: 9, fontWeight: 700, color: isWinner ? '#fff' : '#6B5E4E', lineHeight: 1.2, marginTop: 2, overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>
                             {isWinner ? '🏆' : name.split(' ')[0]}
                           </div>}
                         </div>
@@ -255,7 +255,7 @@ export default function HockeySAPromo() {
                     })}
                   </div>
                   <div style={{ textAlign: 'center', marginTop: 8, fontSize: 10, color: '#9B8F80', fontStyle: 'italic' }}>
-                    50-square grid at $5/square — $250 raised. Cath L wins! 🎉
+                    25-square grid at $5/square: $125 raised. Cath L wins! 🎉
                   </div>
                 </div>
               );
