@@ -1,6 +1,13 @@
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function GET(req) {
+  const ip = getClientIp(req);
+  const { allowed } = checkRateLimit(`satisfaction:${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+  if (!allowed) return new Response(thankYouPage('Too many requests. Please try again later.', false), {
+    status: 429, headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  });
+
   const { searchParams } = new URL(req.url);
   const ticketId = searchParams.get('ticket');
   const rating   = searchParams.get('rating');
