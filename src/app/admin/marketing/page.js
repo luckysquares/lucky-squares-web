@@ -158,6 +158,7 @@ function CampaignsTab() {
                   <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 700 }}>{item.signups_attributed || ''}</td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-outline btn-sm" onClick={() => setLogging(item)}>Log</button>
                       <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...item })}>Edit</button>
                       <button className="btn btn-outline btn-sm" style={{ color: '#CC0000', borderColor: '#FFCCCC' }} onClick={() => del(item.id)}>Delete</button>
                     </div>
@@ -367,12 +368,114 @@ function ContentTab() {
   );
 }
 
+// ── Contact Log Modal ─────────────────────────────────────────────────────────
+
+const ENTRY_TYPES = ['Call', 'Email', 'Meeting', 'Follow-up', 'Note'];
+
+function ContactLogModal({ contact, onClose }) {
+  const [logs,      setLogs]      = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [entry,     setEntry]     = useState('');
+  const [entryType, setEntryType] = useState('Note');
+  const [loggedAt,  setLoggedAt]  = useState(() => new Date().toISOString().slice(0, 16));
+  const [saving,    setSaving]    = useState(false);
+  const [error,     setError]     = useState('');
+
+  const load = async () => {
+    setLoading(true);
+    const res  = await adminFetch(`/api/admin/marketing/contacts/${contact.id}/log`);
+    const json = await res.json();
+    setLogs(Array.isArray(json) ? json : []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [contact.id]);
+
+  const addEntry = async () => {
+    if (!entry.trim()) return;
+    setSaving(true); setError('');
+    const res  = await adminFetch(`/api/admin/marketing/contacts/${contact.id}/log`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entry, entry_type: entryType, logged_at: new Date(loggedAt).toISOString() }),
+    });
+    const json = await res.json();
+    setSaving(false);
+    if (!res.ok || json.error) { setError(json.error || 'Failed to save'); return; }
+    setEntry('');
+    setLoggedAt(new Date().toISOString().slice(0, 16));
+    load();
+  };
+
+  const deleteEntry = async (logId) => {
+    if (!confirm('Delete this log entry?')) return;
+    await adminFetch(`/api/admin/marketing/contacts/${contact.id}/log/${logId}`, { method: 'DELETE' });
+    load();
+  };
+
+  const typeColour = { Call: '#2563EB', Email: '#7C3AED', Meeting: '#16A34A', 'Follow-up': '#D97706', Note: '#6B7280' };
+
+  return (
+    <Modal title={`Activity log — ${contact.name}`} onClose={onClose}>
+      {/* Add entry */}
+      <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '16px', marginBottom: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr 160px', gap: 10, marginBottom: 10 }}>
+          <select className="form-input" value={entryType} onChange={(e) => setEntryType(e.target.value)} style={{ fontSize: 13 }}>
+            {ENTRY_TYPES.map((t) => <option key={t}>{t}</option>)}
+          </select>
+          <input className="form-input" type="datetime-local" value={loggedAt} onChange={(e) => setLoggedAt(e.target.value)} style={{ fontSize: 13 }} />
+          <button className="btn btn-primary btn-sm" onClick={addEntry} disabled={saving || !entry.trim()} style={{ height: '100%' }}>
+            {saving ? 'Saving...' : 'Add entry'}
+          </button>
+        </div>
+        <textarea
+          className="form-input"
+          rows={3}
+          value={entry}
+          onChange={(e) => setEntry(e.target.value)}
+          placeholder="What happened? What was discussed? What's the outcome?"
+          style={{ resize: 'vertical', fontSize: 13 }}
+          onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) addEntry(); }}
+        />
+        {error && <p style={{ fontSize: 12, color: '#CC0000', marginTop: 6 }}>{error}</p>}
+        <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>Cmd+Enter to save</p>
+      </div>
+
+      {/* Log entries */}
+      {loading ? (
+        <div style={{ fontSize: 13, color: 'var(--text2)' }}>Loading...</div>
+      ) : logs.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text2)', fontSize: 13 }}>No activity logged yet.</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
+          {logs.map((log) => (
+            <div key={log.id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 14px', background: '#fff', border: '1px solid var(--border)', borderRadius: 10 }}>
+              <div style={{ flexShrink: 0, paddingTop: 2 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 99, background: (typeColour[log.entry_type] || '#6B7280') + '18', color: typeColour[log.entry_type] || '#6B7280' }}>
+                  {log.entry_type || 'Note'}
+                </span>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 4 }}>
+                  {new Date(log.logged_at).toLocaleString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{log.entry}</div>
+              </div>
+              <button onClick={() => deleteEntry(log.id)} style={{ background: 'none', border: 'none', color: '#CCC', cursor: 'pointer', fontSize: 16, flexShrink: 0, lineHeight: 1 }}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
 // ── Contacts tab ──────────────────────────────────────────────────────────────
 
 function ContactsTab() {
   const [items,     setItems]     = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [editing,   setEditing]   = useState(null);
+  const [logging,   setLogging]   = useState(null);
   const [saving,    setSaving]    = useState(false);
   const [saveError, setSaveError] = useState('');
   const [filter,    setFilter]    = useState('');
@@ -486,6 +589,8 @@ function ContactsTab() {
           </table>
         </div>
       )}
+
+      {logging && <ContactLogModal contact={logging} onClose={() => setLogging(null)} />}
 
       {editing && (
         <Modal title={editing.id ? 'Edit contact' : 'Add contact'} onClose={() => setEditing(null)}>
