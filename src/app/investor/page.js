@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 const aud = (n) => `$${Math.round(n).toLocaleString('en-AU')}`;
@@ -472,11 +471,10 @@ function InvestorPortal({ visitorName }) {
 
         {/* Team */}
         <Section title="The Team" label="Who's behind it">
-          <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 32, alignItems: 'start', marginBottom: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 32, alignItems: 'start', marginBottom: 32 }}>
             <div>
-              <div style={{ width: 160, height: 160, borderRadius: '50%', overflow: 'hidden', border: '3px solid #6B46F5' }}>
-                <Image src="/ceo-jamie.png" alt="Jamie Stott" width={160} height={160} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/ceo-jamie.png" alt="Jamie Stott" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', borderRadius: 16, border: '1.5px solid #E5E0D5', display: 'block' }} />
             </div>
             <div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 900, color: '#1A1209', marginBottom: 4 }}>Jamie Stott</div>
