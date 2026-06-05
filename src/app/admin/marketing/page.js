@@ -65,10 +65,11 @@ function Modal({ title, onClose, children }) {
 // ── Campaigns tab ─────────────────────────────────────────────────────────────
 
 function CampaignsTab() {
-  const [items,   setItems]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [saving,  setSaving]  = useState(false);
+  const [items,     setItems]     = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [editing,   setEditing]   = useState(null);
+  const [saving,    setSaving]    = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const empty = { name: '', channel: '', status: 'Planned', start_date: '', end_date: '', budget_aud: '', spend_aud: '', signups_attributed: '', result_notes: '' };
 
@@ -83,11 +84,14 @@ function CampaignsTab() {
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    setSaving(true);
+    setSaving(true); setSaveError('');
     const method = editing.id ? 'PATCH' : 'POST';
     const url    = editing.id ? `/api/admin/marketing/campaigns/${editing.id}` : '/api/admin/marketing/campaigns';
-    await adminFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing) });
-    setSaving(false); setEditing(null); load();
+    const res    = await adminFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing) });
+    const json   = await res.json().catch(() => ({}));
+    setSaving(false);
+    if (!res.ok || json.error) { setSaveError(json.error || 'Save failed. Have you run the SQL to create the marketing tables?'); return; }
+    setEditing(null); load();
   };
 
   const del = async (id) => {
@@ -215,6 +219,7 @@ function CampaignsTab() {
               <label className="form-label">Result notes</label>
               <textarea className="form-input" rows={3} value={editing.result_notes || ''} onChange={(e) => fld('result_notes', e.target.value)} placeholder="What worked, what didn't, key learnings..." style={{ resize: 'vertical' }} />
             </div>
+            {saveError && <p style={{ fontSize: 13, color: '#CC0000', margin: 0 }}>{saveError}</p>}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button className="btn btn-outline" onClick={() => setEditing(null)}>Cancel</button>
               <button className="btn btn-primary" onClick={save} disabled={saving || !editing.name.trim()}>{saving ? 'Saving...' : 'Save'}</button>
@@ -229,11 +234,12 @@ function CampaignsTab() {
 // ── Content Calendar tab ──────────────────────────────────────────────────────
 
 function ContentTab() {
-  const [items,   setItems]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [saving,  setSaving]  = useState(false);
-  const [filter,  setFilter]  = useState('');
+  const [items,     setItems]     = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [editing,   setEditing]   = useState(null);
+  const [saving,    setSaving]    = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [filter,    setFilter]    = useState('');
 
   const empty = { title: '', channel: '', status: 'Draft', scheduled_date: '', content: '', notes: '' };
 
@@ -248,11 +254,14 @@ function ContentTab() {
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    setSaving(true);
+    setSaving(true); setSaveError('');
     const method = editing.id ? 'PATCH' : 'POST';
     const url    = editing.id ? `/api/admin/marketing/content/${editing.id}` : '/api/admin/marketing/content';
-    await adminFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing) });
-    setSaving(false); setEditing(null); load();
+    const res    = await adminFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing) });
+    const json   = await res.json().catch(() => ({}));
+    setSaving(false);
+    if (!res.ok || json.error) { setSaveError(json.error || 'Save failed. Have you run the SQL to create the marketing tables?'); return; }
+    setEditing(null); load();
   };
 
   const del = async (id) => {
@@ -361,11 +370,12 @@ function ContentTab() {
 // ── Contacts tab ──────────────────────────────────────────────────────────────
 
 function ContactsTab() {
-  const [items,   setItems]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [saving,  setSaving]  = useState(false);
-  const [filter,  setFilter]  = useState('');
+  const [items,     setItems]     = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [editing,   setEditing]   = useState(null);
+  const [saving,    setSaving]    = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [filter,    setFilter]    = useState('');
 
   const empty = { name: '', organisation: '', role: '', email: '', phone: '', type: '', status: 'To contact', last_contact_date: '', next_action: '', next_action_date: '', notes: '' };
 
@@ -380,11 +390,14 @@ function ContactsTab() {
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    setSaving(true);
+    setSaving(true); setSaveError('');
     const method = editing.id ? 'PATCH' : 'POST';
     const url    = editing.id ? `/api/admin/marketing/contacts/${editing.id}` : '/api/admin/marketing/contacts';
-    await adminFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing) });
-    setSaving(false); setEditing(null); load();
+    const res    = await adminFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing) });
+    const json   = await res.json().catch(() => ({}));
+    setSaving(false);
+    if (!res.ok || json.error) { setSaveError(json.error || 'Save failed. Have you run the SQL to create the marketing tables?'); return; }
+    setEditing(null); load();
   };
 
   const del = async (id) => {
@@ -536,6 +549,7 @@ function ContactsTab() {
               <label className="form-label">Notes</label>
               <textarea className="form-input" rows={3} value={editing.notes || ''} onChange={(e) => fld('notes', e.target.value)} placeholder="Context, conversation history, what they're interested in..." style={{ resize: 'vertical' }} />
             </div>
+            {saveError && <p style={{ fontSize: 13, color: '#CC0000', margin: 0 }}>{saveError}</p>}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button className="btn btn-outline" onClick={() => setEditing(null)}>Cancel</button>
               <button className="btn btn-primary" onClick={save} disabled={saving || !editing.name.trim()}>{saving ? 'Saving...' : 'Save'}</button>
