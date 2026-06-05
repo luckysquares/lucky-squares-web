@@ -48,6 +48,8 @@ export default function Footer() {
           <span>© {new Date().getFullYear()} Play With Heart Pty Ltd ACN 698 202 069 (trading as Lucky Squares Australia)</span>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,.35)' }}>
             Fundraising regulations vary by state. Always check your local requirements.
+            &nbsp;·&nbsp;
+            <Link href="/investor" style={{ color: 'rgba(255,255,255,.25)', textDecoration: 'none' }}>Investors</Link>
           </span>
         </div>
       </div>
