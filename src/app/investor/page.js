@@ -220,11 +220,12 @@ function InvestorPortal({ visitorName }) {
             ))}
           </div>
 
-          <div style={{ background: '#F5F0FF', border: '1.5px solid #C4B5FD', borderRadius: 14, padding: '20px 24px' }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6', marginBottom: 12 }}>Unit Economics</div>
+          <div style={{ background: '#F5F0FF', border: '1.5px solid #C4B5FD', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6', marginBottom: 4 }}>Unit Economics</div>
+            <div style={{ fontSize: 12, color: '#7C5CF6', marginBottom: 16 }}>Conservative direct figures only — see network multiplier below</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {[
-                { label: 'Org LTV (3yr)', value: '$640+', sub: '$149/yr subscription + Blitz events at 50% adoption' },
+                { label: 'Direct org LTV (3yr)', value: '$640+', sub: '$149/yr subscription + Blitz events at 50% adoption' },
                 { label: 'CAC target', value: '<$50', sub: 'Channel partnerships reduce CAC dramatically' },
                 { label: 'Gross margin', value: '~85%', sub: 'SaaS margins at scale' },
                 { label: 'Payback period', value: '<12mo', sub: 'At target org CAC' },
@@ -235,6 +236,40 @@ function InvestorPortal({ visitorName }) {
                   <div style={{ fontSize: 11, color: '#9B8F80' }}>{sub}</div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Network multiplier */}
+          <div style={{ background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 14, padding: '20px 24px' }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#1A1209', marginBottom: 4 }}>Network multiplier effects — not included in base LTV</div>
+            <div style={{ fontSize: 12, color: '#9B8F80', marginBottom: 20 }}>Each org client generates two additional revenue streams beyond their own subscription</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+              <div style={{ borderLeft: '3px solid #6B46F5', paddingLeft: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: '#1A1209', marginBottom: 6 }}>Referral halo</div>
+                <p style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.7, margin: '0 0 10px' }}>
+                  Org clients are embedded in networks of similar organisations. A sporting club committee member also sits on three other boards. A P&C treasurer knows every P&C in the district.
+                </p>
+                <p style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.7, margin: 0 }}>
+                  At 25% referral rate, each org client generates 0.25 additional org clients over their lifetime, adding approximately <strong>$160 in indirect LTV</strong> per customer.
+                </p>
+              </div>
+              <div style={{ borderLeft: '3px solid #F5C820', paddingLeft: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: '#1A1209', marginBottom: 6 }}>Member casual campaigns</div>
+                <p style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.7, margin: '0 0 10px' }}>
+                  Individual members of an org client run their own personal fundraisers independently: travel funds, individual sport goals, personal causes. These pay the $19 casual fee per campaign — separate from the org account.
+                </p>
+                <p style={{ fontSize: 13, color: '#4A3728', lineHeight: 1.7, margin: 0 }}>
+                  A club with 150 members where 5% run one campaign over 3 years = approximately <strong>$143 in halo casual revenue</strong> per org relationship.
+                </p>
+              </div>
+            </div>
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #F0EDE5', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ fontSize: 13, color: '#6B5E4E' }}>
+                Network-adjusted LTV per org client (3yr):
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#6B46F5' }}>
+                $940+ <span style={{ fontSize: 13, fontWeight: 400, color: '#9B8F80' }}>vs $640 direct</span>
+              </div>
             </div>
           </div>
         </Section>
