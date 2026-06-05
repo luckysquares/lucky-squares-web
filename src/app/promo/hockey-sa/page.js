@@ -213,6 +213,55 @@ export default function HockeySAPromo() {
               </div>
             </div>
 
+            {/* Demo grid */}
+            {(() => {
+              const names = [
+                'Sarah M','Tom K','','Jess W','Luke B','Priya S','','Dan H','','Mia T',
+                '','Ben A','Cath L','','Jake R','','Amy C','','Zoe P','Matt G',
+                'Liam F','','Ruby S','','Connor B','Ella T','','Noah W','','Grace H',
+                'Kai O','Bella R','','Tyler M','','Isla J','Josh D','','Finn K','Rosa E',
+                '','Sam V','','Lily N','Max A','','Ava Q','Riley H','','Tara B',
+              ];
+              const winner = 13; // square index of the winner
+              return (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#6B46F5', letterSpacing: 2, textTransform: 'uppercase' }}>What a Lucky Squares grid looks like</div>
+                    <div style={{ display: 'flex', gap: 12, fontSize: 10, color: '#9B8F80', fontWeight: 600 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#6B46F5', display: 'inline-block' }} />Claimed</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#F5C820', display: 'inline-block' }} />Winner</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#E5E0D5', display: 'inline-block' }} />Available</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 3 }}>
+                    {names.map((name, i) => {
+                      const isWinner = i === winner;
+                      const isSold   = name !== '';
+                      return (
+                        <div key={i} style={{
+                          background: isWinner ? '#F5C820' : isSold ? '#6B46F5' : '#F0EDE5',
+                          borderRadius: 4,
+                          padding: '4px 2px',
+                          textAlign: 'center',
+                          position: 'relative',
+                          border: isWinner ? '1.5px solid #D4A017' : 'none',
+                          boxShadow: isWinner ? '0 0 6px rgba(245,200,32,0.6)' : 'none',
+                        }}>
+                          {isWinner && <div style={{ fontSize: 9, position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }}>🏆</div>}
+                          <div style={{ fontSize: 7.5, fontWeight: isSold ? 700 : 400, color: isSold ? '#fff' : '#C4B9AA', lineHeight: 1.2, marginTop: isWinner ? 4 : 0 }}>
+                            {isSold ? name.split(' ')[0] : `#${i + 1}`}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={{ textAlign: 'center', marginTop: 8, fontSize: 10, color: '#9B8F80', fontStyle: 'italic' }}>
+                    50-square grid at $5/square — $250 raised. Cath L wins! 🎉
+                  </div>
+                </div>
+              );
+            })()}
+
           </div>
 
           {/* Footer */}
