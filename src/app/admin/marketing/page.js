@@ -478,6 +478,8 @@ function ContactsTab() {
   const [saving,    setSaving]    = useState(false);
   const [saveError, setSaveError] = useState('');
   const [filter,    setFilter]    = useState('');
+  const [sortKey,   setSortKey]   = useState('name');
+  const [sortDir,   setSortDir]   = useState('asc');
 
   const empty = { name: '', organisation: '', role: '', email: '', phone: '', type: '', status: 'To contact', last_contact_date: '', next_action: '', next_action_date: '', notes: '' };
 
@@ -509,7 +511,24 @@ function ContactsTab() {
   };
 
   const fld = (k, v) => setEditing((p) => ({ ...p, [k]: v }));
-  const visible = filter ? items.filter((i) => i.status === filter) : items;
+
+  const toggleSort = (key) => {
+    if (sortKey === key) setSortDir((d) => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+
+  const sorted = [...(filter ? items.filter((i) => i.status === filter) : items)].sort((a, b) => {
+    const av = a[sortKey] ?? '';
+    const bv = b[sortKey] ?? '';
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  const visible = sorted;
+
+  const SortIcon = ({ col }) => sortKey === col
+    ? <span style={{ marginLeft: 4, opacity: 0.8 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>
+    : <span style={{ marginLeft: 4, opacity: 0.3 }}>↕</span>;
 
   const overdue = items.filter((i) => i.next_action_date && new Date(i.next_action_date) < new Date() && !['Converted', 'Not interested'].includes(i.status));
 
@@ -549,8 +568,18 @@ function ContactsTab() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)' }}>
-                {['Contact', 'Type', 'Status', 'Last contact', 'Next action', ''].map((h) => (
-                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</th>
+                {[
+                  { label: 'Contact',      col: 'name' },
+                  { label: 'Type',         col: null },
+                  { label: 'Status',       col: 'status' },
+                  { label: 'Last contact', col: 'last_contact_date' },
+                  { label: 'Next action',  col: 'next_action_date' },
+                  { label: '',             col: null },
+                ].map(({ label, col }) => (
+                  <th key={label} onClick={col ? () => toggleSort(col) : undefined}
+                    style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: col ? 'var(--purple)' : 'var(--text2)', textTransform: 'uppercase', letterSpacing: 0.5, cursor: col ? 'pointer' : 'default', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                    {label}{col && <SortIcon col={col} />}
+                  </th>
                 ))}
               </tr>
             </thead>
