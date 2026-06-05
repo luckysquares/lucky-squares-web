@@ -72,14 +72,29 @@ export default function AdminDashboard() {
                   <a href="/admin/reporting" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--orange)', textDecoration: 'none', flexShrink: 0 }}>View →</a>
                 </div>
               )}
-              {data.new_org_applications > 0 && (
+              {(data.new_org_applications_paid > 0) && (
                 <div style={{ background: '#F0FBF6', border: '1.5px solid #C8E8D8', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ fontSize: 20 }}>🏫</span>
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--green)' }}>{data.new_org_applications} organisation application{data.new_org_applications !== 1 ? 's' : ''} pending review</div>
-                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>Waiting for approval or rejection.</div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--green)' }}>
+                      {data.new_org_applications_paid} organisation application{data.new_org_applications_paid !== 1 ? 's' : ''} pending review
+                      <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, background: '#16A34A', color: '#fff', borderRadius: 99, padding: '2px 8px' }}>Payment confirmed</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>$149 paid via Stripe. Waiting for your approval.</div>
                   </div>
-                  <a href="/admin/organisations" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--green)', textDecoration: 'none', flexShrink: 0 }}>View →</a>
+                  <a href="/admin/organisations" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--green)', textDecoration: 'none', flexShrink: 0 }}>Review →</a>
+                </div>
+              )}
+              {(data.new_org_applications_unpaid > 0) && (
+                <div style={{ background: '#FFFBEB', border: '1.5px solid #FDE68A', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 20 }}>🏫</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#92400E' }}>
+                      {data.new_org_applications_unpaid} organisation application{data.new_org_applications_unpaid !== 1 ? 's' : ''} pending — no payment
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)' }}>Applied without paying. Review before approving.</div>
+                  </div>
+                  <a href="/admin/organisations" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: '#92400E', textDecoration: 'none', flexShrink: 0 }}>Review →</a>
                 </div>
               )}
               {drawAlert && (
