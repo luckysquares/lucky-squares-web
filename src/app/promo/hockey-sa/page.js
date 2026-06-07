@@ -110,13 +110,13 @@ const css = `
   .back-link { font-size: 13px; color: rgba(255,255,255,.6); text-decoration: none; }
   .page-wrap { display: flex; flex-direction: column; gap: 40px; padding: 40px 20px 60px; align-items: center; }
   .a4 { width: 210mm; height: 297mm; overflow: hidden; position: relative; box-shadow: 0 8px 48px rgba(0,0,0,.35); }
-  @page { size: A4 portrait; margin: 0; }
+  @page { size: A4 portrait; margin: 12mm; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
     body { background: #fff !important; }
     .no-print { display: none !important; }
     .page-wrap { padding: 0; gap: 0; background: none; }
-    .a4 { box-shadow: none; page-break-after: always; break-after: page; }
+    .a4 { box-shadow: none; width: 186mm; height: 273mm; page-break-after: always; break-after: page; }
   }
 `;
 
@@ -293,28 +293,9 @@ export default function HockeySAPromo() {
           </div>
 
           {/* Footer */}
-          <div style={{ background: '#1A0A3C', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexShrink: 0 }}>
-            <div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginBottom: 4 }}>Scan to create your free account</div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#F5C820' }}>luckysquares.com.au</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>hello@luckysquares.com.au</div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ background: '#fff', borderRadius: 8, padding: 5, marginBottom: 3 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={QR_SIGNUP} alt="Sign up" width="60" height="60" />
-                </div>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Create account</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ background: '#fff', borderRadius: 8, padding: 5, marginBottom: 3 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={QR_MAIN} alt="Visit" width="60" height="60" />
-                </div>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Visit website</div>
-              </div>
-            </div>
+          <div style={{ background: '#1A0A3C', padding: '10px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: '#F5C820' }}>luckysquares.com.au</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>hello@luckysquares.com.au</div>
           </div>
         </div>
 
