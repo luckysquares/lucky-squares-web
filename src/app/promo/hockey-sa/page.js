@@ -91,10 +91,10 @@ const SQ = ({ sq, num }) => {
   const numCol = sq.status === 'winner' ? '#fff' : sq.status === 'taken' ? '#9B8F80' : '#C8E8D8';
   const nameCol = sq.status === 'winner' ? '#fff' : '#6B5E4E';
   return (
-    <div style={{ background: bg, border, borderRadius: 6, aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2px', boxShadow: sq.status === 'winner' ? '0 0 8px rgba(0,200,117,0.5)' : 'none' }}>
-      <div style={{ fontSize: 12, fontWeight: 800, color: numCol, lineHeight: 1 }}>{num}</div>
+    <div style={{ background: bg, border, borderRadius: 4, width: 34, height: 34, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2px', boxShadow: sq.status === 'winner' ? '0 0 6px rgba(0,200,117,0.5)' : 'none' }}>
+      <div style={{ fontSize: 9, fontWeight: 800, color: numCol, lineHeight: 1 }}>{num}</div>
       {sq.status !== 'available' && (
-        <div style={{ fontSize: 8, fontWeight: 700, color: nameCol, lineHeight: 1.2, marginTop: 2, overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px', textAlign: 'center' }}>
+        <div style={{ fontSize: 7, fontWeight: 700, color: nameCol, lineHeight: 1.2, marginTop: 1, overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 1px', textAlign: 'center' }}>
           {sq.status === 'winner' ? '🏆' : sq.name.split(' ')[0]}
         </div>
       )}
@@ -280,8 +280,10 @@ export default function HockeySAPromo() {
                   <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><span style={{ width: 9, height: 9, borderRadius: 2, background: '#fff', border: '1px solid #C8E8D8', display: 'inline-block' }} />Available</span>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 5 }}>
-                {GRID.map((sq, i) => <SQ key={i} sq={sq} num={i + 1} />)}
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 34px)', gap: 4 }}>
+                  {GRID.map((sq, i) => <SQ key={i} sq={sq} num={i + 1} />)}
+                </div>
               </div>
               <div style={{ textAlign: 'center', marginTop: 8, fontSize: 9, color: '#9B8F80', fontStyle: 'italic' }}>
                 25-square grid at $5/square — $125 raised. Cath L wins!
