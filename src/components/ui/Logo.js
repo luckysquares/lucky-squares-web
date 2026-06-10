@@ -4,8 +4,8 @@
 // priority = legacy prop (no-op, kept for call-site compatibility)
 
 function LogoIcon({ size, dark }) {
-  const container = dark ? '#7C5CF6'               : '#6B46F5';
-  const squares   = dark ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.22)';
+  const container = dark ? 'var(--purple-icon-dark)' : 'var(--purple)';
+  const squares   = dark ? 'rgba(255,255,255,0.25)'  : 'rgba(255,255,255,0.22)';
   return (
     <svg
       width={size}
@@ -25,7 +25,7 @@ function LogoIcon({ size, dark }) {
 
       {/* Row 2 — y=15, winner square at col 2 (x=15) */}
       <rect x="5"  y="15" width="8" height="8" rx="2" fill={squares} />
-      <rect x="15" y="15" width="8" height="8" rx="2" fill="#F5C820" />
+      <rect x="15" y="15" width="8" height="8" rx="2" fill="var(--gold-bright)" />
       <rect x="25" y="15" width="8" height="8" rx="2" fill={squares} />
       <rect x="35" y="15" width="6" height="8" rx="2" fill={squares} />
 
@@ -45,11 +45,9 @@ function LogoIcon({ size, dark }) {
 }
 
 export default function Logo({ size = 44, dark = false, white = false, stacked = false, priority = false }) {
-  // Wordmark colours per spec
-  // white=true: fully white text for dark footer/background use
-  const luckyColor   = white ? '#ffffff'                : dark ? '#C4B5FD'                : '#6B46F5';
-  const squaresColor = white ? 'rgba(255,255,255,0.9)'  : dark ? 'rgba(255,255,255,0.88)' : '#2A1F0F';
-  const ausColor     = white ? 'rgba(255,255,255,0.45)' : dark ? 'rgba(255,255,255,0.28)' : '#9C8060';
+  const luckyColor   = white ? '#ffffff'                : dark ? 'var(--purple-tint-border)' : 'var(--purple)';
+  const squaresColor = white ? 'rgba(255,255,255,0.9)'  : dark ? 'rgba(255,255,255,0.88)'    : 'var(--text)';
+  const ausColor     = white ? 'rgba(255,255,255,0.45)' : dark ? 'rgba(255,255,255,0.28)'    : 'var(--text3)';
 
   // Font size: ~0.47× icon height, matching reference (36px icon → 18px, 44px → 21px)
   const fontSize = Math.round(size * 0.47);

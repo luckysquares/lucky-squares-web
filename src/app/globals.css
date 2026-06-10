@@ -26,8 +26,12 @@
   --orange2:      #F07030;
   --orange-light: #FFF3EC;
 
+  /* Gold - bright accent (logo highlight, dark-bg CTAs) */
+  --gold-bright:       #F5C820;
+
   /* Purple / hero accent */
   --purple:            #6B46F5;
+  --purple-icon-dark:  #7C5CF6;  /* logo icon container on dark/coloured backgrounds */
   --purple2:           #7C3AED;  /* admin/interactive purple — dominant UI use */
   --purple3:           #A78BFA;  /* light gradient start */
   --purple-dark:       #4A28D4;  /* gradient end / dark variant */

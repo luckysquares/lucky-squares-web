@@ -1,60 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Logo from '@/components/ui/Logo';
 
-const QR_MAIN   = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fluckysquares.com.au&color=1A0A3C&bgcolor=ffffff&margin=4';
-const QR_SIGNUP = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fluckysquares.com.au%2Ffundraise%3Fregister%3D1&color=6B46F5&bgcolor=ffffff&margin=4';
-
-// Inline SVGs — no background attribute issues
-const LogoWhite = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none" style={{ height: 34, display: 'block' }}>
-    <rect width="60" height="60" rx="14" fill="#7C5CF6"/>
-    <rect x="6.5"  y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="19.5" y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="32.5" y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="45.5" y="6.5"  width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="6.5"  y="19.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="19.5" y="19.5" width="10.5" height="10.5" rx="2.5" fill="#F5C820"/>
-    <rect x="32.5" y="19.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="45.5" y="19.5" width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="6.5"  y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="19.5" y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="32.5" y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="45.5" y="32.5" width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="6.5"  y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="19.5" y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="32.5" y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <rect x="45.5" y="45.5" width="8"    height="8"    rx="2.5" fill="rgba(255,255,255,0.25)"/>
-    <text x="76" y="38" fontFamily="Georgia, serif" fontWeight="900" fontSize="28" fill="#C4B5FD">Lucky</text>
-    <text x="148" y="38" fontFamily="Georgia, serif" fontWeight="400" fontStyle="italic" fontSize="28" fill="rgba(255,255,255,0.88)">Squares</text>
-    <text x="77" y="52" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="9" fill="rgba(255,255,255,0.28)" letterSpacing="2.8">AUSTRALIA</text>
-  </svg>
-);
-
-const LogoColour = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none" style={{ height: 30, display: 'block' }}>
-    <rect width="60" height="60" rx="14" fill="#6B46F5"/>
-    <rect x="6.5"  y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="19.5" y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="32.5" y="6.5"  width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="45.5" y="6.5"  width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="6.5"  y="19.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="19.5" y="19.5" width="10.5" height="10.5" rx="2.5" fill="#F5C820"/>
-    <rect x="32.5" y="19.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="45.5" y="19.5" width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="6.5"  y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="19.5" y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="32.5" y="32.5" width="10.5" height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="45.5" y="32.5" width="8"    height="10.5" rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="6.5"  y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="19.5" y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="32.5" y="45.5" width="10.5" height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <rect x="45.5" y="45.5" width="8"    height="8"    rx="2.5" fill="rgba(255,255,255,0.22)"/>
-    <text x="76" y="38" fontFamily="Georgia, serif" fontWeight="900" fontSize="28" fill="#6B46F5">Lucky</text>
-    <text x="148" y="38" fontFamily="Georgia, serif" fontWeight="400" fontStyle="italic" fontSize="28" fill="#2A1F0F">Squares</text>
-    <text x="77" y="52" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="9" fill="#9C8060" letterSpacing="2.8">AUSTRALIA</text>
-  </svg>
-);
+const QR_MAIN = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fluckysquares.com.au&color=1A0A3C&bgcolor=ffffff&margin=4';
 
 // Demo grid data — 5x5
 const GRID = [
@@ -141,7 +90,7 @@ export default function HockeySAPromo() {
           {/* Dark hero */}
           <div style={{ background: 'linear-gradient(160deg,#0D0820 0%,#1A0A3C 50%,#2D0E6B 100%)', padding: '28px 32px 0', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, right: 0, width: 200, height: 200, opacity: 0.06, backgroundImage: 'radial-gradient(circle,#fff 1.5px,transparent 1.5px)', backgroundSize: '16px 16px' }} />
-            <div style={{ marginBottom: 24 }}><LogoWhite /></div>
+            <div style={{ marginBottom: 24 }}><Logo size={34} dark /></div>
             <div style={{ fontSize: 10, fontWeight: 800, color: '#F5C820', letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 10 }}>For sporting clubs and associations</div>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: 48, fontWeight: 900, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.5px', marginBottom: 14 }}>
               Level up<br/>your<br/>fundraising.
@@ -212,7 +161,7 @@ export default function HockeySAPromo() {
 
           {/* Header */}
           <div style={{ background: '#fff', borderBottom: '3px solid #6B46F5', padding: '18px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <LogoColour />
+            <Logo size={30} />
             <div style={{ fontSize: 12, fontWeight: 700, color: '#6B46F5' }}>luckysquares.com.au</div>
           </div>
 
