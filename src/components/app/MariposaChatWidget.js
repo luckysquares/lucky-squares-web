@@ -152,7 +152,7 @@ export default function MariposaChatWidget() {
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: role === 'user' ? 'rgba(255,255,255,0.9)' : '#5B21B6', textDecoration: 'underline', wordBreak: 'break-all' }}
+          style={{ color: role === 'user' ? 'rgba(255,255,255,0.9)' : 'var(--purple-text)', textDecoration: 'underline', wordBreak: 'break-all' }}
         >
           {part}
         </a>
@@ -171,7 +171,7 @@ export default function MariposaChatWidget() {
         style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 9000,
           width: 60, height: 60, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #A78BFA, #7C3AED, #4A28D4)',
+          background: 'linear-gradient(135deg, var(--purple3), var(--purple2), var(--purple-dark))',
           border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(107,70,245,.4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 28, transition: 'transform .2s, box-shadow .2s',
@@ -195,7 +195,7 @@ export default function MariposaChatWidget() {
 
           {/* Header */}
           <div style={{
-            background: 'linear-gradient(135deg, #2D1B69, #4A28D4, #7C3AED)',
+            background: 'linear-gradient(135deg, #2D1B69, #4A28D4, var(--purple2))',
             padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0,
           }}>
             <div style={{
@@ -219,7 +219,7 @@ export default function MariposaChatWidget() {
               <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{
                   maxWidth: '85%', padding: '10px 14px', borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  background: m.role === 'user' ? 'linear-gradient(135deg, #7C3AED, #4A28D4)' : '#F5F3EE',
+                  background: m.role === 'user' ? 'linear-gradient(135deg, var(--purple2), #4A28D4)' : '#F5F3EE',
                   color: m.role === 'user' ? '#fff' : '#1A1209',
                   fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                 }}>
@@ -232,7 +232,7 @@ export default function MariposaChatWidget() {
                 <div style={{ background: '#F5F3EE', borderRadius: '16px 16px 16px 4px', padding: '10px 16px' }}>
                   <span style={{ display: 'inline-flex', gap: 4 }}>
                     {[0,1,2].map((i) => (
-                      <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: '#7C3AED', display: 'inline-block', animation: `bounce 1s ${i * 0.2}s infinite` }} />
+                      <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--purple2)', display: 'inline-block', animation: `bounce 1s ${i * 0.2}s infinite` }} />
                     ))}
                   </span>
                 </div>
@@ -255,7 +255,7 @@ export default function MariposaChatWidget() {
               <div style={{ background: '#F5F3EE', borderRadius: 12, padding: 14, margin: '4px 0 8px', fontSize: 13 }}>
                 <div style={{ fontWeight: 700, marginBottom: 8, color: '#1A1209' }}>Need more help?</div>
                 <p style={{ margin: '0 0 12px', fontSize: 12, lineHeight: 1.6, color: '#4A3728' }}>
-                  For detailed support, please visit our <a href="/contact" style={{ color: '#7C3AED', fontWeight: 700 }}>contact page</a> and submit a support request. Our team typically responds within one business day.
+                  For detailed support, please visit our <a href="/contact" style={{ color: 'var(--purple2)', fontWeight: 700 }}>contact page</a> and submit a support request. Our team typically responds within one business day.
                 </p>
                 <button
                   onClick={() => setEscalate(false)}
@@ -289,7 +289,7 @@ export default function MariposaChatWidget() {
               disabled={loading || !input.trim()}
               style={{
                 width: 38, height: 38, borderRadius: '50%', border: 'none',
-                background: input.trim() ? 'linear-gradient(135deg, #7C3AED, #4A28D4)' : '#E5E0D5',
+                background: input.trim() ? 'linear-gradient(135deg, var(--purple2), #4A28D4)' : '#E5E0D5',
                 color: '#fff', cursor: input.trim() ? 'pointer' : 'not-allowed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 16, flexShrink: 0, transition: 'background .2s',

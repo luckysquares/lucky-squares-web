@@ -89,7 +89,7 @@ export default function AdminLayout({ children }) {
                 fontSize: 13, fontWeight: 700, textDecoration: 'none',
                 color: active ? '#fff' : 'rgba(255,255,255,.5)',
                 background: active ? 'rgba(255,255,255,.08)' : 'none',
-                borderLeft: active ? '3px solid #7C3AED' : '3px solid transparent',
+                borderLeft: active ? '3px solid var(--purple2)' : '3px solid transparent',
                 transition: 'all .15s',
               }}>
                 <span style={{ fontSize: 16 }}>{icon}</span>

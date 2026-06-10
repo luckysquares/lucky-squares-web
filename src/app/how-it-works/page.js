@@ -157,7 +157,7 @@ export default function HowItWorksPage() {
                   { num: '5', icon: '👁️', title: 'Preview and launch', desc: 'Review everything before it goes live. When you are happy, click Launch. Your unique share link is ready to send to your community.' },
                 ].map((s) => (
                   <div key={s.num} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: 'var(--cream)', borderRadius: 12, padding: '16px 20px', border: '1px solid var(--border)' }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #A78BFA, #7C3AED)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, var(--purple3), var(--purple2))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
                       {s.num}
                     </div>
                     <div>
@@ -312,7 +312,7 @@ export default function HowItWorksPage() {
                   { step: '4', icon: '📬', title: 'Notifying your winners', desc: 'The platform automatically notifies buyers of the draw results by email. You can also follow up directly using the contact details each winner provided at checkout to arrange prize delivery.' },
                 ].map((s) => (
                   <div key={s.step} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '16px 18px', background: 'var(--cream)', borderRadius: 12, border: '1px solid var(--border)' }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #A78BFA, #7C3AED)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, var(--purple3), var(--purple2))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
                       {s.step}
                     </div>
                     <div>

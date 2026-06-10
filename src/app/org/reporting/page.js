@@ -44,7 +44,7 @@ export default function OrgReporting() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 36 }}>
         {[
           { label: 'Total raised',     value: fmtAud(totalGross),           color: '#16A34A' },
-          { label: 'Squares sold',     value: `${totalSold} / ${totalSquares}`, color: '#7C3AED' },
+          { label: 'Squares sold',     value: `${totalSold} / ${totalSquares}`, color: 'var(--purple2)' },
           { label: 'Avg fill rate',    value: `${avgFill}%`,                color: '#F59E0B' },
           { label: 'Campaigns active', value: active.length,                color: '#0EA5E9' },
           { label: 'Draws completed',  value: drawn.length,                 color: '#6B7280' },
@@ -81,7 +81,7 @@ export default function OrgReporting() {
                     </td>
                     <td style={{ padding: '12px 16px', color: 'var(--text2)' }}>{c.owner_name}</td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span className={`tag ${c.status === 'active' ? 'tag-green' : ''}`} style={{ fontSize: 11, textTransform: 'capitalize', background: c.status === 'drawn' ? '#EDE9FE' : undefined, color: c.status === 'drawn' ? '#7C3AED' : undefined }}>
+                      <span className={`tag ${c.status === 'active' ? 'tag-green' : c.status === 'drawn' ? 'tag-drawn' : 'tag-muted'}`} style={{ fontSize: 11, textTransform: 'capitalize' }}>
                         {c.status}
                       </span>
                     </td>

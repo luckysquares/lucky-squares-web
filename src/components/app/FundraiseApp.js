@@ -620,7 +620,7 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
 
         {/* ── Organisation Plan Panel ──────────────────────────────────── */}
         {isOrg && (
-          <div style={{ background: 'linear-gradient(135deg, #4A28D4 0%, #6B46F5 60%, #7C3AED 100%)', borderRadius: 16, padding: '24px 28px', marginBottom: 24, color: '#fff' }}>
+          <div style={{ background: 'linear-gradient(135deg, #4A28D4 0%, #6B46F5 60%, var(--purple2) 100%)', borderRadius: 16, padding: '24px 28px', marginBottom: 24, color: '#fff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
@@ -717,7 +717,7 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
               { step: '4', icon: '💸', title: 'Funds go to you', desc: 'Proceeds transfer directly to your account. We charge a flat $19 fee, nothing more.' },
             ]).map(({ step, icon, title, desc }) => (
               <div key={step} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--purple-light)', border: '1.5px solid #C4B5FD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{icon}</div>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--purple-light)', border: '1.5px solid var(--purple-tint-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{icon}</div>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', marginBottom: 3 }}>{title}</div>
                   <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>{desc}</div>
@@ -1822,7 +1822,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
         </div>
       )}
       {payment.method === 'stripe' && (
-        <div className="scratch-card" style={{ padding: '24px 28px', background: '#F5F3FF', border: '1.5px solid #C4B5FD' }}>
+        <div className="scratch-card" style={{ padding: '24px 28px', background: 'var(--purple-bg)', border: '1.5px solid var(--purple-tint-border)' }}>
           <div style={{ fontWeight: 900, fontSize: 15, color: 'var(--text)', marginBottom: 6 }}>
             One quick setup before you go live
           </div>
@@ -1842,7 +1842,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
               </div>
             ))}
           </div>
-          <div style={{ fontSize: 12, color: '#5B21B6', background: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '10px 14px', lineHeight: 1.6 }}>
+          <div style={{ fontSize: 12, color: 'var(--purple-text)', background: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '10px 14px', lineHeight: 1.6 }}>
             <strong>Timeline:</strong> Funds transfer to your bank within 2 business days of the draw completing.
           </div>
         </div>
@@ -1984,7 +1984,7 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
             ))}
           </div>
 
-          <div style={{ background: '#F5F3FF', border: '1.5px solid #C4B5FD', borderRadius: 12, padding: '12px 18px', marginBottom: 28, fontSize: 12, color: '#5B21B6', lineHeight: 1.6, textAlign: 'center' }}>
+          <div style={{ background: 'var(--purple-bg)', border: '1.5px solid var(--purple-tint-border)', borderRadius: 12, padding: '12px 18px', marginBottom: 28, fontSize: 12, color: 'var(--purple-text)', lineHeight: 1.6, textAlign: 'center' }}>
             🔒 Stripe processes over $1 trillion in payments annually — the same infrastructure trusted by Atlassian, Canva, Xero and millions of businesses worldwide.
           </div>
 

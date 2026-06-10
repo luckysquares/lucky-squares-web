@@ -550,7 +550,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
               />
               <button
                 className="btn btn-sm"
-                style={{ background: '#7C3AED', color: '#fff', border: 'none', borderRadius: 10, padding: '0 16px', fontWeight: 700, flexShrink: 0, cursor: notifyState === 'saving' ? 'not-allowed' : 'pointer', opacity: notifyState === 'saving' ? 0.6 : 1 }}
+                style={{ background: 'var(--purple2)', color: '#fff', border: 'none', borderRadius: 10, padding: '0 16px', fontWeight: 700, flexShrink: 0, cursor: notifyState === 'saving' ? 'not-allowed' : 'pointer', opacity: notifyState === 'saving' ? 0.6 : 1 }}
                 disabled={notifyState === 'saving'}
                 onClick={async () => {
                   const email = (notifyEmail || savedBuyer?.email || buyerEmail).trim();
@@ -1062,15 +1062,15 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                             </div>
                             <div style={{ fontSize: 14, fontWeight: 800, color: '#1A1209' }}>{w.name || 'Unknown'}</div>
                             <div style={{ fontSize: 12, color: '#4A3728', marginTop: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                              {w.email && <a href={`mailto:${w.email}`} style={{ color: '#7C3AED', textDecoration: 'none', fontWeight: 600 }}>✉ {w.email}</a>}
-                              {w.phone && <a href={`tel:${w.phone}`} style={{ color: '#7C3AED', textDecoration: 'none', fontWeight: 600 }}>📞 {w.phone}</a>}
+                              {w.email && <a href={`mailto:${w.email}`} style={{ color: 'var(--purple2)', textDecoration: 'none', fontWeight: 600 }}>✉ {w.email}</a>}
+                              {w.phone && <a href={`tel:${w.phone}`} style={{ color: 'var(--purple2)', textDecoration: 'none', fontWeight: 600 }}>📞 {w.phone}</a>}
                               {!w.email && !w.phone && <span style={{ color: '#9C8060', fontStyle: 'italic' }}>No contact details recorded</span>}
                             </div>
                           </div>
                           {w.email && (
                             <a
                               href={`mailto:${w.email}?subject=Congratulations! You won ${place} prize in ${fundraiser.title}&body=Hi ${w.name ? w.name.split(' ')[0] : 'there'},%0D%0A%0D%0ACongratulations! You have won the ${place} prize${prize?.description ? ` (${prize.description})` : ''} in the ${fundraiser.title} Lucky Squares fundraiser.%0D%0A%0D%0APlease contact us to arrange your prize.%0D%0A%0D%0ARegards,%0D%0A${fundraiser.org}`}
-                              style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, textDecoration: 'none', background: '#7C3AED', color: '#fff', borderRadius: 8, padding: '6px 12px', whiteSpace: 'nowrap' }}
+                              style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, textDecoration: 'none', background: 'var(--purple2)', color: '#fff', borderRadius: 8, padding: '6px 12px', whiteSpace: 'nowrap' }}
                             >
                               ✉ Email winner
                             </a>
@@ -1258,7 +1258,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
                     </div>
                   </div>
                 </div>
-                <button className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', borderColor: '#C4B5F4', color: '#7C3AED' }} onClick={() => window.open(`/${fundraiser.slug ?? fundraiser.id}/poster`, '_blank')}>
+                <button className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', borderColor: '#C4B5F4', color: 'var(--purple2)' }} onClick={() => window.open(`/${fundraiser.slug ?? fundraiser.id}/poster`, '_blank')}>
                   🖨 Create poster
                 </button>
               </div>
@@ -1380,7 +1380,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           )}
 
           {!isOwner && (
-            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '40px auto 0', padding: '24px 28px', background: 'linear-gradient(135deg, #A78BFA22, #7C3AED11)', border: '1.5px solid rgba(107,70,245,.2)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '40px auto 0', padding: '24px 28px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--purple3) 13%, transparent), color-mix(in srgb, var(--purple2) 7%, transparent))', border: '1.5px solid rgba(107,70,245,.2)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
               <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                 <span style={{ fontSize: 32, flexShrink: 0 }}>🍀</span>
                 <div>

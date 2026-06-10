@@ -140,8 +140,8 @@ export default function MariposaLogsPage() {
                   key={s.session_id}
                   onClick={() => loadMessages(s)}
                   style={{
-                    textAlign: 'left', background: activeSession?.session_id === s.session_id ? '#EDE9FE' : '#fff',
-                    border: `1.5px solid ${activeSession?.session_id === s.session_id ? '#7C3AED' : 'var(--border)'}`,
+                    textAlign: 'left', background: activeSession?.session_id === s.session_id ? 'var(--purple-tint)' : '#fff',
+                    border: `1.5px solid ${activeSession?.session_id === s.session_id ? 'var(--purple2)' : 'var(--border)'}`,
                     borderRadius: 10, padding: '10px 14px', cursor: 'pointer', fontFamily: 'inherit',
                     transition: 'all .15s',
                   }}
@@ -153,7 +153,7 @@ export default function MariposaLogsPage() {
                     <span style={{ fontSize: 10, color: 'var(--text3)', fontWeight: 600 }}>{s.count} msg{s.count !== 1 ? 's' : ''}</span>
                   </div>
                   {s.fundraiser ? (
-                    <div style={{ fontSize: 11, color: '#5B21B6', fontWeight: 600, marginBottom: 2 }}>
+                    <div style={{ fontSize: 11, color: 'var(--purple-text)', fontWeight: 600, marginBottom: 2 }}>
                       🗂️ {s.fundraiser.title}
                     </div>
                   ) : (
@@ -201,12 +201,12 @@ export default function MariposaLogsPage() {
                 ) : messages.map((m) => (
                   <div key={m.id} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', gap: 8 }}>
                     {m.role === 'assistant' && (
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0, marginTop: 2 }}>🐰</div>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--purple-tint)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0, marginTop: 2 }}>🐰</div>
                     )}
                     <div style={{ maxWidth: '70%' }}>
                       <div style={{
                         padding: '10px 14px', borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                        background: m.role === 'user' ? 'linear-gradient(135deg, #7C3AED, #4A28D4)' : '#F5F3EE',
+                        background: m.role === 'user' ? 'linear-gradient(135deg, var(--purple2), #4A28D4)' : '#F5F3EE',
                         color: m.role === 'user' ? '#fff' : '#1A1209',
                         fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                       }}>

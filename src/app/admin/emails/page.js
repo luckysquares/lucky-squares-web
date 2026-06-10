@@ -927,7 +927,7 @@ export default function EmailPreviewPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: saving ? '#E5E0D5' : '#7C3AED', color: saving ? '#9C8060' : '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: saving ? '#E5E0D5' : 'var(--purple2)', color: saving ? '#9C8060' : '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   {saving ? 'Saving...' : 'Save template'}
                 </button>

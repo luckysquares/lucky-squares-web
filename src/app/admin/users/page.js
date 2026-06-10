@@ -140,7 +140,7 @@ export default function AdminUsers() {
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       {u.is_admin
-                        ? <span className="tag" style={{ background: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD', fontSize: 11, fontWeight: 800 }}>Admin</span>
+                        ? <span className="tag" style={{ background: 'var(--purple-tint)', color: 'var(--purple-text)', border: '1px solid var(--purple-tint-border)', fontSize: 11, fontWeight: 800 }}>Admin</span>
                         : <span className={`tag ${PLAN_COLOURS[u.plan] ?? 'tag-muted'}`} style={{ fontSize: 11 }}>{PLAN_LABELS[u.plan] ?? u.plan}</span>
                       }
                     </td>

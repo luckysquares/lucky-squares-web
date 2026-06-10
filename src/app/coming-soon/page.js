@@ -47,7 +47,7 @@ export default function ComingSoonPage() {
 
         <h1 className="hero-title" style={{ maxWidth: 640 }}>
           Something{' '}
-          <span style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #4A28D4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <span className="text-gradient-purple">
             exciting
           </span>{' '}
           is coming

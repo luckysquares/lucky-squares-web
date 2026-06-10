@@ -92,7 +92,7 @@ const select = {
   cursor: 'pointer',
 };
 
-const btn = (bg = '#7C3AED', text = '#fff') => ({
+const btn = (bg = 'var(--purple2)', text = '#fff') => ({
   padding: '8px 16px',
   borderRadius: 8,
   border: 'none',
@@ -131,9 +131,9 @@ export default function SupportPage() {
             style={{
               padding: '10px 20px',
               border: 'none',
-              borderBottom: activeTab === id ? '2px solid #7C3AED' : '2px solid transparent',
+              borderBottom: activeTab === id ? '2px solid var(--purple2)' : '2px solid transparent',
               background: 'none',
-              color: activeTab === id ? '#7C3AED' : '#6B7280',
+              color: activeTab === id ? 'var(--purple2)' : '#6B7280',
               fontWeight: 700,
               fontSize: 13,
               cursor: 'pointer',
@@ -221,7 +221,7 @@ function TicketsTab() {
           <button
             onClick={() => fetchTickets(true)}
             disabled={refreshing}
-            style={{ ...btn('#F5F3EE', '#7C3AED'), padding: '4px 10px', border: '1.5px solid #E5E0D5', opacity: refreshing ? 0.6 : 1 }}
+            style={{ ...btn('#F5F3EE', 'var(--purple2)'), padding: '4px 10px', border: '1.5px solid #E5E0D5', opacity: refreshing ? 0.6 : 1 }}
           >
             {refreshing ? '↻ Refreshing…' : '↻ Refresh'}
           </button>
@@ -308,7 +308,7 @@ function TicketListItem({ ticket, selected, onClick }) {
       style={{
         padding: '12px 14px',
         borderRadius: 10,
-        border: `1.5px solid ${selected ? '#7C3AED' : '#E5E0D5'}`,
+        border: `1.5px solid ${selected ? 'var(--purple2)' : '#E5E0D5'}`,
         background: selected ? '#F5F0FF' : '#fff',
         marginBottom: 8,
         cursor: 'pointer',
@@ -316,7 +316,7 @@ function TicketListItem({ ticket, selected, onClick }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-        <span style={{ fontSize: 11, fontWeight: 900, color: '#7C3AED', fontFamily: 'monospace' }}>{ticket.ticket_ref}</span>
+        <span style={{ fontSize: 11, fontWeight: 900, color: 'var(--purple2)', fontFamily: 'monospace' }}>{ticket.ticket_ref}</span>
         {ticket.sla_level && <span title={`SLA breach: ${ticket.sla_level}`} style={{ fontSize: 12 }}>⚠️</span>}
         <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: PRIORITY_COLOURS[ticket.priority] || '#9CA3AF', display: 'inline-block', flexShrink: 0 }} title={`Priority: ${ticket.priority}`} />
       </div>
@@ -453,7 +453,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontFamily: 'monospace', fontWeight: 900, color: '#7C3AED', fontSize: 13 }}>{ticket.ticket_ref}</span>
+              <span style={{ fontFamily: 'monospace', fontWeight: 900, color: 'var(--purple2)', fontSize: 13 }}>{ticket.ticket_ref}</span>
               <span style={{ ...badge(sc) }}>{STATUS_LABELS[ticket.status]}</span>
               {ticket.satisfaction && (
                 <span style={{ fontSize: 13 }}>{ticket.satisfaction === 'positive' ? '👍' : '👎'}</span>
@@ -461,7 +461,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
             </div>
             <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#1A1209', lineHeight: 1.3 }}>{ticket.subject}</h2>
             <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>
-              {ticket.contact_name} — <a href={`mailto:${ticket.contact_email}`} style={{ color: '#7C3AED' }}>{ticket.contact_email}</a>
+              {ticket.contact_name} — <a href={`mailto:${ticket.contact_email}`} style={{ color: 'var(--purple2)' }}>{ticket.contact_email}</a>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
@@ -507,7 +507,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
               onChange={(e) => setMergeInput(e.target.value)}
               style={{ flex: 1, padding: '7px 10px', borderRadius: 8, border: '1.5px solid #E5E0D5', fontSize: 12, fontFamily: 'inherit' }}
             />
-            <button onClick={mergeTicket} style={{ ...btn('#7C3AED') }}>Merge into</button>
+            <button onClick={mergeTicket} style={{ ...btn('var(--purple2)') }}>Merge into</button>
             <button onClick={() => setShowMerge(false)} style={{ ...btn('#F5F3EE', '#4A3728'), border: '1.5px solid #E5E0D5' }}>Cancel</button>
           </div>
         )}
@@ -537,9 +537,9 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
               onClick={() => setIsInternal(val)}
               style={{
                 padding: '5px 14px', borderRadius: 20, border: '1.5px solid',
-                borderColor: isInternal === val ? (val ? '#D97706' : '#7C3AED') : '#E5E0D5',
+                borderColor: isInternal === val ? (val ? '#D97706' : 'var(--purple2)') : '#E5E0D5',
                 background:  isInternal === val ? (val ? '#FEF3C7' : '#F5F0FF') : '#fff',
-                color:        isInternal === val ? (val ? '#92400E' : '#7C3AED') : '#6B7280',
+                color:        isInternal === val ? (val ? '#92400E' : 'var(--purple2)') : '#6B7280',
                 fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
@@ -633,7 +633,7 @@ function TicketDetail({ ticketId, onUpdate, onClose }) {
             onClick={sendReply}
             disabled={sending || !replyBody.trim()}
             style={{
-              ...btn(sending || !replyBody.trim() ? '#E5E0D5' : '#7C3AED'),
+              ...btn(sending || !replyBody.trim() ? '#E5E0D5' : 'var(--purple2)'),
               color: sending || !replyBody.trim() ? '#9C8060' : '#fff',
             }}
           >
@@ -669,7 +669,7 @@ function MessageBubble({ message }) {
         padding: '12px 16px',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: isAdmin ? '#7C3AED' : '#4A3728' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: isAdmin ? 'var(--purple2)' : '#4A3728' }}>
             {message.sender_name || (isAdmin ? 'Support team' : 'Customer')}
           </span>
           <span style={{ fontSize: 11, color: '#9C8060', whiteSpace: 'nowrap' }}>{new Date(message.created_at).toLocaleString('en-AU')}</span>
@@ -779,7 +779,7 @@ function CannedTab() {
           <button
             onClick={handleCreate}
             disabled={saving || !title.trim() || !body.trim()}
-            style={{ ...btn(saving || !title.trim() || !body.trim() ? '#E5E0D5' : '#7C3AED'), color: saving || !title.trim() || !body.trim() ? '#9C8060' : '#fff' }}
+            style={{ ...btn(saving || !title.trim() || !body.trim() ? '#E5E0D5' : 'var(--purple2)'), color: saving || !title.trim() || !body.trim() ? '#9C8060' : '#fff' }}
           >
             {saving ? 'Saving...' : 'Save response'}
           </button>
@@ -852,7 +852,7 @@ function MetricsTab() {
         {[
           { label: 'Open tickets',           value: open,                                     colour: '#1D4ED8' },
           { label: 'Resolved this week',     value: resolvedThisWeek,                         colour: '#15803D' },
-          { label: 'Total tickets',          value: tickets.length,                           colour: '#7C3AED' },
+          { label: 'Total tickets',          value: tickets.length,                           colour: 'var(--purple2)' },
           { label: 'Satisfaction score',     value: satisfactionPct !== null ? `${satisfactionPct}%` : 'N/A', colour: '#D97706' },
         ].map(({ label, value, colour }) => (
           <div key={label} style={{ ...card, textAlign: 'center' }}>

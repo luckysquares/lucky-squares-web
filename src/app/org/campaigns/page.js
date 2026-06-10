@@ -84,7 +84,7 @@ export default function OrgCampaigns() {
                         <div style={{ fontSize: 10, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Price</div>
                         <div style={{ fontSize: 14, fontWeight: 900 }}>${parseFloat(c.price_per_sq || 0).toFixed(0)}</div>
                       </div>
-                      <span className={`tag ${c.status === 'active' ? 'tag-green' : ''}`} style={{ fontSize: 11, textTransform: 'capitalize', background: c.status === 'drawn' ? '#EDE9FE' : undefined, color: c.status === 'drawn' ? '#7C3AED' : undefined }}>
+                      <span className={`tag ${c.status === 'active' ? 'tag-green' : c.status === 'drawn' ? 'tag-drawn' : 'tag-muted'}`} style={{ fontSize: 11, textTransform: 'capitalize' }}>
                         {c.status}
                       </span>
                       <div style={{ display: 'flex', gap: 6 }}>

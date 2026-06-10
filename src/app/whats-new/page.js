@@ -106,12 +106,12 @@ const ENTRIES = [
 ];
 
 const BADGE_STYLES = {
-  'Feature':     { background: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD' },
+  'Feature':     { background: 'var(--purple-tint)', color: 'var(--purple-text)', border: '1px solid var(--purple-tint-border)' },
   'Update':      { background: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0' },
   'Fixed':       { background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' },
   'Coming soon': { background: '#F3F4F6', color: '#4B5563', border: '1px solid #D1D5DB' },
   // Legacy — kept for backwards compat with older entries
-  'New':         { background: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD' },
+  'New':         { background: 'var(--purple-tint)', color: 'var(--purple-text)', border: '1px solid var(--purple-tint-border)' },
   'Improved':    { background: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0' },
 };
 
