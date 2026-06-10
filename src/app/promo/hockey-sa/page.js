@@ -166,7 +166,7 @@ export default function HockeySAPromo() {
           </div>
 
           {/* Hero image */}
-          <div style={{ height: 148, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+          <div style={{ height: 296, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/help-for-sports-clubs-to-raise-money.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', display: 'block' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right,rgba(107,70,245,0.82) 0%,rgba(107,70,245,0.25) 55%,transparent 100%)' }} />
