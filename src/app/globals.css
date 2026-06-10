@@ -62,6 +62,13 @@
   --rb1: #E83030; --rb2: #F57A20; --rb3: #F5C820;
   --rb4: #28C860; --rb5: #2080E8; --rb6: #8040D0;
 
+  /* Square states — authoritative colours for the live grid */
+  --sq-available-border: #C8E8D8;
+  --sq-taken-bg:         #F0EDE5;
+  --sq-taken-border:     #DDD5C0;
+  --sq-winner-bg:        #00C875;
+  --sq-winner-border:    #009A5C;
+
   /* Fonts */
   --font-sans:  var(--font-nunito), 'Nunito', system-ui, sans-serif;
   --font-serif: var(--font-fraunces), 'Fraunces', Georgia, serif;
@@ -344,7 +351,7 @@ textarea { font-family: inherit; }
 }
 .sq:hover { transform: scale(1.14); z-index: 2; }
 
-.sq.available     { background: #fff; border-color: #C8E8D8; color: var(--text3); }
+.sq.available     { background: #fff; border-color: var(--sq-available-border); color: var(--text3); }
 .sq.available:hover { border-color: var(--green2); background: #F0FBF6; box-shadow: 0 3px 12px rgba(26,122,85,.16); }
 
 /* In-cart: lighter tint so it reads clearly against the new darker green */
@@ -374,7 +381,7 @@ textarea { font-family: inherit; }
 }
 .sq.reserved:hover { transform: none; }
 
-.sq.taken { background: #F0EDE5; border-color: #DDD5C0; color: var(--muted); cursor: default; }
+.sq.taken { background: var(--sq-taken-bg); border-color: var(--sq-taken-border); color: var(--muted); cursor: default; }
 .sq.taken:hover { transform: none; }
 
 /* ── Draw result squares ── */
@@ -382,7 +389,7 @@ textarea { font-family: inherit; }
   0%,100% { box-shadow: 0 0 0 0   rgba(0,200,117,.7); }
   50%      { box-shadow: 0 0 0 10px rgba(0,200,117,0); }
 }
-.sq.winner { background: #00C875; border-color: #009A5C; color: #fff; cursor: default; animation: winner-sq-pulse 1.5s ease-in-out infinite; }
+.sq.winner { background: var(--sq-winner-bg); border-color: var(--sq-winner-border); color: #fff; cursor: default; animation: winner-sq-pulse 1.5s ease-in-out infinite; }
 .sq.mine-lost { background: #4A90D9; border-color: #2165B5; color: #fff; cursor: default; }
 
 /* ── Sponsored square (gifted by LuckySquares Australia) ── */
@@ -447,7 +454,7 @@ textarea { font-family: inherit; }
 .sq-label { font-size: 8px; line-height: 1; margin-top: 2px; text-align: center; overflow: hidden; max-width: 100%; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; }
 .sq-timer { font-size: 10px; color: var(--orange); font-weight: 800; }
 
-.grid-container { display: grid; gap: 4px; margin: 0 auto; }
+.grid-container { display: grid; gap: 5px; margin: 0 auto; }
 .grid-100 { grid-template-columns: repeat(10, 1fr); max-width: 640px; }
 .grid-50  { grid-template-columns: repeat(10, 1fr); max-width: 640px; }
 .grid-25  { grid-template-columns: repeat(5, 1fr);  max-width: 330px; }
@@ -663,13 +670,13 @@ textarea { font-family: inherit; }
 
 /* ── btn-purple ── */
 .btn-purple {
-  background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 45%, #4A28D4 100%);
+  background: linear-gradient(135deg, var(--purple3) 0%, var(--purple2) 45%, var(--purple-dark) 100%);
   color: #fff;
   border: none;
   box-shadow: 0 4px 20px rgba(107,70,245,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
 .btn-purple:hover {
-  background: linear-gradient(135deg, #C4B5FD 0%, #8B5CF6 45%, #5B35E8 100%);
+  background: linear-gradient(135deg, #C4B5FD 0%, var(--purple3) 45%, var(--purple2) 100%);
   box-shadow: 0 8px 32px rgba(107,70,245,.55), inset 0 1px 0 rgba(255,255,255,.22);
   animation: wiggle .4s ease;
 }
