@@ -95,34 +95,34 @@ export default function HockeySAPromo() {
             <div style={{ fontFamily: 'Georgia, serif', fontSize: 48, fontWeight: 900, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.5px', marginBottom: 14 }}>
               Level up<br/>your<br/>fundraising.
             </div>
-            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, maxWidth: 340, marginBottom: 24 }}>
+            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, maxWidth: 340, marginBottom: 20 }}>
               Run a Lucky Squares fundraiser entirely online. Set up in minutes, sell squares by link, and draw live.
             </div>
-            {/* Stats strip */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', background: 'rgba(255,255,255,0.07)', borderRadius: '10px 10px 0 0', overflow: 'hidden' }}>
+          </div>
+
+          {/* Sports photo with stats overlay */}
+          <div style={{ height: 210, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/sports-club-fundraiser.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', display: 'block' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,#2D0E6B 0%,transparent 30%,transparent 45%,rgba(0,0,0,0.72) 100%)' }} />
+            {/* Stats strip — overlaid on photo */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' }}>
               {[
                 { n: '5 min', label: 'to set up' },
                 { n: '$0', label: 'to get started' },
                 { n: '$19', label: 'flat launch fee' },
                 { n: '100%', label: 'raised to your cause' },
               ].map(({ n, label }, i) => (
-                <div key={n} style={{ padding: '14px 8px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+                <div key={n} style={{ padding: '12px 8px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.12)' : 'none' }}>
                   <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--gold-bright)', marginBottom: 2 }}>{n}</div>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.65)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Sports photo */}
-          <div style={{ height: 148, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/sports-club-fundraiser.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', display: 'block' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,#2D0E6B 0%,transparent 22%,transparent 72%,#fff 100%)' }} />
-          </div>
-
           {/* How it works */}
-          <div style={{ padding: '6px 32px 0', flex: 1 }}>
+          <div style={{ padding: '22px 32px 0', flex: 1 }}>
             <div style={{ fontSize: 10, fontWeight: 800, color: '#6B46F5', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>How it works</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
               {[
