@@ -101,7 +101,7 @@ export default function HockeySAPromo() {
           </div>
 
           {/* Sports photo with stats overlay */}
-          <div style={{ height: 210, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+          <div style={{ height: 420, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/sports-club-fundraiser.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', display: 'block' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,#2D0E6B 0%,transparent 30%,transparent 45%,rgba(0,0,0,0.72) 100%)' }} />
