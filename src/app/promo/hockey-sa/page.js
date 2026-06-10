@@ -91,7 +91,7 @@ export default function HockeySAPromo() {
           <div style={{ background: 'linear-gradient(160deg,#0D0820 0%,#1A0A3C 50%,#2D0E6B 100%)', padding: '28px 32px 0', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, right: 0, width: 200, height: 200, opacity: 0.06, backgroundImage: 'radial-gradient(circle,#fff 1.5px,transparent 1.5px)', backgroundSize: '16px 16px' }} />
             <div style={{ marginBottom: 24 }}><Logo size={34} dark /></div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#F5C820', letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 10 }}>For sporting clubs and associations</div>
+            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--gold-bright)', letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 10 }}>For sporting clubs and associations</div>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: 48, fontWeight: 900, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.5px', marginBottom: 14 }}>
               Level up<br/>your<br/>fundraising.
             </div>
@@ -107,7 +107,7 @@ export default function HockeySAPromo() {
                 { n: '100%', label: 'raised to your cause' },
               ].map(({ n, label }, i) => (
                 <div key={n} style={{ padding: '14px 8px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#F5C820', marginBottom: 2 }}>{n}</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--gold-bright)', marginBottom: 2 }}>{n}</div>
                   <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
                 </div>
               ))}
@@ -145,7 +145,7 @@ export default function HockeySAPromo() {
           <div style={{ background: 'linear-gradient(135deg,#1A0A3C,#6B46F5)', padding: '18px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Start free at</div>
-              <div style={{ fontSize: 24, fontWeight: 900, color: '#F5C820', letterSpacing: '-0.5px' }}>luckysquares.com.au</div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--gold-bright)', letterSpacing: '-0.5px' }}>luckysquares.com.au</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>No credit card needed to get started</div>
             </div>
             <div style={{ background: '#fff', borderRadius: 10, padding: 6, flexShrink: 0 }}>
@@ -213,9 +213,9 @@ export default function HockeySAPromo() {
               </div>
               <div style={{ background: 'linear-gradient(135deg,#1A0A3C,#4A28D4)', borderRadius: 10, padding: '14px 16px', border: '1.5px solid #6B46F5' }}>
                 <div style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Organisation plan</div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: '#F5C820', marginBottom: 2 }}>$149<span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.6)' }}>/yr</span></div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--gold-bright)', marginBottom: 2 }}>$149<span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.6)' }}>/yr</span></div>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>Up to 10 campaigns at once. Team access. Perfect for regular fundraisers.</div>
-                <div style={{ marginTop: 8, fontSize: 10, fontWeight: 700, color: '#F5C820' }}>✓ Best for clubs and associations</div>
+                <div style={{ marginTop: 8, fontSize: 10, fontWeight: 700, color: 'var(--gold-bright)' }}>✓ Best for clubs and associations</div>
               </div>
             </div>
 
@@ -243,7 +243,7 @@ export default function HockeySAPromo() {
 
           {/* Footer */}
           <div style={{ background: '#1A0A3C', padding: '10px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: '#F5C820' }}>luckysquares.com.au</div>
+            <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--gold-bright)' }}>luckysquares.com.au</div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>hello@luckysquares.com.au</div>
           </div>
         </div>
