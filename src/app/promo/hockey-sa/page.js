@@ -43,6 +43,7 @@ const css = `
   .back-link { font-size: 13px; color: rgba(255,255,255,.6); text-decoration: none; }
   .page-wrap { display: flex; flex-direction: column; gap: 40px; padding: 40px 20px 60px; align-items: center; }
   .a4 { width: 210mm; height: 297mm; overflow: hidden; position: relative; box-shadow: 0 8px 48px rgba(0,0,0,.35); }
+  .sq, .sq * { animation: none !important; transition: none !important; }
   @page { size: A4 portrait; margin: 12mm; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
