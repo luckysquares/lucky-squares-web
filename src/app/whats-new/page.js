@@ -89,7 +89,7 @@ const ENTRIES = [
       {
         badge: 'Feature',
         title: 'Live draw',
-        body: 'When you\'re ready to draw, hit the button and the winning square is revealed live to everyone watching the grid. Winners are highlighted instantly. For multiple prizes, multiple squares are drawn in sequence.',
+        body: 'When you\'re ready to draw, hit the button and the winning square is highlighted live on the grid for everyone watching. Winners are highlighted instantly. For multiple prizes, multiple squares are drawn in sequence.',
       },
       {
         badge: 'Feature',

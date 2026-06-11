@@ -713,7 +713,7 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
             ] : [
               { step: '1', icon: '🎯', title: 'Set up your grid', desc: 'Choose your grid size, set a price per square, and add your prizes.' },
               { step: '2', icon: '🔗', title: 'Share your link', desc: 'Send your campaign link via WhatsApp, email, or social media.' },
-              { step: '3', icon: '🎲', title: 'Run the draw', desc: 'Hit draw when ready and the winner is revealed live to everyone watching.' },
+              { step: '3', icon: '🎲', title: 'Run the draw', desc: 'Hit draw when ready and the winning square is highlighted live on the grid for everyone watching.' },
               { step: '4', icon: '💸', title: 'Funds go to you', desc: 'Proceeds transfer directly to your account. We charge a flat $19 fee, nothing more.' },
             ]).map(({ step, icon, title, desc }) => (
               <div key={step} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
