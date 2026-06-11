@@ -186,7 +186,7 @@ export default function HockeySAPromo() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {[
                   { icon: '📱', title: 'Works on any device', body: 'Buyers pick their square and pay by card from their phone. No app needed.' },
-                  { icon: '💸', title: 'Funds go directly to you', body: 'Proceeds transfer straight to your bank. Flat $19 fee. Nothing more.' },
+                  { icon: '💸', title: 'Funds go directly to you', body: 'Simple flat-fee pricing. We don\'t take a percentage of the funds you raise.' },
                   { icon: '🎯', title: 'No spreadsheets', body: 'The grid manages itself. See who has which square in real time.' },
                   { icon: '🎲', title: 'Live draw everyone can watch', body: 'Run the draw on any screen. Winners revealed live. Everyone loves it.' },
                 ].map(({ icon, title, body }) => (
