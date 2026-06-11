@@ -128,7 +128,7 @@ export default function HockeySAPromo() {
               {[
                 { icon: '🎯', title: 'Set up your grid', body: 'Choose your grid size, set your price per square, and add your prizes. Takes about five minutes.' },
                 { icon: '🔗', title: 'Share your link', body: 'Send your link via WhatsApp, social media, SMS or email. Buyers pick their square and pay by card on the spot.' },
-                { icon: '🎲', title: 'Run the live draw', body: 'Hit draw when ready and the winning square is revealed live to everyone watching. Winners notified instantly.' },
+                { icon: '🎲', title: 'Run the live draw', body: 'Hit draw when ready and the winning square is highlighted live for everyone watching. Winners notified by email instantly.' },
               ].map(({ icon, title, body }) => (
                 <div key={title} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#A78BFA,#6B46F5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>{icon}</div>
