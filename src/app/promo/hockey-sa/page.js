@@ -9,11 +9,11 @@ const QR_MAIN = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=h
 const GRID = [
   { name: 'Sarah M',  status: 'taken'  },
   { name: 'Tom K',    status: 'taken'  },
-  { name: '',         status: 'available' },
+  { name: 'You',       status: 'mine'   },
   { name: 'Jess W',   status: 'taken'  },
   { name: 'Luke B',   status: 'taken'  },
   { name: 'Priya S',  status: 'taken'  },
-  { name: '',         status: 'available' },
+  { name: '',         status: 'reserved' },
   { name: 'Dan H',    status: 'taken'  },
   { name: 'Cath L',   status: 'winner' },
   { name: 'Mia T',    status: 'taken'  },
@@ -211,22 +211,27 @@ export default function HockeySAPromo() {
                   {GRID.map((sq, i) => (
                     <div key={i} className={`sq ${sq.status}`} style={{ width: 44, height: 44, borderRadius: 7, cursor: 'default' }}>
                       <span className="sq-num">{i + 1}</span>
-                      {sq.status !== 'available' && <span className="sq-label">{sq.status === 'winner' ? '🏆' : sq.name.split(' ')[0]}</span>}
+                      {sq.status !== 'available' && sq.status !== 'reserved' && <span className="sq-label">{sq.name.split(' ')[0]}</span>}
                     </div>
                   ))}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {[
-                    { state: 'taken',     label: 'Claimed',   num: '4',  name: 'Jess' },
-                    { state: 'winner',    label: 'Winner',    num: '9',  name: '🏆'   },
-                    { state: 'available', label: 'Available', num: '3'               },
-                  ].map(({ state, label, num, name }) => (
-                    <div key={state} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div className={`sq ${state}`} style={{ width: 36, height: 36, borderRadius: 6, flexShrink: 0, cursor: 'default' }}>
+                    { state: 'available', label: 'Available',   num: '3',  name: null,   desc: 'Open for anyone to claim.' },
+                    { state: 'mine',      label: 'Your square', num: '3',  name: 'You',  desc: 'Your square — confirmed after payment.' },
+                    { state: 'reserved',  label: 'Reserved',    num: '7',  name: null,   desc: 'In someone\'s cart. Released if not paid.' },
+                    { state: 'taken',     label: 'Sold',        num: '4',  name: 'Jess', desc: 'Purchased. Buyer\'s first name shown.' },
+                    { state: 'winner',    label: 'Winner',      num: '9',  name: 'Cath', desc: 'Winning square, highlighted after the draw.' },
+                  ].map(({ state, label, num, name, desc }) => (
+                    <div key={state} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', background: 'var(--cream)', borderRadius: 8, border: '1px solid var(--border)' }}>
+                      <div className={`sq ${state}`} style={{ width: 34, height: 34, borderRadius: 6, flexShrink: 0, cursor: 'default' }}>
                         <span className="sq-num" style={{ fontSize: 11 }}>{num}</span>
                         {name && <span className="sq-label">{name}</span>}
                       </div>
-                      <span style={{ fontSize: 10, color: '#6B5E4E', fontWeight: 700 }}>{label}</span>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 10, color: 'var(--text)', marginBottom: 1 }}>{label}</div>
+                        <div style={{ fontSize: 9, color: 'var(--text2)', lineHeight: 1.4 }}>{desc}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
