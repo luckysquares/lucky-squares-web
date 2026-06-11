@@ -34,22 +34,6 @@ const GRID = [
   { name: 'Isla J',   status: 'taken'  },
 ];
 
-const SQ = ({ sq, num }) => {
-  const bg     = sq.status === 'winner' ? '#00C875' : sq.status === 'taken' ? '#F0EDE5' : '#fff';
-  const border = sq.status === 'winner' ? '1.5px solid #009A5C' : sq.status === 'taken' ? '1.5px solid #DDD5C0' : '1.5px solid #C8E8D8';
-  const numCol = sq.status === 'winner' ? '#fff' : sq.status === 'taken' ? '#9B8F80' : '#C8E8D8';
-  const nameCol = sq.status === 'winner' ? '#fff' : '#6B5E4E';
-  return (
-    <div style={{ background: bg, border, borderRadius: 4, width: 34, height: 34, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2px', boxShadow: sq.status === 'winner' ? '0 0 6px rgba(0,200,117,0.5)' : 'none' }}>
-      <div style={{ fontSize: 9, fontWeight: 800, color: numCol, lineHeight: 1 }}>{num}</div>
-      {sq.status !== 'available' && (
-        <div style={{ fontSize: 7, fontWeight: 700, color: nameCol, lineHeight: 1.2, marginTop: 1, overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 1px', textAlign: 'center' }}>
-          {sq.status === 'winner' ? '🏆' : sq.name.split(' ')[0]}
-        </div>
-      )}
-    </div>
-  );
-};
 
 const css = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -221,21 +205,31 @@ export default function HockeySAPromo() {
 
             {/* Live grid demo */}
             <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', border: '1.5px solid #E5E0D5' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div style={{ fontSize: 10, fontWeight: 800, color: '#6B46F5', letterSpacing: 1.5, textTransform: 'uppercase' }}>This is what your grid looks like</div>
-                <div style={{ display: 'flex', gap: 10, fontSize: 9, color: '#9B8F80', fontWeight: 600 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><span style={{ width: 9, height: 9, borderRadius: 2, background: '#F0EDE5', border: '1px solid #DDD5C0', display: 'inline-block' }} />Claimed</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><span style={{ width: 9, height: 9, borderRadius: 2, background: '#00C875', display: 'inline-block' }} />Winner</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><span style={{ width: 9, height: 9, borderRadius: 2, background: '#fff', border: '1px solid #C8E8D8', display: 'inline-block' }} />Available</span>
+              <div style={{ fontSize: 10, fontWeight: 800, color: '#6B46F5', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 12 }}>This is what a Lucky Squares grid looks like</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 44px)', gap: 5 }}>
+                  {GRID.map((sq, i) => (
+                    <div key={i} className={`sq ${sq.status}`} style={{ width: 44, height: 44, borderRadius: 7, cursor: 'default' }}>
+                      <span className="sq-num">{i + 1}</span>
+                      {sq.status !== 'available' && <span className="sq-label">{sq.status === 'winner' ? '🏆' : sq.name.split(' ')[0]}</span>}
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 34px)', gap: 4 }}>
-                  {GRID.map((sq, i) => <SQ key={i} sq={sq} num={i + 1} />)}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[
+                    { state: 'taken',     label: 'Claimed',   num: '4',  name: 'Jess' },
+                    { state: 'winner',    label: 'Winner',    num: '9',  name: '🏆'   },
+                    { state: 'available', label: 'Available', num: '3'               },
+                  ].map(({ state, label, num, name }) => (
+                    <div key={state} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className={`sq ${state}`} style={{ width: 36, height: 36, borderRadius: 6, flexShrink: 0, cursor: 'default' }}>
+                        <span className="sq-num" style={{ fontSize: 11 }}>{num}</span>
+                        {name && <span className="sq-label">{name}</span>}
+                      </div>
+                      <span style={{ fontSize: 10, color: '#6B5E4E', fontWeight: 700 }}>{label}</span>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div style={{ textAlign: 'center', marginTop: 8, fontSize: 9, color: '#9B8F80', fontStyle: 'italic' }}>
-                25-square grid at $5/square — $125 raised. Cath L wins!
               </div>
             </div>
 
