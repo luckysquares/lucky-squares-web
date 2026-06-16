@@ -212,8 +212,12 @@ async function buildTemplate(type: string, d: any): Promise<{ subject: string; t
     case 'fifty_fifty_draw_no_win':         return T.emailFiftyFiftyDrawNoWin(d);
     // Welcome sequence
     case 'welcome_day1':                  return T.emailWelcomeDay1(d);
-    case 'welcome_day3_no_campaign':      return T.emailWelcomeDay3NoCampaign(d);
-    case 'welcome_day7_no_campaign':      return T.emailWelcomeDay7NoCampaign(d);
+    case 'welcome_day3_no_campaign':      return T.emailWelcomeDay3NoCampaign(d);  // legacy
+    case 'welcome_day5_coupon':           return T.emailWelcomeDay5Coupon(d);
+    case 'welcome_day7_no_campaign':      return T.emailWelcomeDay7NoCampaign(d);  // legacy
+    case 'welcome_day9_no_campaign':      return T.emailWelcomeDay3NoCampaign(d);  // same content, new timing
+    case 'welcome_day21_no_campaign':     return T.emailWelcomeDay21NoCampaign(d);
+    case 'welcome_coupon_manual':         return T.emailWelcomeCouponManual(d);
     case 'first_campaign_tips':           return T.emailFirstCampaignTips(d);
     case 're_engagement':                 return T.emailReEngagement(d);
     case 'seasonal':                      return T.emailSeasonal(d);

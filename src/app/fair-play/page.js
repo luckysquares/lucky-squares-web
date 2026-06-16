@@ -56,7 +56,7 @@ export default function FairPlayPage() {
             </p>
           </div>
 
-          <div className="scratch-card" style={{ padding: '32px 36px', background: 'linear-gradient(135deg, #A78BFA22, #7C3AED11)', border: '1.5px solid rgba(107,70,245,.2)' }}>
+          <div className="scratch-card" style={{ padding: '32px 36px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--purple3) 13%, transparent), color-mix(in srgb, var(--purple2) 7%, transparent))', border: '1.5px solid rgba(107,70,245,.2)' }}>
             <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', marginBottom: 16 }}>
               <span style={{ fontSize: 28, flexShrink: 0 }}>💜</span>
               <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 900 }}>Our intent</h2>

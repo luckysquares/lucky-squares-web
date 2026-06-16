@@ -43,7 +43,7 @@ Lucky Squares Australia is a platform for running grid-based fundraisers online.
 2. They launch the fundraiser (one-off $19 platform fee) and share the link via WhatsApp, social media, or email
 3. Buyers pick their squares and pay: in person, by bank transfer, or online by card
 4. When ready, the organiser hits the draw button and a winner is randomly selected
-5. The winning square is revealed live: all participants watching see it highlighted instantly
+5. The winning square is highlighted live on the grid: all participants watching see it updated instantly (the full draw animation is only visible to the organiser running the draw)
 
 ### Grid sizes
 - 25 squares: great for smaller groups, sells out faster

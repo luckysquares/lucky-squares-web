@@ -96,7 +96,7 @@ export default async function HomePage() {
           🍀 Early Access Open
         </div>
         <h1 className="hero-title">
-          The <span style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #4A28D4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>easiest</span> Lucky Squares <span style={{ background: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #4A28D4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>fundraiser</span> in Australia
+          The <span className="text-gradient-purple">easiest</span> Lucky Squares <span className="text-gradient-purple">fundraiser</span> in Australia
         </h1>
         <p className="hero-sub">
           Set up your fundraising campaign in minutes, share a link, and watch the squares sell. Run a live draw when you&apos;re ready. No spreadsheets, no unintelligible handwriting and no cash handling headaches.

@@ -268,7 +268,7 @@ function StackedBarChart({ years, height = 200 }) {
 
         const segments = [
           { h: h1, fill: '#16A34A' },
-          { h: h2, fill: '#7C3AED' },
+          { h: h2, fill: 'var(--purple2)' },
           { h: h3, fill: '#F59E0B' },
           { h: h4, fill: '#34D399' },
         ];
@@ -298,7 +298,7 @@ function StackedBarChart({ years, height = 200 }) {
       {/* Legend */}
       {[
         { fill: '#16A34A', label: 'Indiv campaigns' },
-        { fill: '#7C3AED', label: 'Org plans' },
+        { fill: 'var(--purple2)', label: 'Org plans' },
         { fill: '#F59E0B', label: 'Blitz events' },
         { fill: '#34D399', label: 'Org campaigns' },
         { fill: '#DC2626', label: 'Cumulative' },
@@ -515,8 +515,8 @@ export default function AdminReporting() {
               background: 'none', border: 'none', cursor: 'pointer',
               padding: '10px 20px', fontSize: 14, fontWeight: 800,
               fontFamily: 'inherit',
-              color: activeTab === key ? '#7C3AED' : 'var(--text2)',
-              borderBottom: activeTab === key ? '2px solid #7C3AED' : '2px solid transparent',
+              color: activeTab === key ? 'var(--purple2)' : 'var(--text2)',
+              borderBottom: activeTab === key ? '2px solid var(--purple2)' : '2px solid transparent',
               marginBottom: -2,
               transition: 'all .15s',
             }}
@@ -587,7 +587,7 @@ export default function AdminReporting() {
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9B8F80', marginBottom: 8 }}>
             Year-3 ARR
           </div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 30, fontWeight: 900, color: '#7C3AED' }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 30, fontWeight: 900, color: 'var(--purple2)' }}>
             {aud(yr3ARR)}
           </div>
           <div style={{ fontSize: 12, color: '#9B8F80', marginTop: 4 }}>Annualised run rate</div>
@@ -702,7 +702,7 @@ export default function AdminReporting() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
             {[
               { label: 'New Individual Organisers', value: sel.newIndiv,        color: '#16A34A' },
-              { label: 'New Org Clients',            value: sel.newOrg,          color: '#7C3AED' },
+              { label: 'New Org Clients',            value: sel.newOrg,          color: 'var(--purple2)' },
               { label: 'Indiv Attrition',            value: `-${sel.indivChurn ?? 0}`, color: '#DC2626' },
               { label: 'Org Attrition',              value: `-${sel.orgChurn ?? 0}`,   color: '#DC2626' },
               { label: 'Cumulative Organisers',      value: sel.cumulativeIndiv, color: '#6B5E4E' },
@@ -722,7 +722,7 @@ export default function AdminReporting() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 { label: 'Individual campaign fees', value: sel.campaignRevIndiv, color: '#16A34A' },
-                { label: 'Org plan subscriptions (monthly share)', value: sel.orgPlanRev, color: '#7C3AED' },
+                { label: 'Org plan subscriptions (monthly share)', value: sel.orgPlanRev, color: 'var(--purple2)' },
                 { label: 'Org campaign fees', value: sel.campaignRevOrg, color: '#34D399' },
                 { label: 'Blitz event fees', value: sel.blitzRev, color: '#F59E0B' },
               ].map((row) => (
@@ -768,7 +768,7 @@ export default function AdminReporting() {
           <div style={{ fontSize: 15, fontWeight: 800 }}>Revenue by Stream (2026-2030)</div>
           <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#9B8F80', flexWrap: 'wrap' }}>
             <span>5-year total: <strong style={{ color: '#16A34A' }}>{aud(yr5Total)}</strong></span>
-            <span>Yr-5 org penetration: <strong style={{ color: '#7C3AED' }}>{yr5Penetration.toFixed(2)}%</strong> of {TAM.toLocaleString('en-AU')} TAM</span>
+            <span>Yr-5 org penetration: <strong style={{ color: 'var(--purple2)' }}>{yr5Penetration.toFixed(2)}%</strong> of {TAM.toLocaleString('en-AU')} TAM</span>
           </div>
         </div>
         <StackedBarChart years={years5} height={240} />
@@ -881,7 +881,7 @@ export default function AdminReporting() {
           <div style={{ fontSize: 11, fontWeight: 800, color: '#9B8F80', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
             Organisation Client LTV
           </div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 900, color: '#7C3AED', marginBottom: 8 }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 900, color: 'var(--purple2)', marginBottom: 8 }}>
             {aud(ltvOrg)}
           </div>
           <div style={{ fontSize: 13, color: '#9B8F80', lineHeight: 1.6 }}>
@@ -889,7 +889,7 @@ export default function AdminReporting() {
           </div>
           <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <div style={{ padding: '10px 12px', background: '#FAF5FF', borderRadius: 10 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', marginBottom: 4 }}>Annual plan</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--purple2)', marginBottom: 4 }}>Annual plan</div>
               <div style={{ fontWeight: 900, fontSize: 16 }}>{aud(PRICE_ORG_ANNUAL)}/yr</div>
             </div>
             <div style={{ padding: '10px 12px', background: '#FFFBEB', borderRadius: 10 }}>
@@ -1014,7 +1014,7 @@ export default function AdminReporting() {
 
 // ── Reporting Tab ─────────────────────────────────────────────────────────────
 
-function MiniBar({ value, max, colour = '#7C3AED' }) {
+function MiniBar({ value, max, colour = 'var(--purple2)' }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1026,7 +1026,7 @@ function MiniBar({ value, max, colour = '#7C3AED' }) {
   );
 }
 
-function StatCard({ label, value, sub, colour = '#7C3AED' }) {
+function StatCard({ label, value, sub, colour = 'var(--purple2)' }) {
   return (
     <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #E5E0D5', padding: '18px 22px' }}>
       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9B8F80', marginBottom: 8 }}>{label}</div>
@@ -1134,11 +1134,11 @@ function ReportingTab() {
       {/* ── KPI Overview ──────────────────────────────────────────── */}
       <div style={{ marginBottom: 12 }}><SectionTitle>Overview</SectionTitle></div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 32 }}>
-        <StatCard label="Campaigns launched"  value={launched.length}                   colour="#7C3AED" sub={`${campaigns.length} total incl. drafts`} />
+        <StatCard label="Campaigns launched"  value={launched.length}                   colour="var(--purple2)" sub={`${campaigns.length} total incl. drafts`} />
         <StatCard label="Draws completed"     value={drawn.length}                      colour="#16A34A" sub={`${completionRate}% completion rate`} />
         <StatCard label="Squares sold"        value={totalSold.toLocaleString('en-AU')} colour="#4A28D4" sub={`Avg ${avgSold} per campaign`} />
         <StatCard label="Total raised"        value={aud(totalRaised)}                  colour="#16A34A" sub="Across all campaigns" />
-        <StatCard label="Platform fees"       value={aud(platformFees)}                 colour="#7C3AED" sub="$19 per launched campaign" />
+        <StatCard label="Platform fees"       value={aud(platformFees)}                 colour="var(--purple2)" sub="$19 per launched campaign" />
         <StatCard label="Registered users"    value={users.length}                      colour="#4A28D4" sub={`${stripeCampaigns.length} Stripe / ${cashCampaigns.length} cash campaigns`} />
       </div>
 
@@ -1149,7 +1149,7 @@ function ReportingTab() {
           <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Status breakdown</div>
           {[
             { label: 'Active (live)',  count: campaigns.filter((c) => c.status === 'active').length,   colour: '#16A34A' },
-            { label: 'Draw complete', count: drawn.length,                                              colour: '#7C3AED' },
+            { label: 'Draw complete', count: drawn.length,                                              colour: 'var(--purple2)' },
             { label: 'Draft',         count: campaigns.filter((c) => c.status === 'draft').length,     colour: '#F59E0B' },
             { label: 'Cancelled',     count: campaigns.filter((c) => c.status === 'cancelled').length, colour: '#9CA3AF' },
           ].map(({ label, count, colour }) => (
@@ -1166,7 +1166,7 @@ function ReportingTab() {
         <Card>
           <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 16 }}>Payment method (launched)</div>
           {[
-            { label: 'Stripe (online)', count: stripeCampaigns.length, colour: '#7C3AED' },
+            { label: 'Stripe (online)', count: stripeCampaigns.length, colour: 'var(--purple2)' },
             { label: 'Cash / bank',     count: cashCampaigns.length,   colour: '#F59E0B' },
           ].map(({ label, count, colour }) => (
             <div key={label} style={{ marginBottom: 16 }}>
@@ -1206,7 +1206,7 @@ function ReportingTab() {
                     }}>{c.status}</span>
                   </td>
                   <td style={{ padding: '10px 8px', color: '#6B5E4E', fontSize: 12 }}>{c.payment_method === 'stripe' ? '💳' : '💵'} {c.payment_method}</td>
-                  <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: '#7C3AED' }}>{(c.sold_count || 0).toLocaleString('en-AU')}</td>
+                  <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: 'var(--purple2)' }}>{(c.sold_count || 0).toLocaleString('en-AU')}</td>
                   <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 700, color: '#16A34A' }}>{aud((c.sold_count || 0) * Number(c.price_per_sq || 0))}</td>
                 </tr>
               ))}
@@ -1238,8 +1238,8 @@ function ReportingTab() {
                   return (
                     <tr key={k} style={{ borderBottom: '1px solid #F0EAE0' }}>
                       <td style={{ padding: '10px 8px', fontWeight: 700, color: '#1A1209' }}>{label}</td>
-                      <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: '#7C3AED' }}>{cCount}</td>
-                      <td style={{ padding: '10px 8px' }}><MiniBar value={cCount} max={maxMonthCampaigns} colour="#7C3AED" /></td>
+                      <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: 'var(--purple2)' }}>{cCount}</td>
+                      <td style={{ padding: '10px 8px' }}><MiniBar value={cCount} max={maxMonthCampaigns} colour="var(--purple2)" /></td>
                       <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 800, color: '#16A34A' }}>{uCount}</td>
                       <td style={{ padding: '10px 8px' }}><MiniBar value={uCount} max={maxMonthUsers} colour="#16A34A" /></td>
                     </tr>
@@ -1254,7 +1254,7 @@ function ReportingTab() {
       {/* ── Revenue Actuals ───────────────────────────────────────── */}
       <div style={{ marginBottom: 12 }}><SectionTitle>Revenue Actuals</SectionTitle></div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 32 }}>
-        <StatCard label="Platform fees collected" value={aud(platformFees)}   colour="#7C3AED" sub={`${launched.length} campaigns × $19`} />
+        <StatCard label="Platform fees collected" value={aud(platformFees)}   colour="var(--purple2)" sub={`${launched.length} campaigns × $19`} />
         <StatCard label="Total raised (all orgs)"  value={aud(totalRaised)}   colour="#16A34A" sub="Organiser-side revenue" />
         <StatCard label="Stripe campaigns raised"  value={aud(stripeCampaigns.reduce((s, c) => s + (c.sold_count || 0) * Number(c.price_per_sq || 0), 0))} colour="#4A28D4" sub={`${stripeCampaigns.length} Stripe campaigns`} />
         <StatCard label="Cash campaigns raised"    value={aud(cashCampaigns.reduce((s, c) => s + (c.sold_count || 0) * Number(c.price_per_sq || 0), 0))}   colour="#F59E0B" sub={`${cashCampaigns.length} cash campaigns`} />
@@ -1295,9 +1295,9 @@ function ReportingTab() {
                 <div key={cat} style={{ marginBottom: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                     <span style={{ fontSize: 13, color: '#6B5E4E' }}>{catLabels[cat] || cat}</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: '#7C3AED' }}>{count}</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--purple2)' }}>{count}</span>
                   </div>
-                  <MiniBar value={count} max={maxCatCount} colour="#7C3AED" />
+                  <MiniBar value={count} max={maxCatCount} colour="var(--purple2)" />
                 </div>
               ))
           )}
@@ -1307,7 +1307,7 @@ function ReportingTab() {
       {/* ── Referrals ─────────────────────────────────────────────── */}
       <div style={{ marginBottom: 12 }}><SectionTitle>Referral Program</SectionTitle></div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, marginBottom: 20 }}>
-        <StatCard label="Total referrals"   value={referrals.length}                                          colour="#7C3AED" />
+        <StatCard label="Total referrals"   value={referrals.length}                                          colour="var(--purple2)" />
         <StatCard label="Rewarded"          value={referrals.filter((r) => r.status === 'rewarded').length}   colour="#16A34A" sub="Free campaign issued" />
         <StatCard label="Pending"           value={referrals.filter((r) => r.status === 'pending').length}    colour="#F59E0B" sub="Awaiting first campaign" />
         <StatCard label="Flagged"           value={referrals.filter((r) => r.suspicious).length}              colour="#DC2626" sub="Possible self-referral" />
@@ -1357,7 +1357,7 @@ function ReportingTab() {
                       {r.status === 'rewarded' ? 'Rewarded' : 'Pending'}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 10px', fontFamily: 'monospace', fontSize: 11, color: '#7C3AED' }}>
+                  <td style={{ padding: '10px 10px', fontFamily: 'monospace', fontSize: 11, color: 'var(--purple2)' }}>
                     {r.reward_code ?? <span style={{ color: '#C4B9AA' }}>none yet</span>}
                   </td>
                   <td style={{ padding: '10px 10px', color: '#9B8F80', whiteSpace: 'nowrap' }}>
@@ -1442,7 +1442,7 @@ function ReportingTab() {
                 <span style={{ fontSize: 14, fontWeight: 800, color: '#1A1209' }}>{tool.title}</span>
               </div>
               <p style={{ fontSize: 12, color: '#9B8F80', lineHeight: 1.6, margin: '0 0 14px' }}>{tool.desc}</p>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED' }}>{tool.label} →</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--purple2)' }}>{tool.label} →</span>
             </div>
           </a>
         ))}
@@ -1467,7 +1467,7 @@ function ReportingTab() {
             return (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, marginBottom: 24 }}>
                 <StatCard label="Sessions"      value={totalSessions.toLocaleString('en-AU')} colour="#4A28D4" sub="Last 30 days" />
-                <StatCard label="Users"         value={totalUsers.toLocaleString('en-AU')}    colour="#7C3AED" sub="Active users" />
+                <StatCard label="Users"         value={totalUsers.toLocaleString('en-AU')}    colour="var(--purple2)" sub="Active users" />
                 <StatCard label="New users"     value={totalNew.toLocaleString('en-AU')}      colour="#16A34A" sub={`${totalUsers > 0 ? Math.round((totalNew / totalUsers) * 100) : 0}% of all users`} />
                 <StatCard label="Top channel"   value={topSource?.channel ?? 'N/A'}           colour="#F59E0B" sub={`${topSource?.sessions.toLocaleString('en-AU') ?? 0} sessions`} />
               </div>
@@ -1488,7 +1488,7 @@ function ReportingTab() {
                       style={{
                         flex: 1,
                         height: `${Math.max(4, (d.sessions / maxS) * 80)}px`,
-                        background: '#7C3AED',
+                        background: 'var(--purple2)',
                         borderRadius: '2px 2px 0 0',
                         opacity: 0.8,
                         cursor: 'default',
@@ -1532,9 +1532,9 @@ function ReportingTab() {
                   <div key={d.device} style={{ marginBottom: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                       <span style={{ fontSize: 13, color: '#6B5E4E' }}>{icons[d.device] || '💻'} {d.device}</span>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: '#7C3AED' }}>{d.sessions.toLocaleString('en-AU')}</span>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--purple2)' }}>{d.sessions.toLocaleString('en-AU')}</span>
                     </div>
-                    <MiniBar value={d.sessions} max={maxS} colour="#7C3AED" />
+                    <MiniBar value={d.sessions} max={maxS} colour="var(--purple2)" />
                   </div>
                 ));
               })()}
@@ -1609,7 +1609,7 @@ function FinancialsTab() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
         {[
           { label: 'Gross collected',     value: aud(summary.totalGrossCents),    colour: '#16A34A', sub: `${summary.launched} campaigns` },
-          { label: 'Platform fees earned', value: aud(summary.totalFeesCents),     colour: '#7C3AED', sub: `$19 per launched campaign` },
+          { label: 'Platform fees earned', value: aud(summary.totalFeesCents),     colour: 'var(--purple2)', sub: `$19 per launched campaign` },
           { label: 'Prize reserve held',   value: aud(summary.totalReserveCents),  colour: '#F59E0B', sub: `${summary.active} active campaigns` },
           { label: 'Transferred to orgs',  value: aud(summary.totalTransferCents), colour: '#2563EB', sub: 'Estimated (see note)' },
         ].map((card) => (
@@ -1633,9 +1633,9 @@ function FinancialsTab() {
             style={{
               padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 700,
               border: '1.5px solid', cursor: 'pointer', fontFamily: 'inherit',
-              background: filter === f ? '#7C3AED' : '#fff',
+              background: filter === f ? 'var(--purple2)' : '#fff',
               color:      filter === f ? '#fff' : 'var(--text2)',
-              borderColor: filter === f ? '#7C3AED' : '#E5E0D5',
+              borderColor: filter === f ? 'var(--purple2)' : '#E5E0D5',
             }}
           >
             {f === 'all' ? `All (${campaigns.length})` : f === 'active' ? `Live (${summary.active})` : `Drawn (${summary.drawn})`}
@@ -1667,19 +1667,19 @@ function FinancialsTab() {
                   <span style={{
                     display: 'inline-block', padding: '2px 8px', borderRadius: 99, fontSize: 11, fontWeight: 700,
                     background: c.status === 'active' ? '#DCFCE7' : c.status === 'drawn' ? '#F5F0FF' : '#F5F3EE',
-                    color:      c.status === 'active' ? '#16A34A' : c.status === 'drawn' ? '#7C3AED' : '#9C8060',
+                    color:      c.status === 'active' ? '#16A34A' : c.status === 'drawn' ? 'var(--purple2)' : '#9C8060',
                   }}>
                     {c.status === 'active' ? '● Live' : c.status === 'drawn' ? '🏆 Drawn' : c.status}
                   </span>
                 </td>
                 <td style={{ padding: '10px 12px', fontWeight: 700 }}>{c.sold}<span style={{ color: '#9C8060', fontWeight: 400 }}>/{c.gridSize}</span></td>
                 <td style={{ padding: '10px 12px', fontWeight: 800, color: '#16A34A' }}>{aud(c.grossCents)}</td>
-                <td style={{ padding: '10px 12px', color: '#7C3AED', fontWeight: 700 }}>{aud(c.feeCents)}</td>
+                <td style={{ padding: '10px 12px', color: 'var(--purple2)', fontWeight: 700 }}>{aud(c.feeCents)}</td>
                 <td style={{ padding: '10px 12px', color: '#F59E0B', fontWeight: 700 }}>{aud(c.reserveCents)}</td>
                 <td style={{ padding: '10px 12px', color: '#2563EB', fontWeight: 700 }}>{aud(c.transferCents)}</td>
                 <td style={{ padding: '10px 12px' }}>
                   {c.status === 'drawn'
-                    ? <a href={`/${c.slug ?? c.id}/certificate`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textDecoration: 'none', whiteSpace: 'nowrap' }}>View certificate →</a>
+                    ? <a href={`/${c.slug ?? c.id}/certificate`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 700, color: 'var(--purple2)', textDecoration: 'none', whiteSpace: 'nowrap' }}>View certificate →</a>
                     : <span style={{ color: '#D1C5B5', fontSize: 11 }}>After draw</span>
                   }
                 </td>
@@ -1691,7 +1691,7 @@ function FinancialsTab() {
               <tr style={{ borderTop: '2px solid #E5E0D5', background: '#F5F3EE' }}>
                 <td colSpan={3} style={{ padding: '10px 12px', fontWeight: 800, fontSize: 12, color: '#6B5E4E' }}>Totals ({visible.length} campaigns)</td>
                 <td style={{ padding: '10px 12px', fontWeight: 900, color: '#16A34A' }}>{aud(visible.reduce((s, c) => s + c.grossCents, 0))}</td>
-                <td style={{ padding: '10px 12px', fontWeight: 900, color: '#7C3AED' }}>{aud(visible.reduce((s, c) => s + c.feeCents, 0))}</td>
+                <td style={{ padding: '10px 12px', fontWeight: 900, color: 'var(--purple2)' }}>{aud(visible.reduce((s, c) => s + c.feeCents, 0))}</td>
                 <td style={{ padding: '10px 12px', fontWeight: 900, color: '#F59E0B' }}>{aud(visible.reduce((s, c) => s + c.reserveCents, 0))}</td>
                 <td style={{ padding: '10px 12px', fontWeight: 900, color: '#2563EB' }}>{aud(visible.reduce((s, c) => s + c.transferCents, 0))}</td>
                 <td />

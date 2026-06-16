@@ -14,21 +14,26 @@ function amt(v: string | number): string {
 
 export function emailOrganizerWelcome(d: { first_name: string }) {
   return {
-    subject: `Welcome to Lucky Squares, ${d.first_name}!`,
+    subject: `Welcome to Lucky Squares — here's how to get your first fundraiser live`,
     text: `Hi ${d.first_name},
 
-Welcome aboard! You've just joined a community of Australian schools, clubs, and charities using Lucky Squares to run simple, fun fundraisers.
+Welcome! You've just joined hundreds of Australian schools, clubs and community groups using Lucky Squares to run simple, fun fundraisers.
 
 Here's how it works in three steps:
 
-1. Set up your grid: choose your grid size, set your price per square, and add your prizes. Takes about 5 minutes.
-2. Share your link: send it via WhatsApp, social media, or email. Buyers pick their squares and pay on the spot.
-3. Run your draw: when you're ready, hit the draw button and the winners are revealed instantly.
+1. Set up your grid
+Choose 25, 50 or 100 squares. Set your price per square (most campaigns use $2 to $5), add a prize or two, and write a short note about what you're raising money for. Takes about five minutes.
 
-Ready to get started? Log in to create your first fundraiser:
+2. Share your link
+Drop it in your WhatsApp group, post it on Facebook, or share it at your next game or meeting. Buyers pick their square and can pay by card on the spot, or you can take cash or use your club's eftpos machine.
+
+3. Run your draw
+When you're ready, hit the draw button. A winner is randomly selected from all sold squares. The winning square is highlighted live on the grid for everyone watching.
+
+Ready to go?
 https://luckysquares.com.au/fundraise
 
-If you have any questions along the way, just reply to this email and we'll help you out.
+If you have any questions, just reply to this email — we're a small team and we read everything.
 
 ${SIG}`,
   };
@@ -679,6 +684,33 @@ ${SIG}`,
   };
 }
 
+export function emailWelcomeDay5Coupon(d: {
+  first_name: string;
+  coupon_code: string;
+}) {
+  return {
+    subject: `Your first Lucky Squares campaign is on us, ${d.first_name}`,
+    text: `Hi ${d.first_name},
+
+You took a look at our online Lucky Squares platform five days ago and we haven't seen a fundraiser from you yet. That's fine — we know life gets in the way.
+
+To make it a little easier to get started, we'd like to give you your first campaign on us. No platform fee for your first launch.
+
+Use this code at checkout:
+
+${d.coupon_code}
+
+It covers the full $19 launch fee. It is valid for 30 days, no catch.
+
+If there's something holding you back — questions about prizes, payment options, whether Lucky Squares is a good fit for your organisation — just reply and we'll help you figure it out.
+
+Ready when you are:
+https://luckysquares.com.au/fundraise
+
+${SIG}`,
+  };
+}
+
 export function emailWelcomeDay7NoCampaign(d: {
   first_name: string;
 }) {
@@ -696,6 +728,60 @@ Or jump straight in:
 https://luckysquares.com.au/fundraise
 
 ${SIG}`,
+  };
+}
+
+export function emailWelcomeDay21NoCampaign(d: {
+  first_name: string;
+  coupon_code?: string;
+}) {
+  const couponBlock = d.coupon_code
+    ? `\nAs a reminder, here's the free campaign code we sent you a couple of weeks ago:\n\n${d.coupon_code}\n\nThis is the last time we'll mention it — it expires in about ten days, so if you'd like to use it, now's the time.\n`
+    : '';
+
+  return {
+    subject: `Last one from us, ${d.first_name} — can we help you get started?`,
+    text: `Hi ${d.first_name},
+
+This is our last check-in. You signed up three weeks ago and we haven't seen a campaign from you yet. That's completely fine — life gets busy.
+
+But if there's something holding you back, we'd genuinely love to help. A lot of first-time organisers have questions about things like prize sourcing, how bank transfers work, or whether Lucky Squares is a good fit for their situation.
+${couponBlock}
+Just reply to this email and tell us where you're up to. We'll get back to you personally.
+
+Or jump straight in:
+https://luckysquares.com.au/fundraise
+
+${SIG}`,
+  };
+}
+
+export function emailWelcomeCouponManual(d: {
+  first_name: string;
+  coupon_code: string;
+}) {
+  return {
+    subject: `Here's a free Lucky Squares campaign on us`,
+    text: `Hi ${d.first_name},
+
+I wanted to offer a personal thank you for being one of the very first people to check out our new Lucky Squares website.
+
+I noticed you took a look around our website recently but haven't run a campaign yet, and so I wanted to reach out personally.
+
+Running a fundraiser with Lucky Squares is quite easy to set up — most organisers have their grid live in under five minutes and their first square sold within an hour of sharing the link.
+
+To help you get started, I'd like to give you your first campaign on us. Just use this coupon code:
+
+${d.coupon_code}
+
+That covers the full $19 launch fee. Just enter it at checkout when you're ready to go live.
+
+If you have any questions or want to talk through whether Lucky Squares is the right fit for what you're trying to do, just reply to this email. I'd love to help.
+
+Cheers,
+Jamie
+Founder, Lucky Squares
+hello@luckysquares.com.au`,
   };
 }
 

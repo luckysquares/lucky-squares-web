@@ -79,7 +79,7 @@ export default async function PosterPage({ params }) {
         }}>
 
           {/* Header */}
-          <div style={{ background: 'linear-gradient(135deg,#A78BFA 0%,#7C3AED 45%,#4A28D4 100%)', padding: '14px 28px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          <div style={{ background: 'linear-gradient(135deg,var(--purple3) 0%,var(--purple2) 45%,var(--purple-dark) 100%)', padding: '14px 28px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
             <svg width="44" height="44" viewBox="0 0 46 46" xmlns="http://www.w3.org/2000/svg">
               <rect width="46" height="46" rx="11" fill="#6B46F5"/>
               <rect x="5"  y="5"  width="8" height="8" rx="2" fill="rgba(255,255,255,.22)"/>

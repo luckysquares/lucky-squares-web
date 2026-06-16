@@ -136,10 +136,10 @@ export default function OrgDashboard() {
           </button>
         </div>
       ) : (
-        <div className="scratch-card" style={{ padding: '20px 24px', marginBottom: 28, background: 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)', border: '1.5px solid #C4B5FD' }}>
+        <div className="scratch-card" style={{ padding: '20px 24px', marginBottom: 28, background: 'linear-gradient(135deg, var(--purple-bg) 0%, var(--purple-tint) 100%)', border: '1.5px solid var(--purple-tint-border)' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: '#5B21B6', marginBottom: 6 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--purple-text)', marginBottom: 6 }}>
                 Get Annual Organisation Membership
               </div>
               <p style={{ fontSize: 13, color: '#6D28D9', lineHeight: 1.65, margin: '0 0 16px' }}>
@@ -154,7 +154,7 @@ export default function OrgDashboard() {
                 {membershipBusy ? 'Loading…' : 'Get Annual Membership — $149/year →'}
               </button>
             </div>
-            <div style={{ fontSize: 13, color: '#7C3AED', lineHeight: 1.8, flexShrink: 0 }}>
+            <div style={{ fontSize: 13, color: 'var(--purple2)', lineHeight: 1.8, flexShrink: 0 }}>
               <div>✓ Unlimited campaigns per year</div>
               <div>✓ Up to 10 live simultaneously</div>
               <div>✓ Team member access</div>
@@ -168,7 +168,7 @@ export default function OrgDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
         {[
           { label: 'Total raised',    value: fmtAud(stats?.gross_cents || 0), color: '#16A34A' },
-          { label: 'Active campaigns', value: stats?.active ?? 0,             color: '#7C3AED' },
+          { label: 'Active campaigns', value: stats?.active ?? 0,             color: 'var(--purple2)' },
           { label: 'Draws completed',  value: stats?.drawn ?? 0,              color: '#F59E0B' },
           { label: 'Team members',     value: (stats?.members ?? 0) + 1,      color: '#0EA5E9' },
         ].map(({ label, value, color }) => (
@@ -210,7 +210,7 @@ export default function OrgDashboard() {
                     <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Raised</div>
                     <div style={{ fontSize: 15, fontWeight: 900, color: '#16A34A' }}>${raised}</div>
                   </div>
-                  <span className={`tag ${c.status === 'active' ? 'tag-green' : c.status === 'drawn' ? '' : 'tag-muted'}`} style={{ fontSize: 11, textTransform: 'capitalize', background: c.status === 'drawn' ? '#EDE9FE' : undefined, color: c.status === 'drawn' ? '#7C3AED' : undefined }}>
+                  <span className={`tag ${c.status === 'active' ? 'tag-green' : c.status === 'drawn' ? 'tag-drawn' : 'tag-muted'}`} style={{ fontSize: 11, textTransform: 'capitalize' }}>
                     {c.status}
                   </span>
                 </div>

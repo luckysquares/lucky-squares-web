@@ -230,7 +230,7 @@ export default function AdminBlogPage() {
             )}
           </div>
           <div style={{ height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden', marginBottom: 16 }}>
-            <div style={{ height: '100%', width: `${(seedProgress.current / seedProgress.total) * 100}%`, background: 'linear-gradient(90deg,#A78BFA,#7C3AED)', borderRadius: 99, transition: 'width .3s' }} />
+            <div style={{ height: '100%', width: `${(seedProgress.current / seedProgress.total) * 100}%`, background: 'linear-gradient(90deg,var(--purple3),var(--purple2))', borderRadius: 99, transition: 'width .3s' }} />
           </div>
           <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
             {seedProgress.log.map((l, i) => (

@@ -17,7 +17,7 @@ const STATUS_COLOURS = {
   'Planned':        { bg: '#F3F4F6', colour: '#4B5563' },
   'Active':         { bg: '#DCFCE7', colour: '#15803D' },
   'Paused':         { bg: '#FEF3C7', colour: '#92400E' },
-  'Complete':       { bg: '#EDE9FE', colour: '#5B21B6' },
+  'Complete':       { bg: 'var(--purple-tint)', colour: 'var(--purple-text)' },
   // Content
   'Draft':          { bg: '#F3F4F6', colour: '#4B5563' },
   'Scheduled':      { bg: '#FEF3C7', colour: '#92400E' },
@@ -425,7 +425,7 @@ function ContactLogModal({ contact, onClose }) {
     load();
   };
 
-  const typeColour = { Call: '#2563EB', Email: '#7C3AED', Meeting: '#16A34A', 'Follow-up': '#D97706', Note: '#6B7280' };
+  const typeColour = { Call: '#2563EB', Email: 'var(--purple2)', Meeting: '#16A34A', 'Follow-up': '#D97706', Note: '#6B7280' };
 
   return (
     <Modal title={`Activity log — ${contact.name}`} onClose={onClose}>

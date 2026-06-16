@@ -57,7 +57,7 @@ function PasswordGate({ onSuccess }) {
                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)} />
             </div>
             {error && <p style={{ fontSize: 13, color: '#FCA5A5', margin: 0 }}>{error}</p>}
-            <button type="submit" disabled={loading} style={{ background: 'linear-gradient(135deg,#7C3AED,#6B46F5)', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontSize: 15, fontWeight: 800, cursor: 'pointer', marginTop: 4, fontFamily: 'inherit' }}>
+            <button type="submit" disabled={loading} style={{ background: 'linear-gradient(135deg,var(--purple2),#6B46F5)', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontSize: 15, fontWeight: 800, cursor: 'pointer', marginTop: 4, fontFamily: 'inherit' }}>
               {loading ? 'Verifying…' : 'View investor information →'}
             </button>
           </form>
@@ -211,7 +211,7 @@ function InvestorPortal({ visitorName }) {
               <div key={label} style={{ background: '#fff', border: '1.5px solid #E5E0D5', borderRadius: 14, padding: '22px 24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                   <div style={{ fontSize: 15, fontWeight: 800, color: '#1A1209' }}>{label}</div>
-                  <span style={{ fontSize: 10, fontWeight: 800, background: '#EDE9FE', color: '#5B21B6', borderRadius: 99, padding: '3px 8px' }}>{badge}</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, background: 'var(--purple-tint)', color: 'var(--purple-text)', borderRadius: 99, padding: '3px 8px' }}>{badge}</span>
                 </div>
                 <div style={{ fontSize: 24, fontWeight: 900, color: '#6B46F5', marginBottom: 8 }}>{price}</div>
                 <p style={{ fontSize: 13, color: '#6B5E4E', lineHeight: 1.6, margin: 0 }}>{desc}</p>
@@ -219,8 +219,8 @@ function InvestorPortal({ visitorName }) {
             ))}
           </div>
 
-          <div style={{ background: '#F5F0FF', border: '1.5px solid #C4B5FD', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6', marginBottom: 4 }}>Unit Economics</div>
+          <div style={{ background: '#F5F0FF', border: '1.5px solid var(--purple-tint-border)', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--purple-text)', marginBottom: 4 }}>Unit Economics</div>
             <div style={{ fontSize: 12, color: '#7C5CF6', marginBottom: 16 }}>Conservative direct figures only. See network multiplier below.</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {[
@@ -399,7 +399,7 @@ function InvestorPortal({ visitorName }) {
                 items: ['50 paying organisations', '$25,000 ARR', 'First 500 fundraising participants across platform', '$50,000 total raised for community causes', 'Net Promoter Score baseline established', 'Second state body partnership signed (QLD or VIC)'],
               },
               {
-                phase: '3', months: 'Months 6–9', title: 'Channel Expansion', subtitle: 'Replicate the SA model', colour: '#7C3AED',
+                phase: '3', months: 'Months 6–9', title: 'Channel Expansion', subtitle: 'Replicate the SA model', colour: 'var(--purple2)',
                 items: ['100 paying organisations', '$60,000 ARR', 'Second state body fully launched', 'School and P&C channel opened: first 10 schools', '5 registered charities beyond Ashleigh Young Foundation', 'Referral program launched: clubs referring clubs'],
               },
               {
@@ -487,7 +487,7 @@ function InvestorPortal({ visitorName }) {
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {['30+ years business leadership', 'Multiple industries', 'Community sport advocate', 'Award-winning founder', 'First-to-market product builder'].map((tag) => (
-                  <span key={tag} style={{ fontSize: 11, fontWeight: 700, background: '#EDE9FE', color: '#5B21B6', borderRadius: 99, padding: '4px 10px' }}>{tag}</span>
+                  <span key={tag} style={{ fontSize: 11, fontWeight: 700, background: 'var(--purple-tint)', color: 'var(--purple-text)', borderRadius: 99, padding: '4px 10px' }}>{tag}</span>
                 ))}
               </div>
             </div>
