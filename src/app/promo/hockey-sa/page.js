@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 
@@ -56,6 +57,41 @@ const css = `
 `;
 
 export default function HockeySAPromo() {
+  const [generating, setGenerating] = useState(false);
+  const pageWrapRef = useRef(null);
+
+  async function downloadPDF() {
+    setGenerating(true);
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
+
+      const pages = pageWrapRef.current.querySelectorAll('.a4');
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      for (let i = 0; i < pages.length; i++) {
+        if (i > 0) pdf.addPage();
+        const canvas = await html2canvas(pages[i], {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: '#ffffff',
+          logging: false,
+        });
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+      }
+
+      pdf.save('Hockey-SA-Lucky-Squares.pdf');
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      alert('PDF generation failed — please try again.');
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
@@ -65,13 +101,12 @@ export default function HockeySAPromo() {
           <Link href="/admin/marketing" className="back-link">Back to Marketing</Link>
           <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>Double-sided A4 — Hockey SA Junior Country Championships</span>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>To save as PDF: File → Print → PDF → Save as PDF</span>
-          <button className="print-btn" onClick={() => window.print()}>Print / Save as PDF</button>
-        </div>
+        <button className="print-btn" onClick={downloadPDF} disabled={generating} style={{ opacity: generating ? 0.6 : 1 }}>
+          {generating ? 'Generating...' : 'Download PDF'}
+        </button>
       </div>
 
-      <div className="page-wrap">
+      <div className="page-wrap" ref={pageWrapRef}>
 
         {/* ══ SIDE 1 — HERO ══ */}
         <div className="a4" style={{ display: 'flex', flexDirection: 'column', background: '#fff' }}>
