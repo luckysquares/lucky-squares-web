@@ -377,7 +377,6 @@ function ContactLogModal({ contact, onClose }) {
   const [loading,        setLoading]        = useState(true);
   const [entry,          setEntry]          = useState('');
   const [entryType,      setEntryType]      = useState('Note');
-  const [loggedAt,       setLoggedAt]       = useState(() => new Date().toISOString().slice(0, 16));
   const [saving,         setSaving]         = useState(false);
   const [error,          setError]          = useState('');
   const [nextAction,     setNextAction]     = useState(contact.next_action || '');
@@ -400,13 +399,12 @@ function ContactLogModal({ contact, onClose }) {
     setSaving(true); setError('');
     const res  = await adminFetch(`/api/admin/marketing/contacts/${contact.id}/log`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ entry, entry_type: entryType, logged_at: new Date(loggedAt).toISOString() }),
+      body: JSON.stringify({ entry, entry_type: entryType, logged_at: new Date().toISOString() }),
     });
     const json = await res.json();
     setSaving(false);
     if (!res.ok || json.error) { setError(json.error || 'Failed to save'); return; }
     setEntry('');
-    setLoggedAt(new Date().toISOString().slice(0, 16));
     load();
   };
 
@@ -432,11 +430,13 @@ function ContactLogModal({ contact, onClose }) {
     <Modal title={`Activity log — ${contact.name}`} onClose={onClose}>
       {/* Add entry */}
       <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '16px', marginBottom: 20 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr 160px', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr 140px', gap: 10, marginBottom: 10 }}>
           <select className="form-input" value={entryType} onChange={(e) => setEntryType(e.target.value)} style={{ fontSize: 13 }}>
             {ENTRY_TYPES.map((t) => <option key={t}>{t}</option>)}
           </select>
-          <input className="form-input" type="datetime-local" value={loggedAt} onChange={(e) => setLoggedAt(e.target.value)} style={{ fontSize: 13 }} />
+          <div style={{ fontSize: 12, color: 'var(--text2)', alignSelf: 'center', paddingLeft: 4 }}>
+            Logged at current time
+          </div>
           <button className="btn btn-primary btn-sm" onClick={addEntry} disabled={saving || !entry.trim()} style={{ height: '100%' }}>
             {saving ? 'Saving...' : 'Add entry'}
           </button>
