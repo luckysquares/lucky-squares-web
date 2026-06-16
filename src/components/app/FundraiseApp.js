@@ -606,6 +606,7 @@ function Dashboard({ user, fundraisers, fiftyFiftyCampaigns, onNew, onView, onRe
     setTimeout(() => setCopied(false), 2000);
   };
   const hasAnyCampaign = fundraisers.some((f) => ['active', 'drawn'].includes(f.status));
+  const isContributor  = orgInfo?.role === 'contributor';
 
   const isOrg = user?.plan === 'org' || isContributor;
   const totalRaised = fundraisers.reduce((s, f) => s + (f.sold_count || 0) * parseFloat(f.price_per_sq || 0), 0);
@@ -3816,10 +3817,9 @@ export default function FundraiseApp() {
   const showHeader = !['login', 'register', 'verify', 'loading'].includes(phase);
 
   const activeCampaignCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
-  const isSuspended         = suspension?.suspended === true;
-  const isContributor       = orgInfo?.role === 'contributor';
+  const isSuspended = suspension?.suspended === true;
   // Contributors use the org plan limit (10), not their own plan
-  const planLimit           = isContributor ? PLAN_LIMITS['org'] : PLAN_LIMITS[user?.plan ?? 'trial'];
+  const planLimit   = isContributor ? PLAN_LIMITS['org'] : PLAN_LIMITS[user?.plan ?? 'trial'];
   const canCreate           = activeCampaignCount < planLimit && !isSuspended;
 
   const handleNewFundraiser = () => {
