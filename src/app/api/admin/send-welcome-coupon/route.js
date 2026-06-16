@@ -57,8 +57,9 @@ export async function POST(req) {
     });
 
     if (!res.ok) {
-      console.error('[send-welcome-coupon] email send failed:', res.status);
-      return NextResponse.json({ error: 'Coupon created but email failed to send' }, { status: 502 });
+      const body = await res.text().catch(() => '');
+      console.error('[send-welcome-coupon] email send failed:', res.status, body);
+      return NextResponse.json({ error: `Coupon created but email failed (${res.status}): ${body}` }, { status: 502 });
     }
   }
 
