@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
+import { adminFetch } from '@/lib/adminFetch';
 
 const PLAN_LABELS  = { trial: 'Trial', casual: 'Casual', org: 'Organisation' };
 const PLAN_COLOURS = { trial: 'tag-muted', casual: 'tag-green', org: 'tag-drawn' };
@@ -97,7 +98,7 @@ export default function AdminUsers() {
     if (!confirm(`Send a free campaign coupon to ${u.full_name || u.email}?`)) return;
     setSendingCoupon(u.id);
     try {
-      const res  = await fetch('/api/admin/send-welcome-coupon', {
+      const res  = await adminFetch('/api/admin/send-welcome-coupon', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ user_id: u.id, email: u.email, first_name: u.full_name }),
