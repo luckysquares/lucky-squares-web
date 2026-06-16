@@ -44,7 +44,19 @@ const css = `
   .back-link { font-size: 13px; color: rgba(255,255,255,.6); text-decoration: none; }
   .page-wrap { display: flex; flex-direction: column; gap: 40px; padding: 40px 20px 60px; align-items: center; }
   .a4 { width: 210mm; height: 297mm; overflow: hidden; position: relative; box-shadow: 0 8px 48px rgba(0,0,0,.35); }
-  .sq, .sq * { animation: none !important; transition: none !important; }
+  .sq {
+    aspect-ratio: 1; border-radius: 6px; border: 1.5px solid transparent;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: default; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px; font-weight: 700; user-select: none; position: relative; overflow: hidden;
+  }
+  .sq.available  { background: #fff; border-color: #C8E8D8; color: #9C8060; }
+  .sq.mine       { background: linear-gradient(135deg,#5B9FE8,#2165B5); border-color: #1A55A0; color: #fff; }
+  .sq.reserved   { background: linear-gradient(135deg,#FFEADC,#FFD8C0); border-color: #FF9045; color: #FF6010; }
+  .sq.taken      { background: #F0EDE5; border-color: #DDD5C0; color: #C4B09A; }
+  .sq.winner     { background: #00C875; border-color: #009A5C; color: #fff; }
+  .sq-num   { font-size: 16px; line-height: 1; font-weight: 800; }
+  .sq-label { font-size: 8px; line-height: 1; margin-top: 2px; text-align: center; overflow: hidden; max-width: 100%; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; }
   @page { size: A4 portrait; margin: 0; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
@@ -115,7 +127,7 @@ export default function HockeySAPromo() {
           <div style={{ background: 'linear-gradient(160deg,#0D0820 0%,#1A0A3C 50%,#2D0E6B 100%)', padding: '28px 32px 0', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, right: 0, width: 200, height: 200, opacity: 0.06, backgroundImage: 'radial-gradient(circle,#fff 1.5px,transparent 1.5px)', backgroundSize: '16px 16px' }} />
             <div style={{ marginBottom: 24 }}><Logo size={34} dark /></div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--gold-bright)', letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 10 }}>For sporting clubs and associations</div>
+            <div style={{ fontSize: 10, fontWeight: 800, color: '#F5C820', letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 10 }}>For sporting clubs and associations</div>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: 48, fontWeight: 900, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.5px', marginBottom: 14 }}>
               Level up<br/>your<br/>fundraising.
             </div>
@@ -136,7 +148,7 @@ export default function HockeySAPromo() {
                 { n: '100%', label: 'raised to your cause' },
               ].map(({ n, label }, i) => (
                 <div key={n} style={{ padding: '12px 8px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.12)' : 'none' }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--gold-bright)', marginBottom: 2 }}>{n}</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#F5C820', marginBottom: 2 }}>{n}</div>
                   <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.65)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
                 </div>
               ))}
@@ -167,7 +179,7 @@ export default function HockeySAPromo() {
           <div style={{ background: 'linear-gradient(135deg,#1A0A3C,#6B46F5)', padding: '18px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Start free at</div>
-              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--gold-bright)', letterSpacing: '-0.5px' }}>luckysquares.com.au</div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: '#F5C820', letterSpacing: '-0.5px' }}>luckysquares.com.au</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>No credit card needed to get started</div>
             </div>
             <div style={{ background: '#fff', borderRadius: 10, padding: 6, flexShrink: 0 }}>
@@ -233,9 +245,9 @@ export default function HockeySAPromo() {
               </div>
               <div style={{ background: 'linear-gradient(135deg,#1A0A3C,#4A28D4)', borderRadius: 10, padding: '14px 16px', border: '1.5px solid #6B46F5' }}>
                 <div style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Organisation plan</div>
-                <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--gold-bright)', marginBottom: 2 }}>$149<span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.6)' }}>/yr</span></div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: '#F5C820', marginBottom: 2 }}>$149<span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.6)' }}>/yr</span></div>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>Up to 10 campaigns at once. Team access. Perfect for regular fundraisers.</div>
-                <div style={{ marginTop: 8, fontSize: 10, fontWeight: 700, color: 'var(--gold-bright)' }}>✓ Best for clubs and associations</div>
+                <div style={{ marginTop: 8, fontSize: 10, fontWeight: 700, color: '#F5C820' }}>✓ Best for clubs and associations</div>
               </div>
             </div>
 
@@ -259,14 +271,14 @@ export default function HockeySAPromo() {
                     { state: 'taken',     label: 'Sold',        num: '4',  name: 'Jess', desc: 'Purchased. Buyer\'s first name shown.' },
                     { state: 'winner',    label: 'Winner',      num: '9',  name: 'Cath', desc: 'Winning square, highlighted after the draw.' },
                   ].map(({ state, label, num, name, desc }) => (
-                    <div key={state} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', background: 'var(--cream)', borderRadius: 8, border: '1px solid var(--border)' }}>
+                    <div key={state} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', background: '#FDF8F0', borderRadius: 8, border: '1px solid #E8DEC8' }}>
                       <div className={`sq ${state}`} style={{ width: 34, height: 34, borderRadius: 6, flexShrink: 0, cursor: 'default' }}>
                         <span className="sq-num" style={{ fontSize: 11 }}>{num}</span>
                         {name && <span className="sq-label">{name}</span>}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: 10, color: 'var(--text)', marginBottom: 1 }}>{label}</div>
-                        <div style={{ fontSize: 9, color: 'var(--text2)', lineHeight: 1.4 }}>{desc}</div>
+                        <div style={{ fontWeight: 800, fontSize: 10, color: '#2A1F0F', marginBottom: 1 }}>{label}</div>
+                        <div style={{ fontSize: 9, color: '#6B5340', lineHeight: 1.4 }}>{desc}</div>
                       </div>
                     </div>
                   ))}
@@ -278,7 +290,7 @@ export default function HockeySAPromo() {
 
           {/* Footer */}
           <div style={{ background: '#1A0A3C', padding: '10px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--gold-bright)' }}>luckysquares.com.au</div>
+            <div style={{ fontSize: 14, fontWeight: 900, color: '#F5C820' }}>luckysquares.com.au</div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>hello@luckysquares.com.au</div>
           </div>
         </div>
