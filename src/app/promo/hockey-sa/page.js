@@ -75,7 +75,10 @@ export default function HockeySAPromo() {
     setGenerating(true);
     try {
       const res = await fetch('/api/promo/hockey-sa-pdf');
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(`${res.status}: ${body.detail || body.error || 'unknown'}`);
+      }
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
@@ -85,7 +88,7 @@ export default function HockeySAPromo() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('PDF generation failed:', err);
-      alert('PDF generation failed — please try again.');
+      alert(`PDF generation failed: ${err.message}`);
     } finally {
       setGenerating(false);
     }
