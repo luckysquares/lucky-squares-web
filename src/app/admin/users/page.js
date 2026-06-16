@@ -159,6 +159,9 @@ export default function AdminUsers() {
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       <a href={`mailto:${u.email}`} style={{ color: 'var(--green)', fontWeight: 600 }}>{u.email}</a>
+                      {u.email_opted_out && (
+                        <span style={{ display: 'block', marginTop: 3, fontSize: 10, fontWeight: 700, color: '#6B7280', background: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: 20, padding: '1px 7px', letterSpacing: '0.5px', textTransform: 'uppercase', width: 'fit-content' }}>Unsubscribed</span>
+                      )}
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       {u.is_admin
