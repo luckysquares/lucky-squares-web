@@ -50,7 +50,8 @@ const css = `
     html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
     .no-print { display: none !important; }
     .page-wrap { padding: 0 !important; gap: 0 !important; background: none !important; display: block !important; }
-    .a4 { box-shadow: none !important; width: 210mm !important; height: 297mm !important; overflow: hidden !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+    .a4 { box-shadow: none !important; width: 210mm !important; height: 297mm !important; overflow: hidden !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+    .a4 + .a4 { page-break-before: always !important; break-before: page !important; }
   }
 `;
 
