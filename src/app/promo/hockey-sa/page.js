@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 
@@ -70,32 +70,19 @@ const css = `
 
 export default function HockeySAPromo() {
   const [generating, setGenerating] = useState(false);
-  const pageWrapRef = useRef(null);
 
   async function downloadPDF() {
     setGenerating(true);
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas'),
-        import('jspdf'),
-      ]);
-
-      const pages = pageWrapRef.current.querySelectorAll('.a4');
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-
-      for (let i = 0; i < pages.length; i++) {
-        if (i > 0) pdf.addPage();
-        const canvas = await html2canvas(pages[i], {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: '#ffffff',
-          logging: false,
-        });
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
-      }
-
-      pdf.save('Hockey-SA-Lucky-Squares.pdf');
+      const res = await fetch('/api/promo/hockey-sa-pdf');
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'Hockey-SA-Lucky-Squares.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('PDF generation failed:', err);
       alert('PDF generation failed — please try again.');
@@ -118,7 +105,7 @@ export default function HockeySAPromo() {
         </button>
       </div>
 
-      <div className="page-wrap" ref={pageWrapRef}>
+      <div className="page-wrap">
 
         {/* ══ SIDE 1 — HERO ══ */}
         <div className="a4" style={{ display: 'flex', flexDirection: 'column', background: '#fff' }}>
