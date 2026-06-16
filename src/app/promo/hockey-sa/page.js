@@ -125,9 +125,7 @@ export default function HockeySAPromo() {
           </div>
 
           {/* Sports photo with stats overlay */}
-          <div style={{ height: 420, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/sports-club-fundraiser.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', display: 'block' }} />
+          <div style={{ height: 420, overflow: 'hidden', flexShrink: 0, position: 'relative', backgroundImage: 'url(/sports-club-fundraiser.PNG)', backgroundSize: 'cover', backgroundPosition: 'center 35%' }}>
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom,#2D0E6B 0%,transparent 30%,transparent 45%,rgba(0,0,0,0.72) 100%)' }} />
             {/* Stats strip — overlaid on photo */}
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' }}>
@@ -190,9 +188,7 @@ export default function HockeySAPromo() {
           </div>
 
           {/* Hero image */}
-          <div style={{ height: 296, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/help-for-sports-clubs-to-raise-money.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', display: 'block' }} />
+          <div style={{ height: 296, overflow: 'hidden', flexShrink: 0, position: 'relative', backgroundImage: 'url(/help-for-sports-clubs-to-raise-money.PNG)', backgroundSize: 'cover', backgroundPosition: 'center 30%' }}>
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right,rgba(107,70,245,0.82) 0%,rgba(107,70,245,0.25) 55%,transparent 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 32px' }}>
               <div>
