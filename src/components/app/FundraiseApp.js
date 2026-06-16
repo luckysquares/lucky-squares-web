@@ -3258,7 +3258,6 @@ export default function FundraiseApp() {
         if (newSignup?.email === u.email) {
           const firstName = newSignup.name?.split(' ')[0] || u.user_metadata?.full_name?.split(' ')[0] || 'there';
           sendTxEmail('organizer_welcome', u.email, { first_name: firstName });
-          sendTxEmail('welcome_day1', u.email, { first_name: firstName });
           localStorage.removeItem('ls_new_signup');
         }
         // Load org role (contributor or admin) and org details for wizard pre-fill

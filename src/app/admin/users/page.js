@@ -15,6 +15,8 @@ export default function AdminUsers() {
   const [suspendModal, setSuspendModal] = useState(null); // user being suspended
   const [suspendReason,setSuspendReason]= useState('');
   const [suspending,   setSuspending]   = useState(false);
+  const [sendingCoupon,setSendingCoupon]= useState(null); // user_id of in-flight coupon send
+  const [couponSent,   setCouponSent]   = useState({});   // { [user_id]: coupon_code }
 
   useEffect(() => {
     if (!supabaseConfigured) { setUsers(DEMO_USERS); setLoading(false); return; }
@@ -91,6 +93,25 @@ export default function AdminUsers() {
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, suspended: false, suspension_reason: null } : u));
   };
 
+  const sendWelcomeCoupon = async (u) => {
+    if (!confirm(`Send a free campaign coupon to ${u.full_name || u.email}?`)) return;
+    setSendingCoupon(u.id);
+    try {
+      const res  = await fetch('/api/admin/send-welcome-coupon', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ user_id: u.id, email: u.email, first_name: u.full_name }),
+      });
+      const json = await res.json();
+      if (!res.ok) { alert(`Failed: ${json.error}`); return; }
+      setCouponSent((prev) => ({ ...prev, [u.id]: json.coupon_code }));
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    } finally {
+      setSendingCoupon(null);
+    }
+  };
+
   const toggleFoundingMember = async (u) => {
     const newVal = !u.is_founding_member;
     if (supabaseConfigured) {
@@ -164,6 +185,20 @@ export default function AdminUsers() {
                         ) : (
                           <>
                             <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...u })}>Edit</button>
+                            {u.plan === 'trial' && !u.suspended && (
+                              couponSent[u.id] ? (
+                                <span style={{ fontSize: 11, color: 'var(--green)', fontWeight: 700, alignSelf: 'center' }} title={`Coupon: ${couponSent[u.id]}`}>✓ Coupon sent</span>
+                              ) : (
+                                <button
+                                  className="btn btn-sm"
+                                  style={{ background: '#F0FBF6', color: '#1A7A55', border: '1px solid #A8DFBF', fontSize: 11 }}
+                                  onClick={() => sendWelcomeCoupon(u)}
+                                  disabled={sendingCoupon === u.id}
+                                >
+                                  {sendingCoupon === u.id ? 'Sending…' : '🎁 Send coupon'}
+                                </button>
+                              )
+                            )}
                             <button
                               className="btn btn-sm"
                               style={{ background: u.is_founding_member ? '#FEF3C7' : '#F9FAFB', color: u.is_founding_member ? '#92400E' : '#6B7280', border: `1px solid ${u.is_founding_member ? '#F59E0B' : '#D1D5DB'}`, fontSize: 11 }}
