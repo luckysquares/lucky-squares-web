@@ -18,6 +18,8 @@ export default function AdminUsers() {
   const [suspending,   setSuspending]   = useState(false);
   const [sendingCoupon,setSendingCoupon]= useState(null); // user_id of in-flight coupon send
   const [couponSent,   setCouponSent]   = useState({});   // { [user_id]: coupon_code }
+  const [giftingOrg,   setGiftingOrg]   = useState(null); // user_id of in-flight org gift
+  const [orgGifted,    setOrgGifted]    = useState({});   // { [user_id]: true }
 
   useEffect(() => {
     if (!supabaseConfigured) { setUsers(DEMO_USERS); setLoading(false); return; }
@@ -113,6 +115,26 @@ export default function AdminUsers() {
     }
   };
 
+  const giftOrgMembership = async (u) => {
+    if (!confirm(`Gift 12 months of Organisation membership to ${u.full_name || u.email}?\n\nThis will upgrade their plan and send them the org welcome email.`)) return;
+    setGiftingOrg(u.id);
+    try {
+      const res  = await adminFetch('/api/admin/gift-org-membership', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ user_id: u.id, email: u.email, first_name: u.full_name, org_name: u.organisation || u.full_name }),
+      });
+      const json = await res.json();
+      if (!res.ok) { alert(`Failed: ${json.error}`); return; }
+      setOrgGifted((prev) => ({ ...prev, [u.id]: true }));
+      setUsers((prev) => prev.map((p) => p.id === u.id ? { ...p, plan: 'org' } : p));
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    } finally {
+      setGiftingOrg(null);
+    }
+  };
+
   const toggleFoundingMember = async (u) => {
     const newVal = !u.is_founding_member;
     if (supabaseConfigured) {
@@ -200,6 +222,20 @@ export default function AdminUsers() {
                                   disabled={sendingCoupon === u.id}
                                 >
                                   {sendingCoupon === u.id ? 'Sending…' : '🎁 Send coupon'}
+                                </button>
+                              )
+                            )}
+                            {u.plan !== 'org' && !u.suspended && (
+                              orgGifted[u.id] ? (
+                                <span style={{ fontSize: 11, color: '#1D4ED8', fontWeight: 700, alignSelf: 'center' }}>✓ Org gifted</span>
+                              ) : (
+                                <button
+                                  className="btn btn-sm"
+                                  style={{ background: '#EEF2FF', color: '#1D4ED8', border: '1px solid #BFDBFE', fontSize: 11 }}
+                                  onClick={() => giftOrgMembership(u)}
+                                  disabled={giftingOrg === u.id}
+                                >
+                                  {giftingOrg === u.id ? 'Gifting…' : '🏆 Gift org'}
                                 </button>
                               )
                             )}
