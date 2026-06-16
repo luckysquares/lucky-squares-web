@@ -20,6 +20,15 @@ const nextConfig = {
     // Lighthouse flags as adding ~500 ms to the critical path on mobile.
     optimizeCss: true,
   },
+  async redirects() {
+    return [
+      {
+        source:      '/blog/lucky-squares-australia-website-enters-beta-testing',
+        destination: '/blog/lucky-squares-australia-pre-launch',
+        permanent:   true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
