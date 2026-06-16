@@ -14,7 +14,7 @@ function amt(v: string | number): string {
 
 export function emailOrganizerWelcome(d: { first_name: string }) {
   return {
-    subject: `Welcome to Lucky Squares — here's how to get your first fundraiser live`,
+    subject: `Welcome to Lucky Squares: here's how to get your first fundraiser live`,
     text: `Hi ${d.first_name},
 
 Welcome! You've just joined hundreds of Australian schools, clubs and community groups using Lucky Squares to run simple, fun fundraisers.
@@ -33,7 +33,7 @@ When you're ready, hit the draw button. A winner is randomly selected from all s
 Ready to go?
 https://luckysquares.com.au/fundraise
 
-If you have any questions, just reply to this email — we're a small team and we read everything.
+If you have any questions, just reply to this email. We're a small team and we read everything.
 
 ${SIG}`,
   };
@@ -78,11 +78,11 @@ export function emailSquareSold(d: {
 
   const body = `Hi ${d.first_name},
 
-You've just sold your very first square in ${d.campaign_title} — every great fundraiser starts exactly like this. The grid has officially come to life!
+You've just sold your very first square in ${d.campaign_title}: every great fundraiser starts exactly like this. The grid has officially come to life!
 
-${d.buyer_name} has claimed square #${d.square_number}. Now get sharing — the more people who see your link, the faster that grid fills up.
+${d.buyer_name} has claimed square #${d.square_number}. Now get sharing: the more people who see your link, the faster that grid fills up.
 
-From here, we'll send you a daily summary each evening with all the squares sold that day. No individual emails for every sale — just one clean update at the end of the day if there's been activity.`;
+From here, we'll send you a daily summary each evening with all the squares sold that day. No individual emails for every sale, just one clean update at the end of the day if there's been activity.`;
 
   return {
     subject: `You've sold your first square in ${d.campaign_title}!`,
@@ -108,7 +108,7 @@ export function emailExpiryReminder7(d: {
 ${d.campaign_title} has been live for 7 days. You've sold ${d.sold_count} of ${d.grid_size} squares so far, which means $${d.amount_raised} raised for ${d.org_name}.
 
 ${d.below_breakeven
-  ? `You're still a few squares away from covering your prize costs. A fresh share to your network this week can make a big difference — people often need to see something twice before they act.`
+  ? `You're still a few squares away from covering your prize costs. A fresh share to your network this week can make a big difference. People often need to see something twice before they act.`
   : `You've already covered your prize costs, so anything more you sell is pure profit for your cause. Keep going!`}
 
 Log in to view your grid:
@@ -279,7 +279,7 @@ Your free campaign coupon code is:
 
 ${d.coupon_code}
 
-To use it: log in to your Lucky Squares dashboard, start a new campaign, and enter this code on the payment step when you launch. It waives the $19 platform fee entirely — one use only.
+To use it: log in to your Lucky Squares dashboard, start a new campaign, and enter this code on the payment step when you launch. It waives the $19 platform fee entirely (one use only).
 
 Thanks for spreading the word. It means a lot to us and to the causes you're helping.
 
@@ -377,11 +377,11 @@ export function emailOrgSquareSold(d: {
 
   const body = `Hi ${d.first_name},
 
-The first square in ${d.campaign_title} has just been sold — this is where every successful fundraiser begins!
+The first square in ${d.campaign_title} has just been sold: this is where every successful fundraiser begins!
 
 ${d.buyer_name} has claimed square #${d.square_number}. The grid is officially open for business.
 
-From here, we'll send you a daily summary each evening with all the squares sold that day. No individual emails for every sale — just one clean update at the end of the day if there's been activity.`;
+From here, we'll send you a daily summary each evening with all the squares sold that day. No individual emails for every sale, just one clean update at the end of the day if there's been activity.`;
 
   return {
     subject: `Your first square just sold in ${d.campaign_title}!`,
@@ -437,9 +437,9 @@ Thanks for applying for the Lucky Squares Organisation Plan. We've received your
 
 **Next steps:**
 
-1. Confirm your email address — check your inbox for a separate confirmation email and click the link to verify your account.
+1. Confirm your email address: check your inbox for a separate confirmation email and click the link to verify your account.
 
-2. We'll review your application — our team verifies every ABN and reviews each application personally. You'll hear from us within 1 business day.
+2. We'll review your application: our team verifies every ABN and reviews each application personally. You'll hear from us within 1 business day.
 
 3. Once approved, your account is automatically upgraded to the Organisation Plan with full access to all features.
 
@@ -510,7 +510,7 @@ export function emailSquarePurchaseConfirmation(d: {
     subject: `You're in! Square${d.square_numbers.includes(',') ? 's' : ''} confirmed`,
     text: `Hi ${firstName(d.buyer_name)},
 
-You've secured your square${d.square_numbers.includes(',') ? 's' : ''} in ${d.campaign_title} — good luck in the draw!
+You've secured your square${d.square_numbers.includes(',') ? 's' : ''} in ${d.campaign_title}. Good luck in the draw!
 
 Square${d.square_numbers.includes(',') ? 's' : ''}: #${d.square_numbers.split(', ').join(', #')}
 Amount paid: ${amt(d.amount_paid)}
@@ -692,7 +692,7 @@ export function emailWelcomeDay5Coupon(d: {
     subject: `Your first Lucky Squares campaign is on us, ${d.first_name}`,
     text: `Hi ${d.first_name},
 
-You took a look at our online Lucky Squares platform five days ago and we haven't seen a fundraiser from you yet. That's fine — we know life gets in the way.
+You took a look at our online Lucky Squares platform five days ago and we haven't seen a fundraiser from you yet. That's fine, we know life gets in the way.
 
 To make it a little easier to get started, we'd like to give you your first campaign on us. No platform fee for your first launch.
 
@@ -702,7 +702,7 @@ ${d.coupon_code}
 
 It covers the full $19 launch fee. It is valid for 30 days, no catch.
 
-If there's something holding you back — questions about prizes, payment options, whether Lucky Squares is a good fit for your organisation — just reply and we'll help you figure it out.
+If there's something holding you back (questions about prizes, payment options, whether Lucky Squares is a good fit for your organisation), just reply and we'll help you figure it out.
 
 Ready when you are:
 https://luckysquares.com.au/fundraise
@@ -736,14 +736,14 @@ export function emailWelcomeDay21NoCampaign(d: {
   coupon_code?: string;
 }) {
   const couponBlock = d.coupon_code
-    ? `\nAs a reminder, here's the free campaign code we sent you a couple of weeks ago:\n\n${d.coupon_code}\n\nThis is the last time we'll mention it — it expires in about ten days, so if you'd like to use it, now's the time.\n`
+    ? `\nAs a reminder, here's the free campaign code we sent you a couple of weeks ago:\n\n${d.coupon_code}\n\nThis is the last time we'll mention it: it expires in about ten days, so if you'd like to use it, now's the time.\n`
     : '';
 
   return {
-    subject: `Last one from us, ${d.first_name} — can we help you get started?`,
+    subject: `Last one from us, ${d.first_name}: can we help you get started?`,
     text: `Hi ${d.first_name},
 
-This is our last check-in. You signed up three weeks ago and we haven't seen a campaign from you yet. That's completely fine — life gets busy.
+This is our last check-in. You signed up three weeks ago and we haven't seen a campaign from you yet. That's completely fine, life gets busy.
 
 But if there's something holding you back, we'd genuinely love to help. A lot of first-time organisers have questions about things like prize sourcing, how bank transfers work, or whether Lucky Squares is a good fit for their situation.
 ${couponBlock}
@@ -768,7 +768,7 @@ I wanted to offer a personal thank you for being one of the very first people to
 
 I noticed you took a look around our website recently but haven't run a campaign yet, and so I wanted to reach out personally.
 
-Running a fundraiser with Lucky Squares is quite easy to set up — most organisers have their grid live in under five minutes and their first square sold within an hour of sharing the link.
+Running a fundraiser with Lucky Squares is quite easy to set up: most organisers have their grid live in under five minutes and their first square sold within an hour of sharing the link.
 
 To help you get started, I'd like to give you your first campaign on us. Just use this coupon code:
 
@@ -948,7 +948,7 @@ export function emailCampaignLaunchedNotification(d: {
     subject: `New fundraiser from ${d.organiser_name}: ${d.campaign_title}`,
     text: `Hi there,
 
-You asked to be notified when ${d.organiser_name} launched their next fundraiser — and it's now live!
+You asked to be notified when ${d.organiser_name} launched their next fundraiser, and it's now live!
 
 ${d.campaign_title}
 
@@ -1248,7 +1248,7 @@ export function emailOrgRenewalReminder(d: { first_name: string; org_name: strin
 
 Just a heads-up: your Lucky Squares Organisation Plan for ${d.org_name} will automatically renew on ${d.renewal_date} for ${d.amount}.
 
-No action is needed — we'll charge the card on file. If you'd like to update your payment method or cancel before the renewal date, reply to this email.
+No action is needed, we'll charge the card on file. If you'd like to update your payment method or cancel before the renewal date, reply to this email.
 
 ${SIG}`,
   };
@@ -1269,14 +1269,14 @@ export function emailTestimonialInvite(d: {
 
 Congratulations on completing your Lucky Squares fundraiser for ${d.org_name}!
 
-You raised ${d.amount_raised} with ${d.campaign_title} — that's a great result.
+You raised ${d.amount_raised} with ${d.campaign_title}: that's a great result.
 
 We'd love to hear how it went. If you have a moment, sharing your experience helps other schools, clubs, and charities discover Lucky Squares and run their own fundraisers.
 
 Leave a quick note here (takes less than a minute):
 ${d.testimonial_url}
 
-No login required — just click the link and share your thoughts.
+No login required, just click the link and share your thoughts.
 
 **Testimonial Prize Draw:** Every approved testimonial is entered into our monthly Testimonial Prize Draw. One winner is drawn on the first business day of each month and wins a $100 Visa debit gift card. See full terms at luckysquares.com.au/terms.
 
@@ -1295,7 +1295,7 @@ export function emailTestimonialWinner(d: {
     subject: `You won the Lucky Squares Testimonial Prize Draw!`,
     text: `Hi ${d.first_name},
 
-Great news — you've won the Lucky Squares Testimonial Prize Draw for ${d.month_label}!
+Great news: you've won the Lucky Squares Testimonial Prize Draw for ${d.month_label}!
 
 Your testimonial for ${d.org_name} was randomly selected from all approved entries this month, and you've won a $100 Visa debit gift card.
 
@@ -1313,7 +1313,7 @@ export function emailTestimonialDrawReminder(d: {
   draw_url: string;
 }) {
   return {
-    subject: `Reminder: Testimonial Prize Draw — ${d.month_label}`,
+    subject: `Reminder: Testimonial Prize Draw, ${d.month_label}`,
     text: `Hi Jamie,
 
 This is your monthly reminder to run the Lucky Squares Testimonial Prize Draw for ${d.month_label}.
