@@ -246,6 +246,15 @@ export default function AdminUsers() {
                             >
                               {u.is_founding_member ? '★ Founding' : '☆ Founding'}
                             </button>
+                            {u.marketing_contact_id && (
+                              <a
+                                href={`/admin/marketing?contact=${u.marketing_contact_id}`}
+                                className="btn btn-sm"
+                                style={{ background: '#F5F3FF', color: '#6D28D9', border: '1px solid #DDD6FE', fontSize: 11, textDecoration: 'none' }}
+                              >
+                                Activity log
+                              </a>
+                            )}
                             {u.suspended ? (
                               <button
                                 className="btn btn-sm"

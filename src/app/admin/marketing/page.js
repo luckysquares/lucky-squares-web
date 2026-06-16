@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { adminFetch } from '@/lib/adminFetch';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -500,7 +501,7 @@ function ContactLogModal({ contact, onClose }) {
 
 // ── Contacts tab ──────────────────────────────────────────────────────────────
 
-function ContactsTab() {
+function ContactsTab({ defaultContactId }) {
   const [items,     setItems]     = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [editing,   setEditing]   = useState(null);
@@ -521,7 +522,14 @@ function ContactsTab() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, []);  // eslint-disable-line
+
+  useEffect(() => {
+    if (defaultContactId && items.length > 0) {
+      const contact = items.find((c) => c.id === defaultContactId);
+      if (contact) setLogging(contact);
+    }
+  }, [defaultContactId, items]);
 
   const save = async () => {
     setSaving(true); setSaveError('');
@@ -728,7 +736,9 @@ function ContactsTab() {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function AdminMarketingPage() {
-  const [tab, setTab] = useState('campaigns');
+  const searchParams   = useSearchParams();
+  const contactParam   = searchParams.get('contact');
+  const [tab, setTab]  = useState(contactParam ? 'contacts' : 'campaigns');
 
   return (
     <div>
@@ -755,7 +765,7 @@ export default function AdminMarketingPage() {
 
       {tab === 'campaigns' && <CampaignsTab />}
       {tab === 'content'   && <ContentTab />}
-      {tab === 'contacts'  && <ContactsTab />}
+      {tab === 'contacts'  && <ContactsTab defaultContactId={contactParam} />}
     </div>
   );
 }
