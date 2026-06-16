@@ -12,25 +12,26 @@ export async function GET(request) {
   try {
     chromium  = (await import('@sparticuz/chromium')).default;
     puppeteer = (await import('puppeteer-core')).default;
-  } catch {
-    return NextResponse.json({ error: 'PDF generation dependencies not available' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Import failed', detail: String(err) }, { status: 500 });
   }
 
-  const browser = await puppeteer.launch({
-    args:            chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath:  await chromium.executablePath(),
-    headless:        'new',
-  });
-
+  let browser;
   try {
-    const page = await browser.newPage();
+    chromium.setHeadlessMode = true;
+    chromium.setGraphicsMode = false;
 
-    // Hide the toolbar — same as @media print but for headless capture
+    browser = await puppeteer.launch({
+      args:            chromium.args,
+      defaultViewport: { width: 1280, height: 900 },
+      executablePath:  await chromium.executablePath(),
+      headless:        true,
+    });
+
+    const page = await browser.newPage();
     await page.emulateMediaType('print');
     await page.goto(pageUrl, { waitUntil: 'networkidle0', timeout: 30000 });
 
-    // Wait for images to fully load
     await page.evaluate(() =>
       Promise.all(
         Array.from(document.images)
@@ -51,7 +52,10 @@ export async function GET(request) {
         'Content-Disposition': 'attachment; filename="Hockey-SA-Lucky-Squares.pdf"',
       },
     });
+  } catch (err) {
+    console.error('[hockey-sa-pdf]', err);
+    return NextResponse.json({ error: 'PDF generation failed', detail: String(err) }, { status: 500 });
   } finally {
-    await browser.close();
+    if (browser) await browser.close();
   }
 }
