@@ -40,5 +40,19 @@ export async function POST(req) {
     });
   }
 
+  // Log to CRM contact activity
+  const { data: contactId } = await db.rpc('get_or_create_marketing_contact', {
+    p_user_id: user_id,
+    p_email:   email.trim(),
+    p_name:    first_name || null,
+  });
+  if (contactId) {
+    await db.from('marketing_contact_logs').insert({
+      contact_id: contactId,
+      entry:      `Gifted 12-month Organisation membership${org_name ? ` for ${org_name}` : ''}. Org welcome email sent.`,
+      entry_type: 'System',
+    });
+  }
+
   return NextResponse.json({ ok: true });
 }
