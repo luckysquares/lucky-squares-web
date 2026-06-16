@@ -20,6 +20,10 @@ export default function AdminUsers() {
   const [couponSent,   setCouponSent]   = useState({});   // { [user_id]: coupon_code }
   const [giftingOrg,   setGiftingOrg]   = useState(null); // user_id of in-flight org gift
   const [orgGifted,    setOrgGifted]    = useState({});   // { [user_id]: true }
+  const [linkModal,    setLinkModal]    = useState(null); // user to link to CRM
+  const [crmContacts,  setCrmContacts]  = useState([]);   // unlinked contacts for picker
+  const [linkSearch,   setLinkSearch]   = useState('');
+  const [linking,      setLinking]      = useState(false);
 
   useEffect(() => {
     if (!supabaseConfigured) { setUsers(DEMO_USERS); setLoading(false); return; }
@@ -135,6 +139,32 @@ export default function AdminUsers() {
     }
   };
 
+  const openLinkModal = async (u) => {
+    setLinkSearch('');
+    setLinkModal(u);
+    const res  = await adminFetch('/api/admin/marketing/contacts');
+    const json = await res.json();
+    setCrmContacts(Array.isArray(json) ? json.filter((c) => !c.user_id) : []);
+  };
+
+  const linkCrmContact = async (contactId) => {
+    setLinking(true);
+    try {
+      const res = await adminFetch(`/api/admin/marketing/contacts/${contactId}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ user_id: linkModal.id }),
+      });
+      if (!res.ok) { alert('Failed to link contact'); return; }
+      setUsers((prev) => prev.map((u) => u.id === linkModal.id ? { ...u, marketing_contact_id: contactId } : u));
+      setLinkModal(null);
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    } finally {
+      setLinking(false);
+    }
+  };
+
   const toggleFoundingMember = async (u) => {
     const newVal = !u.is_founding_member;
     if (supabaseConfigured) {
@@ -246,7 +276,7 @@ export default function AdminUsers() {
                             >
                               {u.is_founding_member ? '★ Founding' : '☆ Founding'}
                             </button>
-                            {u.marketing_contact_id && (
+                            {u.marketing_contact_id ? (
                               <a
                                 href={`/admin/marketing?contact=${u.marketing_contact_id}`}
                                 className="btn btn-sm"
@@ -254,6 +284,14 @@ export default function AdminUsers() {
                               >
                                 Activity log
                               </a>
+                            ) : (
+                              <button
+                                className="btn btn-sm"
+                                style={{ background: '#F5F3FF', color: '#6D28D9', border: '1px solid #DDD6FE', fontSize: 11 }}
+                                onClick={() => openLinkModal(u)}
+                              >
+                                Link CRM
+                              </button>
                             )}
                             {u.suspended ? (
                               <button
@@ -350,6 +388,47 @@ export default function AdminUsers() {
               >
                 {suspending ? 'Suspending…' : 'Confirm suspension'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Link CRM modal */}
+      {linkModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
+          <div className="scratch-card" style={{ padding: 36, maxWidth: 520, width: '100%' }}>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Link CRM contact</h2>
+            <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
+              Select an existing CRM contact to link to <strong>{linkModal.full_name || linkModal.email}</strong>. Once linked, their activity log will be shared.
+            </p>
+            <input
+              className="form-input"
+              placeholder="Search by name, organisation or email…"
+              value={linkSearch}
+              onChange={(e) => setLinkSearch(e.target.value)}
+              style={{ marginBottom: 12 }}
+              autoFocus
+            />
+            <div style={{ maxHeight: 280, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
+              {crmContacts
+                .filter((c) => !linkSearch || [c.name, c.organisation, c.email].some((f) => f?.toLowerCase().includes(linkSearch.toLowerCase())))
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => linkCrmContact(c.id)}
+                    disabled={linking}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 16px', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{c.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text2)' }}>{[c.organisation, c.email].filter(Boolean).join(' · ')}</div>
+                  </button>
+                ))}
+              {crmContacts.filter((c) => !linkSearch || [c.name, c.organisation, c.email].some((f) => f?.toLowerCase().includes(linkSearch.toLowerCase()))).length === 0 && (
+                <div style={{ padding: '20px 16px', fontSize: 13, color: 'var(--text2)', textAlign: 'center' }}>No unlinked contacts found.</div>
+              )}
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => setLinkModal(null)}>Cancel</button>
             </div>
           </div>
         </div>
