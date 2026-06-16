@@ -44,13 +44,13 @@ const css = `
   .page-wrap { display: flex; flex-direction: column; gap: 40px; padding: 40px 20px 60px; align-items: center; }
   .a4 { width: 210mm; height: 297mm; overflow: hidden; position: relative; box-shadow: 0 8px 48px rgba(0,0,0,.35); }
   .sq, .sq * { animation: none !important; transition: none !important; }
-  @page { size: A4 portrait; margin: 12mm; }
+  @page { size: A4 portrait; margin: 0; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-    body { background: #fff !important; }
+    html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
     .no-print { display: none !important; }
-    .page-wrap { padding: 0; gap: 0; background: none; }
-    .a4 { box-shadow: none; width: 186mm; height: 273mm; page-break-after: always; break-after: page; }
+    .page-wrap { padding: 0 !important; gap: 0 !important; background: none !important; display: block !important; }
+    .a4 { box-shadow: none !important; width: 210mm !important; height: 297mm !important; overflow: hidden !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; }
   }
 `;
 
@@ -64,7 +64,10 @@ export default function HockeySAPromo() {
           <Link href="/admin/marketing" className="back-link">Back to Marketing</Link>
           <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>Double-sided A4 — Hockey SA Junior Country Championships</span>
         </div>
-        <button className="print-btn" onClick={() => window.print()}>Print both sides</button>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>To save as PDF: File → Print → PDF → Save as PDF</span>
+          <button className="print-btn" onClick={() => window.print()}>Print / Save as PDF</button>
+        </div>
       </div>
 
       <div className="page-wrap">
