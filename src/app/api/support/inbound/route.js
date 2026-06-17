@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
-const INTERNAL_TO  = 'jamie@luckysquares.com.au';
-const SUPPORT_FROM = 'hello@luckysquares.com.au';
+const INTERNAL_TO    = 'jamie@luckysquares.com.au';
+const PERSONAL_INBOX = 'jwstott@me.com';
+const SUPPORT_FROM   = 'hello@luckysquares.com.au';
 
 // Parse ticket ID from address like: support+{ticketId}@reply.luckysquares.com.au
 // Also accepts root domain: support+{ticketId}@luckysquares.com.au
@@ -99,7 +100,7 @@ export async function POST(req) {
           headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             from:     SUPPORT_FROM,
-            to:       INTERNAL_TO,
+            to:       PERSONAL_INBOX,
             reply_to: fromField ?? undefined,
             subject:  `Fwd: ${emailSubject ?? '(no subject)'}`,
             text:     `From: ${fromField}\n\n${rawBody}`,
