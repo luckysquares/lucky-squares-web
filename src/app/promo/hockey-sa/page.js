@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 
@@ -69,31 +68,6 @@ const css = `
 `;
 
 export default function HockeySAPromo() {
-  const [generating, setGenerating] = useState(false);
-
-  async function downloadPDF() {
-    setGenerating(true);
-    try {
-      const res = await fetch('/api/promo/hockey-sa-pdf');
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(`${res.status}: ${body.detail || body.error || 'unknown'}`);
-      }
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href     = url;
-      a.download = 'Hockey-SA-Lucky-Squares.pdf';
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('PDF generation failed:', err);
-      alert(`PDF generation failed: ${err.message}`);
-    } finally {
-      setGenerating(false);
-    }
-  }
-
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
@@ -103,9 +77,9 @@ export default function HockeySAPromo() {
           <Link href="/admin/marketing" className="back-link">Back to Marketing</Link>
           <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>Double-sided A4 — Hockey SA Junior Country Championships</span>
         </div>
-        <button className="print-btn" onClick={downloadPDF} disabled={generating} style={{ opacity: generating ? 0.6 : 1 }}>
-          {generating ? 'Generating...' : 'Download PDF'}
-        </button>
+        <a href="/Hockey-SA-Lucky-Squares.pdf" download="Hockey-SA-Lucky-Squares.pdf" className="print-btn">
+          Download PDF
+        </a>
       </div>
 
       <div className="page-wrap">
