@@ -45,7 +45,10 @@ export async function GET(req) {
   if (priority) query = query.eq('priority', priority);
   if (category) query = query.eq('category', category);
   if (assignee) query = query.eq('assignee_id', assignee);
-  if (search)   query = query.or(`contact_name.ilike.%${search}%,contact_email.ilike.%${search}%,subject.ilike.%${search}%,ticket_ref.ilike.%${search}%`);
+  if (search) {
+    const safeSearch = search.replace(/[%(),]/g, '');
+    query = query.or(`contact_name.ilike.%${safeSearch}%,contact_email.ilike.%${safeSearch}%,subject.ilike.%${safeSearch}%,ticket_ref.ilike.%${safeSearch}%`);
+  }
 
   // SLA breach: mark tickets open > 24h as high breach, > 48h as urgent
   const now       = new Date();

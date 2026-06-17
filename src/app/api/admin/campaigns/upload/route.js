@@ -2,7 +2,19 @@ import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 
+async function verifyAdmin(req) {
+  const auth = req.headers.get('Authorization');
+  if (!auth?.startsWith('Bearer ')) return false;
+  const token = auth.slice(7);
+  const supabase = getSupabase();
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return false;
+  const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+  return profile?.is_admin === true;
+}
+
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const formData = await req.formData();
     const file = formData.get('file');
