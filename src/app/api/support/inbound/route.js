@@ -93,20 +93,24 @@ export async function POST(req) {
       const isInternal = (fromField ?? '').toLowerCase().includes('luckysquares.com.au');
       const toAddresses2 = Array.isArray(toField) ? toField : [toField ?? ''];
       const isJamie = toAddresses2.some((a) => a.toLowerCase().startsWith('jamie@'));
-      if (isJamie && !isInternal && resendKey) {
-        const rawBody = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).trim();
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from:     SUPPORT_FROM,
-            to:       PERSONAL_INBOX,
-            reply_to: fromField ?? undefined,
-            subject:  `Fwd: ${emailSubject ?? '(no subject)'}`,
-            text:     `From: ${fromField}\n\n${rawBody}`,
-            html:     payloadHtml ? `<p><strong>From:</strong> ${fromField}</p><hr>${payloadHtml}` : undefined,
-          }),
-        });
+      if (isJamie) {
+        // Internal notifications (from hello@luckysquares.com.au) loop back here — drop silently.
+        // External emails get forwarded to personal inbox via Resend (iCloud trusts Resend outbound).
+        if (!isInternal && resendKey) {
+          const fwdBody = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).trim();
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from:     SUPPORT_FROM,
+              to:       PERSONAL_INBOX,
+              reply_to: fromField ?? undefined,
+              subject:  `Fwd: ${emailSubject ?? '(no subject)'}`,
+              text:     `From: ${fromField}\n\n${fwdBody}`,
+              html:     payloadHtml ? `<p><strong>From:</strong> ${fromField}</p><hr>${payloadHtml}` : undefined,
+            }),
+          });
+        }
         return NextResponse.json({ ok: true });
       }
 
