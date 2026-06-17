@@ -81,12 +81,31 @@ export async function POST(req) {
     const supabase  = getSupabase();
     const resendKey = process.env.RESEND_API_KEY;
 
-    // No ticket ID — direct email to hello@ (not a reply to a specific ticket).
-    // Create a new support ticket from it.
+    // No ticket ID — direct email to hello@ or jamie@.
     if (!ticketId) {
       const fromMatch2   = (fromField ?? '').match(/^(.+?)\s*<([^>]+)>/);
       const senderName2  = fromMatch2 ? fromMatch2[1].trim() : 'Unknown';
       const senderEmail2 = fromMatch2 ? fromMatch2[2].trim() : (fromField ?? '').trim().toLowerCase();
+
+      // Email addressed to jamie@ — forward to personal inbox via Resend (iCloud trusts Resend outbound)
+      const toAddresses2 = Array.isArray(toField) ? toField : [toField ?? ''];
+      const isJamie = toAddresses2.some((a) => a.toLowerCase().includes('jamie@luckysquares'));
+      if (isJamie && resendKey) {
+        const rawBody = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).trim();
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from:     SUPPORT_FROM,
+            to:       INTERNAL_TO,
+            reply_to: fromField ?? undefined,
+            subject:  `Fwd: ${emailSubject ?? '(no subject)'}`,
+            text:     `From: ${fromField}\n\n${rawBody}`,
+            html:     payloadHtml ? `<p><strong>From:</strong> ${fromField}</p><hr>${payloadHtml}` : undefined,
+          }),
+        });
+        return NextResponse.json({ ok: true });
+      }
 
       if (!senderEmail2) {
         console.warn('[inbound] No ticket ID and no sender — ignoring');
