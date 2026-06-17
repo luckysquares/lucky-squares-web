@@ -96,7 +96,7 @@ export default function HockeySAPromo() {
               Level up<br/>your<br/>fundraising.
             </div>
             <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, maxWidth: 340, marginBottom: 20 }}>
-              Run a Lucky Squares fundraiser entirely online. Set up in minutes, sell squares by link, and draw live.
+              Run in person or entirely online. Set up in minutes, sell squares, and draw live.
             </div>
           </div>
 
@@ -125,7 +125,7 @@ export default function HockeySAPromo() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
               {[
                 { icon: '🎯', title: 'Set up your grid', body: 'Choose your grid size, set your price per square, and add your prizes. Takes about five minutes.' },
-                { icon: '🔗', title: 'Share your link', body: 'Send your link via WhatsApp, social media, SMS or email. Buyers pick their square and pay by card on the spot.' },
+                { icon: '🔗', title: 'Share your link', body: 'Run in person, or send your link via WhatsApp, social media, SMS or email to run online. Buyers pick their squares and pay using various methods.' },
                 { icon: '🎲', title: 'Run the live draw', body: 'Hit draw when ready and the winning square is highlighted live for everyone watching. Winners notified by email instantly.' },
               ].map(({ icon, title, body }) => (
                 <div key={title} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
@@ -181,7 +181,7 @@ export default function HockeySAPromo() {
               <div style={{ fontSize: 10, fontWeight: 800, color: '#6B46F5', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>Why sporting clubs choose us</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {[
-                  { icon: '📱', title: 'Works on any device', body: 'Buyers pick their square and pay by card from their phone. No app needed.' },
+                  { icon: '📱', title: 'Works on any device', body: 'Run in person or online. Buyers pick their square and pay by card, bank transfer, or in person. No app needed.' },
                   { icon: '💸', title: 'Funds go directly to you', body: 'Simple flat-fee pricing. We don\'t take a percentage of the funds you raise.' },
                   { icon: '🎯', title: 'No spreadsheets', body: 'The grid manages itself. See who has which square in real time.' },
                   { icon: '🎲', title: 'Live draw everyone can watch', body: 'Run the draw on any screen. Winners revealed live. Everyone loves it.' },
