@@ -210,7 +210,7 @@ export default function HockeySAPromo() {
               <div style={{ background: 'linear-gradient(135deg,#1A0A3C,#4A28D4)', borderRadius: 10, padding: '14px 16px', border: '1.5px solid #6B46F5' }}>
                 <div style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Organisation plan</div>
                 <div style={{ fontSize: 28, fontWeight: 900, color: '#F5C820', marginBottom: 2 }}>$149<span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.6)' }}>/yr</span></div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>Up to 10 campaigns at once. Team access. Perfect for regular fundraisers.</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>Unlimited campaigns during the year with up to 10 campaigns running concurrently. Team access. Perfect for regular fundraisers.</div>
                 <div style={{ marginTop: 8, fontSize: 10, fontWeight: 700, color: '#F5C820' }}>✓ Best for clubs and associations</div>
               </div>
             </div>
