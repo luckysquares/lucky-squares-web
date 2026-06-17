@@ -21,10 +21,15 @@ export async function GET(request) {
     chromium.setHeadlessMode = true;
     chromium.setGraphicsMode = false;
 
+    // Binary is not bundled in the npm package — download from GitHub releases at runtime.
+    const chromiumPath = await chromium.executablePath(
+      'https://github.com/Sparticuz/chromium/releases/download/v149.0.0/chromium-v149.0.0-pack.tar'
+    );
+
     browser = await puppeteer.launch({
       args:            chromium.args,
       defaultViewport: { width: 1280, height: 900 },
-      executablePath:  await chromium.executablePath(),
+      executablePath:  chromiumPath,
       headless:        true,
     });
 
