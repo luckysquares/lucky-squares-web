@@ -88,9 +88,11 @@ export async function POST(req) {
       const senderEmail2 = fromMatch2 ? fromMatch2[2].trim() : (fromField ?? '').trim().toLowerCase();
 
       // Email addressed to jamie@ — forward to personal inbox via Resend (iCloud trusts Resend outbound)
+      // Skip internal system emails (support notifications sent by us) to avoid duplicates
+      const isInternal = (fromField ?? '').toLowerCase().includes('luckysquares.com.au');
       const toAddresses2 = Array.isArray(toField) ? toField : [toField ?? ''];
       const isJamie = toAddresses2.some((a) => a.toLowerCase().includes('jamie@luckysquares'));
-      if (isJamie && resendKey) {
+      if (isJamie && !isInternal && resendKey) {
         const rawBody = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).trim();
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
