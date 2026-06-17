@@ -92,7 +92,7 @@ export async function POST(req) {
       // Skip internal system emails (support notifications sent by us) to avoid duplicates
       const isInternal = (fromField ?? '').toLowerCase().includes('luckysquares.com.au');
       const toAddresses2 = Array.isArray(toField) ? toField : [toField ?? ''];
-      const isJamie = toAddresses2.some((a) => a.toLowerCase().includes('jamie@luckysquares'));
+      const isJamie = toAddresses2.some((a) => a.toLowerCase().startsWith('jamie@'));
       if (isJamie && !isInternal && resendKey) {
         const rawBody = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).trim();
         await fetch('https://api.resend.com/emails', {
