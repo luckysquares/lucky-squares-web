@@ -97,7 +97,15 @@ export async function POST(req) {
         // Internal notifications (from hello@luckysquares.com.au) loop back here — drop silently.
         // External emails get forwarded to personal inbox via Resend (iCloud trusts Resend outbound).
         if (!isInternal && resendKey) {
-          const fwdBody = (payloadText || (payloadHtml ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).trim();
+          // Resend webhook may omit body — fetch from API if both are absent
+          let fwdText = payloadText ?? '';
+          let fwdHtml = payloadHtml ?? '';
+          if (!fwdText && !fwdHtml && email_id) {
+            const detail = await fetchEmailBody(email_id, resendKey);
+            fwdText = detail?.text ?? '';
+            fwdHtml = detail?.html ?? '';
+          }
+          const fwdBody = (fwdText || fwdHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).trim();
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
