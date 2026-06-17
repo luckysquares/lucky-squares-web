@@ -107,7 +107,7 @@ export async function POST(req) {
               reply_to: fromField ?? undefined,
               subject:  `Fwd: ${emailSubject ?? '(no subject)'}`,
               text:     `From: ${fromField}\n\n${fwdBody}`,
-              html:     payloadHtml ? `<p><strong>From:</strong> ${fromField}</p><hr>${payloadHtml}` : undefined,
+              html:     `<p><strong>From:</strong> ${(fromField ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p><hr><pre style="white-space:pre-wrap;font-family:inherit">${fwdBody.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`,
             }),
           });
         }

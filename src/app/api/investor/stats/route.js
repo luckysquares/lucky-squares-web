@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { getAdminClient } from '@/lib/supabase/server';
 
 export async function GET() {
+  const cookieStore = await cookies();
+  if (cookieStore.get('investor_session')?.value !== 'granted') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const db = getAdminClient();
 

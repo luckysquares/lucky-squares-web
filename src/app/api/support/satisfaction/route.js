@@ -13,7 +13,8 @@ export async function GET(req) {
   const rating   = searchParams.get('rating');
 
   const validRatings = ['positive', 'negative'];
-  if (!ticketId || !validRatings.includes(rating)) {
+  const validUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!ticketId || !validUuid.test(ticketId) || !validRatings.includes(rating)) {
     return new Response(thankYouPage('Invalid request', false), {
       status: 400,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
