@@ -24,6 +24,7 @@ export default function AdminCampaigns() {
   const [search,         setSearch]         = useState('');
   const [filter,         setFilter]         = useState('all');
   const [editing,        setEditing]        = useState(null);
+  const [editingPrizes,  setEditingPrizes]  = useState([]);
   const [saving,         setSaving]         = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [buyModal,       setBuyModal]       = useState(null);
@@ -129,9 +130,14 @@ export default function AdminCampaigns() {
         p_image_url: editing.image_url ?? null,
         p_image_focal_y: editing.image_focal_y ?? 50,
       });
+      if (editingPrizes.length > 0) {
+        await Promise.all(editingPrizes.map((p) =>
+          getSupabaseClient().from('prizes').update({ description: p.description, value: p.value }).eq('id', p.id)
+        ));
+      }
     }
     setCampaigns((prev) => prev.map((c) => c.id === editing.id ? { ...c, ...editing } : c));
-    setEditing(null); setSaving(false);
+    setEditing(null); setEditingPrizes([]); setSaving(false);
   };
 
   const openBuyModal = async (campaign) => {
@@ -349,7 +355,14 @@ export default function AdminCampaigns() {
                       {c.status === 'drawn' && (
                         <a href={`/${c.slug ?? c.id}/certificate`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm" style={{ textDecoration: 'none' }}>📜 Certificate</a>
                       )}
-                      <button className="btn btn-outline btn-sm" onClick={() => setEditing({ ...c })}>Edit</button>
+                      <button className="btn btn-outline btn-sm" onClick={async () => {
+                        setEditing({ ...c });
+                        setEditingPrizes([]);
+                        if (supabaseConfigured) {
+                          const { data } = await getSupabaseClient().from('prizes').select('*').eq('fundraiser_id', c.id).order('sort_order');
+                          setEditingPrizes(data ?? []);
+                        }
+                      }}>Edit</button>
                       {c.status === 'active' && (
                         <button className="btn btn-sm" style={{ background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', fontWeight: 700 }} onClick={() => setCancelling(c)}>Cancel</button>
                       )}
@@ -468,6 +481,34 @@ export default function AdminCampaigns() {
                 </div>
               )}
             </div>
+            {editingPrizes.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 12, textTransform: 'uppercase', letterSpacing: .5 }}>Prizes</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {editingPrizes.map((prize, i) => (
+                    <div key={prize.id} style={{ background: 'var(--cream)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: .5, marginBottom: 8 }}>{prize.place} Prize</div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <input
+                          className="form-input"
+                          placeholder="Description"
+                          value={prize.description ?? ''}
+                          onChange={(e) => setEditingPrizes((prev) => prev.map((p, j) => j === i ? { ...p, description: e.target.value } : p))}
+                          style={{ flex: 2, fontSize: 13 }}
+                        />
+                        <input
+                          className="form-input"
+                          placeholder="Value (e.g. $500)"
+                          value={prize.value ?? ''}
+                          onChange={(e) => setEditingPrizes((prev) => prev.map((p, j) => j === i ? { ...p, value: e.target.value } : p))}
+                          style={{ flex: 1, fontSize: 13 }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div style={{ marginBottom: 24 }}>
               <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>Description</label>
               <textarea className="form-input" rows={3} value={editing.description ?? ''} onChange={(e) => setEditing((p) => ({ ...p, description: e.target.value }))} style={{ resize: 'vertical' }} />
