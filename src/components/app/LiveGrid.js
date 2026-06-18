@@ -935,15 +935,17 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>{fundraiser.emoji}</div>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 700, marginBottom: 10 }}>{fundraiser.title}</h1>
-            <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, background: 'var(--cream)', border: '1.5px solid var(--border)', borderRadius: 50, padding: '6px 18px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'var(--cream)', border: '1.5px solid var(--border)', borderRadius: 50, padding: '6px 18px' }}>
               <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--purple2)' }}>${fundraiser.pricePerSq}</span>
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text2)' }}>per square</span>
+              <span style={{ color: 'var(--border)', fontSize: 16 }}>|</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text2)' }}>
+                <strong style={{ color: 'var(--text)' }}>{squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length}</strong> / {fundraiser.grid} sold
+              </span>
             </div>
           </div>
           <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text2)' }}>
-              <strong style={{ color: 'var(--text)' }}>{squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length}</strong> / {fundraiser.grid} squares sold
-            </div>
+            <div style={{ display: 'none' }} />
             {isOwner && !isDrawn && (() => {
               const costPrizes    = (fundraiser.prizes || []).reduce((sum, p) => p.donated ? sum : sum + parsePrizeValue(p.value), 0);
               const soldCount     = squares.filter((sq) => sq.status === 'taken' || sq.status === 'mine').length;
