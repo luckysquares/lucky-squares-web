@@ -934,8 +934,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           )}
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>{fundraiser.emoji}</div>
-            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 700, marginBottom: 4 }}>{fundraiser.title}</h1>
-            <div style={{ fontSize: 13, color: 'var(--text2)' }}>{fundraiser.org}, ${fundraiser.pricePerSq} per square</div>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 700, marginBottom: 10 }}>{fundraiser.title}</h1>
+            <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, background: 'var(--cream)', border: '1.5px solid var(--border)', borderRadius: 50, padding: '6px 18px' }}>
+              <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--purple2)' }}>${fundraiser.pricePerSq}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text2)' }}>per square</span>
+            </div>
           </div>
           <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text2)' }}>
@@ -1074,9 +1077,12 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             );
           })()}
 
-          {!isOwner && fundraiser.contactName && (
+          {!isOwner && (fundraiser.contactName || fundraiser.org) && (
             <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, textAlign: 'center', fontSize: 13, color: 'var(--text2)' }}>
-              This fundraising campaign has been organised by <strong style={{ color: 'var(--text)' }}>{fundraiser.contactName}</strong>
+              This fundraising campaign has been organised by{' '}
+              {fundraiser.contactName && <strong style={{ color: 'var(--text)' }}>{fundraiser.contactName}</strong>}
+              {fundraiser.contactName && fundraiser.org && ' for '}
+              {fundraiser.org && <strong style={{ color: 'var(--text)' }}>{fundraiser.org}</strong>}
               <MemberBadge
                 isFoundingMember={fundraiser.ownerIsFoundingMember}
                 isBetaTester={fundraiser.ownerIsBetaTester}
