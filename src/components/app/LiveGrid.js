@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SharePanel from './SharePanel';
 import MemberBadge from './MemberBadge';
+import { QRCodeSVG } from 'qrcode.react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { calcTxFee, STRIPE_FEE_PCT, STRIPE_FEE_FIXED } from '@/lib/stripeFees';
 import { fmtTime, sanitize, shuffle } from '@/lib/utils';
@@ -78,6 +79,8 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const [cart,        setCart]        = useState([]);
   const [phase,       setPhase]       = useState('browse');
   const [showShare,   setShowShare]   = useState(false);
+  const [showQR,      setShowQR]      = useState(false);
+  const [linkCopied,  setLinkCopied]  = useState(false);
   const [timerSecs,   setTimerSecs]   = useState(RESERVE_SECS);
   const [timerPaused, setTimerPaused] = useState(false);
   const savedBuyer = (() => { try { return JSON.parse(localStorage.getItem(BUYER_STORAGE_KEY) || 'null'); } catch { return null; } })();
@@ -116,6 +119,17 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const lastTapRef      = useRef({}); // debounce map: squareId → timestamp, prevents ghost double-taps on mobile
   const touchStartPos   = useRef({ x: 0, y: 0 }); // track touch-start coords to distinguish taps from scrolls
   const lastTouchTime   = useRef(0);               // timestamp of last touch-handled tap, used to suppress synthetic onClick
+
+  // Campaign URL for sharing — safe for SSR
+  const campaignUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/${fundraiser.slug ?? fundraiser.id}`
+    : `https://luckysquares.com.au/${fundraiser.slug ?? fundraiser.id}`;
+
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(campaignUrl); } catch { /* fallback silent */ }
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
 
   // Hoisted early so effects below can reference them
   const isOwner = !!onBack;
@@ -500,6 +514,30 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             </div>
           </div>
         )}
+        {/* Share nudge */}
+        <div style={{ background: 'linear-gradient(135deg,#F8F5FF,#F0EBFF)', border: '1.5px solid #DDD6FE', borderRadius: 16, padding: '20px 24px', marginBottom: 24, textAlign: 'left' }}>
+          <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--purple2)', marginBottom: 4 }}>Help {fundraiser.org || 'your club'} raise more</div>
+          <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16, lineHeight: 1.5 }}>
+            Every square sold helps {fundraiser.org || 'your club'} raise money for {fundraiser.title}. Share this with someone who&apos;d want in.
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              className="btn btn-sm"
+              style={{ flex: 1, justifyContent: 'center', background: 'var(--purple2)', color: '#fff', border: 'none', gap: 6 }}
+              onClick={() => setShowQR(true)}
+            >
+              📲 Share QR Code
+            </button>
+            <button
+              className="btn btn-sm btn-outline"
+              style={{ flex: 1, justifyContent: 'center', gap: 6 }}
+              onClick={copyLink}
+            >
+              {linkCopied ? '✓ Copied!' : '🔗 Copy Link'}
+            </button>
+          </div>
+        </div>
+
         {fundraiser.thankYou && (
           <div style={{ background: '#F0FDF8', border: '1.5px solid #B6EDD8', borderRadius: 12, padding: '16px 20px', marginBottom: 24, textAlign: 'left' }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .8, color: 'var(--green)', marginBottom: 8 }}>
@@ -818,6 +856,25 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   return (
     <>
       {showShare && <SharePanel fundraiser={fundraiser} onClose={() => setShowShare(false)} />}
+
+      {showQR && (
+        <>
+          <div onClick={() => setShowQR(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 200, backdropFilter: 'blur(4px)' }} />
+          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 201, width: '100%', maxWidth: 340, padding: '0 16px' }}>
+            <div className="scratch-card" style={{ padding: 32, textAlign: 'center' }}>
+              <div style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 4 }}>{fundraiser.org}</div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 900, color: 'var(--text)', marginBottom: 20 }}>{fundraiser.title}</div>
+              <div style={{ display: 'inline-block', background: '#fff', padding: 16, borderRadius: 16, border: '1.5px solid var(--border)', marginBottom: 20 }}>
+                <QRCodeSVG value={campaignUrl} size={200} fgColor="#1A1209" />
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.5 }}>
+                Screenshot this QR code or let a friend scan it from your screen.
+              </div>
+              <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setShowQR(false)}>Close</button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Draft overlay — shown to non-owners when fundraiser is not yet live */}
       {fundraiser.status === 'draft' && !isOwner && (
@@ -1380,15 +1437,36 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
           )}
 
           {!isOwner && (
-            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '40px auto 0', padding: '24px 28px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--purple3) 13%, transparent), color-mix(in srgb, var(--purple2) 7%, transparent))', border: '1.5px solid rgba(107,70,245,.2)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
-              <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                <span style={{ fontSize: 32, flexShrink: 0 }}>🍀</span>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 900, color: 'var(--text)', marginBottom: 4 }}>Running your own fundraiser?</div>
-                  <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>Set up a Lucky Squares grid in minutes — free to try.</div>
-                </div>
+            <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, margin: '32px auto 0' }}>
+              {/* Share buttons */}
+              <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+                <button
+                  className="btn btn-outline"
+                  style={{ flex: 1, justifyContent: 'center', gap: 6 }}
+                  onClick={() => setShowQR(true)}
+                >
+                  <span>📲</span> Share QR Code
+                </button>
+                <button
+                  className="btn btn-outline"
+                  style={{ flex: 1, justifyContent: 'center', gap: 6 }}
+                  onClick={copyLink}
+                >
+                  <span>{linkCopied ? '✓' : '🔗'}</span> {linkCopied ? 'Copied!' : 'Copy Link'}
+                </button>
               </div>
-              <a href="/fundraise?register=1" className="btn btn-primary btn-sm" style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>Start for free →</a>
+
+              {/* Running your own fundraiser */}
+              <div style={{ padding: '24px 28px', background: 'linear-gradient(135deg, color-mix(in srgb, var(--purple3) 13%, transparent), color-mix(in srgb, var(--purple2) 7%, transparent))', border: '1.5px solid rgba(107,70,245,.2)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                  <span style={{ fontSize: 32, flexShrink: 0 }}>🍀</span>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 900, color: 'var(--text)', marginBottom: 4 }}>Running your own fundraiser?</div>
+                    <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.5 }}>Set up a Lucky Squares grid in minutes — free to try.</div>
+                  </div>
+                </div>
+                <a href="/fundraise?register=1" className="btn btn-primary btn-sm" style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>Start for free →</a>
+              </div>
             </div>
           )}
         </div>
