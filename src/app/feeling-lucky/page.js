@@ -127,9 +127,9 @@ export default function FeelingLuckyPage() {
             Support a grassroots cause today
           </h1>
           <p className="section-body" style={{ margin: '0 auto 36px', textAlign: 'center' }}>
-            Feeling generous but not sure who to support? Love a game of chance? Hit the button below and
-            we&apos;ll randomly pick a live fundraiser for you to back. Every square you buy goes directly
-            to a real Australian school, club, or charity.
+            Feeling generous but not sure who to support? Hit the button below and we&apos;ll randomly
+            pick a live fundraiser for you to back. Every square you buy goes directly to a real
+            Australian school, club, or charity.
           </p>
 
           <button
@@ -192,33 +192,6 @@ export default function FeelingLuckyPage() {
                     </p>
                   </div>
 
-                  {/* Prizes */}
-                  {selected.prizes?.length > 0 && (
-                    <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: '1px solid var(--border)' }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-                        Prizes
-                        {selected.totalPrizeValue > 0 && (
-                          <span style={{ marginLeft: 8, background: 'var(--gold)', color: '#6B4F00', borderRadius: 10, padding: '2px 10px', fontSize: 11, fontWeight: 800, letterSpacing: 0 }}>
-                            ${selected.totalPrizeValue.toLocaleString()} prize pool
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {selected.prizes.map((p) => (
-                          <div key={p.place} style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--green)', minWidth: 32 }}>{p.place}</span>
-                            <span style={{ fontSize: 14, color: 'var(--text)', fontWeight: 600 }}>{p.description}</span>
-                            {p.value && !p.donated && (
-                              <span style={{ fontSize: 13, color: 'var(--text2)', marginLeft: 'auto', flexShrink: 0 }}>{p.value}</span>
-                            )}
-                            {p.donated && (
-                              <span style={{ fontSize: 11, color: 'var(--text2)', marginLeft: 'auto', flexShrink: 0, fontStyle: 'italic' }}>donated</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Quick stats */}
                   <div style={{ display: 'flex', gap: 24, marginBottom: 28, flexWrap: 'wrap' }}>
