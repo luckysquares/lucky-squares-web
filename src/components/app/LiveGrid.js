@@ -361,6 +361,18 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
     // Bank / in-person: claim immediately
     if (supabaseConfigured) {
       await getSupabaseClient().rpc('claim_squares', { p_fundraiser_id: fundraiser.id, p_square_numbers: cart, p_buyer_name: ownerName, p_buyer_email: safeEmail, p_buyer_phone: safePhone });
+      if (safeEmail) {
+        fetch('/api/squares/confirm-purchase', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fundraiser_id:   fundraiser.id,
+            square_numbers: cart,
+            buyer_name:      ownerName,
+            buyer_email:     safeEmail,
+          }),
+        }).catch(() => {});
+      }
     }
     cart.forEach((num) => myNumsRef.current.add(num));
     setSquares((prev) => prev.map((sq) => cart.includes(sq.id) ? { ...sq, status: 'mine', owner: ownerName } : sq));
