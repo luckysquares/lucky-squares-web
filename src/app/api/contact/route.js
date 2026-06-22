@@ -3,7 +3,7 @@ import { getAdminClient as getSupabase } from '@/lib/supabase/server';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const SUPPORT_FROM  = 'hello@luckysquares.com.au';
-const INTERNAL_TO   = 'jamie@luckysquares.com.au';
+const INTERNAL_TO   = 'jwstott@me.com';
 
 function safe(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
