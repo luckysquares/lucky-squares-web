@@ -1770,7 +1770,6 @@ function SetupWizard({ onComplete, onCancel, onLaunchPay, onSaveDraft, isFoundin
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {[
           { type: 'manual', icon: '🎲', title: 'Manual draw',         desc: "You run the draw whenever you're ready. Pull a number live!" },
-          { type: 'auto',   icon: '📅', title: 'Scheduled draw',      desc: 'Automatically draws on a set date and time.' },
           { type: 'full',   icon: '✅', title: 'Draw when grid fills', desc: 'Winner picked the instant the last square is sold.' },
         ].map((opt) => (
           <div key={opt.type} className="scratch-card" style={{ padding: '20px 24px', cursor: 'pointer', borderColor: drawRules.type === opt.type ? 'var(--green)' : undefined, borderWidth: drawRules.type === opt.type ? 2 : 1.5 }} onClick={() => setDrawRules({ ...drawRules, type: opt.type })}>
