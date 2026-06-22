@@ -1,8 +1,11 @@
 name: E2E tests
 
+# Disabled 2026-06-22: campaign.spec.js and contributor.spec.js fail at
+# import time because SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY secrets were
+# never added to this repo, causing a failure email on every push. Revisit
+# scope (full secrets vs. smoke-tests-only) before re-enabling the push
+# trigger. workflow_dispatch still works for manual runs once that's decided.
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 
 jobs:
