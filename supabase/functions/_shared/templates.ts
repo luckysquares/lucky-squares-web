@@ -505,16 +505,35 @@ export function emailSquarePurchaseConfirmation(d: {
   amount_paid: string;
   draw_type_description: string;
   campaign_url: string;
+  bank_account_name?: string;
+  bank_bsb?: string;
+  bank_account?: string;
 }) {
+  const isMultiple   = d.square_numbers.includes(',');
+  const needsPayment = !!(d.bank_account_name || d.bank_bsb || d.bank_account);
+
+  const amountLine = needsPayment
+    ? `Amount due: ${amt(d.amount_paid)}`
+    : `Amount paid: ${amt(d.amount_paid)}`;
+
+  const bankBlock = needsPayment
+    ? `
+
+Please transfer ${amt(d.amount_paid)} to:
+Account name: ${d.bank_account_name || 'Organisation Account'}
+BSB: ${d.bank_bsb || '—'}
+Account #: ${d.bank_account || '—'}`
+    : '';
+
   return {
-    subject: `You're in! Square${d.square_numbers.includes(',') ? 's' : ''} confirmed`,
+    subject: `You're in! Square${isMultiple ? 's' : ''} confirmed`,
     text: `Hi ${firstName(d.buyer_name)},
 
-You've secured your square${d.square_numbers.includes(',') ? 's' : ''} in ${d.campaign_title}. Good luck in the draw!
+You've secured your square${isMultiple ? 's' : ''} in ${d.campaign_title}. Good luck in the draw!
 
-Square${d.square_numbers.includes(',') ? 's' : ''}: #${d.square_numbers.split(', ').join(', #')}
-Amount paid: ${amt(d.amount_paid)}
-Draw: ${d.draw_type_description}
+Square${isMultiple ? 's' : ''}: #${d.square_numbers.split(', ').join(', #')}
+${amountLine}
+Draw: ${d.draw_type_description}${bankBlock}
 
 Thanks for supporting ${d.org_name}'s fundraiser. We'll send you the result as soon as the draw is complete.
 
