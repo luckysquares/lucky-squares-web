@@ -31,7 +31,7 @@ export async function POST(req) {
 
   const { data: fundraiser } = await db
     .from('fundraisers')
-    .select('title, org, draw_type, draw_date, contact_name, contact_email, owner_id, grid_size, price_per_sq, slug')
+    .select('title, org, draw_type, draw_date, contact_name, contact_email, owner_id, grid_size, price_per_sq, slug, payment_method, bank_account_name, bank_bsb, bank_account')
     .eq('id', fundraiser_id)
     .single();
 
@@ -48,6 +48,11 @@ export async function POST(req) {
   const txUrl      = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/transactional-email`;
   const txHeaders  = { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` };
 
+  // Buyer still owes money on this path (no payment provider collected it
+  // up front) — give them the account to pay into, matching what the live
+  // grid checkout screen already shows them.
+  const needsBankDetails = ['bank', 'bank_inperson'].includes(fundraiser.payment_method);
+
   // ── Confirmation email to buyer ─────────────────────────────────────────
   await fetch(txUrl, {
     method:  'POST',
@@ -63,6 +68,11 @@ export async function POST(req) {
         amount_paid:            subtotal.toFixed(2),
         draw_type_description:  drawDesc,
         campaign_url:           `${appUrl}/f/${fundraiser.slug ?? fundraiser_id}`,
+        ...(needsBankDetails ? {
+          bank_account_name: fundraiser.bank_account_name || 'Organisation Account',
+          bank_bsb:          fundraiser.bank_bsb || '',
+          bank_account:      fundraiser.bank_account || '',
+        } : {}),
       },
     }),
   }).catch(() => {});
