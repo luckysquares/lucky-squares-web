@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
 const DEMO = {
@@ -23,7 +23,8 @@ function Metric({ icon, label, value, sub, accent }) {
 export default function AdminDashboard() {
   const [data,         setData]         = useState(null);
   const [loading,      setLoading]      = useState(true);
-  const [drawAlert,    setDrawAlert]    = useState(null); // { month, month_label, entry_count }
+  const [drawAlert,    setDrawAlert]    = useState(null);
+  const [liveAlerts,   setLiveAlerts]   = useState({ tickets: 0, mari: 0, errors: 0 });
 
   useEffect(() => {
     if (!supabaseConfigured) { setData(DEMO); setLoading(false); return; }
@@ -47,6 +48,31 @@ export default function AdminDashboard() {
       .catch(() => {});
   }, []);
 
+  // Fetch live alert counts for dashboard banners
+  const fetchLiveAlerts = useCallback(async () => {
+    if (!supabaseConfigured) return;
+    const sb = getSupabaseClient();
+    const cutoff = new Date(Date.now() - 86400000).toISOString();
+    const [ticketsRes, mariRes, errRes] = await Promise.all([
+      sb.from('support_tickets').select('id', { count: 'exact', head: true })
+        .eq('status', 'open').is('merged_into', null),
+      sb.from('mariposa_chats').select('session_id').gte('created_at', cutoff).limit(500),
+      sb.rpc('admin_error_log_summary', { p_days: 7 }),
+    ]);
+    const mariSessions = new Set((mariRes.data ?? []).map((r) => r.session_id)).size;
+    setLiveAlerts({
+      tickets: ticketsRes.count  ?? 0,
+      mari:    mariSessions,
+      errors:  errRes.data?.open ?? 0,
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchLiveAlerts();
+    const interval = setInterval(fetchLiveAlerts, 60000);
+    return () => clearInterval(interval);
+  }, [fetchLiveAlerts]);
+
   const fmt  = (n) => Number(n).toLocaleString('en-AU');
   const fmtd = (n) => `$${Number(n).toLocaleString('en-AU', { minimumFractionDigits: 0 })}`;
 
@@ -59,6 +85,48 @@ export default function AdminDashboard() {
         <div style={{ color: 'var(--text2)', fontSize: 14 }}>Loading…</div>
       ) : (
         <>
+          {/* Live alert banners */}
+          {(liveAlerts.tickets > 0 || liveAlerts.mari > 0 || liveAlerts.errors > 0) && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              {liveAlerts.tickets > 0 && (
+                <div style={{ background: '#FEF2F2', border: '2px solid #FCA5A5', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 20 }}>🎧</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#DC2626' }}>
+                      {liveAlerts.tickets} open support ticket{liveAlerts.tickets !== 1 ? 's' : ''} waiting
+                    </div>
+                    <div style={{ fontSize: 13, color: '#7F1D1D' }}>Unresolved customer requests needing a reply.</div>
+                  </div>
+                  <a href="/admin/support" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: '#DC2626', textDecoration: 'none', flexShrink: 0, background: '#FCA5A5', padding: '6px 14px', borderRadius: 8 }}>View tickets →</a>
+                </div>
+              )}
+              {liveAlerts.errors > 0 && (
+                <div style={{ background: '#FEF2F2', border: '2px solid #FCA5A5', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 20 }}>🚨</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#DC2626' }}>
+                      {liveAlerts.errors} unresolved error{liveAlerts.errors !== 1 ? 's' : ''}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#7F1D1D' }}>Platform errors logged in the last 7 days.</div>
+                  </div>
+                  <a href="/admin/errors" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: '#DC2626', textDecoration: 'none', flexShrink: 0, background: '#FCA5A5', padding: '6px 14px', borderRadius: 8 }}>View errors →</a>
+                </div>
+              )}
+              {liveAlerts.mari > 0 && (
+                <div style={{ background: '#EFF6FF', border: '2px solid #BFDBFE', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 20 }}>🐰</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#1D4ED8' }}>
+                      {liveAlerts.mari} Mari conversation{liveAlerts.mari !== 1 ? 's' : ''} in the last 24 hours
+                    </div>
+                    <div style={{ fontSize: 13, color: '#1E3A8A' }}>Users are asking Mariposa questions.</div>
+                  </div>
+                  <a href="/admin/mariposa-logs" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: '#1D4ED8', textDecoration: 'none', flexShrink: 0, background: '#BFDBFE', padding: '6px 14px', borderRadius: 8 }}>View logs →</a>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Alerts */}
           {(data.campaigns_expiring_soon > 0 || data.new_org_applications > 0 || drawAlert) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>

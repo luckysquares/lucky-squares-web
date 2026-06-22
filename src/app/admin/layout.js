@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
@@ -9,27 +9,36 @@ import Logo from '@/components/ui/Logo';
 const NAV = [
   { href: '/admin/dashboard',      icon: '📊', label: 'Dashboard'     },
   { href: '/admin/campaigns',      icon: '🗂️',  label: 'Campaigns'     },
-  { href: '/admin/organisations',  icon: '🏫',  label: 'Organisations' },
+  { href: '/admin/organisations',  icon: '🏫',  label: 'Organisations', alertKey: 'orgs'    },
   { href: '/admin/users',          icon: '👤',  label: 'Users'         },
   { href: '/admin/coupons',        icon: '🎟️',  label: 'Coupons'       },
   { href: '/admin/blog',           icon: '✍️',  label: 'Blog'          },
   { href: '/admin/waitlist',        icon: '⏳',  label: 'Waitlist'      },
   { href: '/admin/invites',        icon: '✉️',  label: 'Invites'       },
   { href: '/admin/emails',         icon: '📧',  label: 'Emails'        },
-  { href: '/admin/support',        icon: '🎧',  label: 'Support'       },
-  { href: '/admin/mariposa-logs',  icon: '🐰',  label: 'Mari logs'     },
+  { href: '/admin/support',        icon: '🎧',  label: 'Support',       alertKey: 'tickets' },
+  { href: '/admin/mariposa-logs',  icon: '🐰',  label: 'Mari logs',     alertKey: 'mari'    },
   { href: '/admin/testimonials',    icon: '⭐',  label: 'Testimonials'  },
   { href: '/admin/marketing',       icon: '📣',  label: 'Marketing'     },
   { href: '/admin/feedback',        icon: '💬',  label: 'Feedback'      },
   { href: '/admin/reporting',      icon: '📋',  label: 'Reporting'     },
-  { href: '/admin/errors',         icon: '🚨',  label: 'Error logs'    },
+  { href: '/admin/errors',         icon: '🚨',  label: 'Error logs',    alertKey: 'errors'  },
 ];
 
+const BADGE = {
+  position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+  background: '#DC2626', color: '#fff', borderRadius: 99, fontSize: 10, fontWeight: 800,
+  minWidth: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  padding: '0 4px', lineHeight: 1,
+};
+
 export default function AdminLayout({ children }) {
-  const [status, setStatus] = useState('loading'); // loading | auth | unauth | nonadmin
-  const [email,  setEmail]  = useState('');
-  const pathname = usePathname();
-  const router   = useRouter();
+  const [status,      setStatus]      = useState('loading'); // loading | auth | unauth | nonadmin
+  const [email,       setEmail]       = useState('');
+  const [alertCounts, setAlertCounts] = useState({ tickets: 0, mari: 0, errors: 0, orgs: 0 });
+  const [notifPerm,   setNotifPerm]   = useState('unknown'); // unknown | default | granted | denied
+  const prevCounts  = useRef(null);
+  const pathname    = usePathname();
 
   useEffect(() => {
     if (!supabaseConfigured) { setStatus('auth'); return; }
@@ -50,6 +59,76 @@ export default function AdminLayout({ children }) {
     document.body.classList.add('admin-layout');
     return () => document.body.classList.remove('admin-layout');
   }, []);
+
+  // Detect notification permission state
+  useEffect(() => {
+    if (!('Notification' in window)) { setNotifPerm('denied'); return; }
+    setNotifPerm(Notification.permission);
+  }, []);
+
+  const enableNotifications = async () => {
+    const perm = await Notification.requestPermission();
+    setNotifPerm(perm);
+  };
+
+  const fetchAlerts = useCallback(async () => {
+    if (!supabaseConfigured) return;
+    const sb = getSupabaseClient();
+    const cutoff = new Date(Date.now() - 86400000).toISOString();
+
+    const [ticketsRes, mariRes, errRes, orgsRes] = await Promise.all([
+      sb.from('support_tickets').select('id', { count: 'exact', head: true })
+        .eq('status', 'open').is('merged_into', null),
+      sb.from('mariposa_chats').select('session_id').gte('created_at', cutoff).limit(500),
+      sb.rpc('admin_error_log_summary', { p_days: 7 }),
+      sb.from('organisations').select('id', { count: 'exact', head: true })
+        .or('status.is.null,status.eq.pending'),
+    ]);
+
+    const mariSessions = new Set((mariRes.data ?? []).map((r) => r.session_id)).size;
+    const next = {
+      tickets: ticketsRes.count  ?? 0,
+      mari:    mariSessions,
+      errors:  errRes.data?.open ?? 0,
+      orgs:    orgsRes.count     ?? 0,
+    };
+
+    // Fire browser notifications when counts increase
+    if (Notification.permission === 'granted' && prevCounts.current) {
+      const prev = prevCounts.current;
+      if (next.tickets > prev.tickets) {
+        new Notification('Lucky Squares: New support ticket', {
+          body: `${next.tickets} open ticket${next.tickets !== 1 ? 's' : ''} need attention`,
+          icon: '/favicon.ico',
+          tag:  'ls-tickets',
+        });
+      }
+      if (next.orgs > prev.orgs) {
+        new Notification('Lucky Squares: Organisation application', {
+          body: `${next.orgs} application${next.orgs !== 1 ? 's' : ''} pending review`,
+          icon: '/favicon.ico',
+          tag:  'ls-orgs',
+        });
+      }
+      if (next.errors > prev.errors) {
+        new Notification('Lucky Squares: New errors logged', {
+          body: `${next.errors} unresolved error${next.errors !== 1 ? 's' : ''}`,
+          icon: '/favicon.ico',
+          tag:  'ls-errors',
+        });
+      }
+    }
+
+    prevCounts.current = next;
+    setAlertCounts(next);
+  }, []);
+
+  useEffect(() => {
+    if (status !== 'auth') return;
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 60000);
+    return () => clearInterval(interval);
+  }, [status, fetchAlerts]);
 
   const handleSignOut = async () => {
     if (supabaseConfigured) await getSupabaseClient().auth.signOut();
@@ -81,11 +160,12 @@ export default function AdminLayout({ children }) {
         </div>
 
         <nav style={{ padding: '12px 0' }}>
-          {NAV.map(({ href, icon, label }) => {
+          {NAV.map(({ href, icon, label, alertKey }) => {
             const active = pathname.startsWith(href);
+            const count  = alertKey ? alertCounts[alertKey] : 0;
             return (
               <Link key={href} href={href} style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px',
+                position: 'relative', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px',
                 fontSize: 13, fontWeight: 700, textDecoration: 'none',
                 color: active ? '#fff' : 'rgba(255,255,255,.5)',
                 background: active ? 'rgba(255,255,255,.08)' : 'none',
@@ -94,12 +174,21 @@ export default function AdminLayout({ children }) {
               }}>
                 <span style={{ fontSize: 16 }}>{icon}</span>
                 {label}
+                {count > 0 && <span style={BADGE}>{count > 99 ? '99+' : count}</span>}
               </Link>
             );
           })}
         </nav>
 
         <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 'auto' }}>
+          {notifPerm === 'default' && (
+            <button
+              onClick={enableNotifications}
+              style={{ width: '100%', background: 'rgba(124,58,237,.3)', border: '1px solid rgba(124,58,237,.5)', color: 'rgba(255,255,255,.8)', borderRadius: 8, padding: '8px 0', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 8 }}
+            >
+              🔔 Enable notifications
+            </button>
+          )}
           {email && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginBottom: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</div>}
           <button onClick={handleSignOut} style={{ width: '100%', background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.12)', color: 'rgba(255,255,255,.7)', borderRadius: 8, padding: '8px 0', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
             Sign out
