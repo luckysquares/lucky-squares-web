@@ -3818,7 +3818,7 @@ export default function FundraiseApp() {
 
   const activeCampaignCount = fundraisers.filter((f) => ['draft', 'active'].includes(f.status)).length;
   const isSuspended = suspension?.suspended === true;
-  // Contributors use the org plan limit (10), not their own plan
+  const isContributor = orgInfo?.role === 'contributor';
   const planLimit   = isContributor ? PLAN_LIMITS['org'] : PLAN_LIMITS[user?.plan ?? 'trial'];
   const canCreate           = activeCampaignCount < planLimit && !isSuspended;
 
