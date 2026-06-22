@@ -71,7 +71,7 @@ Price per square is set by the organiser. The most successful campaigns price sq
 
 ### Draw mechanics
 - Manual draw: organiser runs it whenever they're ready
-- Scheduled draw: automatically runs on a set date and time
+- Draw when grid fills: winner picked instantly when the last square sells
 - Only sold squares enter the draw: if not all squares are sold, the organiser chooses whether to draw from what's sold, extend the period, or cancel
 - Multiple prizes: the platform selects one winner per prize (multiple winning squares possible)
 - Results are recorded instantly and cannot be changed
