@@ -52,9 +52,9 @@ const homeSchema = {
 };
 
 const FALLBACK_TESTIMONIALS = [
-  { quote: "We raised $1,800 in two days for our school camp. Parents loved picking their own squares. It felt personal and exciting. The live draw was a highlight at assembly.", name: 'Mel T.', role: 'P&C President, Sunbury Primary School' },
-  { quote: "Used to do this on a whiteboard at the club. Now we share a link in the WhatsApp group and the grid fills itself. Saved me hours of admin and the kids love watching the squares get sold.", name: 'Jamie S.', role: "Squad member, L'Aces Masters Baseball" },
-  { quote: "Simple, clean, Australian. I appreciated that bank transfer was a proper option. Half our donors are older and don't use card. Raised $2,500 for our koala rescue program.", name: 'Priya S.', role: 'Volunteer Coordinator, Wildlife Friends VIC' },
+  { quote: "Set up your grid, share the link in your group chat, and let your community pick their lucky squares. No spreadsheets, no whiteboards.", name: 'School fundraising', role: 'P&C committees & class groups' },
+  { quote: "Replace the whiteboard and the cash tin. Sell squares online, run the draw live, and everyone sees the result instantly.", name: 'Sports clubs', role: 'Seasonal fundraising for teams & squads' },
+  { quote: "Bank transfer is a real option, not just card payments — ideal for donors who'd rather not enter card details online.", name: 'Charities & not-for-profits', role: 'Accessible giving for every donor' },
 ];
 
 export default async function HomePage() {
@@ -120,10 +120,10 @@ export default async function HomePage() {
       <section style={{ background: '#fff', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '28px 24px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 20 }}>
-            Trusted by schools, sports clubs &amp; charities across Australia
+            Built for schools, sports clubs &amp; charities across Australia
           </p>
           <div style={{ display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap', opacity: .6 }}>
-            {['🏫 Sunbury Primary', "⚾ L\'Aces Masters Baseball", '🐨 Wildlife Friends', '⚽ Bayside FC', '🎓 St Brendan\'s P&C'].map((org) => (
+            {['🏫 Schools & P&Cs', '⚽ Sports clubs', '🐨 Charities & not-for-profits', '🎓 Community groups'].map((org) => (
               <span key={org} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text2)' }}>{org}</span>
             ))}
           </div>
@@ -208,8 +208,8 @@ export default async function HomePage() {
       <section className="section section-hero-bg">
         <div className="section-inner">
           <div style={{ textAlign: 'center', marginBottom: 0 }}>
-            <div className="section-label">What people say</div>
-            <h2 className="section-heading" style={{ margin: '0 auto' }}>Real fundraisers, real results</h2>
+            <div className="section-label">How it&apos;s used</div>
+            <h2 className="section-heading" style={{ margin: '0 auto' }}>Built for fundraisers like these</h2>
           </div>
           <div className="testimonial-grid">
             {testimonials.map((t, i) => (
