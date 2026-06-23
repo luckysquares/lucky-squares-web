@@ -260,7 +260,7 @@ export default function FeelingLuckyPage() {
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: 48, marginBottom: 16 }}>🍀</div>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>🌈</div>
                   <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 900, marginBottom: 12 }}>No live campaigns right now</h2>
                   <p style={{ color: 'var(--text2)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
                     Check back soon. New fundraisers go live all the time. Or if your group is ready to raise some funds, start your own.

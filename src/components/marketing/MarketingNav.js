@@ -7,7 +7,7 @@ import Logo from '@/components/ui/Logo';
 const DEFAULT_NAV_LINKS = [
   { href: '/how-it-works', label: 'How it works' },
   { href: '/pricing',      label: 'Pricing' },
-  { href: '/feeling-lucky', label: '🍀 Feeling Lucky?' },
+  { href: '/feeling-lucky', label: '🌈 Support a Random Cause' },
 ];
 
 export default function MarketingNav({ links } = {}) {
