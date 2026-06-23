@@ -1160,7 +1160,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
               )}
 
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, fontWeight: 700 }}>
-                {[['#00C875','#009A5C','Winners 🏆'],['#4A90D9','#2165B5','Your squares'],['#F0EDE5','#DDD5C0','Sold']].filter(([,,lbl]) => !(isOwner && lbl === 'Your squares')).map(([bg,bc,lbl]) => (
+                {[['#00C875','#009A5C','Winners 🏆'],['#4A90D9','#2165B5','Your squares'],['#F0EDE5','#DDD5C0','Sold']].filter(([,,lbl]) => lbl !== 'Your squares' || (!isOwner && mySquares.length > 0)).map(([bg,bc,lbl]) => (
                   <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <div style={{ width: 18, height: 18, borderRadius: 4, background: bg, border: `1.5px solid ${bc}` }} />
                     <span style={{ color: 'var(--text2)' }}>{lbl}</span>
@@ -1170,7 +1170,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             </div>
           ) : (
             <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, fontWeight: 700 }}>
-              {[['#fff','#D4EFE6','Available'],['#E8FFF6','var(--green)','In cart'],['#5B9FE8','#2165B5','Your squares'],['#FFF0E8','var(--orange)','Reserved'],['#F0EDE5','#DDD5C0','Sold']].map(([bg,bc,lbl]) => (
+              {[['#fff','#D4EFE6','Available'],['#E8FFF6','var(--green)','In cart'],['#5B9FE8','#2165B5','Your squares'],['#FFF0E8','var(--orange)','Reserved'],['#F0EDE5','#DDD5C0','Sold']].filter(([,,lbl]) => lbl !== 'Your squares' || mySquares.length > 0).map(([bg,bc,lbl]) => (
                 <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 18, height: 18, borderRadius: 4, background: bg, border: `1.5px solid ${bc}` }} />
                   <span style={{ color: 'var(--text2)' }}>{lbl}</span>
