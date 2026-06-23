@@ -22,7 +22,7 @@ export default function Footer() {
             <Link href="/pricing">Pricing</Link>
             <Link href="/fundraise">Start a fundraiser</Link>
             <Link href="/org-signup">Organisation plan</Link>
-            <Link href="/feeling-lucky">Feeling Lucky</Link>
+            <Link href="/feeling-lucky">Support a Random Cause</Link>
             <Link href="/whats-new">What&apos;s new</Link>
           </div>
 
