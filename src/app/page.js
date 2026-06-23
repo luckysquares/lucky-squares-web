@@ -53,7 +53,7 @@ const homeSchema = {
 
 const FALLBACK_TESTIMONIALS = [
   { quote: "Set up your grid, share the link in your group chat, and let your community pick their lucky squares. No spreadsheets, no whiteboards.", name: 'School fundraising', role: 'P&C committees & class groups' },
-  { quote: "Replace the whiteboard and the cash tin. Sell squares online, run the draw live, and everyone sees the result instantly.", name: 'Sports clubs', role: 'Seasonal fundraising for teams & squads' },
+  { quote: "We raised $350 in two days for our Pan Pacific Masters games fundraiser. The process was very simple.", name: 'Jamie', role: "L'Aces Masters Baseball" },
   { quote: "Bank transfer is a real option, not just card payments — ideal for donors who'd rather not enter card details online.", name: 'Charities & not-for-profits', role: 'Accessible giving for every donor' },
 ];
 
