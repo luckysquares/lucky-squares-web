@@ -14,6 +14,16 @@ const MAX_CART       = 10;
 const PLATFORM_FEES  = { 25: 19, 50: 19, 100: 19 };
 const BUYER_STORAGE_KEY = 'ls_buyer_details';
 
+// Matches .sq.sponsored in globals.css so the legend swatch shows the same
+// rainbow gradient as an actual sponsored square on the grid.
+const LEGEND_SPONSORED_SWATCH = {
+  width: 18, height: 18, borderRadius: 4,
+  background: 'linear-gradient(270deg, #ff6b6b, #ff9800, #ffd700, #4caf50, #2196f3, #9c27b0, #ff6b6b)',
+  backgroundSize: '300% 300%',
+  animation: 'rainbow-shift 4s ease infinite',
+  border: '1.5px solid transparent',
+};
+
 const parsePrizeValue = (v) => parseFloat(String(v ?? '').replace(/[^0-9.]/g, '')) || 0;
 
 function makeEmptyGrid(size) {
@@ -489,6 +499,7 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
   const txFee        = subtotal > 0 ? Math.round(calcTxFee(subtotal) * 100) / 100 : 0;
   const totalCost    = subtotal + txFee;
   const mySquares    = squares.filter((sq) => sq.status === 'mine');
+  const hasSponsored = squares.some((sq) => sq.isSponsored);
   const gridClass    = fundraiser.grid === 25 ? 'grid-25' : 'grid-100';
   const winnerNums   = drawnResult ?? fundraiser.winnerSquareNums ?? (fundraiser.winnerSquareNum != null ? [fundraiser.winnerSquareNum] : []);
   const winnerNum    = winnerNums[0] ?? null;
@@ -1160,9 +1171,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
               )}
 
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, fontWeight: 700 }}>
-                {[['#00C875','#009A5C','Winners 🏆'],['#4A90D9','#2165B5','Your squares'],['#F0EDE5','#DDD5C0','Sold']].filter(([,,lbl]) => !(isOwner && lbl === 'Your squares')).map(([bg,bc,lbl]) => (
+                {[['#00C875','#009A5C','Winners 🏆'],['#4A90D9','#2165B5','Your squares'],['#F0EDE5','#DDD5C0','Sold'],['rainbow','rainbow','Sponsored']]
+                  .filter(([,,lbl]) => (lbl !== 'Your squares' || (!isOwner && mySquares.length > 0)) && (lbl !== 'Sponsored' || hasSponsored))
+                  .map(([bg,bc,lbl]) => (
                   <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: 4, background: bg, border: `1.5px solid ${bc}` }} />
+                    <div style={bg === 'rainbow' ? LEGEND_SPONSORED_SWATCH : { width: 18, height: 18, borderRadius: 4, background: bg, border: `1.5px solid ${bc}` }} />
                     <span style={{ color: 'var(--text2)' }}>{lbl}</span>
                   </div>
                 ))}
@@ -1170,9 +1183,11 @@ export default function LiveGrid({ fundraiser, user, onBack, onDrawComplete, onD
             </div>
           ) : (
             <div style={{ maxWidth: fundraiser.grid === 25 ? 330 : 640, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, fontWeight: 700 }}>
-              {[['#fff','#D4EFE6','Available'],['#E8FFF6','var(--green)','In cart'],['#5B9FE8','#2165B5','Your squares'],['#FFF0E8','var(--orange)','Reserved'],['#F0EDE5','#DDD5C0','Sold']].map(([bg,bc,lbl]) => (
+              {[['#fff','#D4EFE6','Available'],['#E8FFF6','var(--green)','In cart'],['#5B9FE8','#2165B5','Your squares'],['#FFF0E8','var(--orange)','Reserved'],['#F0EDE5','#DDD5C0','Sold'],['rainbow','rainbow','Sponsored']]
+                .filter(([,,lbl]) => (lbl !== 'Your squares' || mySquares.length > 0) && (lbl !== 'Sponsored' || hasSponsored))
+                .map(([bg,bc,lbl]) => (
                 <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 18, height: 18, borderRadius: 4, background: bg, border: `1.5px solid ${bc}` }} />
+                  <div style={bg === 'rainbow' ? LEGEND_SPONSORED_SWATCH : { width: 18, height: 18, borderRadius: 4, background: bg, border: `1.5px solid ${bc}` }} />
                   <span style={{ color: 'var(--text2)' }}>{lbl}</span>
                 </div>
               ))}
