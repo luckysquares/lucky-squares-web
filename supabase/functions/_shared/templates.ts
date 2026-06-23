@@ -685,16 +685,14 @@ export function emailWelcomeDay3NoCampaign(d: {
   first_name: string;
 }) {
   return {
-    subject: `A primary school in Melbourne raised $1,000 in four days`,
+    subject: `Still thinking about your campaign?`,
     text: `Hi ${d.first_name},
 
-We wanted to share a quick story from one of our organisers.
+Just a quick note in case you haven't had a chance to set up your campaign yet.
 
-A P&C treasurer at a primary school in Melbourne set up a 100-square grid at $10 per square. She shared it in the school WhatsApp group on a Tuesday morning. By Friday afternoon, every square was sold and the school had raised $1,000 before prizes.
+Setting up a Lucky Squares grid takes about five minutes. You choose your grid size and price per square, add a prize or two, and share the link wherever your community already talks; a group chat, WhatsApp, or social media.
 
-She told us the hardest part was deciding what prizes to offer. Everything else just happened.
-
-If you haven't had a chance to set up your campaign yet, it takes about five minutes. We'd love to help you have a similar story to share.
+If now's a good time, we'd love to help you get yours live.
 
 Set up your campaign:
 https://luckysquares.com.au/fundraise
