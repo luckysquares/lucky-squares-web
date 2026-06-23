@@ -13,7 +13,38 @@ export default function MariposaLogsPage() {
   const [search,      setSearch]      = useState('');
   const [filterType,  setFilterType]  = useState('all'); // all | fundraiser | general
 
-  useEffect(() => { loadSessions(); }, []);
+  const [attributions,    setAttributions]    = useState({}); // session_id -> { contact_id, name, organisation }
+  const [contacts,        setContacts]        = useState([]);
+  const [showPicker,      setShowPicker]      = useState(false);
+  const [contactSearch,   setContactSearch]   = useState('');
+  const [newContactName,  setNewContactName]  = useState('');
+  const [savingAttribution, setSavingAttribution] = useState(false);
+
+  const loadContacts = async () => {
+    if (!supabaseConfigured) { setContacts(DEMO_CONTACTS); return; }
+    const { data } = await getSupabaseClient()
+      .from('marketing_contacts')
+      .select('id, name, organisation')
+      .order('name');
+    setContacts(data ?? []);
+  };
+
+  const loadAttributions = async (sessionIds) => {
+    if (!supabaseConfigured || !sessionIds.length) return {};
+    const { data } = await getSupabaseClient()
+      .from('mariposa_chat_attributions')
+      .select('session_id, contact_id, marketing_contacts(name, organisation)')
+      .in('session_id', sessionIds);
+    const map = {};
+    for (const row of (data ?? [])) {
+      map[row.session_id] = {
+        contact_id:   row.contact_id,
+        name:         row.marketing_contacts?.name ?? 'Unknown contact',
+        organisation: row.marketing_contacts?.organisation ?? '',
+      };
+    }
+    return map;
+  };
 
   const loadSessions = async () => {
     setLoading(true);
@@ -50,14 +81,66 @@ export default function MariposaLogsPage() {
       }
     }
 
-    setSessions([...map.values()].sort((a, b) => b.last_at.localeCompare(a.last_at)));
+    const list = [...map.values()].sort((a, b) => b.last_at.localeCompare(a.last_at));
+    setSessions(list);
     setLoading(false);
+
+    const attrs = await loadAttributions(list.map((s) => s.session_id));
+    setAttributions(attrs);
+  };
+
+  useEffect(() => { loadSessions(); loadContacts(); }, []);
+
+  const attributeTo = async (sessionId, contactId) => {
+    setSavingAttribution(true);
+    if (supabaseConfigured) {
+      const { data: { user } } = await getSupabaseClient().auth.getUser();
+      await getSupabaseClient()
+        .from('mariposa_chat_attributions')
+        .upsert({ session_id: sessionId, contact_id: contactId, attributed_by: user?.id ?? null }, { onConflict: 'session_id' });
+    }
+    const contact = contacts.find((c) => c.id === contactId);
+    setAttributions((prev) => ({ ...prev, [sessionId]: { contact_id: contactId, name: contact?.name ?? '', organisation: contact?.organisation ?? '' } }));
+    setSavingAttribution(false);
+    setShowPicker(false);
+    setContactSearch('');
+  };
+
+  const createAndAttribute = async (sessionId, name) => {
+    if (!name.trim()) return;
+    setSavingAttribution(true);
+    let contactId = null;
+    if (supabaseConfigured) {
+      const { data } = await getSupabaseClient()
+        .from('marketing_contacts')
+        .insert({ name: name.trim(), type: 'Mari chat lead' })
+        .select('id')
+        .single();
+      contactId = data?.id;
+      if (contactId) setContacts((prev) => [...prev, { id: contactId, name: name.trim(), organisation: null }]);
+    } else {
+      contactId = `demo-${Date.now()}`;
+      setContacts((prev) => [...prev, { id: contactId, name: name.trim(), organisation: null }]);
+    }
+    if (contactId) await attributeTo(sessionId, contactId);
+    setNewContactName('');
+    setSavingAttribution(false);
+  };
+
+  const removeAttribution = async (sessionId) => {
+    if (supabaseConfigured) {
+      await getSupabaseClient().from('mariposa_chat_attributions').delete().eq('session_id', sessionId);
+    }
+    setAttributions((prev) => { const n = { ...prev }; delete n[sessionId]; return n; });
   };
 
   const loadMessages = async (session) => {
     setActiveSession(session);
     setLoadingMsgs(true);
     setMessages([]);
+    setShowPicker(false);
+    setContactSearch('');
+    setNewContactName('');
 
     if (!supabaseConfigured) {
       setMessages(DEMO_MESSAGES);
@@ -159,6 +242,12 @@ export default function MariposaLogsPage() {
                   ) : (
                     <div style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 2 }}>General visitor</div>
                   )}
+                  {attributions[s.session_id] && (
+                    <div style={{ fontSize: 11, color: '#0F766E', fontWeight: 700, marginBottom: 2 }}>
+                      👤 {attributions[s.session_id].name}
+                      {attributions[s.session_id].organisation ? ` (${attributions[s.session_id].organisation})` : ''}
+                    </div>
+                  )}
                   <div style={{ fontSize: 11, color: 'var(--text2)' }}>
                     {formatTime(s.last_at)}
                   </div>
@@ -193,6 +282,75 @@ export default function MariposaLogsPage() {
                     {messages.length} messages
                   </div>
                 </div>
+              </div>
+
+              {/* Attribution bar */}
+              <div style={{ padding: '12px 24px', borderBottom: '1px solid var(--border)', background: '#FAFAF8' }}>
+                {attributions[activeSession.session_id] ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12, color: 'var(--text2)' }}>Attributed to:</span>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#0F766E', background: '#CCFBF1', borderRadius: 99, padding: '4px 12px' }}>
+                      👤 {attributions[activeSession.session_id].name}
+                      {attributions[activeSession.session_id].organisation ? ` — ${attributions[activeSession.session_id].organisation}` : ''}
+                    </span>
+                    <button className="btn btn-outline btn-sm" style={{ fontSize: 11 }} onClick={() => setShowPicker((v) => !v)}>Change</button>
+                    <button className="btn btn-outline btn-sm" style={{ fontSize: 11 }} onClick={() => removeAttribution(activeSession.session_id)}>Remove</button>
+                  </div>
+                ) : (
+                  <button className="btn btn-outline btn-sm" style={{ fontSize: 12 }} onClick={() => setShowPicker((v) => !v)}>
+                    + Attribute to a known contact
+                  </button>
+                )}
+
+                {showPicker && (
+                  <div style={{ marginTop: 10, background: '#fff', border: '1.5px solid var(--border)', borderRadius: 10, padding: 14, maxWidth: 360 }}>
+                    <input
+                      className="form-input"
+                      placeholder="Search contacts…"
+                      value={contactSearch}
+                      onChange={(e) => setContactSearch(e.target.value)}
+                      style={{ marginBottom: 8, fontSize: 13 }}
+                      autoFocus
+                    />
+                    <div style={{ maxHeight: 160, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 }}>
+                      {contacts
+                        .filter((c) => !contactSearch || c.name.toLowerCase().includes(contactSearch.toLowerCase()) || c.organisation?.toLowerCase().includes(contactSearch.toLowerCase()))
+                        .slice(0, 20)
+                        .map((c) => (
+                          <button
+                            key={c.id}
+                            disabled={savingAttribution}
+                            onClick={() => attributeTo(activeSession.session_id, c.id)}
+                            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '6px 8px', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--cream)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                          >
+                            {c.name}{c.organisation ? <span style={{ color: 'var(--text2)' }}> — {c.organisation}</span> : null}
+                          </button>
+                        ))}
+                      {contacts.length === 0 && (
+                        <div style={{ fontSize: 12, color: 'var(--text2)', padding: '4px 8px' }}>No contacts in the CRM yet.</div>
+                      )}
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, display: 'flex', gap: 8 }}>
+                      <input
+                        className="form-input"
+                        placeholder="Or add a new contact by name…"
+                        value={newContactName}
+                        onChange={(e) => setNewContactName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && createAndAttribute(activeSession.session_id, newContactName)}
+                        style={{ fontSize: 12, flex: 1 }}
+                      />
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={!newContactName.trim() || savingAttribution}
+                        onClick={() => createAndAttribute(activeSession.session_id, newContactName)}
+                      >
+                        + Add
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 12, maxHeight: '65vh', overflowY: 'auto' }}>
@@ -231,6 +389,11 @@ export default function MariposaLogsPage() {
 }
 
 // ── Demo data ─────────────────────────────────────────────────────────────────
+const DEMO_CONTACTS = [
+  { id: 'demo-c1', name: 'Mel Thompson', organisation: 'Sunbury Primary P&C' },
+  { id: 'demo-c2', name: 'Dave Kowalski', organisation: "L'Aces Masters Baseball" },
+];
+
 const DEMO_SESSIONS = [
   { session_id: 'a1b2c3d4-0000-0000-0000-000000000001', fundraiser_id: '1', fundraiser: { title: 'Koala Rescue Raffle', org: 'Wildlife Friends' }, last_at: new Date(Date.now() - 3600000).toISOString(), count: 8 },
   { session_id: 'e5f6a7b8-0000-0000-0000-000000000002', fundraiser_id: null, fundraiser: null, last_at: new Date(Date.now() - 7200000).toISOString(), count: 4 },
