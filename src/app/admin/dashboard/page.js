@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const [data,         setData]         = useState(null);
   const [loading,      setLoading]      = useState(true);
   const [drawAlert,    setDrawAlert]    = useState(null);
-  const [liveAlerts,   setLiveAlerts]   = useState({ tickets: 0, mari: 0, errors: 0 });
+  const [liveAlerts,   setLiveAlerts]   = useState({ tickets: 0, mari: 0, errors: 0, payouts: 0 });
 
   useEffect(() => {
     if (!supabaseConfigured) { setData(DEMO); setLoading(false); return; }
@@ -53,16 +53,19 @@ export default function AdminDashboard() {
     if (!supabaseConfigured) return;
     const sb = getSupabaseClient();
     const cutoff = new Date(Date.now() - 86400000).toISOString();
-    const [ticketsRes, mariRes, errRes] = await Promise.all([
+    const [ticketsRes, mariRes, errRes, payoutsRes] = await Promise.all([
       sb.from('support_tickets').select('id', { count: 'exact', head: true })
         .eq('status', 'open').is('merged_into', null),
       sb.from('mariposa_chats').select('session_id').gte('created_at', cutoff).limit(500),
       sb.rpc('admin_error_log_summary', { p_days: 7 }),
+      sb.from('payout_queue').select('id', { count: 'exact', head: true })
+        .eq('status', 'pending').eq('payment_method', 'stripe'),
     ]);
     const mariSessions = new Set((mariRes.data ?? []).map((r) => r.session_id)).size;
     setLiveAlerts({
       tickets: ticketsRes.count  ?? 0,
       mari:    mariSessions,
+      payouts: payoutsRes.count  ?? 0,
       errors:  errRes.data?.open ?? 0,
     });
   }, []);
@@ -86,8 +89,20 @@ export default function AdminDashboard() {
       ) : (
         <>
           {/* Live alert banners */}
-          {(liveAlerts.tickets > 0 || liveAlerts.mari > 0 || liveAlerts.errors > 0) && (
+          {(liveAlerts.tickets > 0 || liveAlerts.mari > 0 || liveAlerts.errors > 0 || liveAlerts.payouts > 0) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              {liveAlerts.payouts > 0 && (
+                <div style={{ background: '#FFF8EC', border: '2px solid #F59E0B', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 20 }}>💸</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#92400E' }}>
+                      {liveAlerts.payouts} drawn campaign{liveAlerts.payouts !== 1 ? 's' : ''} waiting on a Stripe payout
+                    </div>
+                    <div style={{ fontSize: 13, color: '#78350F' }}>Prize reserve transfer needs to be triggered or confirmed.</div>
+                  </div>
+                  <a href="/admin/campaigns" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: '#92400E', textDecoration: 'none', flexShrink: 0, background: '#FDE68A', padding: '6px 14px', borderRadius: 8 }}>View payouts →</a>
+                </div>
+              )}
               {liveAlerts.tickets > 0 && (
                 <div style={{ background: '#FEF2F2', border: '2px solid #FCA5A5', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ fontSize: 20 }}>🎧</span>

@@ -8,7 +8,7 @@ import Logo from '@/components/ui/Logo';
 
 const NAV = [
   { href: '/admin/dashboard',      icon: '📊', label: 'Dashboard'     },
-  { href: '/admin/campaigns',      icon: '🗂️',  label: 'Campaigns'     },
+  { href: '/admin/campaigns',      icon: '🗂️',  label: 'Campaigns',     alertKey: 'payouts' },
   { href: '/admin/organisations',  icon: '🏫',  label: 'Organisations', alertKey: 'orgs'    },
   { href: '/admin/users',          icon: '👤',  label: 'Users'         },
   { href: '/admin/coupons',        icon: '🎟️',  label: 'Coupons'       },
@@ -35,7 +35,7 @@ const BADGE = {
 export default function AdminLayout({ children }) {
   const [status,      setStatus]      = useState('loading'); // loading | auth | unauth | nonadmin
   const [email,       setEmail]       = useState('');
-  const [alertCounts, setAlertCounts] = useState({ tickets: 0, mari: 0, errors: 0, orgs: 0 });
+  const [alertCounts, setAlertCounts] = useState({ tickets: 0, mari: 0, errors: 0, orgs: 0, payouts: 0 });
   const [notifPerm,   setNotifPerm]   = useState('unknown'); // unknown | default | granted | denied
   const prevCounts  = useRef(null);
   const pathname    = usePathname();
@@ -76,13 +76,15 @@ export default function AdminLayout({ children }) {
     const sb = getSupabaseClient();
     const cutoff = new Date(Date.now() - 86400000).toISOString();
 
-    const [ticketsRes, mariRes, errRes, orgsRes] = await Promise.all([
+    const [ticketsRes, mariRes, errRes, orgsRes, payoutsRes] = await Promise.all([
       sb.from('support_tickets').select('id', { count: 'exact', head: true })
         .eq('status', 'open').is('merged_into', null),
       sb.from('mariposa_chats').select('session_id').gte('created_at', cutoff).limit(500),
       sb.rpc('admin_error_log_summary', { p_days: 7 }),
       sb.from('organisations').select('id', { count: 'exact', head: true })
         .or('status.is.null,status.eq.pending'),
+      sb.from('payout_queue').select('id', { count: 'exact', head: true })
+        .eq('status', 'pending').eq('payment_method', 'stripe'),
     ]);
 
     const mariSessions = new Set((mariRes.data ?? []).map((r) => r.session_id)).size;
@@ -91,6 +93,7 @@ export default function AdminLayout({ children }) {
       mari:    mariSessions,
       errors:  errRes.data?.open ?? 0,
       orgs:    orgsRes.count     ?? 0,
+      payouts: payoutsRes.count  ?? 0,
     };
 
     // Fire browser notifications when counts increase
@@ -115,6 +118,13 @@ export default function AdminLayout({ children }) {
           body: `${next.errors} unresolved error${next.errors !== 1 ? 's' : ''}`,
           icon: '/favicon.ico',
           tag:  'ls-errors',
+        });
+      }
+      if (next.payouts > prev.payouts) {
+        new Notification('Lucky Squares: Stripe payout needed', {
+          body: `${next.payouts} drawn campaign${next.payouts !== 1 ? 's' : ''} waiting on a Stripe transfer`,
+          icon: '/favicon.ico',
+          tag:  'ls-payouts',
         });
       }
     }
