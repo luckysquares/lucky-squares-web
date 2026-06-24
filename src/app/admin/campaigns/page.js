@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { adminFetch } from '@/lib/adminFetch';
 import ImageUploadZone from '@/components/ui/ImageUploadZone';
@@ -17,12 +18,13 @@ const PAYMENT_LABELS = {
 };
 
 export default function AdminCampaigns() {
+  const searchParams = useSearchParams();
   const [campaigns,      setCampaigns]      = useState([]);
   const [payouts,        setPayouts]        = useState([]);
   const [reports,        setReports]        = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [search,         setSearch]         = useState('');
-  const [filter,         setFilter]         = useState('all');
+  const [filter,         setFilter]         = useState(() => searchParams.get('status') || 'all');
   const [editing,        setEditing]        = useState(null);
   const [editingPrizes,  setEditingPrizes]  = useState([]);
   const [saving,         setSaving]         = useState(false);

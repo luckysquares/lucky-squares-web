@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 
 const DEMO = {
@@ -9,15 +10,16 @@ const DEMO = {
   new_org_applications: 1, campaigns_expiring_soon: 3,
 };
 
-function Metric({ icon, label, value, sub, accent }) {
-  return (
-    <div className="scratch-card" style={{ padding: '24px 28px' }}>
+function Metric({ icon, label, value, sub, accent, href }) {
+  const card = (
+    <div className="scratch-card" style={{ padding: '24px 28px', cursor: href ? 'pointer' : undefined, transition: href ? 'box-shadow .15s' : undefined }}>
       <div style={{ fontSize: 28, marginBottom: 10 }}>{icon}</div>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, color: accent || 'var(--text)', marginBottom: 4 }}>{value}</div>
       <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>{label}</div>
-      {sub && <div style={{ fontSize: 12, color: 'var(--text2)' }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 12, color: 'var(--text2)' }}>{sub}{href && ' — view →'}</div>}
     </div>
   );
+  return href ? <Link href={href} style={{ textDecoration: 'none', display: 'block' }}>{card}</Link> : card;
 }
 
 export default function AdminDashboard() {
@@ -208,7 +210,7 @@ export default function AdminDashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
               <Metric icon="🟢" label="Live campaigns"      value={fmt(data.live_campaigns)}   sub="Currently active" accent="var(--green)" />
               <Metric icon="🏆" label="Completed draws"     value={fmt(data.drawn_campaigns)}  sub="Successfully drawn" />
-              <Metric icon="📝" label="Drafts"              value={fmt(data.draft_campaigns)}  sub="Not yet launched" />
+              <Metric icon="📝" label="Drafts"              value={fmt(data.draft_campaigns)}  sub="Not yet launched" href="/admin/campaigns?status=draft" />
             </div>
           </div>
 
