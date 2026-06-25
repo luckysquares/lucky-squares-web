@@ -199,8 +199,8 @@ export default function AdminDashboard() {
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 16 }}>Clients</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
-              <Metric icon="🧑" label="Casual clients"      value={fmt(data.casual_clients)}  sub="Pay per fundraiser" />
-              <Metric icon="🏫" label="Organisation clients" value={fmt(data.org_clients)}     sub={`Annual plan${data.new_org_approvals > 0 ? ` · +${data.new_org_approvals} approved this month` : ''}`} />
+              <Metric icon="🧑" label="Casual clients"      value={fmt(data.casual_clients)}  sub="Pay per fundraiser" href="/admin/users?plan=casual" />
+              <Metric icon="🏫" label="Organisation clients" value={fmt(data.org_clients)}     sub={`Annual plan${data.new_org_approvals > 0 ? ` · +${data.new_org_approvals} approved this month` : ''}`} href="/admin/users?plan=org" />
             </div>
           </div>
 
@@ -208,8 +208,8 @@ export default function AdminDashboard() {
           <div style={{ marginBottom: 12, marginTop: 32 }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--text2)', marginBottom: 16 }}>Campaigns</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
-              <Metric icon="🟢" label="Live campaigns"      value={fmt(data.live_campaigns)}   sub="Currently active" accent="var(--green)" />
-              <Metric icon="🏆" label="Completed draws"     value={fmt(data.drawn_campaigns)}  sub="Successfully drawn" />
+              <Metric icon="🟢" label="Live campaigns"      value={fmt(data.live_campaigns)}   sub="Currently active" accent="var(--green)" href="/admin/campaigns?status=active" />
+              <Metric icon="🏆" label="Completed draws"     value={fmt(data.drawn_campaigns)}  sub="Successfully drawn" href="/admin/campaigns?status=drawn" />
               <Metric icon="📝" label="Drafts"              value={fmt(data.draft_campaigns)}  sub="Not yet launched" href="/admin/campaigns?status=draft" />
             </div>
           </div>

@@ -36,6 +36,8 @@ export default function AdminCampaigns() {
   const [payoutNotes,       setPayoutNotes]       = useState('');
   const [processingId,      setProcessingId]      = useState(null);
   const [cancelling,        setCancelling]        = useState(null);
+  const [extending,         setExtending]         = useState(null);
+  const [extendDays,        setExtendDays]        = useState(14);
   const [fiftyFiftyCampaigns, setFiftyFiftyCampaigns] = useState([]);
   const [deleting,          setDeleting]          = useState(null); // { id, title, type }
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -203,6 +205,27 @@ export default function AdminCampaigns() {
     setCancelling(null);
   };
 
+  const confirmExtend = async () => {
+    if (!extending) return;
+    const id   = extending.id;
+    const days = parseInt(extendDays, 10);
+    if (!days || days < 1 || days > 90) {
+      alert('Enter a number of days between 1 and 90.');
+      return;
+    }
+    setExtending((e) => ({ ...e, loading: true }));
+    if (supabaseConfigured) {
+      const { data, error } = await getSupabaseClient().rpc('admin_extend_campaign', { p_id: id, p_days: days });
+      if (error) {
+        alert('Extend failed: ' + error.message);
+      } else {
+        setCampaigns((prev) => prev.map((c) => c.id === id ? { ...c, launched_at: data } : c));
+      }
+    }
+    setExtending(null);
+    setExtendDays(14);
+  };
+
   return (
     <div>
       <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Campaigns</h1>
@@ -365,6 +388,9 @@ export default function AdminCampaigns() {
                           setEditingPrizes(data ?? []);
                         }
                       }}>Edit</button>
+                      {c.status === 'active' && (
+                        <button className="btn btn-outline btn-sm" onClick={() => { setExtending(c); setExtendDays(14); }}>⏰ Extend</button>
+                      )}
                       {c.status === 'active' && (
                         <button className="btn btn-sm" style={{ background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', fontWeight: 700 }} onClick={() => setCancelling(c)}>Cancel</button>
                       )}
@@ -550,6 +576,41 @@ export default function AdminCampaigns() {
                 disabled={cancelling.loading}
               >
                 {cancelling.loading ? 'Cancelling…' : 'Yes, cancel it'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Extend campaign modal */}
+      {extending && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 24 }}>
+          <div className="scratch-card" style={{ padding: 36, maxWidth: 440, width: '100%' }}>
+            <div style={{ fontSize: 36, marginBottom: 12, textAlign: 'center' }}>⏰</div>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 800, marginBottom: 12, textAlign: 'center' }}>Extend this campaign?</h2>
+            <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.7 }}>
+              Pushes back the 30-day clock for <strong>{extending.title}</strong>, giving it more time before it would be eligible for automatic cancellation.
+            </p>
+            <div className="form-group" style={{ marginBottom: 24 }}>
+              <label className="form-label">Extend by (days)</label>
+              <input
+                className="form-input"
+                type="number"
+                min={1}
+                max={90}
+                value={extendDays}
+                onChange={(e) => setExtendDays(e.target.value)}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setExtending(null)} disabled={extending.loading}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                style={{ flex: 1 }}
+                onClick={confirmExtend}
+                disabled={extending.loading}
+              >
+                {extending.loading ? 'Extending…' : 'Extend campaign'}
               </button>
             </div>
           </div>
