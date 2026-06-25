@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { getSupabaseClient, supabaseConfigured } from '@/lib/supabase/client';
 import { adminFetch } from '@/lib/adminFetch';
 
@@ -8,9 +9,11 @@ const PLAN_LABELS  = { trial: 'Trial', casual: 'Casual', org: 'Organisation' };
 const PLAN_COLOURS = { trial: 'tag-muted', casual: 'tag-green', org: 'tag-drawn' };
 
 export default function AdminUsers() {
+  const searchParams = useSearchParams();
   const [users,        setUsers]        = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [search,       setSearch]       = useState('');
+  const [planFilter,   setPlanFilter]   = useState(() => searchParams.get('plan') || 'all');
   const [editing,      setEditing]      = useState(null);
   const [saving,       setSaving]       = useState(false);
   const [suspendModal, setSuspendModal] = useState(null); // user being suspended
@@ -32,9 +35,14 @@ export default function AdminUsers() {
     });
   }, []);
 
-  const filtered = users.filter((u) =>
-    !search || [u.email, u.full_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = users.filter((u) => {
+    // Matches admin_dashboard_metrics: casual_clients = anyone not on the org plan
+    const matchPlan = planFilter === 'all'
+      || (planFilter === 'casual' && u.plan !== 'org')
+      || (planFilter === 'org' && u.plan === 'org');
+    const matchSearch = !search || [u.email, u.full_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()));
+    return matchPlan && matchSearch;
+  });
 
   const fmtDate = (d) => new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -178,8 +186,13 @@ export default function AdminUsers() {
       <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 900, marginBottom: 4 }}>Users</h1>
       <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 28 }}>Organiser accounts across the platform</p>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <input className="form-input" placeholder="Search name or email…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ maxWidth: 360 }} />
+        <div style={{ display: 'flex', gap: 6 }}>
+          {[['all','All'],['casual','Casual'],['org','Organisation']].map(([v,l]) => (
+            <button key={v} onClick={() => setPlanFilter(v)} className={`btn btn-sm ${planFilter === v ? 'btn-primary' : 'btn-outline'}`}>{l}</button>
+          ))}
+        </div>
       </div>
 
       <div style={{ background: '#F0FBF6', border: '1px solid #C8E8D8', borderRadius: 10, padding: '12px 16px', marginBottom: 24, fontSize: 13, color: 'var(--text2)' }}>
