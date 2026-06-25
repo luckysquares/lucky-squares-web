@@ -1,0 +1,25 @@
+-- Root-cause fix: cron jobs created via the Supabase CLI (`supabase db query`,
+-- connecting as the postgres role) fail with
+--   ERROR: unrecognized configuration parameter "app.supabase_functions_url"
+-- even though jobs created earlier via the Studio SQL editor, referencing the
+-- exact same current_setting() calls, succeed. Confirmed via cron.job_run_details:
+-- square-sold-digest failed on every run after being rescheduled via the CLI,
+-- while org-renewal-reminder, purge-mariposa-chats, purge-prize-claim-bank-details,
+-- and welcome-sequence (all untouched, created earlier) kept succeeding.
+--
+-- Root cause not fully diagnosed (current_user reports 'postgres' either way,
+-- and pg_db_role_setting shows no app.* rows for any role, so it isn't a simple
+-- role-scoped GUC difference). Pragmatic fix: stop depending on current_setting()
+-- for any cron job touched going forward, and hardcode the functions URL and
+-- service-role key directly in the job command instead. This is no less secure
+-- than the GUC approach (cron.job.command is only readable by superusers either
+-- way) and sidesteps the mystery entirely.
+--
+-- Applied directly via `supabase db query` on 2026-06-25, not as a literal
+-- migration run (this file exists for repo history; the actual command text
+-- includes a real secret and is intentionally NOT reproduced here verbatim —
+-- see git history of the session, or re-derive from .env.local if rebuilding).
+--
+-- Jobs fixed this way: square-sold-digest, cancel-expired-campaigns.
+-- If any other cron job is ever unscheduled/rescheduled via the CLI, apply the
+-- same hardcoded-secret pattern rather than current_setting().
