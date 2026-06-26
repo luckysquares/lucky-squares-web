@@ -154,7 +154,7 @@ export default function AdminDashboard() {
                     <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--orange)' }}>{data.campaigns_expiring_soon} campaign{data.campaigns_expiring_soon !== 1 ? 's' : ''} past 21 days</div>
                     <div style={{ fontSize: 13, color: 'var(--text2)' }}>These are approaching the 30-day cancellation threshold. Consider reaching out.</div>
                   </div>
-                  <a href="/admin/reporting" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--orange)', textDecoration: 'none', flexShrink: 0 }}>View →</a>
+                  <a href="/admin/campaigns?status=due_soon" style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--orange)', textDecoration: 'none', flexShrink: 0 }}>View →</a>
                 </div>
               )}
               {(data.new_org_applications_paid > 0) && (
