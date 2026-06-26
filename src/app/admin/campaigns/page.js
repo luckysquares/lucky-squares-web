@@ -104,7 +104,11 @@ export default function AdminCampaigns() {
 
   const filtered = campaigns.filter((c) => {
     const matchSearch = !search || [c.title, c.org, c.contact_name, c.contact_email].some((f) => f?.toLowerCase().includes(search.toLowerCase()));
-    const matchFilter = filter === 'all' || c.status === filter;
+    const matchFilter = filter === 'all'
+      ? true
+      : filter === 'due_soon'
+        ? c.status === 'active' && c.launched_at && (Date.now() - new Date(c.launched_at).getTime()) >= 21 * 86400000
+        : c.status === filter;
     return matchSearch && matchFilter;
   });
 
@@ -329,8 +333,8 @@ export default function AdminCampaigns() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <input className="form-input" placeholder="Search title, org, contact…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ maxWidth: 300 }} />
         <div style={{ display: 'flex', gap: 8 }}>
-          {['all','active','drawn','draft','cancelled'].map((s) => (
-            <button key={s} onClick={() => setFilter(s)} className={`btn btn-sm ${filter === s ? 'btn-primary' : 'btn-outline'}`} style={{ textTransform: 'capitalize' }}>{s}</button>
+          {[['all','All'],['active','Active'],['due_soon','Due soon'],['drawn','Drawn'],['draft','Draft'],['cancelled','Cancelled']].map(([v,l]) => (
+            <button key={v} onClick={() => setFilter(v)} className={`btn btn-sm ${filter === v ? 'btn-primary' : 'btn-outline'}`}>{l}</button>
           ))}
         </div>
       </div>
